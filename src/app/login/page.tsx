@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -65,13 +66,14 @@ export default function LoginPage() {
         
         if (error.code === 'auth/billing-not-enabled') {
           errorMessage = "جوجل تطلب تفعيل خطة الدفع لإرسال رسائل حقيقية."
-          setErrorInfo("للتجربة مجاناً، يرجى إضافة 'رقم اختبار' في Firebase Console (Authentication -> Settings -> Phone numbers for testing).")
+          setErrorInfo("للمتابعة مجاناً: اذهب إلى تبويب (Sign-in method) -> اضغط على Phone -> انزل للأسفل وأضف رقم هاتف للاختبار (مثل +967700000000 بكلمة سر 123456).")
         } else if (error.code === 'auth/operation-not-allowed') {
-          errorMessage = "يجب تفعيل إرسال الرسائل لليمن من إعدادات Firebase."
+          errorMessage = "يجب تفعيل إرسال الرسائل لليمن."
+          setErrorInfo("اذهب إلى (Settings) -> (SMS Region Policy) -> واضف اليمن (Yemen) للقائمة المسموح بها.")
         } else if (error.code === 'auth/invalid-phone-number') {
           errorMessage = "رقم الهاتف غير صحيح."
         } else if (error.code === 'auth/too-many-requests') {
-          errorMessage = "تم إرسال طلبات كثيرة، حاول لاحقاً أو استخدم رقم اختبار."
+          errorMessage = "تم إرسال طلبات كثيرة، استخدم رقم اختبار لتجنب الحظر."
         }
 
         toast({
