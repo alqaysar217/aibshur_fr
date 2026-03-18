@@ -24,7 +24,7 @@ export default function LoginPage() {
   const { toast } = useToast()
 
   const setupRecaptcha = () => {
-    if (!(window as any).recaptchaVerifier) {
+    if (typeof window !== 'undefined' && !(window as any).recaptchaVerifier) {
       (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
         'callback': () => {
@@ -36,7 +36,6 @@ export default function LoginPage() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
-    // رقم الهاتف اليمني غالباً 9 أرقام
     if (phone.length >= 7) {
       setLoading(true)
       setupRecaptcha()
@@ -54,10 +53,18 @@ export default function LoginPage() {
         })
       } catch (error: any) {
         console.error(error)
+        let errorMessage = "تأكد من الرقم وحاول مجدداً."
+        
+        if (error.code === 'auth/operation-not-allowed') {
+          errorMessage = "يجب تفعيل إرسال الرسائل لليمن من إعدادات Firebase (Authentication -> Settings -> SMS Region Policy)."
+        } else if (error.code === 'auth/invalid-phone-number') {
+          errorMessage = "رقم الهاتف غير صحيح."
+        }
+
         toast({
           variant: "destructive",
           title: "فشل إرسال الرمز",
-          description: error.message || "تأكد من الرقم وحاول مجدداً.",
+          description: errorMessage,
         })
       } finally {
         setLoading(false)
