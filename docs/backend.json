@@ -1,0 +1,88 @@
+
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "بيانات المستخدم العميل",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "رقم المستخدم الفريد" },
+        "name": { "type": "string", "description": "الاسم الكامل" },
+        "phone": { "type": "string", "description": "رقم الهاتف المسجل" },
+        "address": { "type": "string", "description": "العنوان الحالي" },
+        "governorateId": { "type": "string", "description": "معرف المحافظة" },
+        "isVip": { "type": "boolean", "description": "هل المستخدم مشترك في VIP؟" },
+        "loyaltyPoints": { "type": "number", "description": "عدد نقاط الولاء" },
+        "walletBalance": { "type": "number", "description": "رصيد المحفظة بالريال" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "phone"]
+    },
+    "DriverProfile": {
+      "title": "DriverProfile",
+      "description": "بيانات المندوب",
+      "type": "object",
+      "properties": {
+        "driverId": { "type": "string", "description": "رقم المندوب الفريد" },
+        "name": { "type": "string", "description": "اسم المندوب" },
+        "phone": { "type": "string", "description": "رقم الهاتف" },
+        "status": { "type": "string", "enum": ["online", "offline", "busy"], "description": "حالة المندوب الحالية" },
+        "currentLocation": { "type": "object", "description": "الموقع الجغرافي الحالي" },
+        "rating": { "type": "number", "description": "تقييم المندوب" }
+      }
+    },
+    "Store": {
+      "title": "Store",
+      "description": "بيانات المتجر أو المطعم",
+      "type": "object",
+      "properties": {
+        "storeId": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "image": { "type": "string" },
+        "rating": { "type": "number" },
+        "deliveryTime": { "type": "string" },
+        "governorateId": { "type": "string" }
+      }
+    },
+    "Product": {
+      "title": "Product",
+      "description": "بيانات المنتج داخل المتجر",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "image": { "type": "string" },
+        "description": { "type": "string" },
+        "options": { "type": "array", "items": { "type": "object" }, "description": "خيارات إضافية للمنتج" }
+      }
+    },
+    "Order": {
+      "title": "Order",
+      "description": "بيانات الطلب",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string" },
+        "userId": { "type": "string" },
+        "storeId": { "type": "string" },
+        "driverId": { "type": "string" },
+        "items": { "type": "array", "items": { "type": "object" } },
+        "totalPrice": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "preparing", "on_the_way", "delivered"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "auth": {
+    "providers": ["phone"]
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "UserProfile", "description": "مجموعة المستخدمين" },
+    "/drivers/{driverId}": { "schema": "DriverProfile", "description": "مجموعة المندوبين" },
+    "/stores/{storeId}": { "schema": "Store", "description": "مجموعة المتاجر" },
+    "/stores/{storeId}/products/{productId}": { "schema": "Product", "description": "منتجات المتجر" },
+    "/orders/{orderId}": { "schema": "Order", "description": "مجموعة الطلبات" },
+    "/governorates/{governorateId}": { "schema": { "type": "object", "properties": { "name": { "type": "string" } } }, "description": "المحافظات" }
+  }
+}
