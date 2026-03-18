@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Trash2, Plus, Minus, ArrowRight, CreditCard, ShoppingBag, MapPin } from "lucide-react"
+import { Trash2, Plus, Minus, ArrowRight, CreditCard, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
@@ -10,6 +10,8 @@ import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
 import { useUser, useFirestore } from "@/firebase"
 import { collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function CartPage() {
   const [cart, setCart] = useState<any[]>([])
@@ -54,38 +56,46 @@ export default function CartPage() {
       return
     }
 
-    try {
-      const orderData = {
-        userId: user.uid,
-        storeId: cart[0].storeId,
-        items: cart,
-        subtotal: cartTotal,
-        deliveryFee: deliveryFee,
-        totalAmount: total,
-        status: "pending",
-        createdAt: serverTimestamp(),
-        deliveryAddress: "حضرموت - المكلا (افتراضي)",
-        paymentMethod: "cash_on_delivery"
-      }
-
-      await addDoc(collection(db, "orders"), orderData)
-      
-      localStorage.removeItem('absher_cart')
-      setCart([])
-      
-      toast({
-        title: "تم إرسال الطلب بنجاح",
-        description: "شكراً لك! سيتم التواصل معك قريباً",
-      })
-      
-      router.push('/orders')
-    } catch (error: any) {
-      toast({
-        title: "فشل إرسال الطلب",
-        description: error.message,
-        variant: "destructive"
-      })
+    const orderData = {
+      userId: user.uid,
+      storeId: cart[0].storeId,
+      orderItems: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price
+      })),
+      subtotal: cartTotal,
+      deliveryFee: deliveryFee,
+      totalAmount: total,
+      status: "pending",
+      createdAt: new Date().toISOString(), // Using ISO string for simple display
+      deliveryAddress: "حضرموت - المكلا (افتراضي)",
+      deliveryLatitude: 14.54,
+      deliveryLongitude: 49.13,
+      paymentMethod: "cash_on_delivery"
     }
+
+    const ordersRef = collection(db, "users", user.uid, "orders")
+    
+    addDoc(ordersRef, orderData)
+      .then(() => {
+        localStorage.removeItem('absher_cart')
+        setCart([])
+        toast({
+          title: "تم إرسال الطلب بنجاح",
+          description: "شكراً لك! سيتم التواصل معك قريباً",
+        })
+        router.push('/orders')
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: ordersRef.path,
+          operation: 'create',
+          requestResourceData: orderData,
+        })
+        errorEmitter.emit('permission-error', permissionError)
+      })
   }
 
   if (cart.length === 0) {
