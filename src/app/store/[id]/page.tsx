@@ -3,26 +3,77 @@
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { ChevronRight, Star, Clock, MapPin, Plus, ShoppingBag, ArrowRight } from "lucide-react"
+import { Star, Clock, MapPin, Plus, ShoppingBag, ArrowRight, Minus } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { collection, doc } from "firebase/firestore"
+import { useState, useEffect } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function StoreDetailPage() {
   const { id } = useParams()
   const router = useRouter()
   const db = useFirestore()
+  const { toast } = useToast()
+  const [cart, setCart] = useState<any[]>([])
 
-  // جلب بيانات المتجر
+  // Load cart from localStorage
+  useEffect(() => {
+    const savedCart = localStorage.getItem('absher_cart')
+    if (savedCart) setCart(JSON.parse(savedCart))
+  }, [])
+
+  // Save cart to localStorage
+  const saveCart = (newCart: any[]) => {
+    setCart(newCart)
+    localStorage.setItem('absher_cart', JSON.stringify(newCart))
+  }
+
+  const addToCart = (product: any) => {
+    const existing = cart.find(item => item.id === product.id)
+    let newCart;
+    if (existing) {
+      newCart = cart.map(item => 
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    } else {
+      newCart = [...cart, { ...product, quantity: 1 }]
+    }
+    saveCart(newCart)
+    toast({
+      title: "تمت الإضافة",
+      description: `${product.name} أضيف إلى السلة`,
+    })
+  }
+
+  const removeFromCart = (productId: string) => {
+    const existing = cart.find(item => item.id === productId)
+    if (!existing) return
+    
+    let newCart;
+    if (existing.quantity === 1) {
+      newCart = cart.filter(item => item.id !== productId)
+    } else {
+      newCart = cart.map(item => 
+        item.id === productId ? { ...item, quantity: item.quantity - 1 } : item
+      )
+    }
+    saveCart(newCart)
+  }
+
+  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+
+  // Fetch Store Data
   const storeRef = useMemoFirebase(() => {
     if (!db || !id) return null
     return doc(db, "stores", id as string)
   }, [db, id])
   const { data: store, isLoading: isStoreLoading } = useDoc(storeRef)
 
-  // جلب منتجات المتجر من الـ Subcollection
+  // Fetch Products
   const productsQuery = useMemoFirebase(() => {
     if (!db || !id) return null
     return collection(db, "stores", id as string, "products")
@@ -44,7 +95,6 @@ export default function StoreDetailPage() {
 
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen">
-      {/* Header Image */}
       <div className="relative h-64 w-full">
         <Image 
           src={store.logoUrl || `https://picsum.photos/seed/${store.id}/800/600`}
@@ -61,7 +111,6 @@ export default function StoreDetailPage() {
         </button>
       </div>
 
-      {/* Store Info Card */}
       <div className="relative -mt-12 px-4">
         <Card className="border-none shadow-2xl rounded-[2rem] overflow-hidden bg-white">
           <CardContent className="p-6">
@@ -99,7 +148,6 @@ export default function StoreDetailPage() {
         </Card>
       </div>
 
-      {/* Menu Section */}
       <div className="p-4 mt-6">
         <h2 className="text-xl font-black mb-6 flex items-center gap-2">
           <span className="w-2 h-8 bg-primary rounded-full"></span>
@@ -110,30 +158,53 @@ export default function StoreDetailPage() {
           {isProductsLoading ? (
             [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-2xl animate-pulse" />)
           ) : products && products.length > 0 ? (
-            products.map((product: any) => (
-              <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all active:scale-[0.98]">
-                <CardContent className="p-0 flex items-center">
-                  <div className="relative h-28 w-28 shrink-0">
-                    <Image 
-                      src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-4 flex-1">
-                    <h3 className="font-black text-sm mb-1">{product.name}</h3>
-                    <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{product.description}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-primary font-black">{product.price} ر.س</span>
-                      <Button size="sm" className="h-8 w-8 rounded-full p-0 shadow-lg shadow-primary/20">
-                        <Plus className="h-4 w-4" />
-                      </Button>
+            products.map((product: any) => {
+              const inCart = cart.find(item => item.id === product.id)
+              return (
+                <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all">
+                  <CardContent className="p-0 flex items-center">
+                    <div className="relative h-28 w-28 shrink-0">
+                      <Image 
+                        src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                    <div className="p-4 flex-1">
+                      <h3 className="font-black text-sm mb-1">{product.name}</h3>
+                      <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{product.description}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-primary font-black">{product.price} ر.س</span>
+                        
+                        <div className="flex items-center gap-3">
+                          {inCart && (
+                            <>
+                              <Button 
+                                onClick={() => removeFromCart(product.id)}
+                                variant="outline" 
+                                size="sm" 
+                                className="h-8 w-8 rounded-full p-0 border-primary text-primary"
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                              <span className="font-bold text-sm">{inCart.quantity}</span>
+                            </>
+                          )}
+                          <Button 
+                            onClick={() => addToCart(product)}
+                            size="sm" 
+                            className="h-8 w-8 rounded-full p-0 shadow-lg shadow-primary/20"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })
           ) : (
             <div className="text-center py-12 bg-white rounded-2xl border-2 border-dashed border-secondary">
               <ShoppingBag className="h-10 w-10 text-muted-foreground/20 mx-auto mb-2" />
@@ -143,16 +214,20 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      {/* Floating Cart Button Placeholder */}
-      <div className="fixed bottom-6 left-6 right-6 z-50">
-        <Button className="w-full h-14 rounded-2xl shadow-2xl shadow-primary/40 text-lg font-black flex justify-between px-6">
-          <div className="flex items-center gap-2">
-            <span className="bg-white/20 px-2 py-0.5 rounded-lg text-sm">٠</span>
-            عرض السلة
-          </div>
-          <span>٠ ر.س</span>
-        </Button>
-      </div>
+      {cart.length > 0 && (
+        <div className="fixed bottom-6 left-6 right-6 z-50 animate-in slide-in-from-bottom-10">
+          <Button 
+            onClick={() => router.push('/cart')}
+            className="w-full h-14 rounded-2xl shadow-2xl shadow-primary/40 text-lg font-black flex justify-between px-6"
+          >
+            <div className="flex items-center gap-2">
+              <span className="bg-white/20 px-2 py-0.5 rounded-lg text-sm">{cartCount}</span>
+              عرض السلة
+            </div>
+            <span>{cartTotal} ر.س</span>
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
