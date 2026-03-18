@@ -1,45 +1,15 @@
 
 "use client"
 
-import { Search, MapPin, Bell, ChevronLeft, Star, Sparkles } from "lucide-react"
+import { Search, MapPin, Bell, ChevronLeft, Star, Sparkles, Navigation } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { BottomNav } from "@/components/layout/bottom-nav"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-
-const categories = [
-  { id: 1, name: "مطاعم", icon: "🍔" },
-  { id: 2, name: "بقالة", icon: "🛒" },
-  { id: 3, name: "حلويات", icon: "🍰" },
-  { id: 4, name: "صيدلية", icon: "💊" },
-  { id: 5, name: "زهور", icon: "💐" },
-]
-
-const stores = [
-  {
-    id: 1,
-    name: "برجر كينج",
-    rating: 4.8,
-    deliveryTime: "25-35 دقيقة",
-    image: "https://picsum.photos/seed/burger1/400/300",
-    category: "مطاعم",
-    tags: ["وجبات سريعة", "برجر"]
-  },
-  {
-    id: 2,
-    name: "بيتزا هوت",
-    rating: 4.5,
-    deliveryTime: "30-40 دقيقة",
-    image: "https://picsum.photos/seed/pizza1/400/300",
-    category: "مطاعم",
-    tags: ["بيتزا", "ايطالي"]
-  }
-]
 
 export default function Home() {
   const router = useRouter()
@@ -55,108 +25,130 @@ export default function Home() {
   }, [router])
 
   return (
-    <div className="pb-20">
+    <div className="pb-24 bg-secondary/5 min-h-screen">
       {/* Header */}
-      <header className="p-4 flex items-center justify-between sticky top-0 glass z-40">
-        <div className="flex items-center gap-2">
-          <div className="bg-primary/10 p-2 rounded-full">
-            <MapPin className="h-5 w-5 text-primary" />
+      <header className="p-4 flex items-center justify-between sticky top-0 glass z-50 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="bg-primary w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+            <Navigation className="h-5 w-5 text-white" />
           </div>
-          <Link href="/governorates">
+          <Link href="/governorates" className="group">
             <div>
-              <p className="text-[10px] text-muted-foreground font-medium">توصيل إلى</p>
-              <p className="text-sm font-bold flex items-center gap-1">{selectedCity || "اختر مدينتك"} <ChevronLeft className="h-3 w-3 rotate-270" /></p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">توصيل إلى</p>
+              <p className="text-sm font-black flex items-center gap-1 group-hover:text-primary transition-colors">
+                {selectedCity || "جاري التحديد..."} 
+                <ChevronLeft className="h-3 w-3 text-primary" />
+              </p>
             </div>
           </Link>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => router.push('/login')} className="bg-primary/5 px-3 py-1.5 rounded-xl text-xs font-bold text-primary">
-            تسجيل دخول
+        <div className="flex gap-3">
+          <button 
+            onClick={() => router.push('/login')} 
+            className="bg-accent/10 px-4 py-2 rounded-xl text-xs font-black text-accent border border-accent/20 hover:bg-accent hover:text-white transition-all"
+          >
+            دخول
           </button>
-          <button className="relative bg-white shadow-sm p-2 rounded-full border border-border">
-            <Bell className="h-5 w-5 text-foreground" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full border-2 border-white"></span>
+          <button className="relative bg-white shadow-md p-2 rounded-xl border border-border group active:scale-90 transition-transform">
+            <Bell className="h-5 w-5 text-foreground group-hover:text-primary" />
+            <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-white animate-pulse"></span>
           </button>
         </div>
       </header>
 
-      {/* Hero Search */}
-      <section className="p-4 space-y-4">
-        <Link href="/search">
-          <div className="relative group">
-            <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground transition-colors" />
-            <div className="w-full h-14 px-12 rounded-2xl border-none shadow-sm bg-white text-muted-foreground flex items-center text-sm cursor-text">
-              ابحث عن وجبة أو متجر بذكاء...
+      {/* Hero Section */}
+      <section className="p-4 space-y-6">
+        <div className="relative group">
+          <Link href="/search">
+            <div className="w-full h-16 px-12 rounded-2xl border-none shadow-xl bg-white text-muted-foreground flex items-center text-sm cursor-text hover:ring-2 ring-primary/20 transition-all">
+              <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
+              ابحث عن مطعم، بقالة، أو صيدلية...
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 bg-accent/10 p-2 rounded-lg">
+                <Sparkles className="h-4 w-4 text-accent" />
+              </div>
             </div>
-            <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-accent" />
-          </div>
-        </Link>
+          </Link>
+        </div>
 
-        {/* Banner */}
-        <div className="relative h-44 w-full rounded-3xl overflow-hidden shadow-lg bg-primary">
+        {/* Banner Carousel Placeholder */}
+        <div className="relative h-48 w-full rounded-[2rem] overflow-hidden shadow-2xl bg-gradient-to-br from-primary to-primary/80 group">
           <Image 
-            src="https://picsum.photos/seed/delivery1/800/400" 
+            src="https://picsum.photos/seed/delivery-absher/800/400" 
             alt="Delivery" 
             fill
-            className="object-cover opacity-40"
+            className="object-cover opacity-30 group-hover:scale-110 transition-transform duration-1000"
+            data-ai-hint="delivery motorcycle"
           />
-          <div className="absolute inset-0 p-6 flex flex-col justify-center text-white">
-            <Badge className="w-fit mb-2 bg-accent text-accent-foreground font-bold border-none">عرض خاص</Badge>
-            <h2 className="text-2xl font-bold mb-1">خصم 50% على</h2>
-            <p className="text-sm opacity-90">أول 3 طلبات من قسم البقالة</p>
+          <div className="absolute inset-0 p-8 flex flex-col justify-center text-white">
+            <Badge className="w-fit mb-3 bg-white text-primary font-black px-3 py-1 border-none rounded-lg">توصيل مجاني 🚚</Badge>
+            <h2 className="text-3xl font-black mb-2 leading-tight">أول طلب لك<br/> مجاناً بالكامل!</h2>
+            <p className="text-xs font-medium opacity-90">استخدم كود: <span className="font-black bg-white/20 px-2 py-0.5 rounded">ABSHER24</span></p>
           </div>
         </div>
       </section>
 
       {/* Categories */}
       <section className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">الأقسام</h3>
-          <span className="text-primary text-sm font-medium">عرض الكل</span>
+        <div className="flex items-center justify-between mb-6 px-1">
+          <h3 className="font-black text-xl text-foreground">الأقسام الرئيسية</h3>
+          <button className="text-primary text-xs font-black bg-primary/5 px-3 py-1.5 rounded-lg">رؤية الكل</button>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-          {categories.map((cat) => (
-            <div key={cat.id} className="flex flex-col items-center gap-2 min-w-[70px]">
-              <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-border hover:border-accent transition-all active:scale-95">
-                {cat.icon}
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { n: "مطاعم", i: "🍔", c: "bg-orange-50" },
+            { n: "بقالة", i: "🛒", c: "bg-green-50" },
+            { n: "صيدلية", i: "💊", c: "bg-blue-50" },
+            { n: "حلويات", i: "🍰", c: "bg-pink-50" }
+          ].map((cat, idx) => (
+            <div key={idx} className="flex flex-col items-center gap-3 group">
+              <div className={`h-16 w-16 ${cat.c} rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-transparent group-hover:border-primary/20 group-hover:shadow-md transition-all active:scale-90 cursor-pointer`}>
+                {cat.i}
               </div>
-              <span className="text-xs font-semibold">{cat.name}</span>
+              <span className="text-[11px] font-black text-foreground/80">{cat.n}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Popular Stores */}
-      <section className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">المتاجر المميزة</h3>
-          <span className="text-primary text-sm font-medium">عرض الكل</span>
+      {/* Featured Stores */}
+      <section className="p-4 space-y-6">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="font-black text-xl">المتاجر الأكثر طلباً</h3>
+          <button className="text-primary text-xs font-black">فلترة</button>
         </div>
-        <div className="space-y-4">
-          {stores.map((store) => (
-            <Card key={store.id} className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow group">
+        
+        <div className="space-y-6">
+          {[
+            { name: "برجر إليفن", rate: "4.9", time: "20-25 دقيقة", img: "burger1", tag: "وجبات سريعة" },
+            { name: "بيتزا ماستر", rate: "4.7", time: "30-35 دقيقة", img: "pizza1", tag: "إيطالي" }
+          ].map((store, idx) => (
+            <Card key={idx} className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] group cursor-pointer">
               <CardContent className="p-0">
-                <div className="relative h-48 w-full">
+                <div className="relative h-56 w-full">
                   <Image 
-                    src={store.image} 
+                    src={`https://picsum.photos/seed/${store.img}/600/400`} 
                     alt={store.name} 
                     fill 
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-accent text-accent" />
-                    <span className="text-xs font-bold">{store.rating}</span>
+                  <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-lg">
+                    <Star className="h-4 w-4 fill-accent text-accent" />
+                    <span className="text-sm font-black">{store.rate}</span>
+                  </div>
+                  <div className="absolute bottom-4 right-4 bg-primary px-3 py-1.5 rounded-xl text-white text-[10px] font-black shadow-lg">
+                    خصم 20% 🏷️
                   </div>
                 </div>
-                <div className="p-4 bg-white">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-lg">{store.name}</h4>
-                    <span className="text-xs text-muted-foreground">{store.deliveryTime}</span>
+                <div className="p-5 bg-white">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="font-black text-xl text-foreground">{store.name}</h4>
+                    <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground bg-secondary/30 px-2 py-1 rounded-lg">
+                      <span>{store.time}</span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
-                    {store.tags.map(tag => (
-                      <Badge key={tag} variant="secondary" className="font-normal text-[10px] bg-secondary/50 border-none">{tag}</Badge>
-                    ))}
+                    <Badge variant="secondary" className="font-bold text-[10px] bg-secondary/50 text-secondary-foreground border-none px-3">{store.tag}</Badge>
+                    <Badge variant="outline" className="font-bold text-[10px] border-primary/20 text-primary px-3">توصيل 10 ر.س</Badge>
                   </div>
                 </div>
               </CardContent>
