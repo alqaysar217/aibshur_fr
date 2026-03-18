@@ -39,7 +39,7 @@ export default function StoreDetailPage() {
         item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
       )
     } else {
-      newCart = [...cart, { ...product, quantity: 1 }]
+      newCart = [...cart, { ...product, quantity: 1, storeId: id }]
     }
     saveCart(newCart)
     toast({
@@ -73,7 +73,7 @@ export default function StoreDetailPage() {
   }, [db, id])
   const { data: store, isLoading: isStoreLoading } = useDoc(storeRef)
 
-  // Fetch Products
+  // Fetch Products - Re-checking subcollection path
   const productsQuery = useMemoFirebase(() => {
     if (!db || !id) return null
     return collection(db, "stores", id as string, "products")
@@ -140,8 +140,8 @@ export default function StoreDetailPage() {
                   <p className="text-xs font-black">{store.openingHours}</p>
                 </div>
               </div>
-              <Badge className={store.status === 'open' ? 'bg-green-500' : 'bg-destructive'}>
-                {store.status === 'open' ? 'مفتوح' : 'مغلق'}
+              <Badge variant="outline" className={store.status === 'مفتوح' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}>
+                {store.status}
               </Badge>
             </div>
           </CardContent>
@@ -209,6 +209,7 @@ export default function StoreDetailPage() {
             <div className="text-center py-12 bg-white rounded-2xl border-2 border-dashed border-secondary">
               <ShoppingBag className="h-10 w-10 text-muted-foreground/20 mx-auto mb-2" />
               <p className="text-muted-foreground text-xs font-bold">لا توجد وجبات مضافة حالياً</p>
+              <p className="text-[10px] text-muted-foreground mt-1">تأكد من إضافة وجبات داخل مجموعة products في Firebase</p>
             </div>
           )}
         </div>
