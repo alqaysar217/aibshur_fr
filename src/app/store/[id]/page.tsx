@@ -73,7 +73,7 @@ export default function StoreDetailPage() {
   }, [db, id])
   const { data: store, isLoading: isStoreLoading } = useDoc(storeRef)
 
-  // Fetch Products
+  // Fetch Products from the Subcollection: /stores/{storeId}/products
   const productsQuery = useMemoFirebase(() => {
     if (!db || !id) return null
     return collection(db, "stores", id as string, "products")
@@ -209,9 +209,14 @@ export default function StoreDetailPage() {
             <div className="text-center py-12 bg-white rounded-2xl border-2 border-dashed border-secondary">
               <ShoppingBag className="h-10 w-10 text-muted-foreground/20 mx-auto mb-2" />
               <p className="text-muted-foreground text-xs font-bold">لا توجد وجبات مضافة حالياً</p>
-              <p className="text-[10px] text-muted-foreground mt-2 p-4 bg-secondary/20 rounded-xl">
-                تنبيه: تأكد من إضافة الوجبة داخل (Subcollection) تسمى <span className="text-primary font-bold">products</span> داخل مستند المطعم في Firebase.
-              </p>
+              <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-primary/10 text-right">
+                <p className="text-[11px] font-bold text-primary mb-2">💡 نصيحة للمطور:</p>
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  تأكد أنك أنشأت مجموعة تسمى <span className="text-primary font-bold">products</span> داخل مستند مطعم مذاقي في Firebase.
+                  <br/>
+                  المسار الصحيح هو: <span className="font-mono text-[9px] bg-secondary px-1">stores / {id} / products</span>
+                </p>
+              </div>
             </div>
           )}
         </div>
