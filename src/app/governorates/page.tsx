@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 
 const governorates = [
-  "الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "الدمام", "الخبر", "أبها", "تبوك", "حائل", "القصيم", "الجوف", "نجران"
+  "حضرموت", "عدن", "صنعاء", "الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "الدمام", "الخبر", "أبها", "تبوك", "حائل", "القصيم"
 ]
 
 export default function GovernoratesPage() {
@@ -18,13 +18,12 @@ export default function GovernoratesPage() {
   const filtered = governorates.filter(g => g.includes(search))
 
   const handleSelect = (gov: string) => {
-    // سنقوم بتخزين الاختيار لاحقاً في Firestore
     localStorage.setItem('selected_city', gov);
     router.push("/")
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white font-body">
+    <div className="flex flex-col min-h-screen bg-white font-body" dir="rtl">
       {/* الجزء العلوي - الهيدر */}
       <header className="p-8 text-center space-y-4">
         <div className="bg-primary/10 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-2 animate-bounce">
@@ -42,7 +41,7 @@ export default function GovernoratesPage() {
           <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <Input 
             placeholder="ابحث عن مدينتك..." 
-            className="pr-12 h-14 rounded-2xl bg-secondary/30 border-none text-lg shadow-sm focus-visible:ring-primary"
+            className="pr-12 h-14 rounded-2xl bg-secondary/30 border-none text-lg shadow-sm focus-visible:ring-primary text-right"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -52,7 +51,7 @@ export default function GovernoratesPage() {
       {/* قائمة المحافظات */}
       <div className="flex-1 overflow-y-auto px-6 space-y-3 pb-10">
         <div className="flex items-center gap-2 mb-4 text-xs font-bold text-muted-foreground px-2">
-          <Map className="h-4 w-4" /> مدن المملكة العربية السعودية
+          <Map className="h-4 w-4" /> المدن المتاحة
         </div>
         
         {filtered.map((gov) => (
