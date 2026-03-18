@@ -1,46 +1,93 @@
-
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Phone, ChevronRight, MessageSquare, ArrowRight, CheckCircle2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/firebase"
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth"
+import { useToast } from "@/hooks/use-toast"
 
 export default function LoginPage() {
   const [step, setStep] = useState(1) // 1: Phone, 2: OTP
   const [phone, setPhone] = useState("")
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
+  
   const router = useRouter()
+  const auth = useAuth()
+  const { toast } = useToast()
+
+  const setupRecaptcha = () => {
+    if (!(window as any).recaptchaVerifier) {
+      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        }
+      });
+    }
+  }
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     if (phone.length >= 9) {
       setLoading(true)
-      // محاكاة إرسال الكود - سنقوم بربطها بـ Firebase لاحقاً
-      setTimeout(() => {
-        setLoading(false)
+      setupRecaptcha()
+      const appVerifier = (window as any).recaptchaVerifier
+      
+      const fullPhone = `+966${phone}`
+      
+      try {
+        const result = await signInWithPhoneNumber(auth, fullPhone, appVerifier)
+        setConfirmationResult(result)
         setStep(2)
-      }, 1500)
+        toast({
+          title: "تم إرسال الرمز",
+          description: "يرجى التحقق من رسائل SMS الخاصة بك.",
+        })
+      } catch (error: any) {
+        console.error(error)
+        toast({
+          variant: "destructive",
+          title: "فشل إرسال الرمز",
+          description: error.message || "تأكد من الرقم وحاول مجدداً.",
+        })
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (otp.length === 6) {
+    if (otp.length === 6 && confirmationResult) {
       setLoading(true)
-      // محاكاة التحقق - سنقوم بربطها بـ Firebase لاحقاً
-      setTimeout(() => {
-        setLoading(false)
+      try {
+        await confirmationResult.confirm(otp)
+        toast({
+          title: "تم تسجيل الدخول بنجاح",
+          description: "مرحباً بك في أبشر!",
+        })
         router.push("/")
-      }, 1500)
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "رمز غير صحيح",
+          description: "الرجاء التأكد من الرمز المدخل.",
+        })
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-body p-6">
-      {/* زر الرجوع */}
+      <div id="recaptcha-container"></div>
+      
       <button onClick={() => step === 2 ? setStep(1) : router.back()} className="mb-8 w-10 h-10 flex items-center justify-center rounded-full bg-secondary/50">
         <ArrowRight className="h-6 w-6 text-foreground" />
       </button>
