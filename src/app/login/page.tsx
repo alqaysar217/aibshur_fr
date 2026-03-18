@@ -16,6 +16,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
   
+  // مفتاح الدولة الافتراضي (اليمن)
+  const [countryCode, setCountryCode] = useState("+967")
+  
   const router = useRouter()
   const auth = useAuth()
   const { toast } = useToast()
@@ -25,7 +28,7 @@ export default function LoginPage() {
       (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
         'callback': () => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
+          // reCAPTCHA solved
         }
       });
     }
@@ -33,12 +36,13 @@ export default function LoginPage() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (phone.length >= 9) {
+    // رقم الهاتف اليمني غالباً 9 أرقام
+    if (phone.length >= 7) {
       setLoading(true)
       setupRecaptcha()
       const appVerifier = (window as any).recaptchaVerifier
       
-      const fullPhone = `+966${phone}`
+      const fullPhone = `${countryCode}${phone}`
       
       try {
         const result = await signInWithPhoneNumber(auth, fullPhone, appVerifier)
@@ -100,17 +104,17 @@ export default function LoginPage() {
                 <Phone className="h-10 w-10 text-primary" />
               </div>
               <h1 className="text-3xl font-bold text-foreground">مرحباً بك في أبشر</h1>
-              <p className="text-muted-foreground text-sm">أدخل رقم هاتفك لنرسل لك رمز التحقق الآمن</p>
+              <p className="text-muted-foreground text-sm">أدخل رقم هاتفك اليمني لنرسل لك رمز التحقق</p>
             </div>
 
             <form onSubmit={handleSendOtp} className="space-y-6">
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-muted-foreground border-r pr-3 border-secondary-foreground/10">
-                  <span className="text-sm font-bold">+966</span>
+                  <span className="text-sm font-bold">{countryCode}</span>
                 </div>
                 <Input 
                   type="tel"
-                  placeholder="5xxxxxxxx"
+                  placeholder="7xxxxxxxx"
                   className="h-16 pl-20 rounded-2xl bg-secondary/30 border-none text-xl font-bold tracking-wider"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
@@ -120,7 +124,7 @@ export default function LoginPage() {
               </div>
               <Button 
                 type="submit" 
-                disabled={loading || phone.length < 9}
+                disabled={loading || phone.length < 7}
                 className="w-full h-16 rounded-2xl text-lg font-bold bg-primary shadow-lg shadow-primary/30 hover:scale-[1.02] transition-transform active:scale-95"
               >
                 {loading ? "جاري الإرسال..." : "إرسال الرمز"}
@@ -137,7 +141,7 @@ export default function LoginPage() {
               <h1 className="text-3xl font-bold text-foreground">تأكيد الرمز</h1>
               <p className="text-muted-foreground text-sm">
                 تم إرسال رمز التحقق إلى الرقم <br/>
-                <span className="text-primary font-bold" dir="ltr">+966 {phone}</span>
+                <span className="text-primary font-bold" dir="ltr">{countryCode} {phone}</span>
               </p>
             </div>
 
