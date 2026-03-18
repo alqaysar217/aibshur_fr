@@ -11,7 +11,7 @@ import { BottomNav } from "@/components/layout/bottom-nav"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
-import { collection, query, where, limit } from "firebase/firestore"
+import { collection, query, limit } from "firebase/firestore"
 
 export default function Home() {
   const router = useRouter()
@@ -27,7 +27,7 @@ export default function Home() {
     }
   }, [router])
 
-  // تجهيز استعلام لجلب المتاجر من قاعدة البيانات (بحد أقصى 10 متاجر)
+  // جلب المتاجر من Firestore
   const storesQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, "stores"), limit(10));
@@ -136,18 +136,18 @@ export default function Home() {
             ))
           ) : stores && stores.length > 0 ? (
             stores.map((store: any) => (
-              <Card key={store.id} className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] group cursor-pointer">
+              <Card key={store.id} className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] group cursor-pointer hover:scale-[1.01] transition-transform">
                 <CardContent className="p-0">
                   <div className="relative h-56 w-full">
                     <Image 
                       src={store.logoUrl || `https://picsum.photos/seed/${store.id}/600/400`} 
                       alt={store.name} 
                       fill 
-                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-lg">
                       <Star className="h-4 w-4 fill-accent text-accent" />
-                      <span className="text-sm font-black">{store.averageRating}</span>
+                      <span className="text-sm font-black">{store.averageRating || 'جديد'}</span>
                     </div>
                   </div>
                   <div className="p-5 bg-white">
@@ -157,9 +157,9 @@ export default function Home() {
                         <span>{store.openingHours}</span>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Badge variant="secondary" className="font-bold text-[10px] bg-secondary/50 text-secondary-foreground border-none px-3">{store.address}</Badge>
-                      <Badge variant="outline" className="font-bold text-[10px] border-primary/20 text-primary px-3">{store.status}</Badge>
+                      <Badge variant="outline" className="font-bold text-[10px] border-primary/20 text-primary px-3">{store.status === 'open' ? 'مفتوح الآن' : 'مغلق'}</Badge>
                     </div>
                   </div>
                 </CardContent>
@@ -167,9 +167,14 @@ export default function Home() {
             ))
           ) : (
             // في حالة عدم وجود متاجر بعد
-            <div className="text-center py-10 bg-white rounded-3xl border-2 border-dashed border-secondary">
-              <p className="text-muted-foreground text-sm font-bold">لا توجد متاجر مضافة بعد في منطقتك</p>
-              <p className="text-[10px] text-muted-foreground mt-2 italic">ابدأ بإضافة أول متجر من لوحة التحكم</p>
+            <div className="text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-secondary flex flex-col items-center justify-center space-y-4">
+              <div className="bg-secondary/20 p-6 rounded-full">
+                <Navigation className="h-10 w-10 text-muted-foreground opacity-20" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-muted-foreground text-sm font-bold">لا توجد متاجر مضافة بعد في منطقتك</p>
+                <p className="text-[10px] text-muted-foreground italic">ابدأ بإضافة أول متجر من لوحة تحكم Firebase لكي يظهر هنا</p>
+              </div>
             </div>
           )}
         </div>
