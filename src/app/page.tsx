@@ -10,9 +10,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
+import { collection, query, where, limit } from "firebase/firestore"
 
 export default function Home() {
   const router = useRouter()
+  const db = useFirestore()
   const [selectedCity, setSelectedCity] = useState("")
 
   useEffect(() => {
@@ -23,6 +26,14 @@ export default function Home() {
       setSelectedCity(city)
     }
   }, [router])
+
+  // تجهيز استعلام لجلب المتاجر من قاعدة البيانات (بحد أقصى 10 متاجر)
+  const storesQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, "stores"), limit(10));
+  }, [db]);
+
+  const { data: stores, isLoading: isStoresLoading } = useCollection(storesQuery);
 
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">
@@ -70,7 +81,7 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Banner Carousel Placeholder */}
+        {/* Banner */}
         <div className="relative h-48 w-full rounded-[2rem] overflow-hidden shadow-2xl bg-gradient-to-br from-primary to-primary/80 group">
           <Image 
             src="https://picsum.photos/seed/delivery-absher/800/400" 
@@ -110,50 +121,57 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Stores */}
+      {/* Featured Stores Section */}
       <section className="p-4 space-y-6">
         <div className="flex items-center justify-between px-1">
-          <h3 className="font-black text-xl">المتاجر الأكثر طلباً</h3>
+          <h3 className="font-black text-xl">المتاجر المقترحة</h3>
           <button className="text-primary text-xs font-black">فلترة</button>
         </div>
         
         <div className="space-y-6">
-          {[
-            { name: "برجر إليفن", rate: "4.9", time: "20-25 دقيقة", img: "burger1", tag: "وجبات سريعة" },
-            { name: "بيتزا ماستر", rate: "4.7", time: "30-35 دقيقة", img: "pizza1", tag: "إيطالي" }
-          ].map((store, idx) => (
-            <Card key={idx} className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] group cursor-pointer">
-              <CardContent className="p-0">
-                <div className="relative h-56 w-full">
-                  <Image 
-                    src={`https://picsum.photos/seed/${store.img}/600/400`} 
-                    alt={store.name} 
-                    fill 
-                    className="object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-lg">
-                    <Star className="h-4 w-4 fill-accent text-accent" />
-                    <span className="text-sm font-black">{store.rate}</span>
-                  </div>
-                  <div className="absolute bottom-4 right-4 bg-primary px-3 py-1.5 rounded-xl text-white text-[10px] font-black shadow-lg">
-                    خصم 20% 🏷️
-                  </div>
-                </div>
-                <div className="p-5 bg-white">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-black text-xl text-foreground">{store.name}</h4>
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground bg-secondary/30 px-2 py-1 rounded-lg">
-                      <span>{store.time}</span>
+          {isStoresLoading ? (
+            // شاشة تحميل (Skeleton)
+            [1, 2].map((i) => (
+              <div key={i} className="h-64 w-full bg-white rounded-[2rem] animate-pulse" />
+            ))
+          ) : stores && stores.length > 0 ? (
+            stores.map((store: any) => (
+              <Card key={store.id} className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] group cursor-pointer">
+                <CardContent className="p-0">
+                  <div className="relative h-56 w-full">
+                    <Image 
+                      src={store.logoUrl || `https://picsum.photos/seed/${store.id}/600/400`} 
+                      alt={store.name} 
+                      fill 
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-lg">
+                      <Star className="h-4 w-4 fill-accent text-accent" />
+                      <span className="text-sm font-black">{store.averageRating}</span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Badge variant="secondary" className="font-bold text-[10px] bg-secondary/50 text-secondary-foreground border-none px-3">{store.tag}</Badge>
-                    <Badge variant="outline" className="font-bold text-[10px] border-primary/20 text-primary px-3">توصيل 10 ر.س</Badge>
+                  <div className="p-5 bg-white">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-black text-xl text-foreground">{store.name}</h4>
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground bg-secondary/30 px-2 py-1 rounded-lg">
+                        <span>{store.openingHours}</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge variant="secondary" className="font-bold text-[10px] bg-secondary/50 text-secondary-foreground border-none px-3">{store.address}</Badge>
+                      <Badge variant="outline" className="font-bold text-[10px] border-primary/20 text-primary px-3">{store.status}</Badge>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            // في حالة عدم وجود متاجر بعد
+            <div className="text-center py-10 bg-white rounded-3xl border-2 border-dashed border-secondary">
+              <p className="text-muted-foreground text-sm font-bold">لا توجد متاجر مضافة بعد في منطقتك</p>
+              <p className="text-[10px] text-muted-foreground mt-2 italic">ابدأ بإضافة أول متجر من لوحة التحكم</p>
+            </div>
+          )}
         </div>
       </section>
 
