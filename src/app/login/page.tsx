@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Phone, ChevronRight, MessageSquare, ArrowRight, CheckCircle2 } from "lucide-react"
+import { Phone, ChevronRight, MessageSquare, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/firebase"
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth"
 import { useToast } from "@/hooks/use-toast"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function LoginPage() {
   const [step, setStep] = useState(1) // 1: Phone, 2: OTP
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
+  const [errorInfo, setErrorInfo] = useState<string | null>(null)
   
   // مفتاح الدولة الافتراضي (اليمن)
   const [countryCode, setCountryCode] = useState("+967")
@@ -25,17 +27,23 @@ export default function LoginPage() {
 
   const setupRecaptcha = () => {
     if (typeof window !== 'undefined' && !(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved
-        }
-      });
+      try {
+        (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': () => {
+            // reCAPTCHA solved
+          }
+        });
+      } catch (err) {
+        console.error("Recaptcha error:", err)
+      }
     }
   }
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrorInfo(null)
+    
     if (phone.length >= 7) {
       setLoading(true)
       setupRecaptcha()
@@ -52,13 +60,18 @@ export default function LoginPage() {
           description: "يرجى التحقق من رسائل SMS الخاصة بك.",
         })
       } catch (error: any) {
-        console.error(error)
+        console.error("Full error object:", error)
         let errorMessage = "تأكد من الرقم وحاول مجدداً."
         
-        if (error.code === 'auth/operation-not-allowed') {
-          errorMessage = "يجب تفعيل إرسال الرسائل لليمن من إعدادات Firebase (Authentication -> Settings -> SMS Region Policy)."
+        if (error.code === 'auth/billing-not-enabled') {
+          errorMessage = "جوجل تطلب تفعيل خطة الدفع لإرسال رسائل حقيقية."
+          setErrorInfo("للتجربة مجاناً، يرجى إضافة 'رقم اختبار' في Firebase Console (Authentication -> Settings -> Phone numbers for testing).")
+        } else if (error.code === 'auth/operation-not-allowed') {
+          errorMessage = "يجب تفعيل إرسال الرسائل لليمن من إعدادات Firebase."
         } else if (error.code === 'auth/invalid-phone-number') {
           errorMessage = "رقم الهاتف غير صحيح."
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMessage = "تم إرسال طلبات كثيرة، حاول لاحقاً أو استخدم رقم اختبار."
         }
 
         toast({
@@ -104,6 +117,16 @@ export default function LoginPage() {
       </button>
 
       <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+        {errorInfo && (
+          <Alert variant="destructive" className="mb-6 bg-destructive/10 border-destructive/20 text-destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle className="font-bold">تنبيه للمطور</AlertTitle>
+            <AlertDescription className="text-xs leading-relaxed">
+              {errorInfo}
+            </AlertDescription>
+          </Alert>
+        )}
+
         {step === 1 ? (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-3 text-center">
