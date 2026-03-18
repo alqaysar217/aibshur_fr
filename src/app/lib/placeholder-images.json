@@ -1,0 +1,34 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-delivery",
+      "description": "Delivery man on scooter",
+      "imageUrl": "https://picsum.photos/seed/delivery1/800/400",
+      "imageHint": "delivery scooter"
+    },
+    {
+      "id": "burger-store",
+      "description": "Delicious Burger Store",
+      "imageUrl": "https://picsum.photos/seed/burger1/400/300",
+      "imageHint": "burger restaurant"
+    },
+    {
+      "id": "pizza-store",
+      "description": "Hot Pizza Store",
+      "imageUrl": "https://picsum.photos/seed/pizza1/400/300",
+      "imageHint": "pizza restaurant"
+    },
+    {
+      "id": "coffee-store",
+      "description": "Cozy Coffee Shop",
+      "imageUrl": "https://picsum.photos/seed/coffee1/400/300",
+      "imageHint": "coffee shop"
+    },
+    {
+      "id": "grocery-store",
+      "description": "Fresh Grocery Market",
+      "imageUrl": "https://picsum.photos/seed/grocery1/400/300",
+      "imageHint": "supermarket"
+    }
+  ]
+}
