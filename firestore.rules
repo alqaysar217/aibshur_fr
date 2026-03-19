@@ -2,8 +2,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 1. قاعدة البحث الشامل للمنتجات (Collection Group)
-    // يجب أن تكون مستقلة وفي القمة لتمكين استعلامات البحث والمفضلة عبر كافة المتاجر
+    // 1. قاعدة المجموعات المشتركة للمنتجات (Collection Group)
+    // يجب أن تكون في القمة لتمكين استعلامات البحث والمفضلة عبر كافة المتاجر
     match /{path=**}/products/{productId} {
       allow read, get, list: if true;
     }
@@ -37,7 +37,7 @@ service cloud.firestore {
       }
     }
 
-    // 4. قواعد المتاجر والمنتجات (للكتابة)
+    // 4. قواعد المتاجر والمنتجات
     match /stores/{storeId} {
       allow read: if true;
       allow create: if isSignedIn();
