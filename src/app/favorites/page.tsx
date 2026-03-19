@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -103,7 +102,7 @@ export default function FavoritesPage() {
   if (isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-        <div className="animate-pulse font-black text-primary">{"جاري التحميل..."}</div>
+        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
       </div>
     )
   }
@@ -114,8 +113,8 @@ export default function FavoritesPage() {
         <div className="bg-secondary/20 p-8 rounded-full">
           <Heart className="h-16 w-16 text-muted-foreground opacity-30" />
         </div>
-        <h1 className="text-xl font-bold">{"يرجى تسجيل الدخول"}</h1>
-        <Button onClick={() => router.push('/login')} className="w-full h-14 rounded-2xl">{"تسجيل الدخول"}</Button>
+        <h1 className="text-xl font-bold">يرجى تسجيل الدخول</h1>
+        <Button onClick={() => router.push('/login')} className="w-full h-14 rounded-2xl">تسجيل الدخول</Button>
         <BottomNav />
       </div>
     )
@@ -124,14 +123,14 @@ export default function FavoritesPage() {
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">
       <header className="p-4 glass sticky top-0 z-40 flex items-center justify-between">
-        <h1 className="text-xl font-bold">{"المفضلة"}</h1>
+        <h1 className="text-xl font-bold">المفضلة</h1>
       </header>
 
       <div className="p-4">
         <Tabs defaultValue="stores" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6 bg-white rounded-xl p-1">
-            <TabsTrigger value="stores" className="rounded-lg font-bold">{"المتاجر"}</TabsTrigger>
-            <TabsTrigger value="products" className="rounded-lg font-bold">{"الوجبات"}</TabsTrigger>
+            <TabsTrigger value="stores" className="rounded-lg font-bold">المتاجر</TabsTrigger>
+            <TabsTrigger value="products" className="rounded-lg font-bold">الوجبات</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stores" className="space-y-6">
@@ -203,7 +202,7 @@ function EmptyState({ message }: { message: string }) {
         <Heart className="h-16 w-16 text-muted-foreground opacity-20" />
       </div>
       <h2 className="font-bold text-lg">{message}</h2>
-      <p className="text-muted-foreground text-sm">{"ابدأ بتمييز ما تحبه ليظهر هنا."}</p>
+      <p className="text-muted-foreground text-sm">ابدأ بتمييز ما تحبه ليظهر هنا.</p>
     </div>
   )
 }

@@ -1,11 +1,14 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 1. القواعد العامة للمجموعات المشتركة (مهمة جداً للبحث والمفضلة)
+    // 1. القواعد العامة للمجموعات المشتركة (يجب أن تكون في القمة للبحث والمفضلة)
     match /{path=**}/products/{productId} {
-      allow read: if request.auth != null;
+      allow get, list: if request.auth != null;
+    }
+
+    match /{path=**}/stores/{storeId} {
+      allow get, list: if request.auth != null;
     }
 
     // --- دالات مساعدة ---
@@ -17,12 +20,12 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // --- قواعد المجموعات ---
+    // --- قواعد المجموعات التفصيلية ---
 
     match /users/{userId} {
-      // السماح بإنشاء الوثيقة إذا كان المستخدم هو المالك وأرسل الـ ID الصحيح
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow get, list, update: if isOwner(userId);
+      // السماح بالإنشاء والتحديث فقط إذا كان المستخدم هو المالك وأرسل الـ ID الصحيح
+      allow create, update: if isOwner(userId) && (request.resource.data.id == userId || !exists(/databases/$(database)/documents/users/$(userId)));
+      allow get, list: if isOwner(userId);
       allow delete: if false;
 
       match /{allSubcollections=**} {
@@ -31,11 +34,11 @@ service cloud.firestore {
     }
 
     match /stores/{storeId} {
-      allow read: if isSignedIn();
-      allow write: if false; // للمسؤولين فقط من لوحة التحكم
+      allow read, get, list: if isSignedIn();
+      allow write: if false; 
 
       match /products/{productId} {
-        allow read: if isSignedIn();
+        allow read, get, list: if isSignedIn();
       }
     }
 

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice } from "lucide-react"
@@ -68,7 +67,6 @@ export default function Home() {
     const isFav = userData?.favoritesStoreIds?.includes(storeId)
     const ref = doc(db, "users", user.uid)
     
-    // إرسال الـ ID ضروري لنجاح عملية الـ Create الأولى في قواعد الأمان
     const updateData = {
       id: user.uid,
       favoritesStoreIds: isFav ? arrayRemove(storeId) : arrayUnion(storeId),
@@ -98,7 +96,7 @@ export default function Home() {
           </div>
           <Link href="/governorates" className="group">
             <div>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{"توصيل إلى"}</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">توصيل إلى</p>
               <p className="text-sm font-black flex items-center gap-1">
                 {selectedCity || "جاري التحديد..."}
                 <ChevronLeft className="h-3 w-3 text-primary" />
@@ -109,7 +107,7 @@ export default function Home() {
         <div className="flex gap-3">
           {!user && (
             <button onClick={() => router.push('/login')} className="bg-accent/10 px-4 py-2 rounded-xl text-xs font-black text-accent border border-accent/20">
-              {"دخول"}
+              دخول
             </button>
           )}
           <Link href="/notifications" className="relative bg-white shadow-md p-2 rounded-xl border border-border">
@@ -124,7 +122,7 @@ export default function Home() {
           <Link href="/search">
             <div className="w-full h-16 px-12 rounded-2xl border-none shadow-xl bg-white text-muted-foreground flex items-center text-sm cursor-text">
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-              {"ابحث عن مطعم، بقالة، أو صيدلية..."}
+              ابحث عن مطعم، بقالة، أو صيدلية...
             </div>
           </Link>
         </div>
@@ -135,19 +133,18 @@ export default function Home() {
             alt="Delivery" 
             fill
             className="object-cover opacity-30"
-            data-ai-hint="delivery motorcycle"
           />
           <div className="absolute inset-0 p-8 flex flex-col justify-center text-white">
-            <Badge className="w-fit mb-3 bg-white text-primary font-black px-3 py-1 border-none rounded-lg">{"توصيل مجاني 🚚"}</Badge>
-            <h2 className="text-3xl font-black mb-2 leading-tight">{"أول طلب لك"}<br/>{"مجاناً بالكامل!"}</h2>
-            <p className="text-xs font-medium opacity-90">{"استخدم كود: "}<span className="font-black bg-white/20 px-2 py-0.5 rounded">{"ABSHER24"}</span></p>
+            <Badge className="w-fit mb-3 bg-white text-primary font-black px-3 py-1 border-none rounded-lg">توصيل مجاني 🚚</Badge>
+            <h2 className="text-3xl font-black mb-2 leading-tight">أول طلب لك<br/>مجاناً بالكامل!</h2>
+            <p className="text-xs font-medium opacity-90">استخدم كود: <span className="font-black bg-white/20 px-2 py-0.5 rounded">ABSHER24</span></p>
           </div>
         </div>
       </section>
 
       <section className="p-4">
         <div className="flex items-center justify-between mb-6 px-1">
-          <h3 className="font-black text-xl text-foreground">{"الأقسام الرئيسية"}</h3>
+          <h3 className="font-black text-xl text-foreground">الأقسام الرئيسية</h3>
         </div>
         <div className="grid grid-cols-4 gap-4">
           {CATEGORIES.map((cat) => (
@@ -170,7 +167,7 @@ export default function Home() {
 
       <section className="p-4 space-y-6">
         <div className="flex items-center justify-between px-1">
-          <h3 className="font-black text-xl">{"المتاجر المقترحة"}</h3>
+          <h3 className="font-black text-xl">المتاجر المقترحة</h3>
         </div>
         <div className="space-y-6">
           {isStoresLoading ? (
