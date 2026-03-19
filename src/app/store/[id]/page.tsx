@@ -1,21 +1,23 @@
 
 "use client"
 
-import { useDoc, useCollection, useFirestore, useMemoFirebase } from "@/firebase"
+import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { Star, Clock, MapPin, Plus, ShoppingBag, ArrowRight, Minus, AlertCircle } from "lucide-react"
+import { Star, Clock, MapPin, Plus, ShoppingBag, ArrowRight, Minus, AlertCircle, Heart } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { collection, doc } from "firebase/firestore"
+import { collection, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 export default function StoreDetailPage() {
   const { id } = useParams()
   const router = useRouter()
   const db = useFirestore()
+  const { user } = useUser()
   const { toast } = useToast()
   const [cart, setCart] = useState<any[]>([])
 
@@ -73,7 +75,28 @@ export default function StoreDetailPage() {
   }, [db, id])
   const { data: store, isLoading: isStoreLoading } = useDoc(storeRef)
 
-  // Fetch Products from the Subcollection: /stores/{storeId}/products
+  // Fetch User Data for Favorites
+  const userRef = useMemoFirebase(() => {
+    if (!db || !user) return null
+    return doc(db, "users", user.uid)
+  }, [db, user])
+  const { data: userData } = useDoc(userRef)
+
+  const toggleFavorite = async () => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    const isFav = userData?.favoritesStoreIds?.includes(id as string)
+    const ref = doc(db, "users", user.uid)
+
+    await updateDoc(ref, {
+      favoritesStoreIds: isFav ? arrayRemove(id) : arrayUnion(id)
+    })
+  }
+
+  // Fetch Products
   const productsQuery = useMemoFirebase(() => {
     if (!db || !id) return null
     return collection(db, "stores", id as string, "products")
@@ -93,6 +116,8 @@ export default function StoreDetailPage() {
     </div>
   )
 
+  const isFavorite = userData?.favoritesStoreIds?.includes(id as string)
+
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen">
       <div className="relative h-64 w-full">
@@ -103,12 +128,20 @@ export default function StoreDetailPage() {
           className="object-cover"
         />
         <div className="absolute inset-0 bg-black/30"></div>
-        <button 
-          onClick={() => router.back()}
-          className="absolute top-6 right-6 h-10 w-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-        >
-          <ArrowRight className="h-6 w-6 text-foreground" />
-        </button>
+        <div className="absolute top-6 left-6 right-6 flex justify-between items-center">
+          <button 
+            onClick={() => router.back()}
+            className="h-10 w-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+          >
+            <ArrowRight className="h-6 w-6 text-foreground" />
+          </button>
+          <button 
+            onClick={toggleFavorite}
+            className="h-10 w-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+          >
+            <Heart className={cn("h-6 w-6 transition-colors", isFavorite ? "fill-destructive text-destructive" : "text-foreground")} />
+          </button>
+        </div>
       </div>
 
       <div className="relative -mt-12 px-4">
@@ -208,27 +241,7 @@ export default function StoreDetailPage() {
           ) : (
             <div className="text-center py-12 bg-white rounded-2xl border-2 border-dashed border-secondary flex flex-col items-center justify-center p-6">
               <ShoppingBag className="h-12 w-12 text-muted-foreground/20 mb-4" />
-              <p className="text-muted-foreground text-sm font-bold mb-6">لا توجد وجبات مضافة حالياً</p>
-              
-              <div className="w-full bg-primary/5 rounded-2xl p-6 border border-primary/10 text-right space-y-4">
-                <div className="flex items-center gap-2 text-primary font-black">
-                  <AlertCircle className="h-5 w-5" />
-                  <h3>تنبيه للمطور: أين الوجبات؟</h3>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  يبدو أنك أنشأت مجموعة الوجبات في المكان الخاطئ. الكود يتوقع المسار التالي:
-                </p>
-                <div className="bg-white p-3 rounded-xl border font-mono text-[10px] text-primary flex items-center justify-center gap-2 overflow-x-auto" dir="ltr">
-                  <span>stores</span>
-                  <span className="text-muted-foreground">/</span>
-                  <span className="font-bold">{id}</span>
-                  <span className="text-muted-foreground">/</span>
-                  <span className="font-bold">products</span>
-                </div>
-                <p className="text-[10px] text-muted-foreground italic">
-                  * اذهب لجدول stores، ثم اضغط على مستند المتجر، ثم اضغط Start collection من داخل المستند.
-                </p>
-              </div>
+              <p className="text-muted-foreground text-sm font-bold">لا توجد وجبات مضافة حالياً</p>
             </div>
           )}
         </div>

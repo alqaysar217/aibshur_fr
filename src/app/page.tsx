@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Bell, ChevronLeft, Star, Sparkles, Navigation } from "lucide-react"
+import { Search, MapPin, Bell, ChevronLeft, Star, Sparkles, Navigation, Heart } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
@@ -10,12 +10,14 @@ import { Card, CardContent } from "@/components/ui/card"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
-import { collection, query, limit } from "firebase/firestore"
+import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase"
+import { collection, query, limit, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
+import { cn } from "@/lib/utils"
 
 export default function Home() {
   const router = useRouter()
   const db = useFirestore()
+  const { user } = useUser()
   const [selectedCity, setSelectedCity] = useState("")
 
   useEffect(() => {
@@ -27,12 +29,34 @@ export default function Home() {
     }
   }, [router])
 
+  const userRef = useMemoFirebase(() => {
+    if (!db || !user) return null
+    return doc(db, "users", user.uid)
+  }, [db, user])
+  const { data: userData } = useDoc(userRef)
+
   const storesQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, "stores"), limit(10));
   }, [db]);
 
   const { data: stores, isLoading: isStoresLoading } = useCollection(storesQuery);
+
+  const toggleFavorite = async (e: React.MouseEvent, storeId: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    const isFav = userData?.favoritesStoreIds?.includes(storeId)
+    const ref = doc(db, "users", user.uid)
+
+    await updateDoc(ref, {
+      favoritesStoreIds: isFav ? arrayRemove(storeId) : arrayUnion(storeId)
+    })
+  }
 
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">
@@ -52,12 +76,14 @@ export default function Home() {
           </Link>
         </div>
         <div className="flex gap-3">
-          <button 
-            onClick={() => router.push('/login')} 
-            className="bg-accent/10 px-4 py-2 rounded-xl text-xs font-black text-accent border border-accent/20 hover:bg-accent hover:text-white transition-all"
-          >
-            دخول
-          </button>
+          {!user && (
+            <button 
+              onClick={() => router.push('/login')} 
+              className="bg-accent/10 px-4 py-2 rounded-xl text-xs font-black text-accent border border-accent/20 hover:bg-accent hover:text-white transition-all"
+            >
+              دخول
+            </button>
+          )}
           <button className="relative bg-white shadow-md p-2 rounded-xl border border-border group active:scale-90 transition-transform">
             <Bell className="h-5 w-5 text-foreground group-hover:text-primary" />
             <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-white animate-pulse"></span>
@@ -130,7 +156,7 @@ export default function Home() {
           ) : stores && stores.length > 0 ? (
             stores.map((store: any) => (
               <Link key={store.id} href={`/store/${store.id}`}>
-                <Card className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] group cursor-pointer hover:scale-[1.01] transition-transform mb-6">
+                <Card className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] group cursor-pointer hover:scale-[1.01] transition-transform mb-6 relative">
                   <CardContent className="p-0">
                     <div className="relative h-56 w-full">
                       <Image 
@@ -143,6 +169,17 @@ export default function Home() {
                         <Star className="h-4 w-4 fill-accent text-accent" />
                         <span className="text-sm font-black">{store.averageRating || 'جديد'}</span>
                       </div>
+                      <button 
+                        onClick={(e) => toggleFavorite(e, store.id)}
+                        className="absolute top-4 right-4 h-10 w-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform z-10"
+                      >
+                        <Heart 
+                          className={cn(
+                            "h-5 w-5 transition-colors", 
+                            userData?.favoritesStoreIds?.includes(store.id) ? "fill-destructive text-destructive" : "text-muted-foreground"
+                          )} 
+                        />
+                      </button>
                     </div>
                     <div className="p-5 bg-white">
                       <div className="flex justify-between items-center mb-3">

@@ -1,0 +1,122 @@
+
+"use client"
+
+import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
+import { doc, collection, query, where, updateDoc, arrayRemove } from "firebase/firestore"
+import { Heart, Navigation, Star, MapPin, ArrowRight } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { BottomNav } from "@/components/layout/bottom-nav"
+import { cn } from "@/lib/utils"
+
+export default function FavoritesPage() {
+  const { user } = useUser()
+  const db = useFirestore()
+  const router = useRouter()
+
+  const userRef = useMemoFirebase(() => {
+    if (!db || !user) return null
+    return doc(db, "users", user.uid)
+  }, [db, user])
+  const { data: userData } = useDoc(userRef)
+
+  const favoritesQuery = useMemoFirebase(() => {
+    if (!db || !userData?.favoritesStoreIds?.length) return null
+    // نستخدم مصفوفة الـ IDs لجلب المتاجر المفضلة فقط
+    return query(
+      collection(db, "stores"), 
+      where("__name__", "in", userData.favoritesStoreIds.slice(0, 10))
+    )
+  }, [db, userData?.favoritesStoreIds])
+
+  const { data: favoriteStores, isLoading } = useCollection(favoritesQuery)
+
+  const toggleFavorite = async (e: React.MouseEvent, storeId: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!user) return
+
+    const ref = doc(db, "users", user.uid)
+    await updateDoc(ref, {
+      favoritesStoreIds: arrayRemove(storeId)
+    })
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-6">
+        <div className="bg-secondary/20 p-8 rounded-full">
+          <Heart className="h-16 w-16 text-muted-foreground opacity-30" />
+        </div>
+        <h1 className="text-xl font-bold">يرجى تسجيل الدخول</h1>
+        <p className="text-muted-foreground text-sm text-center">يجب تسجيل الدخول لمشاهدة متاجرك المفضلة</p>
+        <Button onClick={() => router.push('/login')} className="w-full h-14 rounded-2xl">تسجيل الدخول</Button>
+        <BottomNav />
+      </div>
+    )
+  }
+
+  return (
+    <div className="pb-24 bg-secondary/5 min-h-screen">
+      <header className="p-4 glass sticky top-0 z-40 flex items-center gap-4">
+        <h1 className="text-xl font-bold">المفضلة</h1>
+      </header>
+
+      <div className="p-4 space-y-6">
+        {isLoading ? (
+          [1, 2].map(i => <div key={i} className="h-64 bg-white rounded-[2rem] animate-pulse" />)
+        ) : favoriteStores && favoriteStores.length > 0 ? (
+          favoriteStores.map((store: any) => (
+            <Link key={store.id} href={`/store/${store.id}`}>
+              <Card className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] group cursor-pointer hover:scale-[1.01] transition-transform relative">
+                <CardContent className="p-0">
+                  <div className="relative h-56 w-full">
+                    <Image 
+                      src={store.logoUrl || `https://picsum.photos/seed/${store.id}/600/400`} 
+                      alt={store.name} 
+                      fill 
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-lg">
+                      <Star className="h-4 w-4 fill-accent text-accent" />
+                      <span className="text-sm font-black">{store.averageRating || 'جديد'}</span>
+                    </div>
+                    <button 
+                      onClick={(e) => toggleFavorite(e, store.id)}
+                      className="absolute top-4 right-4 h-10 w-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform z-10"
+                    >
+                      <Heart className="h-5 w-5 fill-destructive text-destructive" />
+                    </button>
+                  </div>
+                  <div className="p-5 bg-white">
+                    <h4 className="font-black text-xl text-foreground mb-3">{store.name}</h4>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="font-bold text-[10px] bg-secondary/50 text-secondary-foreground border-none px-3">{store.address}</Badge>
+                      <Badge variant="outline" className="font-bold text-[10px] border-primary/20 text-primary px-3">{store.status === 'open' ? 'مفتوح الآن' : 'مغلق'}</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))
+        ) : (
+          <div className="text-center py-20 space-y-6">
+            <div className="bg-secondary/20 p-8 rounded-full w-fit mx-auto">
+              <Heart className="h-16 w-16 text-muted-foreground opacity-20" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="font-bold text-lg">قائمة المفضلة فارغة</h2>
+              <p className="text-muted-foreground text-sm max-w-[200px] mx-auto">احفظ المتاجر التي تحبها لتجدها هنا دائماً.</p>
+            </div>
+            <Button onClick={() => router.push('/')} variant="outline" className="rounded-xl">تصفح المتاجر</Button>
+          </div>
+        )}
+      </div>
+      <BottomNav />
+    </div>
+  )
+}
