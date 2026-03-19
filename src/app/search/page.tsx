@@ -6,6 +6,7 @@ import { Search, Store, MapPin, ArrowRight, Loader2, ShoppingBag, Utensils, Spar
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, getDocs, limit, collectionGroup } from "firebase/firestore"
@@ -66,7 +67,7 @@ export default function SearchPage() {
     }
   }
 
-  // تحديث البحث عند تغيير النص (اختياري، للبحث اللحظي)
+  // تحديث البحث عند تغيير النص (البحث اللحظي)
   useEffect(() => {
     if (queryText.length > 1) {
       const timeoutId = setTimeout(() => {
