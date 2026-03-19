@@ -3,7 +3,7 @@
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { Star, Clock, MapPin, Plus, ShoppingBag, ArrowRight, Minus } from "lucide-react"
+import { Star, Clock, MapPin, Plus, ShoppingBag, ArrowRight, Minus, AlertCircle } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -206,15 +206,27 @@ export default function StoreDetailPage() {
               )
             })
           ) : (
-            <div className="text-center py-12 bg-white rounded-2xl border-2 border-dashed border-secondary">
-              <ShoppingBag className="h-10 w-10 text-muted-foreground/20 mx-auto mb-2" />
-              <p className="text-muted-foreground text-xs font-bold">لا توجد وجبات مضافة حالياً</p>
-              <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-primary/10 text-right">
-                <p className="text-[11px] font-bold text-primary mb-2">💡 نصيحة للمطور:</p>
-                <p className="text-[10px] text-muted-foreground leading-relaxed">
-                  تأكد أنك أنشأت مجموعة تسمى <span className="text-primary font-bold">products</span> داخل مستند مطعم مذاقي في Firebase.
-                  <br/>
-                  المسار الصحيح هو: <span className="font-mono text-[9px] bg-secondary px-1">stores / {id} / products</span>
+            <div className="text-center py-12 bg-white rounded-2xl border-2 border-dashed border-secondary flex flex-col items-center justify-center p-6">
+              <ShoppingBag className="h-12 w-12 text-muted-foreground/20 mb-4" />
+              <p className="text-muted-foreground text-sm font-bold mb-6">لا توجد وجبات مضافة حالياً</p>
+              
+              <div className="w-full bg-primary/5 rounded-2xl p-6 border border-primary/10 text-right space-y-4">
+                <div className="flex items-center gap-2 text-primary font-black">
+                  <AlertCircle className="h-5 w-5" />
+                  <h3>تنبيه للمطور: أين الوجبات؟</h3>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  يبدو أنك أنشأت مجموعة الوجبات في المكان الخاطئ. الكود يتوقع المسار التالي:
+                </p>
+                <div className="bg-white p-3 rounded-xl border font-mono text-[10px] text-primary flex items-center justify-center gap-2 overflow-x-auto" dir="ltr">
+                  <span>stores</span>
+                  <span className="text-muted-foreground">/</span>
+                  <span className="font-bold">{id}</span>
+                  <span className="text-muted-foreground">/</span>
+                  <span className="font-bold">products</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground italic">
+                  * اذهب لجدول stores، ثم اضغط على مستند المتجر، ثم اضغط Start collection من داخل المستند.
                 </p>
               </div>
             </div>
