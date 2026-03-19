@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -9,9 +8,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useFirestore } from "@/firebase"
-import { collection, query, where, getDocs, limit, orderBy, startAt, endAt, collectionGroup } from "firebase/firestore"
+import { collection, query, getDocs, limit, orderBy, startAt, endAt, collectionGroup } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function SearchPage() {
   const [queryText, setQueryText] = useState("")
@@ -30,7 +31,7 @@ export default function SearchPage() {
     setHasSearched(true)
     
     try {
-      // 1. البحث في المتاجر (البحث بالاسم يبدأ بـ)
+      // 1. البحث في المتاجر
       const storesRef = collection(db, "stores")
       const storeQ = query(
         storesRef, 
@@ -39,11 +40,21 @@ export default function SearchPage() {
         endAt(queryText + '\uf8ff'),
         limit(5)
       )
-      const storeSnapshot = await getDocs(storeQ)
+      
+      const storeSnapshot = await getDocs(storeQ).catch(err => {
+        if (err.code === 'permission-denied') {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: storesRef.path,
+            operation: 'list'
+          }))
+        }
+        throw err
+      })
+      
       const stores = storeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       setStoreResults(stores)
 
-      // 2. البحث في المنتجات (عبر جميع المتاجر باستخدام collectionGroup)
+      // 2. البحث في المنتجات عبر المجموعات
       const productsRef = collectionGroup(db, "products")
       const productQ = query(
         productsRef,
@@ -52,13 +63,22 @@ export default function SearchPage() {
         endAt(queryText + '\uf8ff'),
         limit(10)
       )
-      const productSnapshot = await getDocs(productQ)
+      
+      const productSnapshot = await getDocs(productQ).catch(err => {
+        if (err.code === 'permission-denied') {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: "collectionGroup/products",
+            operation: 'list'
+          }))
+        }
+        throw err
+      })
+      
       const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       setProductResults(products)
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Search Error:", error)
-      // ملاحظة للمطور: البحث عبر مجموعات فرعية (collectionGroup) قد يتطلب إنشاء فهرس (Index) في لوحة تحكم Firebase
     } finally {
       setLoading(false)
     }
@@ -102,7 +122,6 @@ export default function SearchPage() {
 
         {!loading && hasSearched && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-            {/* قسم المتاجر */}
             {storeResults.length > 0 && (
               <div className="space-y-4">
                 <h3 className="font-black text-lg px-2 flex items-center gap-2 text-primary">
@@ -134,7 +153,6 @@ export default function SearchPage() {
               </div>
             )}
 
-            {/* قسم الوجبات */}
             {productResults.length > 0 && (
               <div className="space-y-4">
                 <h3 className="font-black text-lg px-2 flex items-center gap-2 text-primary">

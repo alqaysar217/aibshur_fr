@@ -19,13 +19,8 @@
  *   Ratings are initially private to the creator but allow for public reading for aggregation.
  * 
  * #### Key Security Decisions
- * - **Denormalization for Authorization**: Fields like `adminUserId` (in Stores) and `storeAdminUserId` 
- *   (in Products) are explicitly required to allow owners to manage their data without rules 
- *   needing to query the parent Store document.
- * - **Administrative Access**: A dedicated `/roles_admin/` collection is used as the source of truth 
- *   for platform-wide administrative privileges.
- * - **Prototyping Flexibility**: While authorization is strictly enforced (Who can access), data 
- *   schema validation is kept minimal (What data is sent) to facilitate rapid development.
+ * - **Collection Group Queries**: Specifically enabled for 'products' to support global search 
+ *   across all stores.
  */
 
 rules_version = '2';
@@ -34,32 +29,26 @@ service cloud.firestore {
 
     // --- GLOBAL HELPER FUNCTIONS ---
 
-    /** @description Checks if the user is authenticated. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the authenticated user's UID matches the provided ID. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Checks if the user exists and matches the authenticated UID for updates/deletes. */
     function isExistingOwner(userId) {
       return resource != null && isOwner(userId);
     }
 
-    /** @description Verifies the authenticated user has administrative privileges. */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    /** @description Checks if a user is the admin of a specific store based on doc data. */
     function isStoreManager(storeData) {
       return isSignedIn() && storeData.adminUserId == request.auth.uid;
     }
 
-    /** @description Checks if a user is the admin of a product's parent store. */
     function isProductManager(productData) {
       return isSignedIn() && productData.storeAdminUserId == request.auth.uid;
     }
@@ -67,22 +56,21 @@ service cloud.firestore {
     // --- COLLECTION RULES ---
 
     /**
-     * @description Stores user profiles. Owner can read/write their own profile.
-     * @path /users/{userId}
-     * @allow (create) if auth.uid == userId
-     * @deny (read) if auth.uid != userId
-     * @principle Ownership: Path wildcard matches UID.
+     * @description Product Collection Group Query Support
+     * Allows searching for products across all stores.
      */
+    match /{path=**}/products/{productId} {
+      allow get, list: if true;
+      allow create: if isProductManager(request.resource.data) || isAdmin();
+      allow update, delete: if isProductManager(resource.data) || isAdmin();
+    }
+
     match /users/{userId} {
       allow get, list: if isOwner(userId);
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
 
-      /**
-       * @description Wallet and financial transactions for the user.
-       * @path /users/{userId}/wallet, /users/{userId}/transactions/{id}
-       */
       match /wallet {
         allow get, list: if isOwner(userId);
         allow create: if isOwner(userId) && request.resource.data.ownerId == userId;
@@ -93,24 +81,18 @@ service cloud.firestore {
       match /transactions/{transactionId} {
         allow get, list: if isOwner(userId);
         allow create: if isOwner(userId) && request.resource.data.walletId != null;
-        allow update, delete: if false; // Transactions are generally immutable
+        allow update, delete: if false;
       }
 
       match /orders/{orderId} {
-        /**
-         * @description Order details shared between user and assigned driver.
-         * @path /users/{userId}/orders/{orderId}
-         * @allow (get) if auth.uid == userId OR auth.uid == resource.data.driverId
-         * @principle Shared Access: Authorized by owner ID or driver ID on the document.
-         */
         allow get: if isOwner(userId) || (isSignedIn() && resource.data.driverId == request.auth.uid);
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
         allow update: if (isExistingOwner(userId) || (isSignedIn() && resource.data.driverId == request.auth.uid));
-        allow delete: if isAdmin(); // Only admins can delete order history
+        allow delete: if isAdmin();
 
         match /ratings/{ratingId} {
-          allow get, list: if true; // Publicly readable for store/driver averages
+          allow get, list: if true;
           allow create: if isOwner(userId) && request.resource.data.userId == userId;
           allow update: if isExistingOwner(userId);
           allow delete: if isExistingOwner(userId) || isAdmin();
@@ -119,8 +101,8 @@ service cloud.firestore {
 
       match /notifications/{notificationId} {
         allow get, list: if isOwner(userId);
-        allow create: if isAdmin(); // Only system/admins create notifications
-        allow update: if isExistingOwner(userId); // For marking as read
+        allow create: if isAdmin();
+        allow update: if isExistingOwner(userId);
         allow delete: if isExistingOwner(userId);
       }
 
@@ -139,16 +121,10 @@ service cloud.firestore {
 
       match /loyaltyPointTransactions/{transactionId} {
         allow get, list: if isOwner(userId);
-        allow create, update, delete: if isAdmin(); // Points managed by system
+        allow create, update, delete: if isAdmin();
       }
     }
 
-    /**
-     * @description Stores delivery driver profiles. Drivers manage self; Admins manage all.
-     * @path /drivers/{driverId}
-     * @allow (update) if auth.uid == driverId
-     * @principle Role-Based and Ownership access.
-     */
     match /drivers/{driverId} {
       allow get, list: if isOwner(driverId) || isAdmin();
       allow create: if isOwner(driverId) || isAdmin();
@@ -173,34 +149,15 @@ service cloud.firestore {
       }
     }
 
-    /**
-     * @description Merchant store details. Publicly readable. AdminUserId for management.
-     * @path /stores/{storeId}
-     * @allow (update) if resource.data.adminUserId == auth.uid
-     * @principle Authorization Independence: Uses adminUserId field on the document.
-     */
     match /stores/{storeId} {
       allow get, list: if true;
-      allow create: if isSignedIn(); // Any signed-in user can propose a store, or restricted to Admin
+      allow create: if isSignedIn();
       allow update: if isStoreManager(resource.data) || isAdmin();
       allow delete: if isAdmin();
-
-      match /products/{productId} {
-        /**
-         * @description Store products. Publicly readable. Managed by store admin.
-         * @principle Denormalization: storeAdminUserId allows write checks without parent get().
-         */
-        allow get, list: if true;
-        allow create: if isProductManager(request.resource.data) || isAdmin();
-        allow update: if isProductManager(resource.data) || isAdmin();
-        allow delete: if isProductManager(resource.data) || isAdmin();
-      }
+      
+      // Products are handled by the collection group rule at the top level
     }
 
-    /**
-     * @description Platform-wide metadata and resources. Publicly readable. Admin-only writes.
-     * @path /categories, /governorates, /ads, /offers, /coupons
-     */
     match /categories/{id} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
@@ -222,18 +179,13 @@ service cloud.firestore {
     }
 
     match /coupons/{id} {
-      // Logic for active coupons can be handled via query filters (e.g., isActive == true)
       allow get, list: if true; 
       allow create, update, delete: if isAdmin();
     }
 
-    /**
-     * @description Administrative roles registry. Read-only for authorization checks.
-     * @path /roles_admin/{adminUid}
-     */
     match /roles_admin/{adminUid} {
       allow get: if isSignedIn();
-      allow list, create, update, delete: if false; // Managed via Firebase Console or Admin SDK
+      allow list, create, update, delete: if false;
     }
   }
 }
