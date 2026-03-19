@@ -71,6 +71,7 @@ export default function SearchPage() {
       )
       
       const productSnapshot = await getDocs(productQ).catch(err => {
+        // التحقق من خطأ الفهرس المفقود
         if (err.code === 'failed-precondition' || err.message?.includes('index')) {
           setIndexError(true)
           return null
@@ -128,17 +129,18 @@ export default function SearchPage() {
         </form>
 
         {indexError && (
-          <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-900 rounded-2xl">
+          <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-900 rounded-2xl border-2">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
-            <AlertTitle className="font-bold">تنبيه: مطلوب إعداد يدوي</AlertTitle>
-            <AlertDescription className="text-xs space-y-2">
-              <p>البحث عن الوجبات يتطلب إنشاء "فهرس" في Firebase. اتبع الخطوات التالية:</p>
-              <ol className="list-decimal mr-4 space-y-1">
-                <li>اذهب لتبويب <b>Indexes</b> في Firebase.</li>
-                <li>اضغط <b>Add Index</b>.</li>
-                <li>Collection ID: <b>products</b>.</li>
-                <li>Field: <b>name</b> (Ascending).</li>
-                <li>Scope: <b>Collection group</b>.</li>
+            <AlertTitle className="font-bold text-lg mb-2">تنبيه: تفعيل البحث في الوجبات</AlertTitle>
+            <AlertDescription className="text-sm space-y-3">
+              <p>للبحث عن الوجبات في جميع المطاعم، اتبع هذه الخطوات البسيطة في Firebase:</p>
+              <ol className="list-decimal mr-5 space-y-2">
+                <li>اذهب لتبويب <b>Indexes</b> ثم اضغط على <b>Single Field</b>.</li>
+                <li>اضغط على زر <b>Add exemption</b>.</li>
+                <li>في Collection ID اكتب: <code className="bg-amber-200 px-1 rounded">products</code></li>
+                <li>في Field path اكتب: <code className="bg-amber-200 px-1 rounded">name</code></li>
+                <li>فعل خيار <b>Collection group</b> لـ <b>Ascending</b> (اجعله Enabled).</li>
+                <li>اضغط <b>Save</b> وانتظر دقيقة.</li>
               </ol>
             </AlertDescription>
           </Alert>
