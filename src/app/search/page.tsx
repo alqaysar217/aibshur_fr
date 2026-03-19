@@ -1,7 +1,8 @@
+
 "use client"
 
 import { useState } from "react"
-import { Search, Store, MapPin, ArrowRight, Loader2, ShoppingBag, Utensils } from "lucide-react"
+import { Search, Store, MapPin, ArrowRight, Loader2, ShoppingBag, Utensils, AlertTriangle } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -13,6 +14,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function SearchPage() {
   const [queryText, setQueryText] = useState("")
@@ -20,6 +22,7 @@ export default function SearchPage() {
   const [storeResults, setStoreResults] = useState<any[]>([])
   const [productResults, setProductResults] = useState<any[]>([])
   const [hasSearched, setHasSearched] = useState(false)
+  const [indexError, setIndexError] = useState(false)
   const db = useFirestore()
   const router = useRouter()
 
@@ -29,15 +32,18 @@ export default function SearchPage() {
     
     setLoading(true)
     setHasSearched(true)
+    setIndexError(false)
     
     try {
+      const searchVal = queryText.trim()
+
       // 1. البحث في المتاجر
       const storesRef = collection(db, "stores")
       const storeQ = query(
         storesRef, 
         orderBy("name"),
-        startAt(queryText),
-        endAt(queryText + '\uf8ff'),
+        startAt(searchVal),
+        endAt(searchVal + '\uf8ff'),
         limit(5)
       )
       
@@ -59,12 +65,17 @@ export default function SearchPage() {
       const productQ = query(
         productsRef,
         orderBy("name"),
-        startAt(queryText),
-        endAt(queryText + '\uf8ff'),
+        startAt(searchVal),
+        endAt(searchVal + '\uf8ff'),
         limit(10)
       )
       
       const productSnapshot = await getDocs(productQ).catch(err => {
+        // التحقق من خطأ الفهرس المفقود (Index required)
+        if (err.code === 'failed-precondition' || err.message?.includes('index')) {
+          setIndexError(true)
+          return null
+        }
         if (err.code === 'permission-denied') {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: "collectionGroup/products",
@@ -74,8 +85,12 @@ export default function SearchPage() {
         throw err
       })
       
-      const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      setProductResults(products)
+      if (productSnapshot) {
+        const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        setProductResults(products)
+      } else {
+        setProductResults([])
+      }
 
     } catch (error: any) {
       console.error("Search Error:", error)
@@ -112,6 +127,16 @@ export default function SearchPage() {
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "بحث"}
           </Button>
         </form>
+
+        {indexError && (
+          <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-800">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="font-bold text-sm">تنبيه: مطلوب إنشاء فهرس</AlertTitle>
+            <AlertDescription className="text-[10px] leading-relaxed">
+              يرجى الضغط على الرابط الموجود في رسالة الخطأ (Console) لإنشاء الفهرس المطلوب في Firebase. سيتم تفعيل البحث عن الوجبات فور اكتمال البناء.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
@@ -185,7 +210,7 @@ export default function SearchPage() {
               </div>
             )}
 
-            {storeResults.length === 0 && productResults.length === 0 && (
+            {storeResults.length === 0 && productResults.length === 0 && !indexError && (
               <div className="text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-secondary flex flex-col items-center">
                 <ShoppingBag className="h-12 w-12 text-muted-foreground/20 mb-4" />
                 <p className="text-muted-foreground text-sm font-bold">عذراً، لم نجد نتائج مطابقة لبحثك</p>
