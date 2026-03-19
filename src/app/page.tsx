@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Bell, ChevronLeft, Star, Sparkles, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice } from "lucide-react"
+import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
@@ -50,7 +50,6 @@ export default function Home() {
     let baseQuery = collection(db, "stores");
     
     if (activeCategory) {
-      // الفلترة حسب القسم المختار باستخدام حقل categoryIds
       return query(baseQuery, where("categoryIds", "array-contains", activeCategory), limit(10));
     }
     
@@ -125,9 +124,6 @@ export default function Home() {
             <div className="w-full h-16 px-12 rounded-2xl border-none shadow-xl bg-white text-muted-foreground flex items-center text-sm cursor-text hover:ring-2 ring-primary/20 transition-all">
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
               ابحث عن مطعم، بقالة، أو صيدلية...
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 bg-accent/10 p-2 rounded-lg">
-                <Sparkles className="h-4 w-4 text-accent" />
-              </div>
             </div>
           </Link>
         </div>

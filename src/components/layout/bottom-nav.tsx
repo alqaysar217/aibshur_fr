@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -7,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 const navItems = [
   { icon: Home, label: "الرئيسية", href: "/" },
-  { icon: Search, label: "بحث ذكي", href: "/search" },
+  { icon: Search, label: "البحث", href: "/search" },
   { icon: ShoppingBag, label: "طلباتي", href: "/orders" },
   { icon: Heart, label: "المفضلة", href: "/favorites" },
   { icon: User, label: "حسابي", href: "/profile" },
