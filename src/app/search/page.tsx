@@ -2,21 +2,22 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Store, MapPin, ArrowRight, Loader2, ShoppingBag } from "lucide-react"
+import { Search, Store, MapPin, ArrowRight, Loader2, ShoppingBag, Utensils } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useFirestore } from "@/firebase"
-import { collection, query, where, getDocs, limit, orderBy, startAt, endAt } from "firebase/firestore"
+import { collection, query, where, getDocs, limit, orderBy, startAt, endAt, collectionGroup } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 
 export default function SearchPage() {
   const [queryText, setQueryText] = useState("")
   const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState<any[]>([])
+  const [storeResults, setStoreResults] = useState<any[]>([])
+  const [productResults, setProductResults] = useState<any[]>([])
   const [hasSearched, setHasSearched] = useState(false)
   const db = useFirestore()
   const router = useRouter()
@@ -29,21 +30,35 @@ export default function SearchPage() {
     setHasSearched(true)
     
     try {
+      // 1. البحث في المتاجر (البحث بالاسم يبدأ بـ)
       const storesRef = collection(db, "stores")
-      // بحث بسيط بالاسم (يبدأ بـ)
-      const q = query(
+      const storeQ = query(
         storesRef, 
+        orderBy("name"),
+        startAt(queryText),
+        endAt(queryText + '\uf8ff'),
+        limit(5)
+      )
+      const storeSnapshot = await getDocs(storeQ)
+      const stores = storeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      setStoreResults(stores)
+
+      // 2. البحث في المنتجات (عبر جميع المتاجر باستخدام collectionGroup)
+      const productsRef = collectionGroup(db, "products")
+      const productQ = query(
+        productsRef,
         orderBy("name"),
         startAt(queryText),
         endAt(queryText + '\uf8ff'),
         limit(10)
       )
+      const productSnapshot = await getDocs(productQ)
+      const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      setProductResults(products)
 
-      const snapshot = await getDocs(q)
-      const stores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      setResults(stores)
     } catch (error) {
       console.error("Search Error:", error)
+      // ملاحظة للمطور: البحث عبر مجموعات فرعية (collectionGroup) قد يتطلب إنشاء فهرس (Index) في لوحة تحكم Firebase
     } finally {
       setLoading(false)
     }
@@ -66,7 +81,7 @@ export default function SearchPage() {
           <Input 
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
-            placeholder="ابحث عن مطعم أو متجر.." 
+            placeholder="ابحث عن مطعم أو وجبة.." 
             className="pr-12 h-16 rounded-2xl border-none shadow-xl bg-white text-base focus-visible:ring-primary"
           />
           <Button 
@@ -81,50 +96,83 @@ export default function SearchPage() {
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
             <div className="h-12 w-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-            <p className="text-muted-foreground font-bold">جاري البحث في المتاجر...</p>
+            <p className="text-muted-foreground font-bold">جاري البحث...</p>
           </div>
         )}
 
-        {!loading && hasSearched && results.length > 0 && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
-            <h3 className="font-black text-lg px-2 flex items-center gap-2">
-              <Store className="h-5 w-5 text-primary" /> نتائج البحث ({results.length})
-            </h3>
-            {results.map((store) => (
-              <Card 
-                key={store.id} 
-                className="border-none shadow-sm rounded-2xl overflow-hidden cursor-pointer active:scale-95 transition-transform"
-                onClick={() => router.push(`/store/${store.id}`)}
-              >
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="relative h-16 w-16 shrink-0">
-                    <Image 
-                      src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
-                      alt={store.name} 
-                      fill 
-                      className="object-cover rounded-xl" 
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-black text-sm">{store.name}</p>
-                    <p className="text-[10px] text-muted-foreground line-clamp-1">{store.address}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Badge className={store.status === 'مفتوح' ? "text-[8px] bg-green-50 text-green-600 border-none h-4" : "text-[8px] bg-red-50 text-red-600 border-none h-4"}>
-                        {store.status}
-                      </Badge>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground rotate-180" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+        {!loading && hasSearched && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+            {/* قسم المتاجر */}
+            {storeResults.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="font-black text-lg px-2 flex items-center gap-2 text-primary">
+                  <Store className="h-5 w-5" /> المتاجر ({storeResults.length})
+                </h3>
+                {storeResults.map((store) => (
+                  <Card 
+                    key={store.id} 
+                    className="border-none shadow-sm rounded-2xl overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                    onClick={() => router.push(`/store/${store.id}`)}
+                  >
+                    <CardContent className="p-4 flex items-center gap-4">
+                      <div className="relative h-16 w-16 shrink-0">
+                        <Image 
+                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
+                          alt={store.name} 
+                          fill 
+                          className="object-cover rounded-xl" 
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-black text-sm">{store.name}</p>
+                        <p className="text-[10px] text-muted-foreground line-clamp-1">{store.address}</p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground rotate-180" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
 
-        {!loading && hasSearched && results.length === 0 && (
-          <div className="text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-secondary flex flex-col items-center">
-            <ShoppingBag className="h-12 w-12 text-muted-foreground/20 mb-4" />
-            <p className="text-muted-foreground text-sm font-bold">عذراً، لم نجد نتائج مطابقة لبحثك</p>
+            {/* قسم الوجبات */}
+            {productResults.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="font-black text-lg px-2 flex items-center gap-2 text-primary">
+                  <Utensils className="h-5 w-5" /> الوجبات ({productResults.length})
+                </h3>
+                {productResults.map((product) => (
+                  <Card 
+                    key={product.id} 
+                    className="border-none shadow-sm rounded-2xl overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                    onClick={() => router.push(`/store/${product.storeId}`)}
+                  >
+                    <CardContent className="p-4 flex items-center gap-4">
+                      <div className="relative h-16 w-16 shrink-0">
+                        <Image 
+                          src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} 
+                          alt={product.name} 
+                          fill 
+                          className="object-cover rounded-xl" 
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-black text-sm">{product.name}</p>
+                        <p className="text-[10px] text-muted-foreground line-clamp-1">{product.description}</p>
+                        <p className="text-primary font-black text-xs mt-1">{product.price} ر.س</p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground rotate-180" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {storeResults.length === 0 && productResults.length === 0 && (
+              <div className="text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-secondary flex flex-col items-center">
+                <ShoppingBag className="h-12 w-12 text-muted-foreground/20 mb-4" />
+                <p className="text-muted-foreground text-sm font-bold">عذراً، لم نجد نتائج مطابقة لبحثك</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -134,8 +182,8 @@ export default function SearchPage() {
               <Search className="h-16 w-16 text-primary/10" />
             </div>
             <div className="space-y-2">
-              <h2 className="font-black text-xl">اكتشف أفضل المتاجر</h2>
-              <p className="text-muted-foreground text-sm max-w-[250px] mx-auto">ابحث عن مطاعمك المفضلة، البقالات، أو الصيدليات في منطقتك.</p>
+              <h2 className="font-black text-xl">اكتشف كل شيء</h2>
+              <p className="text-muted-foreground text-sm max-w-[250px] mx-auto">ابحث عن مطاعمك المفضلة أو الوجبات التي تشتهيها في منطقتك.</p>
             </div>
           </div>
         )}
