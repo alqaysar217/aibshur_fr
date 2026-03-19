@@ -1,64 +1,66 @@
 {
   "entities": {
     "User": {
-      "title": "User",
-      "description": "بيانات العميل الشخصية والمفضلة",
-      "type": "object",
+      "description": "بيانات العميل",
       "properties": {
         "id": { "type": "string" },
         "name": { "type": "string" },
         "phone": { "type": "string" },
-        "favoritesStoreIds": { "type": "array", "items": { "type": "string" } },
-        "favoritesProductIds": { "type": "array", "items": { "type": "string" } },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "phone"]
+        "favoritesStoreIds": { "type": "array" },
+        "favoritesProductIds": { "type": "array" },
+        "loyaltyPoints": { "type": "number" }
+      }
+    },
+    "Driver": {
+      "description": "بيانات المندوب",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "vehicleType": { "type": "string" },
+        "status": { "type": "string", "enum": ["online", "offline", "busy"] }
+      }
     },
     "Store": {
-      "title": "Store",
-      "description": "بيانات المتجر أو المطعم",
-      "type": "object",
+      "description": "المتاجر والمطاعم",
       "properties": {
         "id": { "type": "string" },
         "name": { "type": "string" },
         "logoUrl": { "type": "string" },
+        "categoryIds": { "type": "array" },
         "address": { "type": "string" },
-        "categoryIds": { "type": "array", "items": { "type": "string" } },
         "status": { "type": "string", "enum": ["open", "closed"] }
       }
     },
     "Product": {
-      "title": "Product",
-      "description": "بيانات الوجبة أو المنتج",
-      "type": "object",
+      "description": "الوجبات والمنتجات",
       "properties": {
         "id": { "type": "string" },
-        "storeId": { "type": "string" },
         "name": { "type": "string" },
         "price": { "type": "number" },
-        "imageUrl": { "type": "string" }
+        "imageUrl": { "type": "string" },
+        "description": { "type": "string" }
       }
     },
     "Order": {
-      "title": "Order",
-      "description": "بيانات الطلب"،
-      "type": "object",
+      "description": "الطلبات",
       "properties": {
         "id": { "type": "string" },
         "userId": { "type": "string" },
         "storeId": { "type": "string" },
+        "driverId": { "type": "string" },
         "totalAmount": { "type": "number" },
         "status": { "type": "string", "enum": ["pending", "accepted", "preparing", "on_the_way", "delivered"] }
       }
     }
   },
-  "auth": {
-    "providers": ["phone", "google.com"]
-  },
   "firestore": {
-    "/users/{userId}": { "schema": "User", "description": "ملفات المستخدمين" },
-    "/stores/{storeId}": { "schema": "Store", "description": "المتاجر" },
-    "/stores/{storeId}/products/{productId}": { "schema": "Product", "description": "منتجات المتجر" },
-    "/orders/{orderId}": { "schema": "Order", "description": "الطلبات" }
+    "/users/{userId}": { "schema": "User" },
+    "/drivers/{driverId}": { "schema": "Driver" },
+    "/stores/{storeId}": { "schema": "Store" },
+    "/stores/{storeId}/products/{productId}": { "schema": "Product" },
+    "/orders/{orderId}": { "schema": "Order" },
+    "/categories/{id}": { "description": "الأقسام" },
+    "/governorates/{id}": { "description": "المحافظات" },
+    "/ads/{id}": { "description": "الإعلانات" }
   }
 }

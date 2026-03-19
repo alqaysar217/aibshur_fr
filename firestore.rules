@@ -4,20 +4,18 @@ service cloud.firestore {
 
     // --- دالات مساعدة (Helpers) ---
     
-    // التأكد من أن المستخدم سجل دخوله
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // التأكد من أن المستخدم هو صاحب البيانات
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
     // --- القواعد (Rules) ---
 
-    // 1. البيانات العامة: السماح للجميع بالقراءة (لتمكين التصفح قبل تسجيل الدخول)
-    // تشمل المتاجر، المنتجات داخلها، الأقسام، العروض، والمحافظات
+    // 1. البيانات العامة: (المتاجر، المنتجات، الأقسام، العروض، الإعلانات، المحافظات)
+    // نسمح للجميع (حتى غير المسجلين) بالقراءة لتصفح التطبيق
     match /stores/{storeId} {
       allow read, get, list: if true;
       match /products/{productId} {
@@ -25,8 +23,7 @@ service cloud.firestore {
       }
     }
 
-    // قاعدة البحث الشامل (Collection Group) للمنتجات
-    // ضرورية جداً لعمل صفحة "المفضلة" والبحث الذكي عبر كافة المتاجر
+    // قاعدة البحث الشامل للمنتجات (ضرورية للمفضلة والبحث)
     match /{path=**}/products/{productId} {
       allow read, get, list: if true;
     }
@@ -36,25 +33,33 @@ service cloud.firestore {
     match /ads/{id} { allow read: if true; }
     match /governorates/{id} { allow read: if true; }
 
-    // 2. بيانات المستخدمين: حماية الخصوصية (المالك فقط)
+    // 2. بيانات المستخدمين والمندوبين (حماية الخصوصية)
     match /users/{userId} {
       allow read, write: if isOwner(userId);
-
-      // المجموعات الفرعية (المحفظة، التنبيهات، الطلبات الخاصة، إلخ)
       match /{allSubcollections=**} {
         allow read, write: if isOwner(userId);
       }
     }
 
-    // 3. الطلبات المركزية (Orders): المالك أو المندوب الموكل إليه
+    match /drivers/{driverId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(driverId);
+    }
+
+    // 3. الطلبات (Orders): المالك أو المندوب فقط
     match /orders/{orderId} {
       allow create: if isSignedIn();
       allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.driverId == request.auth.uid);
       allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.driverId == request.auth.uid);
     }
 
-    // 4. التقييمات والكوبونات: للمسجلين فقط
-    match /coupons/{id} { allow read: if isSignedIn(); }
-    match /ratings/{id} { allow read: if isSignedIn(); allow create: if isSignedIn(); }
+    // 4. التقييمات والكوبونات
+    match /ratings/{id} { 
+      allow read: if true;
+      allow create: if isSignedIn(); 
+    }
+    match /coupons/{id} { 
+      allow read: if isSignedIn(); 
+    }
   }
 }
