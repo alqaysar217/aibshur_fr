@@ -2,7 +2,7 @@
 "use client"
 
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
-import { doc, collection, query, where, updateDoc, arrayRemove } from "firebase/firestore"
+import { doc, collection, query, where, setDoc, arrayRemove } from "firebase/firestore"
 import { Heart, Navigation, Star, MapPin, ArrowRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { cn } from "@/lib/utils"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function FavoritesPage() {
   const { user } = useUser()
@@ -26,7 +28,6 @@ export default function FavoritesPage() {
 
   const favoritesQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds?.length) return null
-    // نستخدم مصفوفة الـ IDs لجلب المتاجر المفضلة فقط
     return query(
       collection(db, "stores"), 
       where("__name__", "in", userData.favoritesStoreIds.slice(0, 10))
@@ -35,15 +36,26 @@ export default function FavoritesPage() {
 
   const { data: favoriteStores, isLoading } = useCollection(favoritesQuery)
 
-  const toggleFavorite = async (e: React.MouseEvent, storeId: string) => {
+  const toggleFavorite = (e: React.MouseEvent, storeId: string) => {
     e.preventDefault()
     e.stopPropagation()
     if (!user) return
 
     const ref = doc(db, "users", user.uid)
-    await updateDoc(ref, {
+    const updateData = {
+      id: user.uid,
       favoritesStoreIds: arrayRemove(storeId)
-    })
+    }
+
+    setDoc(ref, updateData, { merge: true })
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: ref.path,
+          operation: 'write',
+          requestResourceData: updateData,
+        })
+        errorEmitter.emit('permission-error', permissionError)
+      })
   }
 
   if (!user) {

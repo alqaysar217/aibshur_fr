@@ -8,10 +8,12 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { collection, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
+import { collection, doc, setDoc, arrayUnion, arrayRemove } from "firebase/firestore"
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function StoreDetailPage() {
   const { id } = useParams()
@@ -82,7 +84,7 @@ export default function StoreDetailPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
-  const toggleFavorite = async () => {
+  const toggleFavorite = () => {
     if (!user) {
       router.push('/login')
       return
@@ -90,10 +92,21 @@ export default function StoreDetailPage() {
 
     const isFav = userData?.favoritesStoreIds?.includes(id as string)
     const ref = doc(db, "users", user.uid)
-
-    await updateDoc(ref, {
+    
+    const updateData = {
+      id: user.uid,
       favoritesStoreIds: isFav ? arrayRemove(id) : arrayUnion(id)
-    })
+    }
+
+    setDoc(ref, updateData, { merge: true })
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: ref.path,
+          operation: 'write',
+          requestResourceData: updateData,
+        })
+        errorEmitter.emit('permission-error', permissionError)
+      })
   }
 
   // Fetch Products

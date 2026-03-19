@@ -11,8 +11,10 @@ import { BottomNav } from "@/components/layout/bottom-nav"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase"
-import { collection, query, limit, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
+import { collection, query, limit, doc, setDoc, arrayUnion, arrayRemove } from "firebase/firestore"
 import { cn } from "@/lib/utils"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function Home() {
   const router = useRouter()
@@ -42,7 +44,7 @@ export default function Home() {
 
   const { data: stores, isLoading: isStoresLoading } = useCollection(storesQuery);
 
-  const toggleFavorite = async (e: React.MouseEvent, storeId: string) => {
+  const toggleFavorite = (e: React.MouseEvent, storeId: string) => {
     e.preventDefault()
     e.stopPropagation()
     if (!user) {
@@ -52,10 +54,22 @@ export default function Home() {
 
     const isFav = userData?.favoritesStoreIds?.includes(storeId)
     const ref = doc(db, "users", user.uid)
-
-    await updateDoc(ref, {
+    
+    const updateData = {
+      id: user.uid,
       favoritesStoreIds: isFav ? arrayRemove(storeId) : arrayUnion(storeId)
-    })
+    }
+
+    // استخدام setDoc مع merge لضمان إنشاء الوثيقة إذا لم تكن موجودة
+    setDoc(ref, updateData, { merge: true })
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: ref.path,
+          operation: 'write',
+          requestResourceData: updateData,
+        })
+        errorEmitter.emit('permission-error', permissionError)
+      })
   }
 
   return (
