@@ -3,7 +3,7 @@
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { Star, Clock, MapPin, Plus, ShoppingBag, ArrowRight, Minus, AlertCircle, Heart } from "lucide-react"
+import { Star, Clock, MapPin, Plus, ShoppingBag, ArrowRight, Minus, Heart } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,13 +23,11 @@ export default function StoreDetailPage() {
   const { toast } = useToast()
   const [cart, setCart] = useState<any[]>([])
 
-  // Load cart from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem('absher_cart')
     if (savedCart) setCart(JSON.parse(savedCart))
   }, [])
 
-  // Save cart to localStorage
   const saveCart = (newCart: any[]) => {
     setCart(newCart)
     localStorage.setItem('absher_cart', JSON.stringify(newCart))
@@ -70,21 +68,19 @@ export default function StoreDetailPage() {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
-  // Fetch Store Data
   const storeRef = useMemoFirebase(() => {
     if (!db || !id) return null
     return doc(db, "stores", id as string)
   }, [db, id])
   const { data: store, isLoading: isStoreLoading } = useDoc(storeRef)
 
-  // Fetch User Data for Favorites
   const userRef = useMemoFirebase(() => {
     if (!db || !user) return null
     return doc(db, "users", user.uid)
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
-  const toggleFavorite = () => {
+  const toggleFavoriteStore = () => {
     if (!user) {
       router.push('/login')
       return
@@ -109,7 +105,31 @@ export default function StoreDetailPage() {
       })
   }
 
-  // Fetch Products
+  const toggleFavoriteProduct = (productId: string) => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    const isFav = userData?.favoritesProductIds?.includes(productId)
+    const ref = doc(db, "users", user.uid)
+    
+    const updateData = {
+      id: user.uid,
+      favoritesProductIds: isFav ? arrayRemove(productId) : arrayUnion(productId)
+    }
+
+    setDoc(ref, updateData, { merge: true })
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: ref.path,
+          operation: 'write',
+          requestResourceData: updateData,
+        })
+        errorEmitter.emit('permission-error', permissionError)
+      })
+  }
+
   const productsQuery = useMemoFirebase(() => {
     if (!db || !id) return null
     return collection(db, "stores", id as string, "products")
@@ -129,7 +149,7 @@ export default function StoreDetailPage() {
     </div>
   )
 
-  const isFavorite = userData?.favoritesStoreIds?.includes(id as string)
+  const isFavoriteStore = userData?.favoritesStoreIds?.includes(id as string)
 
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen">
@@ -149,10 +169,10 @@ export default function StoreDetailPage() {
             <ArrowRight className="h-6 w-6 text-foreground" />
           </button>
           <button 
-            onClick={toggleFavorite}
+            onClick={toggleFavoriteStore}
             className="h-10 w-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
           >
-            <Heart className={cn("h-6 w-6 transition-colors", isFavorite ? "fill-destructive text-destructive" : "text-foreground")} />
+            <Heart className={cn("h-6 w-6 transition-colors", isFavoriteStore ? "fill-destructive text-destructive" : "text-foreground")} />
           </button>
         </div>
       </div>
@@ -206,8 +226,15 @@ export default function StoreDetailPage() {
           ) : products && products.length > 0 ? (
             products.map((product: any) => {
               const inCart = cart.find(item => item.id === product.id)
+              const isFavProd = userData?.favoritesProductIds?.includes(product.id)
               return (
-                <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all">
+                <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all relative">
+                  <button 
+                    onClick={() => toggleFavoriteProduct(product.id)}
+                    className="absolute top-2 right-2 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform"
+                  >
+                    <Heart className={cn("h-4 w-4", isFavProd ? "fill-destructive text-destructive" : "text-muted-foreground")} />
+                  </button>
                   <CardContent className="p-0 flex items-center">
                     <div className="relative h-28 w-28 shrink-0">
                       <Image 
