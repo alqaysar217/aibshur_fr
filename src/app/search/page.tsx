@@ -29,13 +29,15 @@ export default function SearchPage() {
   const results = useMemo(() => {
     const searchVal = queryText.trim().toLowerCase()
     
-    // إذا كان البحث فارغاً، نعرض قائمة مقترحة (أو فارغة حسب رغبتك، هنا سنعرض الكل)
+    // تحويل البيانات لشكل موحد للدمج
     const allStores = (stores || []).map(s => ({ ...s, type: 'store' }))
-    const allProducts = (products || []).map(p => ({ ...s, type: 'product' }))
+    const allProducts = (products || []).map(p => ({ ...p, type: 'product' }))
     const combined = [...allStores, ...allProducts]
 
-    if (!searchVal) return combined.slice(0, 20) // عرض أول 20 نتيجة عند البداية
+    // إذا لم يوجد نص بحث، نعرض قائمة أولية من الكل
+    if (!searchVal) return combined.slice(0, 20)
 
+    // فلترة النتائج بحيث تبحث في أي مكان في النص (بداية، وسط، نهاية)
     return combined.filter((item: any) => {
       const nameMatch = item.name?.toLowerCase().includes(searchVal)
       const descMatch = item.description?.toLowerCase().includes(searchVal)
@@ -78,7 +80,7 @@ export default function SearchPage() {
           {!isLoading && results.length > 0 ? (
             results.map((item: any) => (
               <Card 
-                key={item.id} 
+                key={`${item.type}-${item.id}`} 
                 className="border-none shadow-sm rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-all bg-white"
                 onClick={() => router.push(item.type === 'store' ? `/store/${item.id}` : `/store/${item.storeId}`)}
               >
