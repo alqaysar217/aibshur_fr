@@ -10,12 +10,19 @@ import { signOut } from "firebase/auth"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { doc } from "firebase/firestore"
+import { useState, useEffect } from "react"
 
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser()
   const auth = useAuth()
   const db = useFirestore()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const userRef = useMemoFirebase(() => {
     if (!db || !user) return null
@@ -35,7 +42,13 @@ export default function ProfilePage() {
     router.push("/login")
   }
 
-  if (isUserLoading) return <div className="flex items-center justify-center min-h-screen font-black text-primary animate-pulse">جاري التحميل...</div>
+  if (!mounted || isUserLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary/5">
+        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
+      </div>
+    )
+  }
 
   if (!user) {
     return (
