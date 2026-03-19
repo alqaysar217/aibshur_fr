@@ -1,4 +1,3 @@
-
 "use client"
 
 import { User, MapPin, CreditCard, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart } from "lucide-react"
@@ -42,12 +41,13 @@ export default function ProfilePage() {
     router.push("/login")
   }
 
+  // Prevent Hydration error by ensuring component is mounted
   if (!mounted) return null
 
   if (isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
+        <div className="animate-pulse font-black text-primary">جاري التحميل</div>
       </div>
     )
   }
@@ -123,7 +123,6 @@ export default function ProfilePage() {
                 <div className="text-right">
                   <div className="flex items-center gap-2">
                     <p className="font-bold text-base">{item.label}</p>
-                    {item.badge && <Badge className="text-[8px] h-4 bg-accent text-accent-foreground border-none font-bold">{item.badge}</Badge>}
                   </div>
                   <p className="text-[11px] text-muted-foreground font-medium">{item.description}</p>
                 </div>

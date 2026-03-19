@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -63,13 +62,13 @@ export default function OrdersPage() {
     return formatDistanceToNow(date, { addSuffix: true, locale: ar })
   }
 
-  // منع مشاكل الـ Hydration
+  // Prevent Hydration error
   if (!mounted) return null
 
   if (isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
+        <div className="animate-pulse font-black text-primary">جاري التحميل</div>
       </div>
     )
   }

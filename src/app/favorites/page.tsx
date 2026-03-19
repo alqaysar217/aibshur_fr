@@ -40,8 +40,9 @@ export default function FavoritesPage() {
   }, [db, userData?.favoritesStoreIds])
 
   const favoritesProductsQuery = useMemoFirebase(() => {
+    // Only query if we have favorites to show
     if (!db || !userData?.favoritesProductIds?.length) return null
-    // Ensure collectionGroup queries are used sparingly and focused
+    // collectionGroup needs a root-level permission match in firestore.rules
     return query(
       collectionGroup(db, "products"),
       where("id", "in", userData.favoritesProductIds.slice(0, 10)),
@@ -99,7 +100,7 @@ export default function FavoritesPage() {
   if (isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
+        <div className="animate-pulse font-black text-primary">جاري التحميل</div>
       </div>
     )
   }
