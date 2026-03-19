@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice } from "lucide-react"
@@ -29,8 +28,10 @@ export default function Home() {
   const { user } = useUser()
   const [selectedCity, setSelectedCity] = useState("")
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const city = localStorage.getItem('selected_city')
     if (!city) {
       router.push("/governorates")
@@ -83,6 +84,19 @@ export default function Home() {
         })
         errorEmitter.emit('permission-error', permissionError)
       })
+  }
+
+  if (!mounted) {
+    return (
+      <div className="pb-24 bg-secondary/5 min-h-screen">
+        <header className="p-4 flex items-center justify-between sticky top-0 glass z-50 shadow-sm h-[72px]"></header>
+        <div className="p-4 space-y-6">
+          <div className="h-16 w-full bg-white rounded-2xl animate-pulse"></div>
+          <div className="h-48 w-full bg-primary/20 rounded-[2rem] animate-pulse"></div>
+        </div>
+        <BottomNav />
+      </div>
+    )
   }
 
   return (

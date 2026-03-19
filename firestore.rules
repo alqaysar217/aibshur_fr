@@ -1,20 +1,16 @@
 /**
  * ### Firebase Security Rules for "أبشر" Delivery Platform
- * 
- * #### Core Philosophy
- * This ruleset implements a strict identity-based authorization model designed for high performance
- * and "Authorization Independence."
+ * Updated: 2024-05-21 (Force Redeploy for Collection Group Queries)
  */
 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- 1. COLLECTION GROUP RULES (MUST BE AT THE TOP LEVEL) ---
-    // This allows collectionGroup('products') queries to work globally.
-    // Necessary for smart search and favorites features.
+    // --- 1. COLLECTION GROUP RULES (MUST BE TOP LEVEL) ---
+    // يسمح بالبحث الشامل عن المنتجات في كافة المتاجر
     match /{path=**}/products/{productId} {
-      allow read: if true;
+      allow get, list: if true;
       allow write: if isSignedIn() && (
         isAdmin() || 
         (resource != null && resource.data.storeAdminUserId == request.auth.uid) ||
