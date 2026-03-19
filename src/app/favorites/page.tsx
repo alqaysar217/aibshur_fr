@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
-import { doc, collection, query, where, setDoc, arrayRemove, collectionGroup } from "firebase/firestore"
+import { doc, collection, query, where, setDoc, arrayRemove, collectionGroup, limit } from "firebase/firestore"
 import { Heart, Star, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -33,7 +33,6 @@ export default function FavoritesPage() {
 
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds?.length) return null
-    // We limit to 10 to avoid 'in' query limitations and potential performance issues
     return query(
       collection(db, "stores"), 
       where("id", "in", userData.favoritesStoreIds.slice(0, 10))
@@ -42,10 +41,11 @@ export default function FavoritesPage() {
 
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesProductIds?.length) return null
-    // Collection group queries are essential for finding subcollection documents across different parents
+    // Collection group query to find products across all stores
     return query(
       collectionGroup(db, "products"),
-      where("id", "in", userData.favoritesProductIds.slice(0, 10))
+      where("id", "in", userData.favoritesProductIds.slice(0, 10)),
+      limit(10)
     )
   }, [db, userData?.favoritesProductIds])
 
