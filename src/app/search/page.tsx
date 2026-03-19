@@ -130,19 +130,31 @@ export default function SearchPage() {
 
         {indexError && (
           <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-900 rounded-2xl border-2">
-            <AlertTriangle className="h-5 w-5 text-amber-600" />
-            <AlertTitle className="font-bold text-lg mb-2">تنبيه: تفعيل البحث في الوجبات</AlertTitle>
-            <AlertDescription className="text-sm space-y-3">
-              <p>للبحث عن الوجبات في جميع المطاعم، اتبع هذه الخطوات البسيطة في Firebase:</p>
-              <ol className="list-decimal mr-5 space-y-2">
-                <li>في صفحة Indexes، اضغط على تبويب **Single Field** (بجانب Composite).</li>
-                <li>اضغط على زر **Add exemption**.</li>
-                <li>في Collection ID اكتب: <code className="bg-amber-200 px-1 rounded">products</code></li>
-                <li>في Field path اكتب: <code className="bg-amber-200 px-1 rounded">name</code></li>
-                <li>فعل خيار **Collection group** لـ **Ascending** (اجعله Enabled).</li>
-                <li>اضغط **Save** وانتظر دقيقة.</li>
-              </ol>
-            </AlertDescription>
+            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+            <div className="mr-2">
+              <AlertTitle className="font-bold text-lg mb-2 text-amber-800">خطوة أخيرة لتفعيل البحث في الوجبات</AlertTitle>
+              <AlertDescription className="text-sm space-y-4">
+                <p>Firebase يطلب تفعيل "البحث عبر المجموعات" لهذا الحقل يدوياً. اتبع الصور التالية في واجهة Firebase:</p>
+                <div className="bg-white/50 p-4 rounded-xl border border-amber-200 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <Badge className="bg-amber-600">1</Badge>
+                    <p>في صفحة **Indexes**، اضغط على تبويب **Single Field** (بجانب Composite).</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Badge className="bg-amber-600">2</Badge>
+                    <p>اضغط على زر **Add exemption** الكبير في الأعلى.</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Badge className="bg-amber-600">3</Badge>
+                    <p>أدخل `products` في معرف المجموعة و `name` في مسار الحقل.</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Badge className="bg-amber-600">4</Badge>
+                    <p>فعل **Enabled** لخيار **Collection group** (في الأسفل) ثم اضغط **Save**.</p>
+                  </div>
+                </div>
+              </AlertDescription>
+            </div>
           </Alert>
         )}
 
