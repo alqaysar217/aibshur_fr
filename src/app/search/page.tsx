@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Store, MapPin, ArrowRight, Loader2, ShoppingBag, Utensils, AlertTriangle } from "lucide-react"
+import { Search, Store, MapPin, ArrowRight, Loader2, ShoppingBag, Utensils, AlertTriangle, Info } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -71,7 +71,6 @@ export default function SearchPage() {
       )
       
       const productSnapshot = await getDocs(productQ).catch(err => {
-        // التحقق من خطأ الفهرس المفقود (Index required)
         if (err.code === 'failed-precondition' || err.message?.includes('index')) {
           setIndexError(true)
           return null
@@ -105,7 +104,7 @@ export default function SearchPage() {
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
           <ArrowRight className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl font-black">البحث</h1>
+        <h1 className="text-xl font-black">البحث المباشر</h1>
       </header>
 
       <div className="p-4 space-y-6">
@@ -129,11 +128,18 @@ export default function SearchPage() {
         </form>
 
         {indexError && (
-          <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-800">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="font-bold text-sm">تنبيه: مطلوب إنشاء فهرس</AlertTitle>
-            <AlertDescription className="text-[10px] leading-relaxed">
-              يرجى الضغط على الرابط الموجود في رسالة الخطأ (Console) لإنشاء الفهرس المطلوب في Firebase. سيتم تفعيل البحث عن الوجبات فور اكتمال البناء.
+          <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-900 rounded-2xl">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <AlertTitle className="font-bold">تنبيه: مطلوب إعداد يدوي</AlertTitle>
+            <AlertDescription className="text-xs space-y-2">
+              <p>البحث عن الوجبات يتطلب إنشاء "فهرس" في Firebase. اتبع الخطوات التالية:</p>
+              <ol className="list-decimal mr-4 space-y-1">
+                <li>اذهب لتبويب <b>Indexes</b> في Firebase.</li>
+                <li>اضغط <b>Add Index</b>.</li>
+                <li>Collection ID: <b>products</b>.</li>
+                <li>Field: <b>name</b> (Ascending).</li>
+                <li>Scope: <b>Collection group</b>.</li>
+              </ol>
             </AlertDescription>
           </Alert>
         )}
@@ -141,7 +147,7 @@ export default function SearchPage() {
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
             <div className="h-12 w-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-            <p className="text-muted-foreground font-bold">جاري البحث...</p>
+            <p className="text-muted-foreground font-bold">جاري البحث في قاعدة البيانات...</p>
           </div>
         )}
 
@@ -150,7 +156,7 @@ export default function SearchPage() {
             {storeResults.length > 0 && (
               <div className="space-y-4">
                 <h3 className="font-black text-lg px-2 flex items-center gap-2 text-primary">
-                  <Store className="h-5 w-5" /> المتاجر ({storeResults.length})
+                  <Store className="h-5 w-5" /> المطاعم المتاحة ({storeResults.length})
                 </h3>
                 {storeResults.map((store) => (
                   <Card 
@@ -167,7 +173,7 @@ export default function SearchPage() {
                           className="object-cover rounded-xl" 
                         />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 text-right">
                         <p className="font-black text-sm">{store.name}</p>
                         <p className="text-[10px] text-muted-foreground line-clamp-1">{store.address}</p>
                       </div>
@@ -181,7 +187,7 @@ export default function SearchPage() {
             {productResults.length > 0 && (
               <div className="space-y-4">
                 <h3 className="font-black text-lg px-2 flex items-center gap-2 text-primary">
-                  <Utensils className="h-5 w-5" /> الوجبات ({productResults.length})
+                  <Utensils className="h-5 w-5" /> الوجبات المقترحة ({productResults.length})
                 </h3>
                 {productResults.map((product) => (
                   <Card 
@@ -198,7 +204,7 @@ export default function SearchPage() {
                           className="object-cover rounded-xl" 
                         />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 text-right">
                         <p className="font-black text-sm">{product.name}</p>
                         <p className="text-[10px] text-muted-foreground line-clamp-1">{product.description}</p>
                         <p className="text-primary font-black text-xs mt-1">{product.price} ر.س</p>
