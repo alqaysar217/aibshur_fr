@@ -2,70 +2,213 @@
 {
   "entities": {
     "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
+      "description": "بيانات العميل المستخدم للتطبيق",
       "type": "object",
-      "description": "Represents a customer using the delivery platform.",
       "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "phoneNumber": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string",
-          "format": "email"
-        },
-        "favoritesStoreIds": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "favoritesProductIds": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        }
+        "id": { "type": "string", "description": "المعرف الفريد للمستخدم (UID)" },
+        "name": { "type": "string", "description": "الاسم الكامل" },
+        "phone": { "type": "string", "description": "رقم الهاتف الدولي" },
+        "email": { "type": "string", "format": "email", "description": "البريد الإلكتروني" },
+        "favoritesStoreIds": { "type": "array", "items": { "type": "string" }, "description": "قائمة معرفات المتاجر المفضلة" },
+        "favoritesProductIds": { "type": "array", "items": { "type": "string" }, "description": "قائمة معرفات المنتجات المفضلة" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "تاريخ إنشاء الحساب" }
       },
-      "required": [
-        "id",
-        "createdAt"
-      ]
+      "required": ["id", "phone", "createdAt"]
+    },
+    "Driver": {
+      "title": "Driver",
+      "description": "بيانات مندوب التوصيل",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "vehicleType": { "type": "string", "enum": ["bike", "car", "van"] },
+        "status": { "type": "string", "enum": ["online", "offline", "busy"] },
+        "currentLocation": { "type": "object", "description": "الإحداثيات الجغرافية الحالية" }
+      }
+    },
+    "Store": {
+      "title": "Store",
+      "description": "بيانات المتجر أو المطعم",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "address": { "type": "string" },
+        "categoryIds": { "type": "array", "items": { "type": "string" } },
+        "rating": { "type": "number" },
+        "status": { "type": "string", "enum": ["open", "closed"] }
+      }
+    },
+    "Product": {
+      "title": "Product",
+      "description": "بيانات الوجبة أو المنتج",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "storeId": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "isAvailable": { "type": "boolean" }
+      }
+    },
+    "Order": {
+      "title": "Order",
+      "description": "بيانات طلب التوصيل",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "storeId": { "type": "string" },
+        "driverId": { "type": "string" },
+        "items": { "type": "array", "description": "قائمة المنتجات المطلوبة وكمياتها" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "preparing", "on_the_way", "delivered", "cancelled"] },
+        "paymentMethod": { "type": "string", "enum": ["cash", "wallet"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Category": {
+      "title": "Category",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "icon": { "type": "string" }
+      }
+    },
+    "Offer": {
+      "title": "Offer",
+      "description": "العروض الترويجية والخصومات",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "targetType": { "type": "string", "enum": ["store", "product", "link"] },
+        "targetId": { "type": "string" }
+      }
+    },
+    "Coupon": {
+      "title": "Coupon",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "discount": { "type": "number" },
+        "expiryDate": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Wallet": {
+      "title": "Wallet",
+      "type": "object",
+      "properties": {
+        "balance": { "type": "number" },
+        "currency": { "type": "string", "default": "ر.س" }
+      }
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["deposit", "withdrawal", "payment"] },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Rating": {
+      "title": "Rating",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "targetId": { "type": "string", "description": "معرف المتجر أو المنتج المقيّم" },
+        "score": { "type": "number" },
+        "comment": { "type": "string" }
+      }
+    },
+    "Notification": {
+      "title": "Notification",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Governorate": {
+      "title": "Governorate",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    },
+    "Ad": {
+      "title": "Ad",
+      "description": "الإعلانات المنبثقة أو الجانبية",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "actionUrl": { "type": "string" }
+      }
+    },
+    "Donation": {
+      "title": "Donation",
+      "type": "object",
+      "properties": {
+        "charityName": { "type": "string" },
+        "amount": { "type": "number" },
+        "userId": { "type": "string" }
+      }
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "description": "اشتراكات VIP",
+      "type": "object",
+      "properties": {
+        "planName": { "type": "string" },
+        "expiryDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "expired"] }
+      }
+    },
+    "LoyaltyPoints": {
+      "title": "LoyaltyPoints",
+      "type": "object",
+      "properties": {
+        "currentBalance": { "type": "number" },
+        "history": { "type": "array", "items": { "$ref": "#/backend/entities/Transaction" } }
+      }
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous",
-      "phone"
-    ]
+    "providers": ["phone", "password", "google.com"]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "description": "User profiles"
-        }
-      },
-      {
-        "path": "/stores/{storeId}/products/{productId}",
-        "definition": {
-          "entityName": "Product",
-          "description": "Store products"
-        }
-      }
-    ]
+    "/users/{userId}": { "schema": "User", "description": "بيانات المستخدمين" },
+    "/users/{userId}/wallet/balance": { "schema": "Wallet", "description": "محفظة المستخدم" },
+    "/users/{userId}/wallet/transactions/{id}": { "schema": "Transaction", "description": "عمليات المحفظة" },
+    "/users/{userId}/notifications/{id}": { "schema": "Notification", "description": "تنبيهات المستخدم" },
+    "/users/{userId}/subscriptions/{id}": { "schema": "Subscription", "description": "اشتراكات VIP" },
+    "/drivers/{driverId}": { "schema": "Driver", "description": "بيانات المناديب" },
+    "/stores/{storeId}": { "schema": "Store", "description": "بيانات المتاجر" },
+    "/stores/{storeId}/products/{productId}": { "schema": "Product", "description": "منتجات المتجر" },
+    "/orders/{orderId}": { "schema": "Order", "description": "طلبات التوصيل المركزية" },
+    "/categories/{id}": { "schema": "Category", "description": "أقسام الخدمات" },
+    "/offers/{id}": { "schema": "Offer", "description": "العروض والخصومات" },
+    "/coupons/{code}": { "schema": "Coupon", "description": "كوبونات الخصم" },
+    "/ratings/{id}": { "schema": "Rating", "description": "التقييمات العامة" },
+    "/governorates/{id}": { "schema": "Governorate", "description": "المحافظات والمدن المتاحة" },
+    "/ads/{id}": { "schema": "Ad", "description": "الإعلانات" },
+    "/donations/{id}": { "schema": "Donation", "description": "سجل التبرعات" }
   }
 }
