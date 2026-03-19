@@ -69,7 +69,7 @@ export default function CartPage() {
       deliveryFee: deliveryFee,
       totalAmount: total,
       status: "pending",
-      createdAt: new Date().toISOString(), // Using ISO string for simple display
+      createdAt: serverTimestamp(), // التوقيت من السيرفر لضمان الدقة
       deliveryAddress: "حضرموت - المكلا (افتراضي)",
       deliveryLatitude: 14.54,
       deliveryLongitude: 49.13,

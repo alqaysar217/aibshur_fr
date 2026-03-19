@@ -10,6 +10,8 @@ import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebas
 import { collection, query, orderBy } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import { formatDistanceToNow } from "date-fns"
+import { ar } from "date-fns/locale"
 
 export default function OrdersPage() {
   const { user } = useUser()
@@ -48,6 +50,13 @@ export default function OrdersPage() {
     }
   }
 
+  const formatOrderDate = (createdAt: any) => {
+    if (!createdAt) return "الآن"
+    // التحقق إذا كان التاريخ من نوع Timestamp الخاص بـ Firebase
+    const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt)
+    return formatDistanceToNow(date, { addSuffix: true, locale: ar })
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-4">
@@ -80,7 +89,7 @@ export default function OrdersPage() {
                     </div>
                     <div>
                       <h3 className="font-bold">طلب من المتجر</h3>
-                      <p className="text-[10px] text-muted-foreground">رقم الطلب: {order.id.substring(0, 8)}</p>
+                      <p className="text-[10px] text-muted-foreground">توقيت الطلب: {formatOrderDate(order.createdAt)}</p>
                     </div>
                   </div>
                   <Badge 
@@ -95,7 +104,7 @@ export default function OrdersPage() {
                   {order.status !== 'delivered' && (
                     <div className="space-y-3">
                       <div className="flex justify-between text-xs font-bold">
-                        <span className="flex items-center gap-1 text-primary"><Clock className="h-3 w-3" /> جاري المعالجة</span>
+                        <span className="flex items-center gap-1 text-primary"><Clock className="h-3 w-3" /> حالة الطلب</span>
                         <span className="text-muted-foreground">{getStatusProgress(order.status)}%</span>
                       </div>
                       <Progress value={getStatusProgress(order.status)} className="h-2 rounded-full" />
