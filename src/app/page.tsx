@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice } from "lucide-react"

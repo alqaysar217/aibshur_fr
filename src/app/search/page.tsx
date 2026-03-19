@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -68,7 +69,7 @@ export default function SearchPage() {
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
           <ArrowRight className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl font-black">{"اكتشف في أبشر"}</h1>
+        <h1 className="text-xl font-black">اكتشف في أبشر</h1>
       </header>
 
       <div className="p-4 space-y-4">
@@ -80,7 +81,7 @@ export default function SearchPage() {
           <Input 
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
-            placeholder="ابحث عن أي شيء.." 
+            placeholder="ابحث عن مطعم أو وجبة..." 
             className="pr-12 h-16 rounded-2xl border-none shadow-xl bg-white text-base focus-visible:ring-primary text-right"
           />
         </div>
@@ -88,7 +89,7 @@ export default function SearchPage() {
         {/* قائمة النتائج الموحدة */}
         <div className="space-y-3 animate-in fade-in duration-500">
           {isLoading && (
-            <div className="text-center py-10 text-muted-foreground text-sm font-bold">{"جاري البحث..."}</div>
+            <div className="text-center py-10 text-muted-foreground text-sm font-bold">جاري البحث...</div>
           )}
 
           {!isLoading && results.length > 0 ? (
@@ -109,13 +110,19 @@ export default function SearchPage() {
                   </div>
                   <div className="flex-1 text-right">
                     <div className="flex items-center gap-2 mb-0.5 justify-end">
-                      <Badge variant="outline" className="text-[8px] h-4 px-1.5 border-primary/20 text-primary">
-                        {item.type === 'store' ? 'متجر' : 'وجبة'}
+                      <Badge 
+                        variant={item.type === 'store' ? "default" : "secondary"} 
+                        className={cn(
+                          "text-[8px] h-4 px-1.5 border-none",
+                          item.type === 'store' ? "bg-primary text-white" : "bg-orange-100 text-orange-600"
+                        )}
+                      >
+                        {item.type === 'store' ? 'اسم المتجر' : 'اسم الوجبة'}
                       </Badge>
                       <p className="font-black text-sm">{item.name}</p>
                     </div>
                     <p className="text-[10px] text-muted-foreground line-clamp-1">
-                      {item.type === 'store' ? item.address : item.description}
+                      {item.type === 'store' ? `العنوان: ${item.address}` : `الوصف: ${item.description}`}
                     </p>
                     {item.type === 'product' && (
                       <p className="text-primary font-black text-xs mt-1">{item.price} ر.س</p>
@@ -130,7 +137,7 @@ export default function SearchPage() {
           ) : !isLoading && (
             <div className="text-center py-20 flex flex-col items-center opacity-40">
               <ShoppingBag className="h-12 w-12 mb-2" />
-              <p className="text-sm font-bold">{"لم نجد نتائج مطابقة"}</p>
+              <p className="text-sm font-bold">لم نجد نتائج مطابقة</p>
             </div>
           )}
         </div>
