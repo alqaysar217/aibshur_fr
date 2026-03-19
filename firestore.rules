@@ -3,9 +3,7 @@
  * 
  * #### Core Philosophy
  * This ruleset implements a strict identity-based authorization model designed for high performance
- * and "Authorization Independence." By matching wildcards in the document paths to internal 
- * ownership fields, we ensure that security decisions are atomic and do not require expensive 
- * cross-document lookups (get() calls) in most scenarios.
+ * and "Authorization Independence."
  */
 
 rules_version = '2';

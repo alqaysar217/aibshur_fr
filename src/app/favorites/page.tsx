@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
-import { doc, setDoc, arrayRemove, query, collectionGroup, where, limit } from "firebase/firestore"
+import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit } from "firebase/firestore"
 import { Heart, Star, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -31,15 +31,16 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
+  // نستخدم collection العادية للمتاجر لأنها في المستوى الأول
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds?.length) return null
-    // Fallback to avoid empty 'in' query which fails in Firestore
     return query(
-      collectionGroup(db, "stores"), 
+      collection(db, "stores"), 
       where("id", "in", userData.favoritesStoreIds.slice(0, 10))
     )
   }, [db, userData?.favoritesStoreIds])
 
+  // نستخدم collectionGroup للوجبات لأنها موزعة داخل المتاجر
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesProductIds?.length) return null
     return query(
@@ -55,7 +56,7 @@ export default function FavoritesPage() {
   const toggleStoreFavorite = (e: React.MouseEvent, storeId: string) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!user) return
+    if (!user || !db) return
 
     const ref = doc(db, "users", user.uid)
     const updateData = {
@@ -76,7 +77,7 @@ export default function FavoritesPage() {
   const toggleProductFavorite = (e: React.MouseEvent, productId: string) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!user) return
+    if (!user || !db) return
 
     const ref = doc(db, "users", user.uid)
     const updateData = {
