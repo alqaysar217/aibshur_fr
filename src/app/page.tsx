@@ -97,7 +97,7 @@ export default function Home() {
           </div>
           <Link href="/governorates" className="group">
             <div>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{"توصيل إلى"}</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">توصيل إلى</p>
               <p className="text-sm font-black flex items-center gap-1 group-hover:text-primary transition-colors">
                 {selectedCity || "جاري التحديد..."}
                 <ChevronLeft className="h-3 w-3 text-primary" />
@@ -111,7 +111,7 @@ export default function Home() {
               onClick={() => router.push('/login')} 
               className="bg-accent/10 px-4 py-2 rounded-xl text-xs font-black text-accent border border-accent/20 hover:bg-accent hover:text-white transition-all"
             >
-              {"دخول"}
+              دخول
             </button>
           )}
           <Link href="/notifications" className="relative bg-white shadow-md p-2 rounded-xl border border-border group active:scale-90 transition-transform">
@@ -126,7 +126,7 @@ export default function Home() {
           <Link href="/search">
             <div className="w-full h-16 px-12 rounded-2xl border-none shadow-xl bg-white text-muted-foreground flex items-center text-sm cursor-text hover:ring-2 ring-primary/20 transition-all">
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-              {"ابحث عن مطعم، بقالة، أو صيدلية..."}
+              ابحث عن مطعم، بقالة، أو صيدلية...
             </div>
           </Link>
         </div>
@@ -140,22 +140,22 @@ export default function Home() {
             data-ai-hint="delivery motorcycle"
           />
           <div className="absolute inset-0 p-8 flex flex-col justify-center text-white">
-            <Badge className="w-fit mb-3 bg-white text-primary font-black px-3 py-1 border-none rounded-lg">{"توصيل مجاني 🚚"}</Badge>
-            <h2 className="text-3xl font-black mb-2 leading-tight">{"أول طلب لك"}<br/>{"مجاناً بالكامل!"}</h2>
-            <p className="text-xs font-medium opacity-90">{"استخدم كود:"} <span className="font-black bg-white/20 px-2 py-0.5 rounded">{"ABSHER24"}</span></p>
+            <Badge className="w-fit mb-3 bg-white text-primary font-black px-3 py-1 border-none rounded-lg">توصيل مجاني 🚚</Badge>
+            <h2 className="text-3xl font-black mb-2 leading-tight">أول طلب لك<br/>مجاناً بالكامل!</h2>
+            <p className="text-xs font-medium opacity-90">استخدم كود: <span className="font-black bg-white/20 px-2 py-0.5 rounded">ABSHER24</span></p>
           </div>
         </div>
       </section>
 
       <section className="p-4">
         <div className="flex items-center justify-between mb-6 px-1">
-          <h3 className="font-black text-xl text-foreground">{"الأقسام الرئيسية"}</h3>
+          <h3 className="font-black text-xl text-foreground">الأقسام الرئيسية</h3>
           {activeCategory && (
             <button 
               onClick={() => setActiveCategory(null)}
               className="text-primary text-xs font-black bg-primary/5 px-3 py-1.5 rounded-lg"
             >
-              {"عرض الكل"}
+              عرض الكل
             </button>
           )}
         </div>
@@ -190,7 +190,7 @@ export default function Home() {
           <h3 className="font-black text-xl">
             {activeCategory ? `نتائج ${CATEGORIES.find(c => c.id === activeCategory)?.name}` : "المتاجر المقترحة"}
           </h3>
-          <button className="text-primary text-xs font-black">{"فلترة"}</button>
+          <button className="text-primary text-xs font-black">فلترة</button>
         </div>
         
         <div className="space-y-6">
@@ -247,7 +247,7 @@ export default function Home() {
               <div className="bg-secondary/20 p-6 rounded-full">
                 <Navigation className="h-10 w-10 text-muted-foreground opacity-20" />
               </div>
-              <p className="text-muted-foreground text-sm font-bold">{"لا توجد نتائج في هذا القسم حالياً"}</p>
+              <p className="text-muted-foreground text-sm font-bold">لا توجد نتائج في هذا القسم حالياً</p>
             </div>
           )}
         </div>
