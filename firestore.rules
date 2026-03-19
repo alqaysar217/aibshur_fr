@@ -2,8 +2,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 1. قواعد المجموعات المشتركة (Collection Group) - يجب أن تكون في القمة وبشكل مستقل
-    // تسمح بالاستعلام عن "المنتجات" عبر كافة المسارات (ضروري للمفصلة والبحث)
+    // 1. قاعدة البحث الشامل (Collection Group) - يجب أن تكون مستقلة وفي القمة
+    // تسمح بالبحث عن "products" في أي مكان في قاعدة البيانات
     match /{path=**}/products/{productId} {
       allow read, get, list: if true;
     }
@@ -47,13 +47,14 @@ service cloud.firestore {
       allow create: if isSignedIn();
       allow update: if isSignedIn() && (resource.data.adminUserId == request.auth.uid || isAdmin());
       
+      // قواعد المنتجات داخل المتجر (لعمليات الإضافة والحذف)
       match /products/{productId} {
         allow read: if true;
         allow write: if isSignedIn();
       }
     }
 
-    // 4. قواعد البيانات العامة (القراءة للجميع)
+    // 4. قواعد البيانات العامة
     match /categories/{id} { allow read: if true; allow write: if isAdmin(); }
     match /governorates/{id} { allow read: if true; allow write: if isAdmin(); }
     match /ads/{id} { allow read: if true; allow write: if isAdmin(); }

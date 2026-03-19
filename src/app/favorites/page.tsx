@@ -31,7 +31,6 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
-  // Fix: Use standard collection for stores (not collectionGroup)
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds?.length) return null
     return query(
@@ -40,7 +39,6 @@ export default function FavoritesPage() {
     )
   }, [db, userData?.favoritesStoreIds])
 
-  // Correct collectionGroup usage for products
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesProductIds?.length) return null
     return query(
@@ -95,7 +93,7 @@ export default function FavoritesPage() {
       })
   }
 
-  if (!mounted) return null
+  if (!mounted) return <div className="min-h-screen bg-background" />
 
   if (isUserLoading) {
     return (

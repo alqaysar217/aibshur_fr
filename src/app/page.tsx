@@ -84,7 +84,6 @@ export default function Home() {
       })
   }
 
-  // Hydration fix: Shell render during initial load
   if (!mounted) {
     return <div className="min-h-screen bg-background" />
   }
@@ -97,8 +96,8 @@ export default function Home() {
             <Navigation className="h-5 w-5 text-white" />
           </div>
           <Link href="/governorates" className="group">
-            <div className="flex flex-col">
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{"توصيل إلى"}</p>
+            <div>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">توصيل إلى</p>
               <p className="text-sm font-black flex items-center gap-1 group-hover:text-primary transition-colors">
                 {selectedCity || "جاري التحديد..."}
                 <ChevronLeft className="h-3 w-3 text-primary" />
