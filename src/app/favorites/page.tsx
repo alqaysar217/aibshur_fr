@@ -1,8 +1,9 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
-import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit } from "firebase/firestore"
+import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp } from "firebase/firestore"
 import { Heart, Star, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -59,7 +60,8 @@ export default function FavoritesPage() {
     const ref = doc(db, "users", user.uid)
     const updateData = {
       id: user.uid,
-      favoritesStoreIds: arrayRemove(storeId)
+      favoritesStoreIds: arrayRemove(storeId),
+      updatedAt: serverTimestamp()
     }
 
     setDoc(ref, updateData, { merge: true })
@@ -81,7 +83,8 @@ export default function FavoritesPage() {
     const ref = doc(db, "users", user.uid)
     const updateData = {
       id: user.uid,
-      favoritesProductIds: arrayRemove(productId)
+      favoritesProductIds: arrayRemove(productId),
+      updatedAt: serverTimestamp()
     }
 
     setDoc(ref, updateData, { merge: true })
@@ -112,7 +115,6 @@ export default function FavoritesPage() {
           <Heart className="h-16 w-16 text-muted-foreground opacity-30" />
         </div>
         <h1 className="text-xl font-bold">{"يرجى تسجيل الدخول"}</h1>
-        <p className="text-muted-foreground text-sm text-center">{"يجب تسجيل الدخول لمشاهدة مفضلاتك"}</p>
         <Button onClick={() => router.push('/login')} className="w-full h-14 rounded-2xl">{"تسجيل الدخول"}</Button>
         <BottomNav />
       </div>
@@ -127,9 +129,9 @@ export default function FavoritesPage() {
 
       <div className="p-4">
         <Tabs defaultValue="stores" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/50 rounded-xl p-1">
-            <TabsTrigger value="stores" className="rounded-lg font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">{"المتاجر"}</TabsTrigger>
-            <TabsTrigger value="products" className="rounded-lg font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">{"الوجبات"}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 bg-white rounded-xl p-1">
+            <TabsTrigger value="stores" className="rounded-lg font-bold">{"المتاجر"}</TabsTrigger>
+            <TabsTrigger value="products" className="rounded-lg font-bold">{"الوجبات"}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stores" className="space-y-6">
@@ -138,31 +140,21 @@ export default function FavoritesPage() {
             ) : favoriteStores && favoriteStores.length > 0 ? (
               favoriteStores.map((store: any) => (
                 <Link key={store.id} href={`/store/${store.id}`}>
-                  <Card className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] group cursor-pointer relative">
+                  <Card className="overflow-hidden border-none shadow-xl rounded-[2rem] relative">
                     <CardContent className="p-0">
                       <div className="relative h-56 w-full">
-                        <Image 
-                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/600/400`} 
-                          alt={store.name} 
-                          fill 
-                          className="object-cover"
-                        />
-                        <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-lg">
+                        <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/600/400`} alt={store.name} fill className="object-cover" />
+                        <div className="absolute top-4 left-4 bg-white/95 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
                           <Star className="h-4 w-4 fill-accent text-accent" />
-                          <span className="text-sm font-black">{store.averageRating || 'جديد'}</span>
+                          <span className="text-sm font-black">{store.averageRating || '4.5'}</span>
                         </div>
-                        <button 
-                          onClick={(e) => toggleStoreFavorite(e, store.id)}
-                          className="absolute top-4 right-4 h-10 w-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
-                        >
+                        <button onClick={(e) => toggleStoreFavorite(e, store.id)} className="absolute top-4 right-4 h-10 w-10 bg-white/95 rounded-full flex items-center justify-center">
                           <Heart className="h-5 w-5 fill-destructive text-destructive" />
                         </button>
                       </div>
                       <div className="p-5 bg-white">
                         <h4 className="font-black text-xl text-foreground mb-3">{store.name}</h4>
-                        <div className="flex flex-wrap gap-2">
-                          <Badge variant="secondary" className="font-bold text-[10px] bg-secondary/50 px-3">{store.address}</Badge>
-                        </div>
+                        <Badge variant="secondary" className="font-bold text-[10px] px-3">{store.address}</Badge>
                       </div>
                     </CardContent>
                   </Card>
@@ -179,31 +171,22 @@ export default function FavoritesPage() {
             ) : favoriteProducts && favoriteProducts.length > 0 ? (
               favoriteProducts.map((product: any) => (
                 <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden relative">
-                  <button 
-                    onClick={(e) => toggleProductFavorite(e, product.id)}
-                    className="absolute top-2 right-2 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm"
-                  >
+                  <button onClick={(e) => toggleProductFavorite(e, product.id)} className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full">
                     <Heart className="h-4 w-4 fill-destructive text-destructive" />
                   </button>
                   <CardContent className="p-0 flex items-center">
                     <div className="relative h-28 w-28 shrink-0">
-                      <Image 
-                        src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
+                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                     </div>
                     <div className="p-4 flex-1">
                       <h3 className="font-black text-sm mb-1">{product.name}</h3>
-                      <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{product.description}</p>
                       <span className="text-primary font-black">{product.price} ر.س</span>
                     </div>
                   </CardContent>
                 </Card>
               ))
             ) : (
-              <EmptyState message="قائمة الوجبات المفضلة فارغة" icon={<ShoppingBag className="h-16 w-16 text-muted-foreground opacity-20" />} />
+              <EmptyState message="قائمة الوجبات المفضلة فارغة" />
             )}
           </TabsContent>
         </Tabs>
@@ -213,18 +196,14 @@ export default function FavoritesPage() {
   )
 }
 
-function EmptyState({ message, icon }: { message: string, icon?: React.ReactNode }) {
-  const router = useRouter()
+function EmptyState({ message }: { message: string }) {
   return (
-    <div className="text-center py-20 space-y-6">
+    <div className="text-center py-20 space-y-4">
       <div className="bg-secondary/20 p-8 rounded-full w-fit mx-auto">
-        {icon || <Heart className="h-16 w-16 text-muted-foreground opacity-20" />}
+        <Heart className="h-16 w-16 text-muted-foreground opacity-20" />
       </div>
-      <div className="space-y-2">
-        <h2 className="font-bold text-lg">{message}</h2>
-        <p className="text-muted-foreground text-sm max-w-[200px] mx-auto">{"ابدأ بتمييز ما تحبه ليظهر هنا."}</p>
-      </div>
-      <Button onClick={() => router.push('/')} variant="outline" className="rounded-xl">{"تصفح المتاجر"}</Button>
+      <h2 className="font-bold text-lg">{message}</h2>
+      <p className="text-muted-foreground text-sm">{"ابدأ بتمييز ما تحبه ليظهر هنا."}</p>
     </div>
   )
 }

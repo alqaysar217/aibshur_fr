@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -38,7 +39,7 @@ export function BottomNav() {
             )}
           >
             <item.icon className={cn("h-5 w-5", isActive && "fill-primary/10")} />
-            <span className="text-[10px] font-medium">{item.label}</span>
+            <span className="text-[10px] font-medium leading-none">{item.label}</span>
           </Link>
         )
       })}

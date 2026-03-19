@@ -1,94 +1,48 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * 1. COLLECTION GROUP RULES - MUST BE AT TOP LEVEL
-     * These allow querying 'products' across all stores for the Favorites and Search features.
-     */
+    // 1. القواعد العامة للمجموعات المشتركة (مهمة جداً للبحث والمفضلة)
     match /{path=**}/products/{productId} {
-      allow list: if request.auth != null;
-      allow get: if request.auth != null;
-      // Write permissions remain protected under the specific /stores/{storeId}/products path
+      allow read: if request.auth != null;
     }
 
-    // --- Helper Functions ---
+    // --- دالات مساعدة ---
     function isSignedIn() {
       return request.auth != null;
-    }
-
-    function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
-    // --- Standard Collection Rules ---
-
-    match /roles_admin/{adminId} {
-      allow get, list: if isAdmin();
-      allow create, update, delete: if false;
-    }
+    // --- قواعد المجموعات ---
 
     match /users/{userId} {
-      allow get, list: if isOwner(userId) || isAdmin();
-      // Allow create/update if the user is the owner. 
-      // Ensure the 'id' field matches the document ID for 'create' operations.
+      // السماح بإنشاء الوثيقة إذا كان المستخدم هو المالك وأرسل الـ ID الصحيح
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId);
-      allow delete: if isAdmin();
+      allow get, list, update: if isOwner(userId);
+      allow delete: if false;
 
-      match /wallet/{document} {
-        allow get, list: if isOwner(userId) || isAdmin();
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId);
       }
-
-      match /loyalty_points/{document} {
-        allow get, list: if isOwner(userId) || isAdmin();
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      }
-
-      match /{collection}/{id} {
-        allow get, list: if isOwner(userId) || isAdmin();
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if (isExistingOwner(userId) || isAdmin()) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isAdmin();
-      }
-    }
-
-    match /drivers/{driverId} {
-      allow get, list: if isSignedIn();
-      allow create: if isOwner(driverId) && request.resource.data.id == driverId;
-      allow update: if isExistingOwner(driverId) && request.resource.data.id == resource.data.id;
-      allow delete: if isAdmin();
     }
 
     match /stores/{storeId} {
-      allow get, list: if isSignedIn();
-      allow create: if isOwner(storeId) && request.resource.data.id == storeId;
-      allow update: if isExistingOwner(storeId) && request.resource.data.id == resource.data.id;
-      allow delete: if isAdmin();
+      allow read: if isSignedIn();
+      allow write: if false; // للمسؤولين فقط من لوحة التحكم
 
       match /products/{productId} {
-        // Individual product read is already covered by collectionGroup at top, but redundancy is safe.
-        allow create: if isOwner(storeId) && request.resource.data.storeId == storeId;
-        allow update: if isOwner(storeId) && resource != null && request.resource.data.storeId == resource.data.storeId;
-        allow delete: if isOwner(storeId) && resource != null;
+        allow read: if isSignedIn();
       }
     }
 
-    match /categories/{id} { allow read: if isSignedIn(); allow write: if isAdmin(); }
-    match /offers/{id} { allow read: if isSignedIn(); allow write: if isAdmin(); }
-    match /coupons/{id} { allow read: if isSignedIn(); allow write: if isAdmin(); }
-    match /governorates/{id} { allow read: if isSignedIn(); allow write: if isAdmin(); }
-    match /ads/{id} { allow read: if isSignedIn(); allow write: if isAdmin(); }
+    match /categories/{id} { allow read: if isSignedIn(); }
+    match /offers/{id} { allow read: if isSignedIn(); }
+    match /ads/{id} { allow read: if isSignedIn(); }
+    match /governorates/{id} { allow read: if isSignedIn(); }
+    match /roles_admin/{adminId} { allow read: if isSignedIn(); }
   }
 }
