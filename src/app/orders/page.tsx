@@ -1,7 +1,8 @@
 
 "use client"
 
-import { Clock, ChevronLeft, CheckCircle2, Package, Truck, Utensils, ShoppingBag } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Clock, ChevronLeft, Utensils, ShoppingBag } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { BottomNav } from "@/components/layout/bottom-nav"
@@ -15,9 +16,14 @@ import { formatDistanceToNow } from "date-fns"
 import { ar } from "date-fns/locale"
 
 export default function OrdersPage() {
-  const { user } = useUser()
+  const { user, isUserLoading } = useUser()
   const db = useFirestore()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const ordersQuery = useMemoFirebase(() => {
     if (!db || !user) return null
@@ -27,7 +33,7 @@ export default function OrdersPage() {
     )
   }, [db, user])
 
-  const { data: orders, isLoading } = useCollection(ordersQuery)
+  const { data: orders, isLoading: isCollectionLoading } = useCollection(ordersQuery)
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -57,6 +63,17 @@ export default function OrdersPage() {
     return formatDistanceToNow(date, { addSuffix: true, locale: ar })
   }
 
+  // منع مشاكل الـ Hydration من خلال الانتظار حتى يتم تحميل المكون على المتصفح
+  if (!mounted) return null
+
+  if (isUserLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary/5">
+        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
+      </div>
+    )
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-4">
@@ -68,6 +85,8 @@ export default function OrdersPage() {
       </div>
     )
   }
+
+  const isLoading = isCollectionLoading
 
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">

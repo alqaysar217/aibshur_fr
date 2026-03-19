@@ -1,9 +1,10 @@
 
 "use client"
 
+import { useState, useEffect } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, collection, query, where, setDoc, arrayRemove, collectionGroup } from "firebase/firestore"
-import { Heart, Star, ShoppingBag, ArrowRight } from "lucide-react"
+import { Heart, Star, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -16,9 +17,14 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function FavoritesPage() {
-  const { user } = useUser()
+  const { user, isUserLoading } = useUser()
   const db = useFirestore()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const userRef = useMemoFirebase(() => {
     if (!db || !user) return null
@@ -26,7 +32,6 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
-  // استعلام المتاجر المفضلة
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds?.length) return null
     return query(
@@ -35,7 +40,6 @@ export default function FavoritesPage() {
     )
   }, [db, userData?.favoritesStoreIds])
 
-  // استعلام المنتجات المفضلة (باستخدام collectionGroup)
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesProductIds?.length) return null
     return query(
@@ -89,6 +93,16 @@ export default function FavoritesPage() {
         })
         errorEmitter.emit('permission-error', permissionError)
       })
+  }
+
+  if (!mounted) return null
+
+  if (isUserLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary/5">
+        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
+      </div>
+    )
   }
 
   if (!user) {
