@@ -3,7 +3,6 @@
 import { User, MapPin, CreditCard, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BottomNav } from "@/components/layout/bottom-nav"
-import { Badge } from "@/components/ui/badge"
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { signOut } from "firebase/auth"
 import { useRouter } from "next/navigation"
@@ -41,13 +40,12 @@ export default function ProfilePage() {
     router.push("/login")
   }
 
-  // Prevent Hydration error by ensuring component is mounted
   if (!mounted) return null
 
   if (isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-        <div className="animate-pulse font-black text-primary">جاري التحميل</div>
+        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
       </div>
     )
   }

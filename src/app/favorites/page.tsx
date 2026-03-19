@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
-import { doc, collection, query, where, setDoc, arrayRemove, collectionGroup, limit } from "firebase/firestore"
+import { doc, setDoc, arrayRemove, query, collectionGroup, where, limit } from "firebase/firestore"
 import { Heart, Star, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -33,16 +33,15 @@ export default function FavoritesPage() {
 
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds?.length) return null
+    // Fallback to avoid empty 'in' query which fails in Firestore
     return query(
-      collection(db, "stores"), 
+      collectionGroup(db, "stores"), 
       where("id", "in", userData.favoritesStoreIds.slice(0, 10))
     )
   }, [db, userData?.favoritesStoreIds])
 
   const favoritesProductsQuery = useMemoFirebase(() => {
-    // Only query if we have favorites to show
     if (!db || !userData?.favoritesProductIds?.length) return null
-    // collectionGroup needs a root-level permission match in firestore.rules
     return query(
       collectionGroup(db, "products"),
       where("id", "in", userData.favoritesProductIds.slice(0, 10)),
@@ -100,7 +99,7 @@ export default function FavoritesPage() {
   if (isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-        <div className="animate-pulse font-black text-primary">جاري التحميل</div>
+        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
       </div>
     )
   }
