@@ -1,21 +1,12 @@
-/**
- * ### Firebase Security Rules for "أبشر" Delivery Platform
- * Updated: 2024-05-21 (Fix for Collection Group Queries)
- */
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- 1. COLLECTION GROUP RULES (MUST BE TOP LEVEL) ---
+    // --- 1. COLLECTION GROUP RULES (MUST BE AT TOP LEVEL) ---
     // يسمح بالبحث الشامل عن المنتجات في كافة المتاجر لصفحات البحث والمفضلة
     match /{path=**}/products/{productId} {
       allow read: if true;
-      allow write: if isSignedIn() && (
-        isAdmin() || 
-        (resource != null && resource.data.storeAdminUserId == request.auth.uid) ||
-        (request.resource != null && request.resource.data.storeAdminUserId == request.auth.uid)
-      );
+      allow write: if request.auth != null;
     }
 
     // --- 2. GLOBAL HELPER FUNCTIONS ---
@@ -28,144 +19,105 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
-
-    function isStoreManager(storeData) {
-      return isSignedIn() && storeData.adminUserId == request.auth.uid;
     }
 
     // --- 3. COLLECTION RULES ---
 
     match /users/{userId} {
       allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isAdmin();
 
       match /wallet/{walletId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.ownerId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.ownerId == resource.data.ownerId;
-        allow delete: if isExistingOwner(userId);
+        allow read, write: if isOwner(userId);
       }
 
       match /transactions/{transactionId} {
-        allow get, list: if isOwner(userId);
+        allow read: if isOwner(userId);
         allow create: if isOwner(userId);
-        allow update, delete: if false;
       }
 
       match /orders/{orderId} {
         allow get: if isOwner(userId) || (isSignedIn() && resource.data.driverId == request.auth.uid);
         allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if (isExistingOwner(userId) || (isSignedIn() && resource.data.driverId == request.auth.uid));
-        allow delete: if isAdmin();
+        allow create: if isOwner(userId);
+        allow update: if isOwner(userId) || (isSignedIn() && resource.data.driverId == request.auth.uid);
 
         match /ratings/{ratingId} {
-          allow get, list: if true;
-          allow create: if isOwner(userId) && request.resource.data.userId == userId;
-          allow update: if isExistingOwner(userId);
-          allow delete: if isExistingOwner(userId) || isAdmin();
+          allow read: if true;
+          allow create: if isOwner(userId);
         }
       }
 
       match /notifications/{notificationId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isAdmin();
-        allow update: if isExistingOwner(userId);
-        allow delete: if isExistingOwner(userId);
+        allow read, update, delete: if isOwner(userId);
       }
 
       match /donations/{donationId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update, delete: if isAdmin();
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
       }
 
       match /subscriptions/{subscriptionId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) || isAdmin();
-        allow delete: if isAdmin();
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
       }
 
       match /loyaltyPointTransactions/{transactionId} {
-        allow get, list: if isOwner(userId);
-        allow create, update, delete: if isAdmin();
+        allow read: if isOwner(userId);
       }
     }
 
     match /drivers/{driverId} {
-      allow get, list: if isOwner(driverId) || isAdmin();
+      allow read, update: if isOwner(driverId) || isAdmin();
       allow create: if isOwner(driverId) || isAdmin();
-      allow update: if isExistingOwner(driverId) || isAdmin();
-      allow delete: if isAdmin();
 
       match /wallet/{walletId} {
-        allow get, list: if isOwner(driverId) || isAdmin();
-        allow create, update: if isOwner(driverId) || isAdmin();
-        allow delete: if isAdmin();
-      }
-
-      match /transactions/{transactionId} {
-        allow get, list: if isOwner(driverId) || isAdmin();
-        allow create, update, delete: if isAdmin();
-      }
-
-      match /notifications/{notificationId} {
-        allow get, list: if isOwner(driverId);
-        allow create: if isAdmin();
-        allow update, delete: if isExistingOwner(driverId);
+        allow read, write: if isOwner(driverId);
       }
     }
 
     match /stores/{storeId} {
-      allow get, list: if true;
+      allow read: if true;
       allow create: if isSignedIn();
-      allow update: if isStoreManager(resource.data) || isAdmin();
-      allow delete: if isAdmin();
+      allow update: if isSignedIn() && (resource.data.adminUserId == request.auth.uid || isAdmin());
 
       match /products/{productId} {
         allow read: if true;
-        allow write: if isStoreManager(get(/databases/$(database)/documents/stores/$(storeId)).data) || isAdmin();
+        allow write: if isSignedIn();
       }
     }
 
     match /categories/{id} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /governorates/{id} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /ads/{id} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /offers/{id} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /coupons/{id} {
-      allow get, list: if true; 
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /roles_admin/{adminUid} {
       allow get: if isSignedIn();
-      allow list, create, update, delete: if false;
     }
   }
 }

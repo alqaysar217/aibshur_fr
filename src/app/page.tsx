@@ -71,7 +71,6 @@ export default function Home() {
     const ref = doc(db, "users", user.uid)
     
     const updateData = {
-      id: user.uid,
       favoritesStoreIds: isFav ? arrayRemove(storeId) : arrayUnion(storeId)
     }
 
@@ -152,7 +151,7 @@ export default function Home() {
           />
           <div className="absolute inset-0 p-8 flex flex-col justify-center text-white">
             <Badge className="w-fit mb-3 bg-white text-primary font-black px-3 py-1 border-none rounded-lg">توصيل مجاني 🚚</Badge>
-            <h2 className="text-3xl font-black mb-2 leading-tight">أول طلب لك<br/> مجاناً بالكامل!</h2>
+            <h2 className="text-3xl font-black mb-2 leading-tight">{"أول طلب لك"}<br/>{"مجاناً بالكامل!"}</h2>
             <p className="text-xs font-medium opacity-90">استخدم كود: <span className="font-black bg-white/20 px-2 py-0.5 rounded">ABSHER24</span></p>
           </div>
         </div>
