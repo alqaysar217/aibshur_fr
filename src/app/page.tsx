@@ -84,9 +84,8 @@ export default function Home() {
       })
   }
 
-  if (!mounted) {
-    return <div className="min-h-screen bg-background" />
-  }
+  // Prevent hydration mismatch by returning null until mounted
+  if (!mounted) return null;
 
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">

@@ -22,18 +22,7 @@ export function BottomNav() {
     setMounted(true)
   }, [])
 
-  if (!mounted) {
-    return (
-      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass border-t flex items-center justify-around h-16 safe-area-bottom z-50">
-        {navItems.map((item) => (
-          <div key={item.href} className="flex flex-col items-center justify-center w-full h-full space-y-1 opacity-20">
-            <item.icon className="h-5 w-5" />
-            <span className="text-[10px] font-medium">{item.label}</span>
-          </div>
-        ))}
-      </nav>
-    )
-  }
+  if (!mounted) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass border-t flex items-center justify-around h-16 safe-area-bottom z-50">

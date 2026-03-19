@@ -5,91 +5,57 @@ service cloud.firestore {
     /**
      * CORE PHILOSOPHY
      * This ruleset implements a strict Ownership and Database-Backed Access Control (DBAC) model. 
-     * Security is enforced primarily through document paths (Path-based Authorization) and 
-     * denormalized relational IDs to ensure high performance and minimize cross-document lookups.
-     * 
-     * DATA STRUCTURE
-     * - User-Centric: Private data (wallets, orders, notifications) is nested under `/users/{userId}`.
-     * - Store-Centric: Products are nested under `/stores/{storeId}` for clear administrative boundaries.
-     * - Global Metadata: Categories, Offers, and Ads are top-level and publicly readable.
-     * 
-     * KEY SECURITY DECISIONS
-     * 1. DBAC for Admins: A dedicated `/roles_admin/` collection determines global administrative rights.
-     * 2. Path-based Ownership: Users can only access subcollections nested under their own UID.
-     * 3. Public Discovery: Stores, Products, and Drivers are publicly readable to facilitate the marketplace, but writes are strictly owner-controlled.
-     * 4. Relational Integrity: On creation, we enforce that internal data fields (like userId) match the path parameters.
      */
 
     // --- Helper Functions ---
-
-    /** @description Checks if the request is from an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the user has an entry in the administrative roles collection. */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    /** @description Checks if the authenticated user's UID matches the provided ID. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Validates ownership for existing documents during update or delete. */
     function isExistingOwner(userId) {
       return resource != null && isOwner(userId);
     }
 
-    // --- Collection Rules ---
+    // --- COLLECTION GROUP RULES (CRITICAL FOR SEARCH & FAVORITES) ---
+    // These must be at the top level to allow querying across all stores
+    match /{path=**}/products/{productId} {
+      allow read, get, list: if isSignedIn();
+      // Write permissions are handled in the specific store path below
+    }
 
-    /**
-     * @description Rules for the admin roles lookup collection.
-     * @path /roles_admin/{adminId}
-     * @allow isAdmin() (get) - Admins can check their own or others' status.
-     * @deny (all writes) - Admin roles should be managed via Firebase Console or Admin SDK for safety.
-     * @principle Internal administrative configuration.
-     */
+    // --- Standard Collection Rules ---
+
     match /roles_admin/{adminId} {
       allow get, list: if isAdmin();
       allow create, update, delete: if false;
     }
 
-    /**
-     * @description User profile management.
-     * @path /users/{userId}
-     * @allow isOwner(userId) (create, get, update, list)
-     * @deny (delete) - Account deletion handled via administrative process or logic.
-     * @principle Pattern 4 (Self-Creation) + Pattern 1 (Ownership).
-     */
     match /users/{userId} {
       allow get, list: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isAdmin();
 
-      // Singleton subcollections (Wallet, LoyaltyPoints)
       match /wallet/{document} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
         allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isAdmin();
       }
 
       match /loyalty_points/{document} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
         allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isAdmin();
       }
 
-      /**
-       * @description User-owned subcollections (Orders, Transactions, etc.).
-       * @path /users/{userId}/{collection}/{id}
-       * @allow isOwner(userId) (get, list, create)
-       * @principle Pattern 1 (Ownership) enforced via path.
-       */
       match /{collection}/{id} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
@@ -98,13 +64,6 @@ service cloud.firestore {
       }
     }
 
-    /**
-     * @description Driver profiles. Public for order assignment visibility.
-     * @path /drivers/{driverId}
-     * @allow isSignedIn() (get, list)
-     * @allow isOwner(driverId) (create, update)
-     * @principle Pattern 5 (Public Read with Owner-Only Writes).
-     */
     match /drivers/{driverId} {
       allow get, list: if isSignedIn();
       allow create: if isOwner(driverId) && request.resource.data.id == driverId;
@@ -112,64 +71,23 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    /**
-     * @description Store profiles and their nested products.
-     * @path /stores/{storeId}
-     * @allow isSignedIn() (get, list)
-     * @allow isOwner(storeId) (create, update)
-     * @principle Pattern 5 (Public Read with Owner-Only Writes).
-     */
     match /stores/{storeId} {
       allow get, list: if isSignedIn();
       allow create: if isOwner(storeId) && request.resource.data.id == storeId;
       allow update: if isExistingOwner(storeId) && request.resource.data.id == resource.data.id;
       allow delete: if isAdmin();
 
-      /**
-       * @description Products owned by a specific store.
-       * @path /stores/{storeId}/products/{productId}
-       * @allow isSignedIn() (get, list)
-       * @allow isOwner(storeId) (create, update, delete)
-       * @principle Inherited store-admin ownership.
-       */
       match /products/{productId} {
-        allow get, list: if isSignedIn();
         allow create: if isOwner(storeId) && request.resource.data.storeId == storeId;
         allow update: if isOwner(storeId) && resource != null && request.resource.data.storeId == resource.data.storeId;
         allow delete: if isOwner(storeId) && resource != null;
       }
     }
 
-    /**
-     * @description Global metadata collections.
-     * @path /categories/{id}, /offers/{id}, /coupons/{id}, /governorates/{id}, /ads/{id}
-     * @allow isSignedIn() (get, list)
-     * @allow isAdmin() (write)
-     * @principle Admin-managed public content.
-     */
-    match /categories/{categoryId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /offers/{offerId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /coupons/{couponId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /governorates/{governorateId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /ads/{adId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin();
-    }
+    match /categories/{id} { allow read: if isSignedIn(); allow write: if isAdmin(); }
+    match /offers/{id} { allow read: if isSignedIn(); allow write: if isAdmin(); }
+    match /coupons/{id} { allow read: if isSignedIn(); allow write: if isAdmin(); }
+    match /governorates/{id} { allow read: if isSignedIn(); allow write: if isAdmin(); }
+    match /ads/{id} { allow read: if isSignedIn(); allow write: if isAdmin(); }
   }
 }
