@@ -34,6 +34,7 @@ export default function FavoritesPage() {
 
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds?.length) return null
+    // في المجموعات العادية، يمكن استخدام __name__ مع المعرفات البسيطة
     return query(
       collection(db, "stores"), 
       where("__name__", "in", userData.favoritesStoreIds.slice(0, 10))
@@ -42,9 +43,11 @@ export default function FavoritesPage() {
 
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesProductIds?.length) return null
+    // إصلاح: في استعلام collectionGroup، نستخدم حقل "id" بدلاً من "__name__"
+    // لأن __name__ يتوقع مساراً كاملاً للوثيقة (segments)
     return query(
       collectionGroup(db, "products"),
-      where("__name__", "in", userData.favoritesProductIds.slice(0, 10))
+      where("id", "in", userData.favoritesProductIds.slice(0, 10))
     )
   }, [db, userData?.favoritesProductIds])
 
@@ -95,7 +98,6 @@ export default function FavoritesPage() {
       })
   }
 
-  // منع مشاكل الـ Hydration
   if (!mounted) return null
 
   if (isUserLoading) {
