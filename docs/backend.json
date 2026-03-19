@@ -4,27 +4,23 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a customer user of the delivery platform, including their profile and preferences.",
+      "description": "Represents a customer using the delivery platform. This entity stores profile information, preferences, and links to other user-specific data like wallets and loyalty points. Assumes authentication (e.g., phone number OTP) is handled by an external system and only a unique ID from that system is stored here.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the User entity."
+          "description": "Unique identifier for the User entity, typically provided by the authentication system (e.g., Firebase Auth UID)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the user."
         },
         "phoneNumber": {
           "type": "string",
-          "description": "The user's registered phone number, used for authentication."
-        },
-        "firstName": {
-          "type": "string",
-          "description": "The user's first name."
-        },
-        "lastName": {
-          "type": "string",
-          "description": "The user's last name."
+          "description": "The phone number of the user, used for communication and linked to authentication. (Relationship: Implicit 1:1 with Auth system)"
         },
         "email": {
           "type": "string",
-          "description": "The user's email address.",
+          "description": "The email address of the user for notifications and communication.",
           "format": "email"
         },
         "profileImageUrl": {
@@ -32,86 +28,84 @@
           "description": "URL to the user's profile picture.",
           "format": "uri"
         },
-        "defaultAddress": {
+        "defaultDeliveryAddress": {
           "type": "string",
-          "description": "The user's default delivery address."
+          "description": "The user's preferred default delivery address."
         },
-        "loyaltyPoints": {
-          "type": "number",
-          "description": "Current balance of loyalty points for the user."
+        "city": {
+          "type": "string",
+          "description": "The city where the user resides."
+        },
+        "governorateId": {
+          "type": "string",
+          "description": "Reference to the Governorate where the user's default delivery address is located. (Relationship: Governorate 1:N User)"
         },
         "walletId": {
           "type": "string",
-          "description": "Reference to the User's Wallet entity. (Relationship: User 1:1 Wallet)"
+          "description": "Reference to the user's digital Wallet. (Relationship: User 1:1 Wallet)"
         },
-        "registeredAt": {
+        "loyaltyPointsId": {
           "type": "string",
-          "description": "Timestamp when the user registered.",
-          "format": "date-time"
-        },
-        "lastActiveAt": {
-          "type": "string",
-          "description": "Timestamp when the user was last active.",
-          "format": "date-time"
-        },
-        "preferredGovernorateId": {
-          "type": "string",
-          "description": "Reference to the User's preferred Governorate entity. (Relationship: User 1:1 Governorate)"
-        },
-        "favoritesStoreIds": {
-          "type": "array",
-          "description": "Array of IDs of favorite stores. (Relationship: User N:N Store)",
-          "items": {
-            "type": "string"
-          }
-        },
-        "favoritesProductIds": {
-          "type": "array",
-          "description": "Array of IDs of favorite products. (Relationship: User N:N Product)",
-          "items": {
-            "type": "string"
-          }
+          "description": "Reference to the user's LoyaltyPoint record. (Relationship: User 1:1 LoyaltyPoint)"
         },
         "subscriptionId": {
           "type": "string",
-          "description": "Reference to the User's active Subscription entity. (Relationship: User 1:1 Subscription)"
+          "description": "Reference to the user's active Subscription. (Relationship: User 1:1 Subscription)"
+        },
+        "favoriteStoreIds": {
+          "type": "array",
+          "description": "An array of IDs of stores marked as favorites by the user. (Relationship: User N:N Store)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "favoriteProductIds": {
+          "type": "array",
+          "description": "An array of IDs of products marked as favorites by the user. (Relationship: User N:N Product)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user account was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user account was last updated.",
+          "format": "date-time"
         }
       },
       "required": [
         "id",
+        "name",
         "phoneNumber",
-        "firstName",
-        "lastName",
-        "loyaltyPoints",
-        "walletId",
-        "registeredAt"
+        "governorateId",
+        "createdAt"
       ]
     },
     "Driver": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Driver",
       "type": "object",
-      "description": "Represents a delivery driver registered on the platform.",
+      "description": "Represents a delivery driver associated with the platform. This entity contains driver-specific details, vehicle information, and availability status.",
       "properties": {
         "id": {
           "type": "string",
           "description": "Unique identifier for the Driver entity."
         },
+        "name": {
+          "type": "string",
+          "description": "The full name of the driver."
+        },
         "phoneNumber": {
           "type": "string",
-          "description": "The driver's registered phone number, used for authentication."
-        },
-        "firstName": {
-          "type": "string",
-          "description": "The driver's first name."
-        },
-        "lastName": {
-          "type": "string",
-          "description": "The driver's last name."
+          "description": "The phone number of the driver, used for communication and linked to authentication."
         },
         "email": {
           "type": "string",
-          "description": "The driver's email address.",
+          "description": "The email address of the driver.",
           "format": "email"
         },
         "profileImageUrl": {
@@ -127,60 +121,61 @@
           "type": "string",
           "description": "The license plate number of the driver's vehicle."
         },
-        "status": {
+        "vehicleModel": {
+          "type": "string",
+          "description": "The model of the driver's vehicle."
+        },
+        "availabilityStatus": {
           "type": "string",
           "description": "Current availability status of the driver (e.g., 'available', 'on_delivery', 'offline')."
         },
-        "currentLocationLatitude": {
-          "type": "number",
-          "description": "Current latitude of the driver's location for real-time tracking."
-        },
-        "currentLocationLongitude": {
-          "type": "number",
-          "description": "Current longitude of the driver's location for real-time tracking."
+        "currentLocation": {
+          "type": "array",
+          "description": "The current geographical coordinates [latitude, longitude] of the driver.",
+          "items": {
+            "type": "number"
+          }
         },
         "rating": {
           "type": "number",
-          "description": "Average rating received by the driver from customers."
+          "description": "The average rating received by the driver.",
+          "format": "float"
         },
-        "registeredAt": {
+        "totalDeliveries": {
+          "type": "number",
+          "description": "Total number of deliveries completed by the driver."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates if the driver's account is currently active."
+        },
+        "createdAt": {
           "type": "string",
-          "description": "Timestamp when the driver registered.",
+          "description": "Timestamp when the driver account was created.",
           "format": "date-time"
         },
-        "lastActiveAt": {
+        "updatedAt": {
           "type": "string",
-          "description": "Timestamp when the driver was last active.",
+          "description": "Timestamp when the driver account was last updated.",
           "format": "date-time"
-        },
-        "walletId": {
-          "type": "string",
-          "description": "Reference to the Driver's Wallet entity. (Relationship: Driver 1:1 Wallet)"
-        },
-        "governorateId": {
-          "type": "string",
-          "description": "Reference to the primary Governorate where the driver operates. (Relationship: Driver 1:1 Governorate)"
         }
       },
       "required": [
         "id",
+        "name",
         "phoneNumber",
-        "firstName",
-        "lastName",
         "vehicleType",
         "licensePlate",
-        "status",
-        "rating",
-        "registeredAt",
-        "walletId",
-        "governorateId"
+        "availabilityStatus",
+        "isActive",
+        "createdAt"
       ]
     },
     "Store": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Store",
       "type": "object",
-      "description": "Represents a merchant store from which products can be ordered.",
+      "description": "Represents a vendor or restaurant offering products for delivery through the platform.",
       "properties": {
         "id": {
           "type": "string",
@@ -188,15 +183,23 @@
         },
         "name": {
           "type": "string",
-          "description": "The name of the store."
+          "description": "The official name of the store."
         },
         "description": {
           "type": "string",
-          "description": "A brief description of the store."
+          "description": "A brief description of the store, its cuisine, or offerings."
         },
         "address": {
           "type": "string",
           "description": "The physical address of the store."
+        },
+        "latitude": {
+          "type": "number",
+          "description": "Latitude coordinate of the store's location."
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Longitude coordinate of the store's location."
         },
         "phoneNumber": {
           "type": "string",
@@ -204,7 +207,7 @@
         },
         "email": {
           "type": "string",
-          "description": "Contact email address for the store.",
+          "description": "Contact email for the store.",
           "format": "email"
         },
         "logoUrl": {
@@ -212,63 +215,76 @@
           "description": "URL to the store's logo image.",
           "format": "uri"
         },
-        "coverImageUrl": {
+        "bannerUrl": {
           "type": "string",
-          "description": "URL to the store's cover image.",
+          "description": "URL to the store's banner image for display on its page.",
           "format": "uri"
-        },
-        "openingHours": {
-          "type": "string",
-          "description": "Operating hours of the store (e.g., '9:00 AM - 10:00 PM')."
-        },
-        "status": {
-          "type": "string",
-          "description": "Current operational status of the store (e.g., 'open', 'closed')."
-        },
-        "averageRating": {
-          "type": "number",
-          "description": "Average rating given to the store by customers."
-        },
-        "governorateId": {
-          "type": "string",
-          "description": "Reference to the Governorate entity where the store is located. (Relationship: Store 1:1 Governorate)"
         },
         "categoryIds": {
           "type": "array",
-          "description": "Array of IDs of categories this store belongs to. (Relationship: Store N:N Category)",
+          "description": "An array of IDs of categories that this store belongs to. (Relationship: Store N:N Category)",
           "items": {
             "type": "string"
           }
         },
-        "locationLatitude": {
+        "rating": {
           "type": "number",
-          "description": "Latitude of the store's physical location."
+          "description": "The average rating of the store based on customer reviews.",
+          "format": "float"
         },
-        "locationLongitude": {
+        "minOrderAmount": {
           "type": "number",
-          "description": "Longitude of the store's physical location."
+          "description": "The minimum order amount required for delivery from this store."
+        },
+        "deliveryFee": {
+          "type": "number",
+          "description": "The standard delivery fee charged by this store."
+        },
+        "deliveryTimeEstimate": {
+          "type": "string",
+          "description": "Estimated delivery time range (e.g., '30-45 mins')."
+        },
+        "openingHours": {
+          "type": "array",
+          "description": "An array of objects, each defining opening/closing hours for a day (e.g., {'day': 'Monday', 'open': '09:00', 'close': '22:00'}).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates if the store is currently active and accepting orders."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the store record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the store record was last updated.",
+          "format": "date-time"
         }
       },
       "required": [
         "id",
         "name",
-        "description",
         "address",
+        "latitude",
+        "longitude",
         "phoneNumber",
         "logoUrl",
-        "openingHours",
-        "status",
-        "averageRating",
-        "governorateId",
-        "locationLatitude",
-        "locationLongitude"
+        "minOrderAmount",
+        "deliveryFee",
+        "isActive",
+        "createdAt"
       ]
     },
     "Product": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Product",
       "type": "object",
-      "description": "Represents a product offered by a store.",
+      "description": "Represents a single item or product offered by a store.",
       "properties": {
         "id": {
           "type": "string",
@@ -276,11 +292,7 @@
         },
         "storeId": {
           "type": "string",
-          "description": "Reference to the Store entity that offers this product. (Relationship: Store 1:N Product)"
-        },
-        "categoryId": {
-          "type": "string",
-          "description": "Reference to the Category entity this product belongs to. (Relationship: Category 1:N Product)"
+          "description": "Reference to the Store that offers this product. (Relationship: Store 1:N Product)"
         },
         "name": {
           "type": "string",
@@ -292,57 +304,58 @@
         },
         "imageUrl": {
           "type": "string",
-          "description": "URL to the product's image.",
+          "description": "URL to the main image of the product.",
           "format": "uri"
         },
         "price": {
           "type": "number",
           "description": "The base price of the product."
         },
-        "discountPrice": {
-          "type": "number",
-          "description": "The discounted price of the product, if applicable."
-        },
-        "isAvailable": {
-          "type": "boolean",
-          "description": "Indicates if the product is currently available for purchase."
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the Category this product belongs to. (Relationship: Category 1:N Product)"
         },
         "options": {
           "type": "array",
-          "description": "List of customizable options for the product, like sizes or add-ons.",
+          "description": "An array of objects representing customizable options for the product (e.g., size, color, add-ons). Each option might have its own price adjustment.",
           "items": {
-            "type": "boolean"
+            "type": "string"
           }
+        },
+        "isAvailable": {
+          "type": "boolean",
+          "description": "Indicates if the product is currently in stock and available for order."
+        },
+        "isFeatured": {
+          "type": "boolean",
+          "description": "Indicates if the product is featured or highlighted."
         },
         "createdAt": {
           "type": "string",
-          "description": "Timestamp when the product was created.",
+          "description": "Timestamp when the product record was created.",
           "format": "date-time"
         },
         "updatedAt": {
           "type": "string",
-          "description": "Timestamp when the product was last updated.",
+          "description": "Timestamp when the product record was last updated.",
           "format": "date-time"
         }
       },
       "required": [
         "id",
         "storeId",
-        "categoryId",
         "name",
-        "description",
-        "imageUrl",
         "price",
+        "categoryId",
         "isAvailable",
-        "createdAt",
-        "updatedAt"
+        "createdAt"
       ]
     },
     "Order": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Order",
       "type": "object",
-      "description": "Represents a customer's delivery order placed on the platform.",
+      "description": "Represents a customer's delivery order, tracking its items, status, and associated users and drivers.",
       "properties": {
         "id": {
           "type": "string",
@@ -352,64 +365,60 @@
           "type": "string",
           "description": "Reference to the User who placed the order. (Relationship: User 1:N Order)"
         },
+        "driverId": {
+          "type": "string",
+          "description": "Reference to the Driver assigned to this order. Null if not yet assigned. (Relationship: Driver 1:N Order)"
+        },
         "storeId": {
           "type": "string",
           "description": "Reference to the Store from which the order was placed. (Relationship: Store 1:N Order)"
         },
-        "driverId": {
-          "type": "string",
-          "description": "Reference to the Driver assigned to this order. (Relationship: Driver 1:N Order)"
-        },
         "orderItems": {
           "type": "array",
-          "description": "List of products included in the order with their quantities and selected options.",
+          "description": "An array of objects, each detailing a product and its quantity in the order, including any selected options. E.g., [{'productId': 'p1', 'name': 'Burger', 'quantity': 2, 'unitPrice': 15.00, 'options': [{'name': 'size', 'value': 'large'}]}]",
           "items": {
-            "type": "boolean"
+            "type": "string"
           }
-        },
-        "deliveryAddress": {
-          "type": "string",
-          "description": "The full address for the order delivery."
-        },
-        "deliveryLatitude": {
-          "type": "number",
-          "description": "Latitude of the delivery address."
-        },
-        "deliveryLongitude": {
-          "type": "number",
-          "description": "Longitude of the delivery address."
-        },
-        "status": {
-          "type": "string",
-          "description": "Current status of the order (e.g., 'pending', 'accepted', 'on_the_way', 'delivered')."
         },
         "totalAmount": {
           "type": "number",
-          "description": "The total final amount paid for the order, including all fees and discounts."
+          "description": "The total monetary value of the order, including products, delivery fee, and tip."
         },
         "subtotal": {
           "type": "number",
-          "description": "The sum of prices of all order items before fees and discounts."
+          "description": "The sum of prices of all products in the order before fees and discounts."
         },
         "deliveryFee": {
           "type": "number",
-          "description": "The fee charged for delivery."
+          "description": "The delivery fee for this specific order."
         },
         "tipAmount": {
           "type": "number",
-          "description": "Optional tip amount given to the driver."
+          "description": "The amount of tip given to the driver."
         },
-        "couponId": {
+        "deliveryAddress": {
           "type": "string",
-          "description": "Reference to the Coupon applied to this order. (Relationship: Order 1:1 Coupon)"
+          "description": "The full delivery address for this order."
         },
-        "discountAmount": {
+        "deliveryLatitude": {
           "type": "number",
-          "description": "The total discount applied to the order."
+          "description": "Latitude coordinate of the delivery address."
+        },
+        "deliveryLongitude": {
+          "type": "number",
+          "description": "Longitude coordinate of the delivery address."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the order (e.g., 'pending', 'accepted', 'preparing', 'on_the_way', 'delivered', 'cancelled')."
         },
         "paymentMethod": {
           "type": "string",
-          "description": "Method used for payment (e.g., 'cash_on_delivery', 'wallet')."
+          "description": "The payment method used for the order (e.g., 'credit_card', 'cash_on_delivery', 'wallet')."
+        },
+        "couponId": {
+          "type": "string",
+          "description": "Reference to the Coupon applied to this order, if any. (Relationship: Coupon 1:N Order)"
         },
         "createdAt": {
           "type": "string",
@@ -418,22 +427,22 @@
         },
         "acceptedAt": {
           "type": "string",
-          "description": "Timestamp when the order was accepted by the store/driver.",
+          "description": "Timestamp when the store/driver accepted the order.",
           "format": "date-time"
         },
-        "preparedAt": {
+        "preparingAt": {
           "type": "string",
-          "description": "Timestamp when the order was marked as preparing.",
+          "description": "Timestamp when the store started preparing the order.",
           "format": "date-time"
         },
         "onTheWayAt": {
           "type": "string",
-          "description": "Timestamp when the order was marked as on the way.",
+          "description": "Timestamp when the driver picked up the order and is on the way.",
           "format": "date-time"
         },
         "deliveredAt": {
           "type": "string",
-          "description": "Timestamp when the order was marked as delivered.",
+          "description": "Timestamp when the order was delivered.",
           "format": "date-time"
         },
         "cancelledAt": {
@@ -441,9 +450,10 @@
           "description": "Timestamp when the order was cancelled.",
           "format": "date-time"
         },
-        "ratingId": {
+        "estimatedDeliveryTime": {
           "type": "string",
-          "description": "Reference to the Rating entity associated with this order. (Relationship: Order 1:1 Rating)"
+          "description": "Estimated time of delivery.",
+          "format": "date-time"
         }
       },
       "required": [
@@ -451,13 +461,11 @@
         "userId",
         "storeId",
         "orderItems",
+        "totalAmount",
         "deliveryAddress",
         "deliveryLatitude",
         "deliveryLongitude",
         "status",
-        "totalAmount",
-        "subtotal",
-        "deliveryFee",
         "paymentMethod",
         "createdAt"
       ]
@@ -466,7 +474,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Category",
       "type": "object",
-      "description": "Represents a category for organizing stores or products.",
+      "description": "Represents a classification for stores or products, helping users browse and discover items.",
       "properties": {
         "id": {
           "type": "string",
@@ -474,7 +482,7 @@
         },
         "name": {
           "type": "string",
-          "description": "The name of the category (e.g., 'Restaurants', 'Groceries')."
+          "description": "The name of the category (e.g., 'Fast Food', 'Beverages', 'Electronics')."
         },
         "description": {
           "type": "string",
@@ -482,30 +490,45 @@
         },
         "imageUrl": {
           "type": "string",
-          "description": "URL to an image representing the category.",
+          "description": "URL to an icon or image representing the category.",
           "format": "uri"
+        },
+        "type": {
+          "type": "string",
+          "description": "Indicates whether this category applies to 'stores' or 'products'."
         },
         "displayOrder": {
           "type": "number",
-          "description": "A numerical value to determine the display order of the category in the UI."
+          "description": "An integer to control the order in which categories are displayed."
         },
-        "parentCategoryId": {
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates if the category is currently active and visible."
+        },
+        "createdAt": {
           "type": "string",
-          "description": "Reference to a parent Category, if this is a sub-category. (Relationship: Category 1:N Category - self-referencing)"
+          "description": "Timestamp when the category record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the category record was last updated.",
+          "format": "date-time"
         }
       },
       "required": [
         "id",
         "name",
-        "description",
-        "displayOrder"
+        "type",
+        "isActive",
+        "createdAt"
       ]
     },
     "Offer": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Offer",
       "type": "object",
-      "description": "Represents a promotional offer or discount available on the platform.",
+      "description": "Represents a promotional offer or discount that can be applied to stores or products.",
       "properties": {
         "id": {
           "type": "string",
@@ -513,23 +536,23 @@
         },
         "name": {
           "type": "string",
-          "description": "The name of the offer."
+          "description": "The name or title of the offer."
         },
         "description": {
           "type": "string",
-          "description": "A detailed description of the offer."
+          "description": "A detailed description of the offer and its terms."
         },
         "type": {
           "type": "string",
-          "description": "The type of discount or benefit (e.g., 'percentage_discount', 'fixed_amount_discount', 'free_delivery')."
+          "description": "The type of discount (e.g., 'percentage', 'fixed_amount', 'buy_one_get_one')."
         },
-        "value": {
+        "discountValue": {
           "type": "number",
-          "description": "The value of the offer (e.g., 10 for 10% or $10)."
+          "description": "The value of the discount (e.g., 0.15 for 15% off, or 5.00 for $5 off)."
         },
         "minOrderAmount": {
           "type": "number",
-          "description": "Minimum order amount required to apply this offer."
+          "description": "The minimum order amount required to apply this offer."
         },
         "startDate": {
           "type": "string",
@@ -541,49 +564,56 @@
           "description": "The date and time when the offer expires.",
           "format": "date-time"
         },
-        "isActive": {
-          "type": "boolean",
-          "description": "Indicates if the offer is currently active."
-        },
         "storeIds": {
           "type": "array",
-          "description": "Array of IDs of stores to which this offer applies. (Relationship: Offer N:N Store)",
+          "description": "An array of IDs of specific stores this offer applies to. If empty, the offer applies broadly. (Relationship: Store N:N Offer)",
           "items": {
             "type": "string"
           }
         },
         "productIds": {
           "type": "array",
-          "description": "Array of IDs of products to which this offer applies. (Relationship: Offer N:N Product)",
+          "description": "An array of IDs of specific products this offer applies to. If empty, the offer applies broadly. (Relationship: Product N:N Offer)",
           "items": {
             "type": "string"
           }
         },
-        "appliesToAllStores": {
-          "type": "boolean",
-          "description": "If true, this offer applies to all stores, ignoring 'storeIds'."
+        "bannerImageUrl": {
+          "type": "string",
+          "description": "URL to an image banner for the offer.",
+          "format": "uri"
         },
-        "appliesToAllProducts": {
+        "isActive": {
           "type": "boolean",
-          "description": "If true, this offer applies to all products, ignoring 'productIds'."
+          "description": "Indicates if the offer is currently active and visible to users."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the offer record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the offer record was last updated.",
+          "format": "date-time"
         }
       },
       "required": [
         "id",
         "name",
-        "description",
         "type",
-        "value",
+        "discountValue",
         "startDate",
         "endDate",
-        "isActive"
+        "isActive",
+        "createdAt"
       ]
     },
     "Coupon": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Coupon",
       "type": "object",
-      "description": "Represents a redeemable coupon code providing discounts or benefits.",
+      "description": "Represents a redeemable discount code that users can apply to their orders.",
       "properties": {
         "id": {
           "type": "string",
@@ -591,96 +621,95 @@
         },
         "code": {
           "type": "string",
-          "description": "The actual coupon code that users enter (e.g., 'SAVE10')."
+          "description": "The actual coupon code string (e.g., 'SAVE10', 'FREEDELIVERY')."
         },
         "description": {
           "type": "string",
           "description": "A description of the coupon and its benefits."
         },
-        "type": {
+        "discountType": {
           "type": "string",
-          "description": "The type of discount or benefit (e.g., 'percentage_discount', 'fixed_amount_discount')."
+          "description": "The type of discount provided by the coupon (e.g., 'percentage', 'fixed_amount', 'free_delivery')."
         },
-        "value": {
+        "discountValue": {
           "type": "number",
-          "description": "The value of the coupon (e.g., 10 for 10% or $10)."
+          "description": "The value of the discount (e.g., 0.10 for 10%, 7.50 for $7.50)."
         },
         "minOrderAmount": {
           "type": "number",
-          "description": "Minimum order amount required to apply this coupon."
+          "description": "The minimum order amount required to use this coupon."
         },
-        "usageLimit": {
+        "usageLimitPerUser": {
           "type": "number",
-          "description": "The total number of times this coupon can be used across all users."
+          "description": "The maximum number of times a single user can use this coupon."
         },
-        "perUserLimit": {
+        "totalUsageLimit": {
           "type": "number",
-          "description": "The maximum number of times a single user can apply this coupon."
+          "description": "The total maximum number of times this coupon can be used across all users."
         },
-        "usedCount": {
-          "type": "number",
-          "description": "The current count of how many times this coupon has been used."
-        },
-        "startDate": {
+        "validFrom": {
           "type": "string",
-          "description": "The date and time when the coupon becomes active.",
+          "description": "The date and time from which the coupon is valid.",
           "format": "date-time"
         },
-        "endDate": {
+        "validUntil": {
           "type": "string",
-          "description": "The date and time when the coupon expires.",
+          "description": "The date and time until which the coupon is valid.",
           "format": "date-time"
-        },
-        "isActive": {
-          "type": "boolean",
-          "description": "Indicates if the coupon is currently active."
         },
         "storeIds": {
           "type": "array",
-          "description": "Array of IDs of stores to which this coupon applies. (Relationship: Coupon N:N Store)",
+          "description": "An array of IDs of specific stores this coupon applies to. If empty, the coupon applies broadly. (Relationship: Store N:N Coupon)",
           "items": {
             "type": "string"
           }
         },
         "productIds": {
           "type": "array",
-          "description": "Array of IDs of products to which this coupon applies. (Relationship: Coupon N:N Product)",
+          "description": "An array of IDs of specific products this coupon applies to. If empty, the coupon applies broadly. (Relationship: Product N:N Coupon)",
           "items": {
             "type": "string"
           }
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates if the coupon is currently active and can be used."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the coupon record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the coupon record was last updated.",
+          "format": "date-time"
         }
       },
       "required": [
         "id",
         "code",
-        "description",
-        "type",
-        "value",
-        "usageLimit",
-        "perUserLimit",
-        "usedCount",
-        "startDate",
-        "endDate",
-        "isActive"
+        "discountType",
+        "discountValue",
+        "validFrom",
+        "validUntil",
+        "isActive",
+        "createdAt"
       ]
     },
     "Wallet": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Wallet",
       "type": "object",
-      "description": "Represents a digital wallet for users or drivers to manage their balance.",
+      "description": "Represents a user's digital wallet for storing credit or balance within the application.",
       "properties": {
         "id": {
           "type": "string",
           "description": "Unique identifier for the Wallet entity."
         },
-        "ownerId": {
+        "userId": {
           "type": "string",
-          "description": "Reference to the User or Driver who owns this wallet. (Polymorphic: User/Driver 1:1 Wallet)"
-        },
-        "ownerType": {
-          "type": "string",
-          "description": "The type of owner for this wallet ('user' or 'driver')."
+          "description": "Reference to the User who owns this wallet. (Relationship: User 1:1 Wallet)"
         },
         "balance": {
           "type": "number",
@@ -688,46 +717,43 @@
         },
         "currency": {
           "type": "string",
-          "description": "The currency of the wallet balance (e.g., 'EGP', 'USD')."
+          "description": "The currency in which the balance is held (e.g., 'SAR', 'USD')."
         },
-        "createdAt": {
+        "lastUpdated": {
           "type": "string",
-          "description": "Timestamp when the wallet was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "Timestamp when the wallet was last updated.",
+          "description": "Timestamp when the wallet balance was last updated.",
           "format": "date-time"
         }
       },
       "required": [
         "id",
-        "ownerId",
-        "ownerType",
+        "userId",
         "balance",
         "currency",
-        "createdAt",
-        "updatedAt"
+        "lastUpdated"
       ]
     },
     "Transaction": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Transaction",
       "type": "object",
-      "description": "Represents a financial transaction associated with a wallet.",
+      "description": "Records all financial transactions related to user wallets, orders, or other monetary movements.",
       "properties": {
         "id": {
           "type": "string",
           "description": "Unique identifier for the Transaction entity."
         },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User involved in the transaction. (Relationship: User 1:N Transaction)"
+        },
         "walletId": {
           "type": "string",
-          "description": "Reference to the Wallet involved in this transaction. (Relationship: Wallet 1:N Transaction)"
+          "description": "Reference to the Wallet involved in the transaction, if applicable. (Relationship: Wallet 1:N Transaction)"
         },
-        "type": {
+        "orderId": {
           "type": "string",
-          "description": "The type of transaction (e.g., 'credit', 'debit', 'deposit', 'order_payment', 'driver_earning')."
+          "description": "Reference to the Order associated with this transaction, if applicable. (Relationship: Order 1:N Transaction)"
         },
         "amount": {
           "type": "number",
@@ -735,33 +761,41 @@
         },
         "currency": {
           "type": "string",
-          "description": "The currency of the transaction amount."
+          "description": "The currency of the transaction."
         },
-        "description": {
+        "type": {
           "type": "string",
-          "description": "A brief description or purpose of the transaction."
+          "description": "The type of transaction (e.g., 'wallet_topup', 'order_payment', 'refund', 'withdrawal', 'loyalty_redemption')."
         },
         "status": {
           "type": "string",
-          "description": "The current status of the transaction (e.g., 'completed', 'pending', 'failed')."
+          "description": "The status of the transaction (e.g., 'completed', 'pending', 'failed')."
         },
-        "referenceId": {
+        "description": {
           "type": "string",
-          "description": "Optional reference ID to link to the source entity (e.g., Order ID, Donation ID)."
+          "description": "A brief description of the transaction."
+        },
+        "paymentGatewayTransactionId": {
+          "type": "string",
+          "description": "Optional: ID from the external payment gateway for tracking."
         },
         "createdAt": {
           "type": "string",
-          "description": "Timestamp when the transaction was created.",
+          "description": "Timestamp when the transaction was initiated.",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "Timestamp when the transaction was completed.",
           "format": "date-time"
         }
       },
       "required": [
         "id",
-        "walletId",
-        "type",
+        "userId",
         "amount",
         "currency",
-        "description",
+        "type",
         "status",
         "createdAt"
       ]
@@ -770,7 +804,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Rating",
       "type": "object",
-      "description": "Represents a rating provided by a user for an order, store, product, or driver.",
+      "description": "Stores user ratings and reviews for various entities like stores, products, or drivers.",
       "properties": {
         "id": {
           "type": "string",
@@ -778,42 +812,40 @@
         },
         "userId": {
           "type": "string",
-          "description": "Reference to the User who provided the rating. (Relationship: User 1:N Rating)"
+          "description": "Reference to the User who submitted the rating. (Relationship: User 1:N Rating)"
         },
-        "orderId": {
+        "entityId": {
           "type": "string",
-          "description": "Reference to the Order associated with this rating. (Relationship: Order 1:1 Rating)"
+          "description": "The ID of the entity being rated (e.g., Store ID, Product ID, Driver ID)."
         },
-        "storeId": {
+        "entityType": {
           "type": "string",
-          "description": "Reference to the Store that received the rating. (Relationship: Store 1:N Rating)"
-        },
-        "productId": {
-          "type": "string",
-          "description": "Reference to the Product that received the rating. (Relationship: Product 1:N Rating)"
-        },
-        "driverId": {
-          "type": "string",
-          "description": "Reference to the Driver who received the rating. (Relationship: Driver 1:N Rating)"
+          "description": "The type of entity being rated ('store', 'product', 'driver')."
         },
         "ratingValue": {
           "type": "number",
-          "description": "The numerical rating value (e.g., 1 to 5 stars)."
+          "description": "The numerical rating given (e.g., 1 to 5 stars).",
+          "format": "float"
         },
         "comment": {
           "type": "string",
-          "description": "Optional text comment accompanying the rating."
+          "description": "Optional: A textual comment or review provided by the user."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Optional: Reference to the Order related to this rating, if it's an order-specific rating. (Relationship: Order 1:N Rating)"
         },
         "createdAt": {
           "type": "string",
-          "description": "Timestamp when the rating was created.",
+          "description": "Timestamp when the rating was submitted.",
           "format": "date-time"
         }
       },
       "required": [
         "id",
         "userId",
-        "orderId",
+        "entityId",
+        "entityType",
         "ratingValue",
         "createdAt"
       ]
@@ -822,19 +854,19 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Notification",
       "type": "object",
-      "description": "Represents a notification sent to a specific user or driver.",
+      "description": "Stores messages or alerts intended for users, drivers, or admins.",
       "properties": {
         "id": {
           "type": "string",
           "description": "Unique identifier for the Notification entity."
         },
-        "recipientId": {
+        "userId": {
           "type": "string",
-          "description": "Reference to the User or Driver who is the recipient of the notification. (Polymorphic: User/Driver 1:N Notification)"
+          "description": "Reference to the User this notification is for. Null if it's a general notification. (Relationship: User 1:N Notification)"
         },
-        "recipientType": {
+        "driverId": {
           "type": "string",
-          "description": "The type of recipient for this notification ('user' or 'driver')."
+          "description": "Reference to the Driver this notification is for. Null if it's not driver-specific. (Relationship: Driver 1:N Notification)"
         },
         "title": {
           "type": "string",
@@ -846,15 +878,15 @@
         },
         "type": {
           "type": "string",
-          "description": "The category or purpose of the notification (e.g., 'order_status_update', 'promo')."
+          "description": "The type of notification (e.g., 'order_status_update', 'promotion', 'new_message', 'account_alert')."
         },
         "isRead": {
           "type": "boolean",
-          "description": "Indicates if the recipient has read the notification."
+          "description": "Indicates whether the recipient has read the notification."
         },
-        "targetUrl": {
+        "link": {
           "type": "string",
-          "description": "Optional URL or deep link associated with the notification.",
+          "description": "Optional: A deep link or URL that the notification directs to.",
           "format": "uri"
         },
         "createdAt": {
@@ -865,8 +897,6 @@
       },
       "required": [
         "id",
-        "recipientId",
-        "recipientType",
         "title",
         "body",
         "type",
@@ -878,7 +908,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Governorate",
       "type": "object",
-      "description": "Represents a geographical governorate or region where the service is available.",
+      "description": "Defines administrative geographical regions (governorates) within the service area, often used for delivery zones.",
       "properties": {
         "id": {
           "type": "string",
@@ -886,28 +916,28 @@
         },
         "name": {
           "type": "string",
-          "description": "The name of the governorate in primary language (e.g., 'Cairo')."
+          "description": "The name of the governorate (e.g., 'Riyadh Province')."
         },
-        "nameAr": {
+        "name_ar": {
           "type": "string",
           "description": "The Arabic name of the governorate."
         },
+        "deliveryAreas": {
+          "type": "array",
+          "description": "An array of strings or objects defining specific delivery areas/cities within this governorate.",
+          "items": {
+            "type": "string"
+          }
+        },
         "isActive": {
           "type": "boolean",
-          "description": "Indicates if the service is currently active in this governorate."
-        },
-        "deliveryZones": {
-          "type": "array",
-          "description": "List of defined delivery zones within the governorate with their associated fees.",
-          "items": {
-            "type": "boolean"
-          }
+          "description": "Indicates if this governorate is currently serviced by the platform."
         }
       },
       "required": [
         "id",
         "name",
-        "nameAr",
+        "name_ar",
         "isActive"
       ]
     },
@@ -915,7 +945,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Ad",
       "type": "object",
-      "description": "Represents an advertisement to be displayed within the application.",
+      "description": "Represents an advertisement displayed within the application to users.",
       "properties": {
         "id": {
           "type": "string",
@@ -923,11 +953,11 @@
         },
         "title": {
           "type": "string",
-          "description": "The title or headline of the advertisement."
+          "description": "The title of the advertisement."
         },
         "description": {
           "type": "string",
-          "description": "A brief description of the ad's content or offer."
+          "description": "A brief description or tagline for the ad."
         },
         "imageUrl": {
           "type": "string",
@@ -936,51 +966,54 @@
         },
         "targetUrl": {
           "type": "string",
-          "description": "The URL or deep link where the ad directs users.",
+          "description": "The URL or internal app route that the ad links to when clicked.",
           "format": "uri"
-        },
-        "displayLocation": {
-          "type": "string",
-          "description": "The intended location within the app where the ad should be displayed (e.g., 'homepage_banner')."
         },
         "startDate": {
           "type": "string",
-          "description": "The date and time when the ad campaign starts.",
+          "description": "The date and time when the ad starts displaying.",
           "format": "date-time"
         },
         "endDate": {
           "type": "string",
-          "description": "The date and time when the ad campaign ends.",
+          "description": "The date and time when the ad stops displaying.",
           "format": "date-time"
+        },
+        "displayOrder": {
+          "type": "number",
+          "description": "An integer to control the order in which ads are displayed."
         },
         "isActive": {
           "type": "boolean",
-          "description": "Indicates if the advertisement is currently active."
+          "description": "Indicates if the ad is currently active and visible."
         },
-        "priority": {
-          "type": "number",
-          "description": "A numerical value to prioritize display among multiple active ads."
-        },
-        "storeId": {
+        "createdAt": {
           "type": "string",
-          "description": "Reference to the Store entity if the ad is store-specific. (Relationship: Ad 1:1 Store)"
+          "description": "Timestamp when the ad record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the ad record was last updated.",
+          "format": "date-time"
         }
       },
       "required": [
         "id",
         "title",
         "imageUrl",
-        "displayLocation",
+        "targetUrl",
         "startDate",
         "endDate",
-        "isActive"
+        "isActive",
+        "createdAt"
       ]
     },
     "Donation": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Donation",
       "type": "object",
-      "description": "Represents a donation made by a user to a charitable cause.",
+      "description": "Records user donations made through the platform to various causes.",
       "properties": {
         "id": {
           "type": "string",
@@ -996,24 +1029,20 @@
         },
         "currency": {
           "type": "string",
-          "description": "The currency of the donation amount."
+          "description": "The currency of the donation."
         },
-        "charityName": {
+        "causeName": {
           "type": "string",
-          "description": "The name of the charity receiving the donation."
+          "description": "The name of the cause or charity that received the donation."
         },
-        "transactionId": {
+        "status": {
           "type": "string",
-          "description": "Reference to the Transaction entity for the donation payment. (Relationship: Donation 1:1 Transaction)"
+          "description": "The status of the donation transaction (e.g., 'completed', 'pending', 'failed')."
         },
         "createdAt": {
           "type": "string",
           "description": "Timestamp when the donation was made.",
           "format": "date-time"
-        },
-        "status": {
-          "type": "string",
-          "description": "The processing status of the donation (e.g., 'completed', 'pending')."
         }
       },
       "required": [
@@ -1021,17 +1050,16 @@
         "userId",
         "amount",
         "currency",
-        "charityName",
-        "transactionId",
-        "createdAt",
-        "status"
+        "causeName",
+        "status",
+        "createdAt"
       ]
     },
     "Subscription": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Subscription",
       "type": "object",
-      "description": "Represents a user's subscription to a premium service plan.",
+      "description": "Manages user subscriptions for premium features (e.g., VIP membership).",
       "properties": {
         "id": {
           "type": "string",
@@ -1039,11 +1067,11 @@
         },
         "userId": {
           "type": "string",
-          "description": "Reference to the User who holds this subscription. (Relationship: User 1:1 Subscription)"
+          "description": "Reference to the User who owns this subscription. (Relationship: User 1:1 Subscription)"
         },
         "planName": {
           "type": "string",
-          "description": "The name of the subscription plan (e.g., 'VIP Monthly')."
+          "description": "The name of the subscription plan (e.g., 'VIP Monthly', 'Premium Annual')."
         },
         "price": {
           "type": "number",
@@ -1065,18 +1093,15 @@
         },
         "status": {
           "type": "string",
-          "description": "The current status of the subscription (e.g., 'active', 'cancelled', 'expired')."
+          "description": "The current status of the subscription (e.g., 'active', 'expired', 'cancelled', 'pending_renewal')."
         },
-        "paymentTransactionId": {
+        "renewalFrequency": {
           "type": "string",
-          "description": "Reference to the Transaction entity for the subscription payment. (Relationship: Subscription 1:1 Transaction)"
+          "description": "How often the subscription renews (e.g., 'monthly', 'annually')."
         },
-        "benefits": {
-          "type": "array",
-          "description": "List of benefits included with this subscription plan (e.g., 'free_delivery').",
-          "items": {
-            "type": "string"
-          }
+        "paymentMethod": {
+          "type": "string",
+          "description": "The payment method used for the subscription."
         },
         "createdAt": {
           "type": "string",
@@ -1098,54 +1123,46 @@
         "startDate",
         "endDate",
         "status",
-        "paymentTransactionId",
-        "createdAt",
-        "updatedAt"
+        "renewalFrequency",
+        "createdAt"
       ]
     },
-    "LoyaltyPointTransaction": {
+    "LoyaltyPoint": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "LoyaltyPointTransaction",
+      "title": "LoyaltyPoint",
       "type": "object",
-      "description": "Represents a historical record of loyalty points being earned, redeemed, or adjusted for a user.",
+      "description": "Tracks loyalty points accumulated by a user, which can be redeemed for rewards.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the LoyaltyPointTransaction entity."
+          "description": "Unique identifier for the LoyaltyPoint entity."
         },
         "userId": {
           "type": "string",
-          "description": "Reference to the User associated with this loyalty points transaction. (Relationship: User 1:N LoyaltyPointTransaction)"
+          "description": "Reference to the User who owns these loyalty points. (Relationship: User 1:1 LoyaltyPoint)"
         },
-        "type": {
-          "type": "string",
-          "description": "The type of loyalty points transaction (e.g., 'earned', 'redeemed', 'expired')."
-        },
-        "pointsAmount": {
+        "points": {
           "type": "number",
-          "description": "The number of loyalty points involved in this transaction (positive for earned, negative for redeemed/expired)."
+          "description": "The current number of loyalty points the user has."
         },
-        "description": {
+        "lastUpdated": {
           "type": "string",
-          "description": "A brief description of why the points were added or deducted."
-        },
-        "referenceId": {
-          "type": "string",
-          "description": "Optional reference ID to link to the source (e.g., Order ID, Coupon ID)."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp when the loyalty points transaction occurred.",
+          "description": "Timestamp when the loyalty points balance was last updated.",
           "format": "date-time"
+        },
+        "history": {
+          "type": "array",
+          "description": "An array of objects detailing the history of point accrual and redemption. E.g., [{'date': '2023-10-26T10:00:00Z', 'type': 'earned', 'points': 50, 'description': 'Order #1234'}, {'date': '2023-11-01T14:30:00Z', 'type': 'redeemed', 'points': -100, 'description': 'Coupon'}]",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
         "id",
         "userId",
-        "type",
-        "pointsAmount",
-        "description",
-        "createdAt"
+        "points",
+        "lastUpdated"
       ]
     }
   },
@@ -1164,133 +1181,7 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profiles. The document ID {userId} matches the Firebase Authentication UID. Owner can read/write their own profile. Includes denormalized favorite store and product IDs.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique Firebase Authentication UID of the user."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/drivers/{driverId}",
-        "definition": {
-          "entityName": "Driver",
-          "schema": {
-            "$ref": "#/backend/entities/Driver"
-          },
-          "description": "Stores delivery driver profiles. The document ID {driverId} matches the Firebase Authentication UID. Driver can read/write their own profile. Admins can manage all driver profiles.",
-          "params": [
-            {
-              "name": "driverId",
-              "description": "The unique Firebase Authentication UID of the driver."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/stores/{storeId}",
-        "definition": {
-          "entityName": "Store",
-          "schema": {
-            "$ref": "#/backend/entities/Store"
-          },
-          "description": "Contains merchant store details. Publicly readable. Includes 'adminUserId' for authorization, which grants write access to the specific store owner/manager. QAPs supported by 'governorateId' and 'categoryIds'.",
-          "params": [
-            {
-              "name": "storeId",
-              "description": "The unique identifier for the store."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/stores/{storeId}/products/{productId}",
-        "definition": {
-          "entityName": "Product",
-          "schema": {
-            "$ref": "#/backend/entities/Product"
-          },
-          "description": "Lists products offered by a specific store. Publicly readable. Includes denormalized 'storeAdminUserId' from the parent store for authorization independence, allowing write access by the store's admin without a 'get()' call. QAPs supported by 'categoryId' and 'isAvailable'.",
-          "params": [
-            {
-              "name": "storeId",
-              "description": "The unique identifier of the parent store."
-            },
-            {
-              "name": "productId",
-              "description": "The unique identifier for the product."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/orders/{orderId}",
-        "definition": {
-          "entityName": "Order",
-          "schema": {
-            "$ref": "#/backend/entities/Order"
-          },
-          "description": "Stores customer-specific order details. The document ID {orderId} is unique to the order. Authorized by 'userId' (from path and document) for customers and 'driverId' (from document) for assigned drivers. Includes 'storeId' for context. Supports QAPs for users (their orders) and drivers (their assigned orders).",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique Firebase Authentication UID of the user who placed the order."
-            },
-            {
-              "name": "orderId",
-              "description": "The unique identifier for the order."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/categories/{categoryId}",
-        "definition": {
-          "entityName": "Category",
-          "schema": {
-            "$ref": "#/backend/entities/Category"
-          },
-          "description": "Defines global product and store categories. Publicly readable. Admin-only write access. Supports QAPs for listing categories.",
-          "params": [
-            {
-              "name": "categoryId",
-              "description": "The unique identifier for the category."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/offers/{offerId}",
-        "definition": {
-          "entityName": "Offer",
-          "schema": {
-            "$ref": "#/backend/entities/Offer"
-          },
-          "description": "Manages platform-wide promotional offers. Publicly readable. Admin-only write access. Supports QAPs for listing active offers and filtering by 'storeIds'/'productIds'.",
-          "params": [
-            {
-              "name": "offerId",
-              "description": "The unique identifier for the offer."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/coupons/{couponId}",
-        "definition": {
-          "entityName": "Coupon",
-          "schema": {
-            "$ref": "#/backend/entities/Coupon"
-          },
-          "description": "Manages redeemable coupon codes. Publicly readable (for active coupons). Admin-only write access. Supports QAPs for listing active coupons.",
-          "params": [
-            {
-              "name": "couponId",
-              "description": "The unique identifier for the coupon."
-            }
-          ]
+          "description": "Top-level collection for customer profiles. `userId` corresponds to `request.auth.uid` from Firebase Authentication. Documents here are private, accessible only by the owning user."
         }
       },
       {
@@ -1300,185 +1191,17 @@
           "schema": {
             "$ref": "#/backend/entities/Wallet"
           },
-          "description": "The digital wallet for a specific user. The document ID 'wallet' is a fixed name. 'ownerId' field in the document must match the {userId} from the path for authorization independence. Only the owning user can read/write.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique Firebase Authentication UID of the user who owns the wallet."
-            }
-          ]
+          "description": "Stores a user's digital wallet as a singleton subcollection. This enables path-based ownership with `userId` implicitly present in the path. Includes denormalized `userId`."
         }
       },
       {
-        "path": "/drivers/{driverId}/wallet",
+        "path": "/users/{userId}/loyalty_points",
         "definition": {
-          "entityName": "Wallet",
+          "entityName": "LoyaltyPoint",
           "schema": {
-            "$ref": "#/backend/entities/Wallet"
+            "$ref": "#/backend/entities/LoyaltyPoint"
           },
-          "description": "The digital wallet for a specific driver. The document ID 'wallet' is a fixed name. 'ownerId' field in the document must match the {driverId} from the path for authorization independence. Only the owning driver can read/write.",
-          "params": [
-            {
-              "name": "driverId",
-              "description": "The unique Firebase Authentication UID of the driver who owns the wallet."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/transactions/{transactionId}",
-        "definition": {
-          "entityName": "Transaction",
-          "schema": {
-            "$ref": "#/backend/entities/Transaction"
-          },
-          "description": "Records financial transactions related to a user's wallet. Includes 'ownerId' (matching {userId} from path) for authorization independence. Only the owning user can read their transactions. QAPs supported for user's transaction history.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique Firebase Authentication UID of the user who owns the transaction."
-            },
-            {
-              "name": "transactionId",
-              "description": "The unique identifier for the transaction."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/drivers/{driverId}/transactions/{transactionId}",
-        "definition": {
-          "entityName": "Transaction",
-          "schema": {
-            "$ref": "#/backend/entities/Transaction"
-          },
-          "description": "Records financial transactions related to a driver's wallet. Includes 'ownerId' (matching {driverId} from path) for authorization independence. Only the owning driver can read their transactions. QAPs supported for driver's transaction history.",
-          "params": [
-            {
-              "name": "driverId",
-              "description": "The unique Firebase Authentication UID of the driver who owns the transaction."
-            },
-            {
-              "name": "transactionId",
-              "description": "The unique identifier for the transaction."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/orders/{orderId}/ratings/{ratingId}",
-        "definition": {
-          "entityName": "Rating",
-          "schema": {
-            "$ref": "#/backend/entities/Rating"
-          },
-          "description": "Stores ratings provided by a user for a specific order. 'userId' from path and document matches for authorization independence. The creating user can read/write their own rating. Publicly readable for aggregation, but private at creation for the user.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique Firebase Authentication UID of the user who provided the rating."
-            },
-            {
-              "name": "orderId",
-              "description": "The unique identifier of the order being rated."
-            },
-            {
-              "name": "ratingId",
-              "description": "The unique identifier for the rating."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/notifications/{notificationId}",
-        "definition": {
-          "entityName": "Notification",
-          "schema": {
-            "$ref": "#/backend/entities/Notification"
-          },
-          "description": "Stores notifications specific to a user. 'recipientId' field in the document must match {userId} from the path for authorization independence. Only the recipient user can read/mark as read.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique Firebase Authentication UID of the notification recipient."
-            },
-            {
-              "name": "notificationId",
-              "description": "The unique identifier for the notification."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/drivers/{driverId}/notifications/{notificationId}",
-        "definition": {
-          "entityName": "Notification",
-          "schema": {
-            "$ref": "#/backend/entities/Notification"
-          },
-          "description": "Stores notifications specific to a driver. 'recipientId' field in the document must match {driverId} from the path for authorization independence. Only the recipient driver can read/mark as read.",
-          "params": [
-            {
-              "name": "driverId",
-              "description": "The unique Firebase Authentication UID of the notification recipient."
-            },
-            {
-              "name": "notificationId",
-              "description": "The unique identifier for the notification."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/governorates/{governorateId}",
-        "definition": {
-          "entityName": "Governorate",
-          "schema": {
-            "$ref": "#/backend/entities/Governorate"
-          },
-          "description": "Lists available geographical governorates. Publicly readable. Admin-only write access. Supports QAPs for listing active governorates.",
-          "params": [
-            {
-              "name": "governorateId",
-              "description": "The unique identifier for the governorate."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/ads/{adId}",
-        "definition": {
-          "entityName": "Ad",
-          "schema": {
-            "$ref": "#/backend/entities/Ad"
-          },
-          "description": "Manages advertisements displayed in the app. Publicly readable. Admin-only write access. Supports QAPs for filtering by 'isActive' and 'displayLocation'.",
-          "params": [
-            {
-              "name": "adId",
-              "description": "The unique identifier for the advertisement."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/donations/{donationId}",
-        "definition": {
-          "entityName": "Donation",
-          "schema": {
-            "$ref": "#/backend/entities/Donation"
-          },
-          "description": "Records donations made by a specific user. 'userId' from path and document matches for authorization independence. Only the donating user can read/write their own donations. Supports QAPs for a user's donation history.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique Firebase Authentication UID of the user who made the donation."
-            },
-            {
-              "name": "donationId",
-              "description": "The unique identifier for the donation."
-            }
-          ]
+          "description": "Stores a user's loyalty points as a singleton subcollection. This enables path-based ownership with `userId` implicitly present in the path. Includes denormalized `userId`."
         }
       },
       {
@@ -1488,56 +1211,150 @@
           "schema": {
             "$ref": "#/backend/entities/Subscription"
           },
-          "description": "Manages subscriptions for a specific user. 'userId' from path and document matches for authorization independence. Only the owning user can read/write their subscriptions. Supports QAPs for a user's subscription details.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique Firebase Authentication UID of the user who owns the subscription."
-            },
-            {
-              "name": "subscriptionId",
-              "description": "The unique identifier for the subscription."
-            }
-          ]
+          "description": "Stores a user's active subscriptions. This is a subcollection of the user for path-based ownership. Includes denormalized `userId` for authorization independence."
         }
       },
       {
-        "path": "/users/{userId}/loyaltyPointTransactions/{transactionId}",
+        "path": "/users/{userId}/orders/{orderId}",
         "definition": {
-          "entityName": "LoyaltyPointTransaction",
+          "entityName": "Order",
           "schema": {
-            "$ref": "#/backend/entities/LoyaltyPointTransaction"
+            "$ref": "#/backend/entities/Order"
           },
-          "description": "Records loyalty point transactions for a specific user. 'userId' from path and document matches for authorization independence. Only the user can read their loyalty point history. Supports QAPs for a user's loyalty activity.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique Firebase Authentication UID of the user associated with the transaction."
-            },
-            {
-              "name": "transactionId",
-              "description": "The unique identifier for the loyalty point transaction."
-            }
-          ]
+          "description": "Stores orders placed by a specific user. This is a subcollection of the user for path-based ownership. Includes denormalized `userId` and `storeId` for authorization independence and QAPs. Access is restricted to the owning user and assigned driver/store admin."
         }
       },
       {
-        "path": "/roles_admin/{adminUid}",
+        "path": "/users/{userId}/transactions/{transactionId}",
         "definition": {
-          "entityName": "AdminRole",
+          "entityName": "Transaction",
           "schema": {
-            "$ref": "#/backend/entities/AdminRole"
+            "$ref": "#/backend/entities/Transaction"
           },
-          "description": "A metadata collection for Database Access Control (DBAC). The existence of a document at this path signifies that the user with {adminUid} has administrative privileges. Used for Authorization Independence for admin actions.",
-          "params": [
-            {
-              "name": "adminUid",
-              "description": "The Firebase Authentication UID of a user granted administrative privileges."
-            }
-          ]
+          "description": "Records financial transactions related to a specific user. This is a subcollection of the user for path-based ownership. Includes denormalized `userId` for authorization independence."
+        }
+      },
+      {
+        "path": "/users/{userId}/ratings/{ratingId}",
+        "definition": {
+          "entityName": "Rating",
+          "schema": {
+            "$ref": "#/backend/entities/Rating"
+          },
+          "description": "Stores ratings submitted by a specific user. This is a subcollection of the user for path-based ownership. Includes denormalized `userId` and `entityId`/`entityType` for authorization independence and context."
+        }
+      },
+      {
+        "path": "/users/{userId}/notifications/{notificationId}",
+        "definition": {
+          "entityName": "Notification",
+          "schema": {
+            "$ref": "#/backend/entities/Notification"
+          },
+          "description": "Stores notifications specifically for a user. This is a subcollection of the user for path-based ownership. Includes denormalized `userId` for authorization independence. Access is restricted to the owning user."
+        }
+      },
+      {
+        "path": "/users/{userId}/donations/{donationId}",
+        "definition": {
+          "entityName": "Donation",
+          "schema": {
+            "$ref": "#/backend/entities/Donation"
+          },
+          "description": "Records donations made by a specific user. This is a subcollection of the user for path-based ownership. Includes denormalized `userId` for authorization independence."
+        }
+      },
+      {
+        "path": "/drivers/{driverId}",
+        "definition": {
+          "entityName": "Driver",
+          "schema": {
+            "$ref": "#/backend/entities/Driver"
+          },
+          "description": "Top-level collection for driver profiles. `driverId` corresponds to `request.auth.uid` for driver authentication. Publicly readable (limited fields) for order assignment, private for driver's own profile management."
+        }
+      },
+      {
+        "path": "/stores/{storeId}",
+        "definition": {
+          "entityName": "Store",
+          "schema": {
+            "$ref": "#/backend/entities/Store"
+          },
+          "description": "Top-level collection for store profiles. `storeId` can correspond to `request.auth.uid` for store admin or be a generated ID. Publicly readable for browsing, private for store admin management."
+        }
+      },
+      {
+        "path": "/stores/{storeId}/products/{productId}",
+        "definition": {
+          "entityName": "Product",
+          "schema": {
+            "$ref": "#/backend/entities/Product"
+          },
+          "description": "Products offered by a specific store. This is a subcollection of the store for path-based organization. Includes denormalized `storeId` for authorization independence. Publicly readable, with write access for the owning store admin."
+        }
+      },
+      {
+        "path": "/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Global collection for product and store categories. Publicly readable by all users, admin-managed."
+        }
+      },
+      {
+        "path": "/offers/{offerId}",
+        "definition": {
+          "entityName": "Offer",
+          "schema": {
+            "$ref": "#/backend/entities/Offer"
+          },
+          "description": "Global collection for promotional offers. Publicly readable by all users, admin-managed."
+        }
+      },
+      {
+        "path": "/coupons/{couponId}",
+        "definition": {
+          "entityName": "Coupon",
+          "schema": {
+            "$ref": "#/backend/entities/Coupon"
+          },
+          "description": "Global collection for redeemable coupons. Publicly readable for display, admin-managed. Usage requires additional logic and rule checks."
+        }
+      },
+      {
+        "path": "/governorates/{governorateId}",
+        "definition": {
+          "entityName": "Governorate",
+          "schema": {
+            "$ref": "#/backend/entities/Governorate"
+          },
+          "description": "Global collection for administrative geographical regions. Publicly readable by all users, admin-managed."
+        }
+      },
+      {
+        "path": "/ads/{adId}",
+        "definition": {
+          "entityName": "Ad",
+          "schema": {
+            "$ref": "#/backend/entities/Ad"
+          },
+          "description": "Global collection for advertisements. Publicly readable by all users, admin-managed."
+        }
+      },
+      {
+        "path": "/roles_admin/{adminId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Dedicated collection for managing administrative roles. The existence of a document `adminId` (matching a user's `uid`) in this collection grants administrative permissions. This enables database-backed access control (DBAC)."
         }
       }
     ],
-    "reasoning": "The Firestore structure for the \"أبشر\" delivery platform is designed to prioritize security, scalability, and debuggability, adhering to the core design principles outlined. It extensively leverages path-based authorization and strategic denormalization to achieve Authorization Independence and support Queryable Access Patterns (QAPs).\n\n**Authorization Independence:**\n1.  **User and Driver Owned Data:** Entities like `User`, `Driver`, `Donation`, `Subscription`, `LoyaltyPointTransaction`, `Notification`, `Wallet`, and `Transaction` are primarily nested under `/users/{userId}/...` or `/drivers/{driverId}/...`. In these cases, the `userId` or `driverId` from the path wildcard *must* match a corresponding `id`, `ownerId`, or `recipientId` field within the document itself. This eliminates the need for `get()` calls to parent documents for authorization, making rules atomic and easy to debug. For instance, a user's order at `/users/{userId}/orders/{orderId}` explicitly contains `userId` matching the path, allowing `allow read, write: if request.auth.uid == resource.data.userId;`.\n2.  **Store and Product Management:** For entities like `Store` which have specific management rights, a `adminUserId` field will be added to the `Store` document, identifying the user responsible for managing it. For `Product` documents, which are nested under `/stores/{storeId}/products/{productId}`, the `storeAdminUserId` will be denormalized directly from the parent `Store` document into each `Product` document. This allows product write rules to directly check `request.auth.uid == resource.data.storeAdminUserId` without performing a `get()` on the parent store, ensuring atomic product updates and creations.\n3.  **Transactions:** To maintain authorization independence, `Transaction` documents (nested under `/users/{userId}/transactions/{transactionId}` or `/drivers/{driverId}/transactions/{transactionId}`) will include an `ownerId` field. This `ownerId` will match the `userId` or `driverId` from the path, enabling direct authorization checks on the transaction document without fetching the associated wallet.\n\n**QAPs (Queryable Access Patterns):**\n1.  **Structural Segregation:** Publicly accessible, global data such as `Categories`, `Offers`, `Coupons`, `Governorates`, and `Ads` are placed in top-level collections (e.g., `/categories`). This design allows for simple `allow read: true;` rules, enabling efficient and secure `list` queries for all users without complex filtering logic in security rules.\n2.  **Path-Based Filtering:** For user-specific data, collections like `/users/{userId}/orders` naturally filter `list` queries by the `userId` present in the path. This means a user can only query and retrieve their own orders, inherently supporting secure `list` operations.\n3.  **Denormalized Query Fields:** Key query fields (e.g., `storeId`, `categoryId`, `isAvailable` for Products; `isActive`, `storeIds` for Offers/Coupons) are directly present in the documents. This allows for efficient querying and indexing, supporting various `list` operations (e.g., 'all active offers', 'products from a specific store in a category') while maintaining clear security boundaries.\n\n**DBAC (Database-Based Access Control):** Global admin roles are managed via a dedicated collection, `/roles_admin/{adminUid}`. The mere existence of a document at this path for `request.auth.uid` grants administrative privileges, simplifying rule logic for admin operations without relying on custom claims.\n\nThis architecture ensures that security rules are straightforward, explicit, and don't rely on expensive or insecure `get()` operations, making the system robust, scalable, and easy to maintain and debug."
+    "reasoning": "The Firestore data structure is designed with a strong emphasis on Authorization Independence and Query-as-Permission (QAP) principles, ensuring a secure, scalable, and debuggable system. \n\n**Authorization Independence (CRITICAL):**\nTo eliminate the need for `get()` calls in security rules and facilitate atomic operations, authorization context has been denormalized wherever a subcollection's access depends on its parent's attributes:\n1.  **User-specific data:** Collections like `orders`, `transactions`, `ratings`, `notifications`, `donations`, `subscriptions`, and `loyalty_points` are nested directly under `/users/{userId}/`. This places the `userId` in the document path (e.g., `/users/{userId}/orders/{orderId}`), making it trivial for security rules to verify `request.auth.uid == userId` without retrieving the parent user document. The `Wallet` and `LoyaltyPoint` entities, being 1:1 relationships with `User`, are structured as singleton subcollections (`/users/{userId}/wallet` and `/users/{userId}/loyalty_points`) to reinforce this path-based ownership.\n2.  **Store-specific products:** `Products` are nested under `/stores/{storeId}/products/{productId}`. This denormalizes `storeId` into the path, allowing rules to directly use `{storeId}` for authorization, for example, to grant a store admin write access to their products, again without needing to `get()` the parent store document.\n\n**Query-as-Permission (QAPs):**\nQAPs are achieved primarily through **Structural Segregation** and **Denormalization**:\n1.  **Structural Segregation for User Data:** By placing all user-specific collections (e.g., `orders`, `transactions`) as subcollections under `/users/{userId}/`, the system inherently enforces ownership. When a user queries their orders (`db.collection('users').doc(uid).collection('orders')`), the security rules can directly match `request.auth.uid == userId` from the path. This ensures that any `list` operation on these subcollections will *only* return documents owned by the authenticated user, thus making the query itself the permission check and eliminating the need for rules to filter results after a broad read.\n2.  **Structural Segregation for Store Products:** Similarly, `products` are segregated under `/stores/{storeId}/products/{productId}`. This allows for efficient and secure queries for products belonging to a *specific* store, where `storeId` is already part of the query path, making the security rules straightforward to implement (e.g., public read on all products within a `storeId`, but only store admin write).\n3.  **Global, Public Collections:** Entities like `categories`, `offers`, `coupons`, `governorates`, and `ads` are placed in top-level collections. These are generally intended for broad public read access, with write access restricted to administrators. This top-level placement ensures that `list` queries on these collections are efficient and do not require complex filtering by security rules, directly supporting QAPs.\n4.  **Explicit State Modeling:** Fields like `status` in `Order` and `availabilityStatus` in `Driver` explicitly define the state of an entity. This allows client-side queries to include status conditions (e.g., `where('status', '==', 'pending')`), which can then be directly and securely validated by Firestore rules, ensuring that rules do not act as filters on results but rather validate the query itself.\n\n**DBAC (Database-Backed Access Control):**\nAdmin roles are implemented using a dedicated top-level collection `/roles_admin/{adminId}`. The mere *existence* of a document at `roles_admin/$(request.auth.uid)` grants administrative privileges. This strategy avoids relying on custom claims, keeping all authorization data within Firestore and simplifying rule logic. Driver and Store entities also function as implicit roles, where the existence of a `driver` or `store` document matching the `request.auth.uid` grants specific operational permissions.\n\n**Consistency and Debuggability:**\nThe structure employs consistent plural collection names, descriptive wildcard parameters (e.g., `{userId}`, `{orderId}`), and standardized authorization fields (`userId`, `storeId`) within documents and paths. This radical consistency enhances the clarity of intent, making security rules easier to write, understand, and debug."
   }
 }
