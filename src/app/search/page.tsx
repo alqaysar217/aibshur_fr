@@ -23,8 +23,15 @@ export default function SearchPage() {
   }, [])
 
   // جلب كافة المتاجر والمنتجات بشكل لحظي
-  const storesQuery = useMemoFirebase(() => query(collection(db, "stores")), [db])
-  const productsQuery = useMemoFirebase(() => query(collectionGroup(db, "products")), [db])
+  const storesQuery = useMemoFirebase(() => {
+    if (!db) return null
+    return query(collection(db, "stores"))
+  }, [db])
+
+  const productsQuery = useMemoFirebase(() => {
+    if (!db) return null
+    return query(collectionGroup(db, "products"))
+  }, [db])
   
   const { data: stores, isLoading: loadingStores } = useCollection(storesQuery)
   const { data: products, isLoading: loadingProducts } = useCollection(productsQuery)
@@ -42,7 +49,7 @@ export default function SearchPage() {
     // إذا لم يوجد نص بحث، نعرض قائمة أولية من الكل
     if (!searchVal) return combined.slice(0, 20)
 
-    // فلترة النتائج بحيث تبحث في أي مكان في النص (بداية، وسط، نهاية)
+    // فلترة النتائج بحيث تبحث في أي مكان في النص
     return combined.filter((item: any) => {
       const nameMatch = item.name?.toLowerCase().includes(searchVal)
       const descMatch = item.description?.toLowerCase().includes(searchVal)
@@ -53,7 +60,7 @@ export default function SearchPage() {
 
   const isLoading = loadingStores || loadingProducts
 
-  if (!mounted) return null
+  if (!mounted) return <div className="min-h-screen bg-background" />
 
   return (
     <div className="pb-24 min-h-screen bg-secondary/5">
@@ -61,7 +68,7 @@ export default function SearchPage() {
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
           <ArrowRight className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl font-black">اكتشف في أبشر</h1>
+        <h1 className="text-xl font-black">{"اكتشف في أبشر"}</h1>
       </header>
 
       <div className="p-4 space-y-4">
@@ -81,7 +88,7 @@ export default function SearchPage() {
         {/* قائمة النتائج الموحدة */}
         <div className="space-y-3 animate-in fade-in duration-500">
           {isLoading && (
-            <div className="text-center py-10 text-muted-foreground text-sm font-bold">جاري البحث...</div>
+            <div className="text-center py-10 text-muted-foreground text-sm font-bold">{"جاري البحث..."}</div>
           )}
 
           {!isLoading && results.length > 0 ? (
@@ -123,7 +130,7 @@ export default function SearchPage() {
           ) : !isLoading && (
             <div className="text-center py-20 flex flex-col items-center opacity-40">
               <ShoppingBag className="h-12 w-12 mb-2" />
-              <p className="text-sm font-bold">لم نجد نتائج مطابقة</p>
+              <p className="text-sm font-bold">{"لم نجد نتائج مطابقة"}</p>
             </div>
           )}
         </div>

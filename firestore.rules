@@ -2,8 +2,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 1. قاعدة البحث الشامل (Collection Group) - يجب أن تكون في القمة
-    // تسمح بالبحث عن "products" في أي مكان في قاعدة البيانات
+    // 1. قاعدة البحث الشامل (Collection Group) للمنتجات
+    // يجب أن تكون في القمة لتمكين استعلامات البحث والمفضلة عبر كافة المتاجر
     match /{path=**}/products/{productId} {
       allow read, get, list: if true;
     }
