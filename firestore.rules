@@ -9,62 +9,52 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // التأكد من أن المستخدم هو صاحب البيانات (بناءً على الـ UID في المسار)
+    // التأكد من أن المستخدم هو صاحب البيانات
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // التأكد من أن حقل userId في البيانات المرسلة يطابق المستخدم الحالي
-    function isDataOwner() {
-      return isSignedIn() && request.resource.data.userId == request.auth.uid;
-    }
-
     // --- القواعد (Rules) ---
 
-    // 1. قاعدة البحث الشامل (Collection Group) للمنتجات
-    // ضرورية جداً لعمل صفحة "المفضلة" والبحث الذكي
-    match /{path=**}/products/{productId} {
-      allow list, get: if isSignedIn();
+    // 1. البيانات العامة: السماح للجميع بالقراءة (لتمكين التصفح قبل تسجيل الدخول)
+    // تشمل المتاجر، المنتجات داخلها، الأقسام، العروض، والمحافظات
+    match /stores/{storeId} {
+      allow read, get, list: if true;
+      match /products/{productId} {
+        allow read, get, list: if true;
+      }
     }
 
-    // 2. بيانات المستخدمين
+    // قاعدة البحث الشامل (Collection Group) للمنتجات
+    // ضرورية جداً لعمل صفحة "المفضلة" والبحث الذكي عبر كافة المتاجر
+    match /{path=**}/products/{productId} {
+      allow read, get, list: if true;
+    }
+
+    match /categories/{id} { allow read: if true; }
+    match /offers/{id} { allow read: if true; }
+    match /ads/{id} { allow read: if true; }
+    match /governorates/{id} { allow read: if true; }
+
+    // 2. بيانات المستخدمين: حماية الخصوصية (المالك فقط)
     match /users/{userId} {
-      // لا يمكن لأحد قراءة أو تعديل بيانات المستخدم إلا هو نفسه
       allow read, write: if isOwner(userId);
 
-      // المجموعات الفرعية داخل المستخدم (المحفظة، التنبيهات، إلخ)
+      // المجموعات الفرعية (المحفظة، التنبيهات، الطلبات الخاصة، إلخ)
       match /{allSubcollections=**} {
         allow read, write: if isOwner(userId);
       }
     }
 
-    // 3. المتاجر (المعلومات العامة)
-    match /stores/{storeId} {
-      // أي مستخدم مسجل دخول يمكنه رؤية المتاجر ومنتجاتها
-      allow read, get, list: if isSignedIn();
-      // الكتابة (إضافة متجر) ممنوعة من التطبيق (تتم عن طريق الإدمن فقط)
-      allow write: if false;
-
-      match /products/{productId} {
-        allow read, get, list: if isSignedIn();
-      }
-    }
-
-    // 4. الطلبات (Orders)
+    // 3. الطلبات المركزية (Orders): المالك أو المندوب الموكل إليه
     match /orders/{orderId} {
-      // السماح بإنشاء طلب إذا كان الـ userId في الطلب يطابق صاحب الطلب
-      allow create: if isDataOwner();
-      // السماح بالقراءة فقط إذا كان المستخدم هو صاحب الطلب أو المندوب الموكل إليه
+      allow create: if isSignedIn();
       allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.driverId == request.auth.uid);
-      // التحديث مسموح فقط لحالات معينة (مثل إلغاء الطلب)
-      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.driverId == request.auth.uid);
     }
 
-    // 5. المجموعات العامة (أقسام، عروض، محافظات)
-    match /categories/{id} { allow read: if isSignedIn(); }
-    match /offers/{id} { allow read: if isSignedIn(); }
-    match /ads/{id} { allow read: if isSignedIn(); }
-    match /governorates/{id} { allow read: if isSignedIn(); }
+    // 4. التقييمات والكوبونات: للمسجلين فقط
     match /coupons/{id} { allow read: if isSignedIn(); }
+    match /ratings/{id} { allow read: if isSignedIn(); allow create: if isSignedIn(); }
   }
 }
