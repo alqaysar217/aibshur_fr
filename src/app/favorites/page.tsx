@@ -31,7 +31,6 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
-  // نستخدم collection العادية للمتاجر لأنها في المستوى الأول
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds?.length) return null
     return query(
@@ -40,8 +39,6 @@ export default function FavoritesPage() {
     )
   }, [db, userData?.favoritesStoreIds])
 
-  // نستخدم collectionGroup للوجبات لأنها موزعة داخل المتاجر
-  // قمنا بإضافة limit(10) لضمان أداء أفضل وتوافق مع القواعد
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesProductIds?.length) return null
     return query(

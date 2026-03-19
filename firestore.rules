@@ -1,6 +1,6 @@
 /**
  * ### Firebase Security Rules for "أبشر" Delivery Platform
- * Updated: 2024-05-21 (Force Redeploy for Collection Group Queries)
+ * Updated: 2024-05-21 (Fix for Collection Group Queries)
  */
 
 rules_version = '2';
@@ -8,9 +8,9 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // --- 1. COLLECTION GROUP RULES (MUST BE TOP LEVEL) ---
-    // يسمح بالبحث الشامل عن المنتجات في كافة المتاجر
+    // يسمح بالبحث الشامل عن المنتجات في كافة المتاجر لصفحات البحث والمفضلة
     match /{path=**}/products/{productId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if isSignedIn() && (
         isAdmin() || 
         (resource != null && resource.data.storeAdminUserId == request.auth.uid) ||
