@@ -17,10 +17,6 @@
  *   respective documents.
  * - **Orders & Ratings**: Orders are shared between the customer (path owner) and the assigned driver. 
  *   Ratings are initially private to the creator but allow for public reading for aggregation.
- * 
- * #### Key Security Decisions
- * - **Collection Group Queries**: Specifically enabled for 'products' to support global search 
- *   across all stores.
  */
 
 rules_version = '2';
@@ -50,19 +46,20 @@ service cloud.firestore {
     }
 
     function isProductManager(productData) {
-      return isSignedIn() && productData.storeAdminUserId == request.auth.uid;
+      return isSignedIn() && (productData.storeAdminUserId == request.auth.uid || productData.adminUserId == request.auth.uid);
     }
 
     // --- COLLECTION RULES ---
 
     /**
      * @description Product Collection Group Query Support
-     * Allows searching for products across all stores.
+     * Allows searching for products across all stores globally.
+     * This is critical for Favorites and Global Search.
      */
     match /{path=**}/products/{productId} {
-      allow get, list: if true;
-      allow create: if isProductManager(request.resource.data) || isAdmin();
-      allow update, delete: if isProductManager(resource.data) || isAdmin();
+      allow read: if true;
+      allow create: if isSignedIn(); // Managed by application logic & storeAdminUserId
+      allow update, delete: if isAdmin() || isProductManager(resource.data);
     }
 
     match /users/{userId} {
@@ -154,6 +151,12 @@ service cloud.firestore {
       allow create: if isSignedIn();
       allow update: if isStoreManager(resource.data) || isAdmin();
       allow delete: if isAdmin();
+      
+      // Allow products subcollection specifically
+      match /products/{productId} {
+        allow read: if true;
+        allow write: if isAdmin() || isStoreManager(get(/databases/$(database)/documents/stores/$(storeId)).data);
+      }
     }
 
     match /categories/{id} {
