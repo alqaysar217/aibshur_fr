@@ -1,6 +1,7 @@
+
 "use client"
 
-import { User, MapPin, CreditCard, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star } from "lucide-react"
+import { User, MapPin, CreditCard, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { Badge } from "@/components/ui/badge"
@@ -78,9 +79,20 @@ export default function ProfilePage() {
       label: "نقاط الولاء", 
       description: `لديك ${userData?.loyaltyPoints || 0} نقطة`, 
       href: "#",
-      badge: "جديد" 
+      badge: "قريباً" 
     },
-    { icon: Star, label: "عضوية VIP", description: userData?.subscriptionId ? "عضويتك مفعلة" : "اشترك الآن للحصول على توصيل مجاني", href: "#" },
+    { 
+      icon: Star, 
+      label: "عضوية VIP", 
+      description: userData?.subscriptionId ? "عضويتك مفعلة" : "اشترك الآن للحصول على توصيل مجاني", 
+      href: "/subscriptions" 
+    },
+    { 
+      icon: HandHeart, 
+      label: "بوابة التبرعات", 
+      description: "ساهم في الأعمال الخيرية", 
+      href: "/donations" 
+    },
     { icon: Shield, label: "الخصوصية والأمان", description: "إعدادات الحساب وكلمة المرور", href: "#" },
     { icon: HelpCircle, label: "مركز المساعدة", description: "تواصل معنا، الأسئلة الشائعة", href: "#" },
   ]
