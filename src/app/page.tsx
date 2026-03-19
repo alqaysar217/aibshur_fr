@@ -3,7 +3,6 @@
 import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { BottomNav } from "@/components/layout/bottom-nav"
@@ -85,19 +84,8 @@ export default function Home() {
       })
   }
 
-  // Hydration fix: Only render when mounted
-  if (!mounted) {
-    return (
-      <div className="pb-24 bg-secondary/5 min-h-screen">
-        <header className="p-4 flex items-center justify-between sticky top-0 glass z-50 shadow-sm h-[72px]"></header>
-        <div className="p-4 space-y-6">
-          <div className="h-16 w-full bg-white rounded-2xl animate-pulse"></div>
-          <div className="h-48 w-full bg-primary/20 rounded-[2rem] animate-pulse"></div>
-        </div>
-        <BottomNav />
-      </div>
-    )
-  }
+  // Hydration fix: Only render when mounted and clean text
+  if (!mounted) return null;
 
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">
@@ -108,7 +96,7 @@ export default function Home() {
           </div>
           <Link href="/governorates" className="group">
             <div className="flex flex-col">
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{"توصيل إلى"}</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">توصيل إلى</p>
               <p className="text-sm font-black flex items-center gap-1 group-hover:text-primary transition-colors">
                 {selectedCity || "جاري التحديد..."}
                 <ChevronLeft className="h-3 w-3 text-primary" />
@@ -151,8 +139,8 @@ export default function Home() {
             data-ai-hint="delivery motorcycle"
           />
           <div className="absolute inset-0 p-8 flex flex-col justify-center text-white">
-            <Badge className="w-fit mb-3 bg-white text-primary font-black px-3 py-1 border-none rounded-lg">{"توصيل مجاني 🚚"}</Badge>
-            <h2 className="text-3xl font-black mb-2 leading-tight">{"أول طلب لك"}<br/>{"مجاناً بالكامل!"}</h2>
+            <Badge className="w-fit mb-3 bg-white text-primary font-black px-3 py-1 border-none rounded-lg">توصيل مجاني 🚚</Badge>
+            <h2 className="text-3xl font-black mb-2 leading-tight">أول طلب لك<br/>مجاناً بالكامل!</h2>
             <p className="text-xs font-medium opacity-90">استخدم كود: <span className="font-black bg-white/20 px-2 py-0.5 rounded">ABSHER24</span></p>
           </div>
         </div>

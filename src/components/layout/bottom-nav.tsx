@@ -22,7 +22,7 @@ export function BottomNav() {
     setMounted(true)
   }, [])
 
-  // Hydration fix: Simple shell during SSR
+  // Hydration fix: Simple shell during SSR, clean text
   if (!mounted) {
     return (
       <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass border-t flex items-center justify-around h-16 safe-area-bottom z-50">
