@@ -1,20 +1,16 @@
 
 "use client"
 
-import { useState } from "react"
-import { Search, Store, MapPin, ArrowRight, Loader2, ShoppingBag, Utensils, AlertTriangle, Info } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Search, Store, MapPin, ArrowRight, Loader2, ShoppingBag, Utensils, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { BottomNav } from "@/components/layout/bottom-nav"
-import { useFirestore } from "@/firebase"
-import { collection, query, getDocs, limit, orderBy, startAt, endAt, collectionGroup } from "firebase/firestore"
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { collection, query, getDocs, limit, collectionGroup } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { errorEmitter } from "@/firebase/error-emitter"
-import { FirestorePermissionError } from "@/firebase/errors"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function SearchPage() {
   const [queryText, setQueryText] = useState("")
@@ -22,75 +18,46 @@ export default function SearchPage() {
   const [storeResults, setStoreResults] = useState<any[]>([])
   const [productResults, setProductResults] = useState<any[]>([])
   const [hasSearched, setHasSearched] = useState(false)
-  const [indexError, setIndexError] = useState(false)
   const db = useFirestore()
   const router = useRouter()
 
+  // جلب اقتراحات أولية عند فتح الصفحة
+  const suggestedStoresQuery = useMemoFirebase(() => query(collection(db, "stores"), limit(5)), [db])
+  const suggestedProductsQuery = useMemoFirebase(() => query(collectionGroup(db, "products"), limit(5)), [db])
+  
+  const { data: suggestedStores, isLoading: loadingStores } = useCollection(suggestedStoresQuery)
+  const { data: suggestedProducts, isLoading: loadingProducts } = useCollection(suggestedProductsQuery)
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!queryText.trim()) return
+    if (!queryText.trim()) {
+      setHasSearched(false)
+      return
+    }
     
     setLoading(true)
     setHasSearched(true)
-    setIndexError(false)
     
     try {
-      const searchVal = queryText.trim()
+      const searchVal = queryText.trim().toLowerCase()
 
-      // 1. البحث في المتاجر
-      const storesRef = collection(db, "stores")
-      const storeQ = query(
-        storesRef, 
-        orderBy("name"),
-        startAt(searchVal),
-        endAt(searchVal + '\uf8ff'),
-        limit(5)
-      )
-      
-      const storeSnapshot = await getDocs(storeQ).catch(err => {
-        if (err.code === 'permission-denied') {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: storesRef.path,
-            operation: 'list'
-          }))
-        }
-        throw err
-      })
-      
-      const stores = storeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      setStoreResults(stores)
+      // جلب المتاجر والفلترة (لدعم البحث في وسط النص)
+      const storeSnapshot = await getDocs(collection(db, "stores"))
+      const allStores = storeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      const filteredStores = allStores.filter((s: any) => 
+        s.name?.toLowerCase().includes(searchVal) || 
+        s.address?.toLowerCase().includes(searchVal)
+      ).slice(0, 10)
+      setStoreResults(filteredStores)
 
-      // 2. البحث في المنتجات عبر المجموعات
-      const productsRef = collectionGroup(db, "products")
-      const productQ = query(
-        productsRef,
-        orderBy("name"),
-        startAt(searchVal),
-        endAt(searchVal + '\uf8ff'),
-        limit(10)
-      )
-      
-      const productSnapshot = await getDocs(productQ).catch(err => {
-        // التحقق من خطأ الفهرس المفقود
-        if (err.code === 'failed-precondition' || err.message?.includes('index')) {
-          setIndexError(true)
-          return null
-        }
-        if (err.code === 'permission-denied') {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: "collectionGroup/products",
-            operation: 'list'
-          }))
-        }
-        throw err
-      })
-      
-      if (productSnapshot) {
-        const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-        setProductResults(products)
-      } else {
-        setProductResults([])
-      }
+      // جلب المنتجات والفلترة (لدعم البحث في وسط النص)
+      const productSnapshot = await getDocs(collectionGroup(db, "products"))
+      const allProducts = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      const filteredProducts = allProducts.filter((p: any) => 
+        p.name?.toLowerCase().includes(searchVal) || 
+        p.description?.toLowerCase().includes(searchVal)
+      ).slice(0, 15)
+      setProductResults(filteredProducts)
 
     } catch (error: any) {
       console.error("Search Error:", error)
@@ -99,13 +66,26 @@ export default function SearchPage() {
     }
   }
 
+  // تحديث البحث عند تغيير النص (اختياري، للبحث اللحظي)
+  useEffect(() => {
+    if (queryText.length > 1) {
+      const timeoutId = setTimeout(() => {
+        const fakeEvent = { preventDefault: () => {} } as React.FormEvent
+        handleSearch(fakeEvent)
+      }, 500)
+      return () => clearTimeout(timeoutId)
+    } else if (queryText.length === 0) {
+      setHasSearched(false)
+    }
+  }, [queryText])
+
   return (
     <div className="pb-24 min-h-screen bg-secondary/5">
       <header className="p-4 glass sticky top-0 z-50 flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
           <ArrowRight className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl font-black">البحث المباشر</h1>
+        <h1 className="text-xl font-black">اكتشف واستمتع</h1>
       </header>
 
       <div className="p-4 space-y-6">
@@ -116,61 +96,23 @@ export default function SearchPage() {
           <Input 
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
-            placeholder="ابحث عن مطعم أو وجبة.." 
+            placeholder="ابحث عن وجبة، مطعم، أو صنف.." 
             className="pr-12 h-16 rounded-2xl border-none shadow-xl bg-white text-base focus-visible:ring-primary"
           />
-          <Button 
-            type="submit" 
-            disabled={loading}
-            className="absolute left-2 top-1/2 -translate-y-1/2 rounded-xl bg-primary text-white px-6 h-12 font-bold"
-          >
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "بحث"}
-          </Button>
+          {loading && (
+            <div className="absolute left-4 top-1/2 -translate-y-1/2">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            </div>
+          )}
         </form>
 
-        {indexError && (
-          <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-900 rounded-2xl border-2">
-            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
-            <div className="mr-2">
-              <AlertTitle className="font-bold text-lg mb-2 text-amber-800">خطوة أخيرة لتفعيل البحث في الوجبات</AlertTitle>
-              <AlertDescription className="text-sm space-y-4">
-                <p>Firebase يطلب تفعيل "البحث عبر المجموعات" لهذا الحقل يدوياً. اتبع الصور التالية في واجهة Firebase:</p>
-                <div className="bg-white/50 p-4 rounded-xl border border-amber-200 space-y-3">
-                  <div className="flex items-start gap-2">
-                    <Badge className="bg-amber-600">1</Badge>
-                    <p>في صفحة **Indexes**، اضغط على تبويب **Single Field** (بجانب Composite).</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Badge className="bg-amber-600">2</Badge>
-                    <p>اضغط على زر **Add exemption** الكبير في الأعلى.</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Badge className="bg-amber-600">3</Badge>
-                    <p>أدخل `products` في معرف المجموعة و `name` في مسار الحقل.</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Badge className="bg-amber-600">4</Badge>
-                    <p>فعل **Enabled** لخيار **Collection group** (في الأسفل) ثم اضغط **Save**.</p>
-                  </div>
-                </div>
-              </AlertDescription>
-            </div>
-          </Alert>
-        )}
-
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-20 space-y-4">
-            <div className="h-12 w-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-            <p className="text-muted-foreground font-bold">جاري البحث في قاعدة البيانات...</p>
-          </div>
-        )}
-
-        {!loading && hasSearched && (
+        {hasSearched ? (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+            {/* نتائج المتاجر */}
             {storeResults.length > 0 && (
               <div className="space-y-4">
                 <h3 className="font-black text-lg px-2 flex items-center gap-2 text-primary">
-                  <Store className="h-5 w-5" /> المطاعم المتاحة ({storeResults.length})
+                  <Store className="h-5 w-5" /> المتاجر المطابقة ({storeResults.length})
                 </h3>
                 {storeResults.map((store) => (
                   <Card 
@@ -198,10 +140,11 @@ export default function SearchPage() {
               </div>
             )}
 
+            {/* نتائج الوجبات */}
             {productResults.length > 0 && (
               <div className="space-y-4">
                 <h3 className="font-black text-lg px-2 flex items-center gap-2 text-primary">
-                  <Utensils className="h-5 w-5" /> الوجبات المقترحة ({productResults.length})
+                  <Utensils className="h-5 w-5" /> الوجبات المطابقة ({productResults.length})
                 </h3>
                 {productResults.map((product) => (
                   <Card 
@@ -230,23 +173,67 @@ export default function SearchPage() {
               </div>
             )}
 
-            {storeResults.length === 0 && productResults.length === 0 && !indexError && (
+            {storeResults.length === 0 && productResults.length === 0 && !loading && (
               <div className="text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-secondary flex flex-col items-center">
                 <ShoppingBag className="h-12 w-12 text-muted-foreground/20 mb-4" />
-                <p className="text-muted-foreground text-sm font-bold">عذراً، لم نجد نتائج مطابقة لبحثك</p>
+                <p className="text-muted-foreground text-sm font-bold">عذراً، لم نجد نتائج لما تبحث عنه</p>
               </div>
             )}
           </div>
-        )}
-
-        {!hasSearched && !loading && (
-          <div className="py-20 text-center space-y-6">
-            <div className="h-32 w-32 bg-primary/5 rounded-full flex items-center justify-center mx-auto">
-              <Search className="h-16 w-16 text-primary/10" />
+        ) : (
+          <div className="space-y-8 animate-in fade-in duration-700">
+            {/* قسم الاقتراحات الافتراضي */}
+            <div className="flex items-center gap-2 px-2">
+              <Sparkles className="h-5 w-5 text-accent fill-accent/20" />
+              <h2 className="font-black text-lg">اقتراحات لك</h2>
             </div>
-            <div className="space-y-2">
-              <h2 className="font-black text-xl">اكتشف كل شيء</h2>
-              <p className="text-muted-foreground text-sm max-w-[250px] mx-auto">ابحث عن مطاعمك المفضلة أو الوجبات التي تشتهيها في منطقتك.</p>
+
+            {/* عرض المتاجر المقترحة */}
+            <div className="space-y-4">
+              <p className="text-xs font-bold text-muted-foreground px-2">متاجر مميزة</p>
+              {loadingStores ? (
+                <div className="h-24 bg-white rounded-2xl animate-pulse mx-2" />
+              ) : suggestedStores?.map((store: any) => (
+                <Card 
+                  key={store.id} 
+                  className="border-none shadow-sm rounded-2xl overflow-hidden cursor-pointer bg-white/50"
+                  onClick={() => router.push(`/store/${store.id}`)}
+                >
+                  <CardContent className="p-3 flex items-center gap-3">
+                    <div className="h-12 w-12 relative shrink-0">
+                      <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/100`} alt="" fill className="rounded-lg object-cover" />
+                    </div>
+                    <span className="font-bold text-sm flex-1">{store.name}</span>
+                    <Badge variant="secondary" className="text-[9px]">{store.address}</Badge>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* عرض وجبات مقترحة */}
+            <div className="space-y-4">
+              <p className="text-xs font-bold text-muted-foreground px-2">وجبات قد تعجبك</p>
+              <div className="grid grid-cols-2 gap-3">
+                {loadingProducts ? (
+                  [1, 2].map(i => <div key={i} className="h-32 bg-white rounded-2xl animate-pulse" />)
+                ) : suggestedProducts?.map((product: any) => (
+                  <Card 
+                    key={product.id} 
+                    className="border-none shadow-sm rounded-2xl overflow-hidden cursor-pointer group"
+                    onClick={() => router.push(`/store/${product.storeId}`)}
+                  >
+                    <CardContent className="p-0">
+                      <div className="relative h-28 w-full">
+                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt="" fill className="object-cover group-hover:scale-110 transition-transform" />
+                      </div>
+                      <div className="p-2">
+                        <p className="font-bold text-[10px] truncate">{product.name}</p>
+                        <p className="text-primary font-black text-xs">{product.price} ر.س</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
         )}
