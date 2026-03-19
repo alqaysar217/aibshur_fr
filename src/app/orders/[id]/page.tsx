@@ -3,12 +3,14 @@
 
 import { useParams, useRouter } from "next/navigation"
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
-import { doc, updateDoc } from "firebase/firestore"
-import { ArrowRight, Clock, MapPin, CreditCard, ShoppingBag, CheckCircle2, Phone } from "lucide-react"
+import { doc, updateDoc, collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { ArrowRight, Clock, MapPin, CreditCard, ShoppingBag, Star, Phone, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 import { ar } from "date-fns/locale"
 
@@ -17,6 +19,9 @@ export default function OrderDetailPage() {
   const router = useRouter()
   const { user } = useUser()
   const db = useFirestore()
+  const { toast } = useToast()
+  const [rating, setRating] = useState(0)
+  const [isRatingSubmitted, setIsRatingSubmitted] = useState(false)
 
   const orderRef = useMemoFirebase(() => {
     if (!db || !user || !id) return null
@@ -47,16 +52,24 @@ export default function OrderDetailPage() {
     }
   }
 
-  // ميزة للمطور: محاكاة تغيير الحالة لتجربة شريط التقدم
-  const simulateStatusChange = async () => {
-    if (!orderRef || !order) return
-    const statuses = ['pending', 'accepted', 'preparing', 'on_the_way', 'delivered']
-    const currentIndex = statuses.indexOf(order.status)
-    const nextIndex = (currentIndex + 1) % statuses.length
+  const handleRatingSubmit = async () => {
+    if (!db || !user || !order || rating === 0) return
     
-    await updateDoc(orderRef, {
-      status: statuses[nextIndex]
-    })
+    const ratingData = {
+      userId: user.uid,
+      orderId: id as string,
+      storeId: order.storeId,
+      ratingValue: rating,
+      createdAt: serverTimestamp()
+    }
+
+    try {
+      await addDoc(collection(db, "users", user.uid, "orders", id as string, "ratings"), ratingData)
+      setIsRatingSubmitted(true)
+      toast({ title: "شكراً لك!", description: "تم إرسال تقييمك بنجاح" })
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   if (isLoading) return <div className="flex items-center justify-center min-h-screen">جاري التحميل...</div>
@@ -82,7 +95,7 @@ export default function OrderDetailPage() {
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">رقم الطلب</p>
                 <h2 className="font-black text-sm">#{order.id.substring(0, 8)}</h2>
               </div>
-              <Badge className="bg-primary/10 text-primary border-none font-bold">
+              <Badge className="bg-primary/10 text-primary border-none font-bold px-3 py-1">
                 {getStatusLabel(order.status)}
               </Badge>
             </div>
@@ -98,17 +111,30 @@ export default function OrderDetailPage() {
             <p className="text-[10px] text-center text-muted-foreground italic">
               تم الطلب في {format(orderDate, "PPP p", { locale: ar })}
             </p>
-
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full text-[10px] h-8 opacity-50 border-dashed"
-              onClick={simulateStatusChange}
-            >
-              تغيير الحالة (للتجربة)
-            </Button>
           </CardContent>
         </Card>
+
+        {/* نظام التقييم - يظهر فقط عند اكتمال الطلب */}
+        {order.status === 'delivered' && !isRatingSubmitted && (
+          <Card className="border-none shadow-lg rounded-3xl bg-primary text-white overflow-hidden">
+            <CardContent className="p-6 text-center space-y-4">
+              <h3 className="font-black">كيف كانت تجربتك اليوم؟</h3>
+              <p className="text-xs opacity-80">تقييمك يساعدنا على تحسين خدمتنا</p>
+              <div className="flex justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button key={star} onClick={() => setRating(star)} className="transition-transform active:scale-90">
+                    <Star className={`h-8 w-8 ${rating >= star ? 'fill-accent text-accent' : 'text-white/30'}`} />
+                  </button>
+                ))}
+              </div>
+              {rating > 0 && (
+                <Button onClick={handleRatingSubmit} className="bg-white text-primary hover:bg-white/90 w-full rounded-xl font-bold">
+                  إرسال التقييم
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* قائمة الوجبات */}
         <div className="space-y-3">
@@ -123,7 +149,7 @@ export default function OrderDetailPage() {
                     <span className="bg-secondary px-2 py-1 rounded-lg text-[10px] font-bold">{item.quantity}x</span>
                     <span className="font-bold">{item.name}</span>
                   </div>
-                  <span className="text-muted-foreground">{item.price * item.quantity} ر.س</span>
+                  <span className="text-muted-foreground font-bold">{item.price * item.quantity} ر.س</span>
                 </div>
               ))}
             </CardContent>
@@ -131,32 +157,30 @@ export default function OrderDetailPage() {
         </div>
 
         {/* تفاصيل التوصيل والدفع */}
-        <div className="grid grid-cols-1 gap-4">
-          <Card className="border-none shadow-sm rounded-3xl bg-white">
-            <CardContent className="p-5 space-y-4">
-              <div className="flex items-start gap-4">
-                <div className="bg-orange-50 p-2 rounded-xl">
-                  <MapPin className="h-5 w-5 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground font-bold">عنوان التوصيل</p>
-                  <p className="text-xs font-bold">{order.deliveryAddress}</p>
-                </div>
+        <Card className="border-none shadow-sm rounded-3xl bg-white">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="bg-orange-50 p-2 rounded-xl">
+                <MapPin className="h-5 w-5 text-orange-600" />
               </div>
-              <div className="flex items-start gap-4">
-                <div className="bg-green-50 p-2 rounded-xl">
-                  <CreditCard className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground font-bold">طريقة الدفع</p>
-                  <p className="text-xs font-bold">
-                    {order.paymentMethod === 'cash_on_delivery' ? 'الدفع عند الاستلام' : 'المحفظة الإلكترونية'}
-                  </p>
-                </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground font-bold">عنوان التوصيل</p>
+                <p className="text-xs font-bold">{order.deliveryAddress}</p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="bg-green-50 p-2 rounded-xl">
+                <CreditCard className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground font-bold">طريقة الدفع</p>
+                <p className="text-xs font-bold">
+                  {order.paymentMethod === 'cash_on_delivery' ? 'الدفع عند الاستلام' : 'المحفظة الإلكترونية'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* ملخص الفاتورة */}
         <Card className="border-none shadow-sm rounded-3xl bg-white">
@@ -176,9 +200,14 @@ export default function OrderDetailPage() {
           </CardContent>
         </Card>
 
-        <Button variant="outline" className="w-full h-14 rounded-2xl border-primary text-primary font-bold gap-2">
-          <Phone className="h-4 w-4" /> التواصل مع الدعم الفني
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" className="flex-1 h-14 rounded-2xl border-primary text-primary font-bold gap-2">
+            <Phone className="h-4 w-4" /> اتصل بنا
+          </Button>
+          <Button variant="outline" className="flex-1 h-14 rounded-2xl border-green-500 text-green-600 font-bold gap-2">
+            <MessageCircle className="h-4 w-4" /> واتساب
+          </Button>
+        </div>
       </div>
     </div>
   )

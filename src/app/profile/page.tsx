@@ -78,8 +78,7 @@ export default function ProfilePage() {
       icon: Gift, 
       label: "نقاط الولاء", 
       description: `لديك ${userData?.loyaltyPoints || 0} نقطة`, 
-      href: "#",
-      badge: "قريباً" 
+      href: "/loyalty"
     },
     { 
       icon: Star, 

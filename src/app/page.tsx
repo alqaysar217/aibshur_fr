@@ -111,10 +111,10 @@ export default function Home() {
               دخول
             </button>
           )}
-          <button className="relative bg-white shadow-md p-2 rounded-xl border border-border group active:scale-90 transition-transform">
+          <Link href="/notifications" className="relative bg-white shadow-md p-2 rounded-xl border border-border group active:scale-90 transition-transform">
             <Bell className="h-5 w-5 text-foreground group-hover:text-primary" />
             <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-white animate-pulse"></span>
-          </button>
+          </Link>
         </div>
       </header>
 
