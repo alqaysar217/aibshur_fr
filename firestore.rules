@@ -3,9 +3,14 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * CORE PHILOSOPHY
-     * This ruleset implements a strict Ownership and Database-Backed Access Control (DBAC) model. 
+     * 1. COLLECTION GROUP RULES - MUST BE AT TOP LEVEL
+     * These allow querying 'products' across all stores for the Favorites and Search features.
      */
+    match /{path=**}/products/{productId} {
+      allow list: if request.auth != null;
+      allow get: if request.auth != null;
+      // Write permissions remain protected under the specific /stores/{storeId}/products path
+    }
 
     // --- Helper Functions ---
     function isSignedIn() {
@@ -24,13 +29,6 @@ service cloud.firestore {
       return resource != null && isOwner(userId);
     }
 
-    // --- COLLECTION GROUP RULES (CRITICAL FOR SEARCH & FAVORITES) ---
-    // These must be at the top level to allow querying across all stores
-    match /{path=**}/products/{productId} {
-      allow read, get, list: if isSignedIn();
-      // Write permissions are handled in the specific store path below
-    }
-
     // --- Standard Collection Rules ---
 
     match /roles_admin/{adminId} {
@@ -40,8 +38,10 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow get, list: if isOwner(userId) || isAdmin();
+      // Allow create/update if the user is the owner. 
+      // Ensure the 'id' field matches the document ID for 'create' operations.
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow update: if isExistingOwner(userId);
       allow delete: if isAdmin();
 
       match /wallet/{document} {
@@ -78,6 +78,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
 
       match /products/{productId} {
+        // Individual product read is already covered by collectionGroup at top, but redundancy is safe.
         allow create: if isOwner(storeId) && request.resource.data.storeId == storeId;
         allow update: if isOwner(storeId) && resource != null && request.resource.data.storeId == resource.data.storeId;
         allow delete: if isOwner(storeId) && resource != null;

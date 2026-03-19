@@ -58,6 +58,7 @@ export default function FavoritesPage() {
 
     const ref = doc(db, "users", user.uid)
     const updateData = {
+      id: user.uid,
       favoritesStoreIds: arrayRemove(storeId)
     }
 
@@ -79,6 +80,7 @@ export default function FavoritesPage() {
 
     const ref = doc(db, "users", user.uid)
     const updateData = {
+      id: user.uid,
       favoritesProductIds: arrayRemove(productId)
     }
 

@@ -70,6 +70,7 @@ export default function Home() {
     const ref = doc(db, "users", user.uid)
     
     const updateData = {
+      id: user.uid, // Required for 'create' rule if document doesn't exist
       favoritesStoreIds: isFav ? arrayRemove(storeId) : arrayUnion(storeId)
     }
 
@@ -84,8 +85,7 @@ export default function Home() {
       })
   }
 
-  // Prevent hydration mismatch by returning null until mounted
-  if (!mounted) return null;
+  if (!mounted) return <div className="min-h-screen bg-background" />;
 
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">
