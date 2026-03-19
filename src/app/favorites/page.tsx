@@ -33,6 +33,7 @@ export default function FavoritesPage() {
 
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds?.length) return null
+    // We limit to 10 to avoid 'in' query limitations and potential performance issues
     return query(
       collection(db, "stores"), 
       where("id", "in", userData.favoritesStoreIds.slice(0, 10))
@@ -41,7 +42,7 @@ export default function FavoritesPage() {
 
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesProductIds?.length) return null
-    // Important: Collection group queries require top-level match /{path=**}/products/{productId} in security rules
+    // Collection group queries are essential for finding subcollection documents across different parents
     return query(
       collectionGroup(db, "products"),
       where("id", "in", userData.favoritesProductIds.slice(0, 10))
@@ -58,7 +59,6 @@ export default function FavoritesPage() {
 
     const ref = doc(db, "users", user.uid)
     const updateData = {
-      id: user.uid,
       favoritesStoreIds: arrayRemove(storeId)
     }
 
@@ -80,7 +80,6 @@ export default function FavoritesPage() {
 
     const ref = doc(db, "users", user.uid)
     const updateData = {
-      id: user.uid,
       favoritesProductIds: arrayRemove(productId)
     }
 

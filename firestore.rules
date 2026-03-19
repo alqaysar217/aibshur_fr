@@ -12,7 +12,20 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- GLOBAL HELPER FUNCTIONS ---
+    // --- 1. COLLECTION GROUP RULES (CRITICAL) ---
+    // This MUST be at the top level and separate for collectionGroup queries to work.
+    // It allows searching for products across all stores (e.g., in Search and Favorites).
+    match /{path=**}/products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null && (
+        // Admin or Store Manager (via denormalized field)
+        request.auth.uid == request.resource.data.storeAdminUserId || 
+        request.auth.uid == resource.data.storeAdminUserId ||
+        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
+      );
+    }
+
+    // --- 2. GLOBAL HELPER FUNCTIONS ---
 
     function isSignedIn() {
       return request.auth != null;
@@ -34,18 +47,7 @@ service cloud.firestore {
       return isSignedIn() && storeData.adminUserId == request.auth.uid;
     }
 
-    // --- COLLECTION GROUP RULES ---
-    // CRITICAL: This must be at the top level for collectionGroup queries to work.
-    // This allows searching for products across all stores.
-    match /{path=**}/products/{productId} {
-      allow read: if true;
-      allow write: if isAdmin() || (isSignedIn() && (
-        (resource == null && request.resource.data.storeAdminUserId == request.auth.uid) ||
-        (resource != null && (resource.data.storeAdminUserId == request.auth.uid || resource.data.adminUserId == request.auth.uid))
-      ));
-    }
-
-    // --- COLLECTION RULES ---
+    // --- 3. COLLECTION RULES ---
 
     match /users/{userId} {
       allow get, list: if isOwner(userId);
@@ -137,7 +139,7 @@ service cloud.firestore {
       allow update: if isStoreManager(resource.data) || isAdmin();
       allow delete: if isAdmin();
       
-      // Subcollection products (also covered by collectionGroup rule above)
+      // Subcollection products (explicitly allow for single store path)
       match /products/{productId} {
         allow read: if true;
         allow write: if isAdmin() || isStoreManager(get(/databases/$(database)/documents/stores/$(storeId)).data);
