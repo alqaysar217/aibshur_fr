@@ -135,12 +135,12 @@ export default function SearchPage() {
             <AlertDescription className="text-sm space-y-3">
               <p>للبحث عن الوجبات في جميع المطاعم، اتبع هذه الخطوات البسيطة في Firebase:</p>
               <ol className="list-decimal mr-5 space-y-2">
-                <li>اذهب لتبويب <b>Indexes</b> ثم اضغط على <b>Single Field</b>.</li>
-                <li>اضغط على زر <b>Add exemption</b>.</li>
+                <li>في صفحة Indexes، اضغط على تبويب **Single Field** (بجانب Composite).</li>
+                <li>اضغط على زر **Add exemption**.</li>
                 <li>في Collection ID اكتب: <code className="bg-amber-200 px-1 rounded">products</code></li>
                 <li>في Field path اكتب: <code className="bg-amber-200 px-1 rounded">name</code></li>
-                <li>فعل خيار <b>Collection group</b> لـ <b>Ascending</b> (اجعله Enabled).</li>
-                <li>اضغط <b>Save</b> وانتظر دقيقة.</li>
+                <li>فعل خيار **Collection group** لـ **Ascending** (اجعله Enabled).</li>
+                <li>اضغط **Save** وانتظر دقيقة.</li>
               </ol>
             </AlertDescription>
           </Alert>
