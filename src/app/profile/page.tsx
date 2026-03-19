@@ -42,7 +42,10 @@ export default function ProfilePage() {
     router.push("/login")
   }
 
-  if (!mounted || isUserLoading) {
+  // منع مشاكل الـ Hydration من خلال عدم رندرة أي شيء حتى يتم التحميل على المتصفح
+  if (!mounted) return null
+
+  if (isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary/5">
         <div className="animate-pulse font-black text-primary">جاري التحميل...</div>

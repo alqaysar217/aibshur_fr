@@ -63,7 +63,7 @@ export default function OrdersPage() {
     return formatDistanceToNow(date, { addSuffix: true, locale: ar })
   }
 
-  // منع مشاكل الـ Hydration من خلال الانتظار حتى يتم تحميل المكون على المتصفح
+  // منع مشاكل الـ Hydration
   if (!mounted) return null
 
   if (isUserLoading) {
@@ -86,8 +86,6 @@ export default function OrdersPage() {
     )
   }
 
-  const isLoading = isCollectionLoading
-
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">
       <header className="p-4 glass sticky top-0 z-40 flex items-center gap-4">
@@ -95,7 +93,7 @@ export default function OrdersPage() {
       </header>
 
       <div className="p-4 space-y-6">
-        {isLoading ? (
+        {isCollectionLoading ? (
           [1, 2].map(i => <div key={i} className="h-48 bg-white rounded-2xl animate-pulse" />)
         ) : orders && orders.length > 0 ? (
           orders.map((order: any) => (

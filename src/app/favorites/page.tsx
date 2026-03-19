@@ -95,6 +95,7 @@ export default function FavoritesPage() {
       })
   }
 
+  // منع مشاكل الـ Hydration
   if (!mounted) return null
 
   if (isUserLoading) {
