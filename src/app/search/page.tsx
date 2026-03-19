@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Search, Store, ArrowRight, Utensils, ShoppingBag } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -15,8 +14,13 @@ import Image from "next/image"
 
 export default function SearchPage() {
   const [queryText, setQueryText] = useState("")
+  const [mounted, setMounted] = useState(false)
   const db = useFirestore()
   const router = useRouter()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // جلب كافة المتاجر والمنتجات بشكل لحظي
   const storesQuery = useMemoFirebase(() => query(collection(db, "stores")), [db])
@@ -27,6 +31,7 @@ export default function SearchPage() {
 
   // دمج وتصفية النتائج بناءً على النص المدخل
   const results = useMemo(() => {
+    if (!mounted) return []
     const searchVal = queryText.trim().toLowerCase()
     
     // تحويل البيانات لشكل موحد للدمج
@@ -41,12 +46,14 @@ export default function SearchPage() {
     return combined.filter((item: any) => {
       const nameMatch = item.name?.toLowerCase().includes(searchVal)
       const descMatch = item.description?.toLowerCase().includes(searchVal)
-      const addrMatch = item.address?.toLowerCase().includes(searchVal)
+      const addrMatch = item.address?.toLowerCase()?.includes(searchVal)
       return nameMatch || descMatch || addrMatch
     })
-  }, [queryText, stores, products])
+  }, [queryText, stores, products, mounted])
 
   const isLoading = loadingStores || loadingProducts
+
+  if (!mounted) return null
 
   return (
     <div className="pb-24 min-h-screen bg-secondary/5">
@@ -67,7 +74,7 @@ export default function SearchPage() {
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
             placeholder="ابحث عن أي شيء.." 
-            className="pr-12 h-16 rounded-2xl border-none shadow-xl bg-white text-base focus-visible:ring-primary"
+            className="pr-12 h-16 rounded-2xl border-none shadow-xl bg-white text-base focus-visible:ring-primary text-right"
           />
         </div>
 
@@ -94,11 +101,11 @@ export default function SearchPage() {
                     />
                   </div>
                   <div className="flex-1 text-right">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <p className="font-black text-sm">{item.name}</p>
+                    <div className="flex items-center gap-2 mb-0.5 justify-end">
                       <Badge variant="outline" className="text-[8px] h-4 px-1.5 border-primary/20 text-primary">
                         {item.type === 'store' ? 'متجر' : 'وجبة'}
                       </Badge>
+                      <p className="font-black text-sm">{item.name}</p>
                     </div>
                     <p className="text-[10px] text-muted-foreground line-clamp-1">
                       {item.type === 'store' ? item.address : item.description}

@@ -41,7 +41,7 @@ export default function FavoritesPage() {
 
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesProductIds?.length) return null
-    // Important: Use collectionGroup with a specific 'id' check
+    // Important: Collection group queries require top-level match /{path=**}/products/{productId} in security rules
     return query(
       collectionGroup(db, "products"),
       where("id", "in", userData.favoritesProductIds.slice(0, 10))

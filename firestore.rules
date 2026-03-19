@@ -35,11 +35,10 @@ service cloud.firestore {
     }
 
     // --- COLLECTION GROUP RULES ---
-    // These must be at the top level or outside specific path matches to work globally
-    
+    // CRITICAL: This must be at the top level for collectionGroup queries to work.
+    // This allows searching for products across all stores.
     match /{path=**}/products/{productId} {
       allow read: if true;
-      // Write access is handled via denormalized IDs to avoid get() calls
       allow write: if isAdmin() || (isSignedIn() && (
         (resource == null && request.resource.data.storeAdminUserId == request.auth.uid) ||
         (resource != null && (resource.data.storeAdminUserId == request.auth.uid || resource.data.adminUserId == request.auth.uid))
