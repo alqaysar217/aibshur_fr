@@ -50,7 +50,7 @@ export default function Home() {
     let baseQuery = collection(db, "stores");
     
     if (activeCategory) {
-      // الفلترة حسب القسم المختار
+      // الفلترة حسب القسم المختار باستخدام حقل categoryIds
       return query(baseQuery, where("categoryIds", "array-contains", activeCategory), limit(10));
     }
     
