@@ -10,6 +10,7 @@ import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebas
 import { collection, query, orderBy } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { ar } from "date-fns/locale"
 
@@ -52,7 +53,6 @@ export default function OrdersPage() {
 
   const formatOrderDate = (createdAt: any) => {
     if (!createdAt) return "الآن"
-    // التحقق إذا كان التاريخ من نوع Timestamp الخاص بـ Firebase
     const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt)
     return formatDistanceToNow(date, { addSuffix: true, locale: ar })
   }
@@ -111,23 +111,16 @@ export default function OrdersPage() {
                     </div>
                   )}
 
-                  <div className="space-y-1">
-                    {order.orderItems?.map((item: any, i: number) => (
-                      <p key={i} className="text-xs text-muted-foreground flex justify-between">
-                        <span>• {item.name} × {item.quantity}</span>
-                        <span className="font-bold text-foreground">{item.price} ر.س</span>
-                      </p>
-                    ))}
-                  </div>
-
                   <div className="pt-3 flex justify-between items-center border-t border-secondary/30">
                     <div>
                       <p className="text-[10px] text-muted-foreground">الإجمالي</p>
                       <span className="font-black text-primary text-lg">{order.totalAmount} ر.س</span>
                     </div>
-                    <button className="text-xs font-bold text-primary flex items-center gap-1 bg-primary/5 px-3 py-1.5 rounded-lg">
-                      التفاصيل <ChevronLeft className="h-3 w-3" />
-                    </button>
+                    <Link href={`/orders/${order.id}`}>
+                      <button className="text-xs font-bold text-primary flex items-center gap-1 bg-primary/5 px-3 py-1.5 rounded-lg">
+                        التفاصيل <ChevronLeft className="h-3 w-3" />
+                      </button>
+                    </Link>
                   </div>
                 </div>
               </CardContent>
