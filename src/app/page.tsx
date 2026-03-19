@@ -86,7 +86,6 @@ export default function Home() {
       })
   }
 
-  // منع أخطاء الـ Hydration بإرجاع الهيكل الأساسي فقط حتى يكتمل التحميل في المتصفح
   if (!mounted) {
     return (
       <div className="pb-24 bg-secondary/5 min-h-screen">
@@ -109,7 +108,7 @@ export default function Home() {
           </div>
           <Link href="/governorates" className="group">
             <div className="flex flex-col">
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">توصيل إلى</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{"توصيل إلى"}</p>
               <p className="text-sm font-black flex items-center gap-1 group-hover:text-primary transition-colors">
                 {selectedCity || "جاري التحديد..."}
                 <ChevronLeft className="h-3 w-3 text-primary" />
