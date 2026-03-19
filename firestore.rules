@@ -6,17 +6,6 @@
  * and "Authorization Independence." By matching wildcards in the document paths to internal 
  * ownership fields, we ensure that security decisions are atomic and do not require expensive 
  * cross-document lookups (get() calls) in most scenarios.
- * 
- * #### Data Structure
- * - **User/Driver Private Trees**: Personal profiles, wallets, transactions, and notifications are 
- *   nested under `/users/{userId}` or `/drivers/{driverId}`. Access is restricted to the account owner.
- * - **Global Public Collections**: Categories, Governorates, Ads, Offers, and Coupons are top-level 
- *   collections that are publicly readable but only writeable by users with verified Admin privileges.
- * - **Merchant Domain**: Stores and Products are publicly readable. Specific store management 
- *   privileges are handled via denormalized `adminUserId` and `storeAdminUserId` fields on the 
- *   respective documents.
- * - **Orders & Ratings**: Orders are shared between the customer (path owner) and the assigned driver. 
- *   Ratings are initially private to the creator but allow for public reading for aggregation.
  */
 
 rules_version = '2';
@@ -45,22 +34,19 @@ service cloud.firestore {
       return isSignedIn() && storeData.adminUserId == request.auth.uid;
     }
 
-    function isProductManager(productData) {
-      return isSignedIn() && (productData.storeAdminUserId == request.auth.uid || productData.adminUserId == request.auth.uid);
+    // --- COLLECTION GROUP RULES ---
+    // These must be at the top level or outside specific path matches to work globally
+    
+    match /{path=**}/products/{productId} {
+      allow read: if true;
+      // Write access is handled via denormalized IDs to avoid get() calls
+      allow write: if isAdmin() || (isSignedIn() && (
+        (resource == null && request.resource.data.storeAdminUserId == request.auth.uid) ||
+        (resource != null && (resource.data.storeAdminUserId == request.auth.uid || resource.data.adminUserId == request.auth.uid))
+      ));
     }
 
     // --- COLLECTION RULES ---
-
-    /**
-     * @description Product Collection Group Query Support
-     * Allows searching for products across all stores globally.
-     * This is critical for Favorites and Global Search.
-     */
-    match /{path=**}/products/{productId} {
-      allow read: if true;
-      allow create: if isSignedIn(); // Managed by application logic & storeAdminUserId
-      allow update, delete: if isAdmin() || isProductManager(resource.data);
-    }
 
     match /users/{userId} {
       allow get, list: if isOwner(userId);
@@ -152,7 +138,7 @@ service cloud.firestore {
       allow update: if isStoreManager(resource.data) || isAdmin();
       allow delete: if isAdmin();
       
-      // Allow products subcollection specifically
+      // Subcollection products (also covered by collectionGroup rule above)
       match /products/{productId} {
         allow read: if true;
         allow write: if isAdmin() || isStoreManager(get(/databases/$(database)/documents/stores/$(storeId)).data);
