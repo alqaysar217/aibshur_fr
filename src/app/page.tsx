@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Bell, ChevronLeft, Star, Sparkles, Navigation, Heart } from "lucide-react"
+import { Search, MapPin, Bell, ChevronLeft, Star, Sparkles, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
@@ -11,16 +11,24 @@ import { BottomNav } from "@/components/layout/bottom-nav"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase"
-import { collection, query, limit, doc, setDoc, arrayUnion, arrayRemove } from "firebase/firestore"
+import { collection, query, limit, doc, setDoc, arrayUnion, arrayRemove, where } from "firebase/firestore"
 import { cn } from "@/lib/utils"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+
+const CATEGORIES = [
+  { id: "restaurants", name: "مطاعم", icon: <Utensils className="h-6 w-6" />, color: "bg-orange-50", textColor: "text-orange-600" },
+  { id: "grocery", name: "بقالة", icon: <ShoppingBasket className="h-6 w-6" />, color: "bg-green-50", textColor: "text-green-600" },
+  { id: "pharmacy", name: "صيدلية", icon: <Pill className="h-6 w-6" />, color: "bg-blue-50", textColor: "text-blue-600" },
+  { id: "sweets", name: "حلويات", icon: <CakeSlice className="h-6 w-6" />, color: "bg-pink-50", textColor: "text-pink-600" }
+]
 
 export default function Home() {
   const router = useRouter()
   const db = useFirestore()
   const { user } = useUser()
   const [selectedCity, setSelectedCity] = useState("")
+  const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
   useEffect(() => {
     const city = localStorage.getItem('selected_city')
@@ -39,8 +47,15 @@ export default function Home() {
 
   const storesQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, "stores"), limit(10));
-  }, [db]);
+    let baseQuery = collection(db, "stores");
+    
+    if (activeCategory) {
+      // الفلترة حسب القسم المختار
+      return query(baseQuery, where("categoryIds", "array-contains", activeCategory), limit(10));
+    }
+    
+    return query(baseQuery, limit(10));
+  }, [db, activeCategory]);
 
   const { data: stores, isLoading: isStoresLoading } = useCollection(storesQuery);
 
@@ -60,7 +75,6 @@ export default function Home() {
       favoritesStoreIds: isFav ? arrayRemove(storeId) : arrayUnion(storeId)
     }
 
-    // استخدام setDoc مع merge لضمان إنشاء الوثيقة إذا لم تكن موجودة
     setDoc(ref, updateData, { merge: true })
       .catch(async () => {
         const permissionError = new FirestorePermissionError({
@@ -137,28 +151,46 @@ export default function Home() {
       <section className="p-4">
         <div className="flex items-center justify-between mb-6 px-1">
           <h3 className="font-black text-xl text-foreground">الأقسام الرئيسية</h3>
-          <button className="text-primary text-xs font-black bg-primary/5 px-3 py-1.5 rounded-lg">رؤية الكل</button>
+          {activeCategory && (
+            <button 
+              onClick={() => setActiveCategory(null)}
+              className="text-primary text-xs font-black bg-primary/5 px-3 py-1.5 rounded-lg"
+            >
+              عرض الكل
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-4 gap-4">
-          {[
-            { n: "مطاعم", i: "🍔", c: "bg-orange-50" },
-            { n: "بقالة", i: "🛒", c: "bg-green-50" },
-            { n: "صيدلية", i: "💊", c: "bg-blue-50" },
-            { n: "حلويات", i: "🍰", c: "bg-pink-50" }
-          ].map((cat, idx) => (
-            <div key={idx} className="flex flex-col items-center gap-3 group">
-              <div className={`h-16 w-16 ${cat.c} rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-transparent group-hover:border-primary/20 group-hover:shadow-md transition-all active:scale-90 cursor-pointer`}>
-                {cat.i}
+          {CATEGORIES.map((cat) => (
+            <button 
+              key={cat.id} 
+              onClick={() => setActiveCategory(cat.id === activeCategory ? null : cat.id)}
+              className="flex flex-col items-center gap-3 group"
+            >
+              <div className={cn(
+                "h-16 w-16 rounded-2xl flex items-center justify-center shadow-sm border transition-all active:scale-90",
+                cat.color,
+                activeCategory === cat.id ? "border-primary ring-2 ring-primary/20 scale-110 shadow-md" : "border-transparent",
+                cat.textColor
+              )}>
+                {cat.icon}
               </div>
-              <span className="text-[11px] font-black text-foreground/80">{cat.n}</span>
-            </div>
+              <span className={cn(
+                "text-[11px] font-black transition-colors",
+                activeCategory === cat.id ? "text-primary" : "text-foreground/80"
+              )}>
+                {cat.name}
+              </span>
+            </button>
           ))}
         </div>
       </section>
 
       <section className="p-4 space-y-6">
         <div className="flex items-center justify-between px-1">
-          <h3 className="font-black text-xl">المتاجر المقترحة</h3>
+          <h3 className="font-black text-xl">
+            {activeCategory ? `نتائج ${CATEGORIES.find(c => c.id === activeCategory)?.name}` : "المتاجر المقترحة"}
+          </h3>
           <button className="text-primary text-xs font-black">فلترة</button>
         </div>
         
@@ -216,7 +248,7 @@ export default function Home() {
               <div className="bg-secondary/20 p-6 rounded-full">
                 <Navigation className="h-10 w-10 text-muted-foreground opacity-20" />
               </div>
-              <p className="text-muted-foreground text-sm font-bold">لا توجد متاجر مضافة بعد في منطقتك</p>
+              <p className="text-muted-foreground text-sm font-bold">لا توجد نتائج في هذا القسم حالياً</p>
             </div>
           )}
         </div>
