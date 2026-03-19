@@ -33,6 +33,7 @@ export default function FavoritesPage() {
 
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds?.length) return null
+    // Simple query for stores
     return query(
       collection(db, "stores"), 
       where("id", "in", userData.favoritesStoreIds.slice(0, 10))
@@ -41,7 +42,8 @@ export default function FavoritesPage() {
 
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesProductIds?.length) return null
-    // Collection group query to find products across all stores
+    // Collection group query to find products across all stores.
+    // Note: This requires a composite index if the rule wasn't broad enough.
     return query(
       collectionGroup(db, "products"),
       where("id", "in", userData.favoritesProductIds.slice(0, 10)),
