@@ -71,7 +71,7 @@ service cloud.firestore {
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
 
-      match /wallet {
+      match /wallet/{walletId} {
         allow get, list: if isOwner(userId);
         allow create: if isOwner(userId) && request.resource.data.ownerId == userId;
         allow update: if isExistingOwner(userId) && request.resource.data.ownerId == resource.data.ownerId;
@@ -80,7 +80,7 @@ service cloud.firestore {
 
       match /transactions/{transactionId} {
         allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.walletId != null;
+        allow create: if isOwner(userId);
         allow update, delete: if false;
       }
 
@@ -131,7 +131,7 @@ service cloud.firestore {
       allow update: if isExistingOwner(driverId) || isAdmin();
       allow delete: if isAdmin();
 
-      match /wallet {
+      match /wallet/{walletId} {
         allow get, list: if isOwner(driverId) || isAdmin();
         allow create, update: if isOwner(driverId) || isAdmin();
         allow delete: if isAdmin();
@@ -154,8 +154,6 @@ service cloud.firestore {
       allow create: if isSignedIn();
       allow update: if isStoreManager(resource.data) || isAdmin();
       allow delete: if isAdmin();
-      
-      // Products are handled by the collection group rule at the top level
     }
 
     match /categories/{id} {

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { User, MapPin, CreditCard, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star } from "lucide-react"
@@ -42,7 +41,6 @@ export default function ProfilePage() {
     router.push("/login")
   }
 
-  // منع مشاكل الـ Hydration من خلال عدم رندرة أي شيء حتى يتم التحميل على المتصفح
   if (!mounted) return null
 
   if (isUserLoading) {
