@@ -245,9 +245,9 @@ export default function Home() {
                     <CardContent className="p-0 flex flex-col h-full">
                       
                       {/* صورة المتجر (أعلى) - مستطيل عمودي */}
-                      <div className="relative w-full h-[100px] shrink-0">
+                      <div className="relative w-full h-[120px] shrink-0">
                         <Image 
-                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/300/200`} 
+                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/300/400`} 
                           alt={store.name} 
                           fill 
                           className="object-cover" 
