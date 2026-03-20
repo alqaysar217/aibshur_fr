@@ -245,8 +245,8 @@ export default function Home() {
                           fill 
                           className="object-cover transition-transform duration-500 group-hover:scale-110" 
                         />
-                        {/* Rating Badge - Floating on Image */}
-                        <div className="absolute top-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10">
+                        {/* Rating Badge - Floating on Image - Bottom Center */}
+                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
                           <Star className="h-2.5 w-2.5 fill-amber-500" />
                           <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
                         </div>
