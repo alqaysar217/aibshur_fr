@@ -6,6 +6,7 @@ import { Search, ShoppingBag, MapPin } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 export function Header() {
   const [selectedCity, setSelectedCity] = useState("جاري التحديد...")
@@ -17,7 +18,7 @@ export function Header() {
     const city = localStorage.getItem('selected_city')
     if (city) setSelectedCity(city)
 
-    // تحديث عدد العناصر في السلة (تبسيط للعرض)
+    // تحديث عدد العناصر في السلة
     const savedCart = localStorage.getItem('absher_cart')
     if (savedCart) {
       const cart = JSON.parse(savedCart)
@@ -28,9 +29,16 @@ export function Header() {
   return (
     <header className="sticky top-0 z-[60] w-full bg-white/95 backdrop-blur-md border-b border-secondary/20 shadow-sm px-5 py-3 flex items-center justify-between transition-all duration-300">
       <div className="flex flex-col">
-        <Link href="/" className="flex items-center gap-1.5 group">
-          <div className="bg-primary w-8 h-8 rounded-lg flex items-center justify-center shadow-lg shadow-primary/20 group-active:scale-95 transition-transform">
-            <span className="text-white font-black text-lg">أ</span>
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="relative w-9 h-9 group-active:scale-95 transition-transform">
+            <Image 
+              src="/logo.png" 
+              alt="أبشر" 
+              width={36}
+              height={36}
+              className="object-contain"
+              priority
+            />
           </div>
           <h1 className="text-xl font-black text-foreground tracking-tight">أبشر</h1>
         </Link>
