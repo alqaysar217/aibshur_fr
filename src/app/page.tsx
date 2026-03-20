@@ -160,7 +160,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className="bg-white min-h-screen font-body">
+    <div className="bg-secondary/5 min-h-screen font-body transition-colors duration-500">
       {/* 1. السلايدر العلوي */}
       <section className="px-4 py-4 mb-2">
         <Carousel 
@@ -172,7 +172,7 @@ export default function Home() {
             {ads && ads.length > 0 ? ads.map((ad: any) => (
               <CarouselItem key={ad.id}>
                 <Link href={`/search?q=${ad.code}`}>
-                  <Card className="border-none shadow-sm rounded-[1.5rem] overflow-hidden relative h-36 bg-primary transition-all active:scale-[0.98]">
+                  <Card className="border-none shadow-md rounded-[1.5rem] overflow-hidden relative h-36 bg-primary transition-all active:scale-[0.98]">
                     <Image src={ad.imageUrl} alt={ad.title} fill className="object-cover opacity-60" />
                     <div className="absolute inset-0 p-5 flex flex-col justify-center text-white text-right">
                       <h2 className="text-xl font-black mb-1">{ad.title}</h2>
@@ -225,13 +225,13 @@ export default function Home() {
       </section>
 
       {/* 3. قائمة المتاجر */}
-      <section className="px-4 pb-24 space-y-3">
+      <section className="px-4 pb-24 space-y-4">
         <div className="flex items-center justify-between mb-2 px-1">
-          <h3 className="font-black text-sm">المتاجر المتاحة</h3>
+          <h3 className="font-black text-sm text-foreground/80">المتاجر المتاحة</h3>
         </div>
 
         {isStoresLoading ? (
-          [1, 2, 3].map(i => <div key={i} className="h-28 w-full bg-secondary/10 rounded-xl animate-pulse" />)
+          [1, 2, 3].map(i => <div key={i} className="h-28 w-full bg-white rounded-xl animate-pulse border border-secondary/20" />)
         ) : stores && stores.length > 0 ? (
           stores.map((store: any) => {
             const isOpen = store.status === 'مفتوح' || store.status === 'open'
@@ -240,53 +240,48 @@ export default function Home() {
 
             return (
               <Link key={store.id} href={`/store/${store.id}`}>
-                <Card className="border-none shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
+                <Card className="border border-secondary/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
                   <CardContent className="p-2.5 h-full flex flex-row items-center gap-3">
                     {/* 1. الصورة في اليمين */}
-                    <div className="relative w-20 h-20 shrink-0">
+                    <div className="relative w-20 h-20 shrink-0 shadow-sm overflow-hidden rounded-xl border border-secondary/10">
                       <Image 
                         src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
                         alt={store.name} 
                         fill 
-                        className="object-cover rounded-xl" 
+                        className="object-cover transition-transform duration-500 group-hover:scale-110" 
                       />
                     </div>
 
                     {/* 2. المحتوى في الوسط */}
-                    <div className="flex-1 flex flex-col justify-between py-0.5 text-right overflow-hidden">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-foreground truncate">{store.name}</h4>
-                          <div className="flex items-center gap-0.5 text-accent shrink-0">
-                            <Star className="h-3 w-3 fill-accent" />
-                            <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
-                          </div>
-                        </div>
+                    <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
+                      <div className="flex items-center gap-1.5 text-accent">
+                        <Star className="h-3 w-3 fill-accent" />
+                        <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
+                      </div>
+                      
+                      <h4 className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                        {store.name}
+                      </h4>
 
-                        <div className="flex items-center gap-1 text-muted-foreground/60">
-                          <MapPin className="h-2.5 w-2.5" />
-                          <span className="text-[9px] truncate">{store.address || 'المكلا'}</span>
-                          <span className="mx-1 opacity-20">|</span>
-                          <span className="text-[9px]">2.3 كم</span>
-                        </div>
+                      <div className="flex items-center gap-1 text-muted-foreground/60">
+                        <MapPin className="h-2.5 w-2.5" />
+                        <span className="text-[9px] truncate max-w-[100px]">{store.address || 'المكلا'}</span>
+                        <span className="mx-0.5 opacity-20">•</span>
+                        <span className="text-[9px]">يبعد 2.3 كم</span>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-[8px] font-bold text-primary/70 bg-primary/5 px-2 py-0.5 rounded-md">
+                        <span className="text-[8px] font-bold text-primary/80 bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">
                           {categoryName}
                         </span>
-                        <div className="flex items-center gap-1 text-muted-foreground/50">
-                          <Clock className="h-2.5 w-2.5" />
-                          <span className="text-[9px]">{store.deliveryTime || '30 دقيقة'}</span>
-                        </div>
                       </div>
                     </div>
 
                     {/* 3. الإجراءات والحالة في أقصى اليسار */}
-                    <div className="flex flex-col justify-between items-end h-full py-0.5 pl-1 shrink-0">
+                    <div className="flex flex-col justify-between items-end h-full py-1 pl-1 shrink-0">
                       <button 
                         onClick={(e) => toggleFavorite(e, store.id)}
-                        className="p-1.5 bg-secondary/30 rounded-full transition-transform active:scale-75"
+                        className="p-1.5 bg-secondary/30 rounded-full transition-all active:scale-75 hover:bg-destructive/10"
                       >
                         <Heart className={cn("h-3.5 w-3.5 transition-colors", isFav ? "fill-destructive text-destructive" : "text-muted-foreground/30")} />
                       </button>
@@ -306,7 +301,7 @@ export default function Home() {
             )
           })
         ) : (
-          <div className="text-center py-10 border-2 border-dashed rounded-xl border-secondary/50 bg-secondary/5">
+          <div className="text-center py-10 border-2 border-dashed rounded-2xl border-secondary/50 bg-white/50 shadow-inner">
             <Database className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
             <p className="text-[10px] text-muted-foreground font-bold">يرجى تهيئة البيانات</p>
             {user && (
@@ -314,7 +309,7 @@ export default function Home() {
                 onClick={seedData} 
                 disabled={isSeeding} 
                 variant="outline" 
-                className="mt-3 rounded-lg h-8 text-[10px] border-primary text-primary font-bold"
+                className="mt-3 rounded-xl h-8 text-[10px] border-primary text-primary font-bold shadow-sm"
               >
                 {isSeeding ? "جاري البناء..." : "تجهيز تطبيق أبشر"}
               </Button>
