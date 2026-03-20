@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice } from "lucide-react"
+import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice, Database } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -14,6 +14,8 @@ import { collection, query, limit, doc, setDoc, arrayUnion, arrayRemove, where, 
 import { cn } from "@/lib/utils"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
 
 const CATEGORIES = [
   { id: "restaurants", name: "مطاعم", icon: <Utensils className="h-6 w-6" />, color: "bg-orange-50", textColor: "text-orange-600" },
@@ -26,9 +28,11 @@ export default function Home() {
   const router = useRouter()
   const db = useFirestore()
   const { user } = useUser()
+  const { toast } = useToast()
   const [selectedCity, setSelectedCity] = useState("")
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [isSeeding, setIsSeeding] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -56,6 +60,94 @@ export default function Home() {
   }, [db, activeCategory]);
 
   const { data: stores, isLoading: isStoresLoading } = useCollection(storesQuery);
+
+  const seedData = async () => {
+    if (!user) {
+      toast({ title: "عذراً", description: "يجب تسجيل الدخول لتهيئة البيانات", variant: "destructive" })
+      return
+    }
+    setIsSeeding(true)
+    try {
+      // 1. إضافة المتاجر
+      const storesToSeed = [
+        {
+          id: "mandi_king",
+          name: "مطعم مندي الملك",
+          logoUrl: "https://picsum.photos/seed/mandi1/600/400",
+          categoryIds: ["restaurants"],
+          address: "المكلا - الشرج - شارع الستين",
+          openingHours: "11:00 AM - 12:00 AM",
+          status: "open",
+          averageRating: 4.9
+        },
+        {
+          id: "al_khaleej_market",
+          name: "سوبر ماركت الخليج",
+          logoUrl: "https://picsum.photos/seed/grocery_yem/600/400",
+          categoryIds: ["grocery"],
+          address: "المكلا - المكلا مول",
+          openingHours: "08:00 AM - 11:00 PM",
+          status: "open",
+          averageRating: 4.7
+        },
+        {
+          id: "al_shifa_yem",
+          name: "صيدلية الشفاء اليمنية",
+          logoUrl: "https://picsum.photos/seed/pharmacy_yem/600/400",
+          categoryIds: ["pharmacy"],
+          address: "المكلا - حي السلام",
+          openingHours: "24/7",
+          status: "open",
+          averageRating: 4.5
+        }
+      ]
+
+      for (const s of storesToSeed) {
+        await setDoc(doc(db, "stores", s.id), s)
+      }
+
+      // 2. إضافة وجبات لمطعم المندي
+      const mandiProducts = [
+        { id: "mandi_p1", name: "مندي دجاج ربع", price: 2500, description: "ربع دجاجة مع الأرز الحضرمي الأصيل والمرق", imageUrl: "https://picsum.photos/seed/mandi_dish/400/300", status: "available" },
+        { id: "mandi_p2", name: "مندي لحم نفر", price: 5500, description: "لحم بلدي طازج مطهو في التنور مع أرز المندي", imageUrl: "https://picsum.photos/seed/meat/400/300", status: "available" },
+        { id: "mandi_p3", name: "عقدة دجاج", price: 1800, description: "دجاج مقطع مع الخضار والبهارات اليمنية", imageUrl: "https://picsum.photos/seed/ogda/400/300", status: "available" }
+      ]
+      for (const p of mandiProducts) {
+        await setDoc(doc(db, "stores", "mandi_king", "products", p.id), { ...p, storeId: "mandi_king" })
+      }
+
+      // 3. إضافة منتجات للبقالة
+      const groceryProducts = [
+        { id: "groc_p1", name: "زبادي المراعي", price: 250, description: "زبادي طازج 170 جرام", imageUrl: "https://picsum.photos/seed/yogurt/400/300", status: "available" },
+        { id: "groc_p2", name: "خبز رغيف (كيس)", price: 150, description: "خبز طازج من مخابزنا", imageUrl: "https://picsum.photos/seed/bread/400/300", status: "available" },
+        { id: "groc_p3", name: "ماء معدني 1.5ل", price: 200, description: "ماء شرب نقي", imageUrl: "https://picsum.photos/seed/water_bot/400/300", status: "available" }
+      ]
+      for (const p of groceryProducts) {
+        await setDoc(doc(db, "stores", "al_khaleej_market", "products", p.id), { ...p, storeId: "al_khaleej_market" })
+      }
+
+      // 4. إضافة منتجات للصيدلية
+      const pharProducts = [
+        { id: "phar_p1", name: "بنادول إكسترا", price: 1200, description: "مسكن للآلام وخافض للحرارة - 24 قرص", imageUrl: "https://picsum.photos/seed/panadol/400/300", status: "available" },
+        { id: "phar_p2", name: "فيتامين سي 1000مجم", price: 2500, description: "فوار لتقوية المناعة", imageUrl: "https://picsum.photos/seed/vitc/400/300", status: "available" }
+      ]
+      for (const p of pharProducts) {
+        await setDoc(doc(db, "stores", "al_shifa_yem", "products", p.id), { ...p, storeId: "al_shifa_yem" })
+      }
+
+      // 5. إضافة إعلانات
+      await setDoc(doc(db, "ads", "ad_1"), { title: "خصم 20% على المندي", imageUrl: "https://picsum.photos/seed/promo1/800/400", storeId: "mandi_king" })
+      await setDoc(doc(db, "ads", "ad_2"), { title: "توصيل مجاني من الصيدليات", imageUrl: "https://picsum.photos/seed/promo2/800/400", storeId: "al_shifa_yem" })
+
+      toast({ title: "تمت التهيئة", description: "بيانات أبشر جاهزة للاستخدام الآن!" })
+      router.refresh()
+    } catch (e) {
+      console.error(e)
+      toast({ title: "خطأ", description: "فشلت تهيئة البيانات، يرجى مراجعة الصلاحيات", variant: "destructive" })
+    } finally {
+      setIsSeeding(false)
+    }
+  }
 
   const toggleFavorite = (e: React.MouseEvent, storeId: string) => {
     e.preventDefault()
@@ -90,6 +182,23 @@ export default function Home() {
 
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">
+      {/* زر تهيئة البيانات للمطور */}
+      {user && (
+        <div className="p-2 bg-accent/10 border-b border-accent/20 flex items-center justify-between px-4">
+          <p className="text-[10px] font-bold text-accent">وضع التطوير: تهيئة البيانات</p>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            className="h-8 text-[10px] font-black gap-2 bg-white shadow-sm"
+            onClick={seedData}
+            disabled={isSeeding}
+          >
+            <Database className="h-3 w-3" />
+            {isSeeding ? "جاري البناء..." : "تجهيز بيانات أبشر"}
+          </Button>
+        </div>
+      )}
+
       <header className="p-4 flex items-center justify-between sticky top-0 glass z-50 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="bg-primary w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
@@ -173,30 +282,42 @@ export default function Home() {
         <div className="space-y-6">
           {isStoresLoading ? (
             [1, 2].map((i) => <div key={i} className="h-64 w-full bg-white rounded-[2rem] animate-pulse" />)
-          ) : stores?.map((store: any) => (
-            <Link key={store.id} href={`/store/${store.id}`}>
-              <Card className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] relative">
-                <CardContent className="p-0">
-                  <div className="relative h-56 w-full">
-                    <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/600/400`} alt={store.name} fill className="object-cover" />
-                    <div className="absolute top-4 left-4 bg-white/95 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-                      <Star className="h-4 w-4 fill-accent text-accent" />
-                      <span className="text-sm font-black">{store.averageRating || '4.5'}</span>
+          ) : stores && stores.length > 0 ? (
+            stores.map((store: any) => (
+              <Link key={store.id} href={`/store/${store.id}`}>
+                <Card className="overflow-hidden border-none shadow-xl shadow-secondary/10 rounded-[2rem] relative">
+                  <CardContent className="p-0">
+                    <div className="relative h-56 w-full">
+                      <Image 
+                        src={store.logoUrl || `https://picsum.photos/seed/${store.id}/600/400`} 
+                        alt={store.name} 
+                        fill 
+                        className="object-cover"
+                        data-ai-hint="store facade" 
+                      />
+                      <div className="absolute top-4 left-4 bg-white/95 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                        <Star className="h-4 w-4 fill-accent text-accent" />
+                        <span className="text-sm font-black">{store.averageRating || '4.5'}</span>
+                      </div>
+                      <button onClick={(e) => toggleFavorite(e, store.id)} className="absolute top-4 right-4 h-10 w-10 bg-white/95 rounded-full flex items-center justify-center shadow-lg z-10">
+                        <Heart className={cn("h-5 w-5", userData?.favoritesStoreIds?.includes(store.id) ? "fill-destructive text-destructive" : "text-muted-foreground")} />
+                      </button>
                     </div>
-                    <button onClick={(e) => toggleFavorite(e, store.id)} className="absolute top-4 right-4 h-10 w-10 bg-white/95 rounded-full flex items-center justify-center shadow-lg z-10">
-                      <Heart className={cn("h-5 w-5", userData?.favoritesStoreIds?.includes(store.id) ? "fill-destructive text-destructive" : "text-muted-foreground")} />
-                    </button>
-                  </div>
-                  <div className="p-5 bg-white">
-                    <h4 className="font-black text-xl text-foreground mb-2">{store.name}</h4>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary" className="font-bold text-[10px] bg-secondary/50 px-3">{store.address}</Badge>
+                    <div className="p-5 bg-white">
+                      <h4 className="font-black text-xl text-foreground mb-2">{store.name}</h4>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary" className="font-bold text-[10px] bg-secondary/50 px-3">{store.address}</Badge>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                  </CardContent>
+                </Card>
+              </Link>
+            ))
+          ) : (
+            <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-secondary">
+              <p className="text-muted-foreground font-bold">المتاجر فارغة، اضغط على زر التهيئة أعلاه</p>
+            </div>
+          )}
         </div>
       </section>
       <BottomNav />

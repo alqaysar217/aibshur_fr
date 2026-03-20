@@ -1,34 +1,41 @@
+
 {
   "placeholderImages": [
     {
-      "id": "hero-delivery",
-      "description": "Delivery man on scooter",
-      "imageUrl": "https://picsum.photos/seed/delivery1/800/400",
-      "imageHint": "delivery scooter"
+      "id": "mandi-restaurant",
+      "description": "مطعم مندي يمني",
+      "imageUrl": "https://picsum.photos/seed/mandi1/600/400",
+      "imageHint": "mandi rice meat"
     },
     {
-      "id": "burger-store",
-      "description": "Delicious Burger Store",
-      "imageUrl": "https://picsum.photos/seed/burger1/400/300",
-      "imageHint": "burger restaurant"
+      "id": "yemeni-grocery",
+      "description": "بقالة يمنية تقليدية",
+      "imageUrl": "https://picsum.photos/seed/grocery_yem/600/400",
+      "imageHint": "supermarket fruits vegetables"
     },
     {
-      "id": "pizza-store",
-      "description": "Hot Pizza Store",
-      "imageUrl": "https://picsum.photos/seed/pizza1/400/300",
-      "imageHint": "pizza restaurant"
+      "id": "yemeni-pharmacy",
+      "description": "صيدلية طبية",
+      "imageUrl": "https://picsum.photos/seed/pharmacy_yem/600/400",
+      "imageHint": "pharmacy medical shelf"
     },
     {
-      "id": "coffee-store",
-      "description": "Cozy Coffee Shop",
-      "imageUrl": "https://picsum.photos/seed/coffee1/400/300",
-      "imageHint": "coffee shop"
+      "id": "mandi-dish",
+      "description": "وجبة مندي لحم",
+      "imageUrl": "https://picsum.photos/seed/dish1/400/300",
+      "imageHint": "cooked meat rice"
     },
     {
-      "id": "grocery-store",
-      "description": "Fresh Grocery Market",
-      "imageUrl": "https://picsum.photos/seed/grocery1/400/300",
-      "imageHint": "supermarket"
+      "id": "milk-product",
+      "description": "منتجات ألبان",
+      "imageUrl": "https://picsum.photos/seed/milk/400/300",
+      "imageHint": "milk bottle"
+    },
+    {
+      "id": "medicine-box",
+      "description": "علب أدوية",
+      "imageUrl": "https://picsum.photos/seed/meds/400/300",
+      "imageHint": "medicine pills box"
     }
   ]
 }
