@@ -25,9 +25,7 @@ export interface UseCollectionResult<T> {
   error: FirestoreError | Error | null; // Error object, or null.
 }
 
-/* Internal implementation of Query:
-  https://github.com/firebase/firebase-js-sdk/blob/c5f08a9bc5da0d2b0207802c972d53724ccef055/packages/firestore/src/lite-api/reference.ts#L143
-*/
+/* Internal implementation of Query for path extraction */
 export interface InternalQuery extends Query<DocumentData> {
   _query?: {
     path?: {
@@ -79,8 +77,7 @@ export function useCollection<T = any>(
             path = (memoizedTargetRefOrQuery as CollectionReference).path;
           } else {
             const internal = memoizedTargetRefOrQuery as unknown as InternalQuery;
-            // محاولة استخراج اسم المجموعة أو المسار من الاستعلام الداخلي
-            path = internal._query?.path?.toString() || 'collection-group';
+            path = internal._query?.path?.canonicalString() || 'collection-group';
           }
         } catch (e) {
           path = 'collection-group';
@@ -95,7 +92,7 @@ export function useCollection<T = any>(
         setData(null);
         setIsLoading(false);
 
-        // إطلاق خطأ الأمان في نظام الإرسال العالمي
+        // Emit for central error handler
         errorEmitter.emit('permission-error', contextualError);
       }
     );
