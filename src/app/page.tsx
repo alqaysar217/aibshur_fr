@@ -224,95 +224,94 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. قائمة المتاجر - مستطيلة عمودية (2 في الصف) */}
-      <section className="px-4 pb-24">
-        <div className="flex items-center justify-between mb-4 px-1">
+      {/* 3. قائمة المتاجر - عمود واحد (Horizontal Card) */}
+      <section className="px-4 pb-24 space-y-4">
+        <div className="flex items-center justify-between mb-2 px-1">
           <h3 className="font-black text-sm">المتاجر المتاحة</h3>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          {isStoresLoading ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="aspect-[2/3] w-full bg-secondary/10 rounded-xl animate-pulse" />)
-          ) : stores && stores.length > 0 ? (
-            stores.map((store: any) => {
-              const isOpen = store.status === 'مفتوح' || store.status === 'open'
-              const isFav = userData?.favoritesStoreIds?.includes(store.id)
-              const categoryName = categories?.find(c => store.categoryIds?.includes(c.id))?.name || "عام";
+        {isStoresLoading ? (
+          [1, 2, 3].map(i => <div key={i} className="h-28 w-full bg-secondary/10 rounded-xl animate-pulse" />)
+        ) : stores && stores.length > 0 ? (
+          stores.map((store: any) => {
+            const isOpen = store.status === 'مفتوح' || store.status === 'open'
+            const isFav = userData?.favoritesStoreIds?.includes(store.id)
+            const categoryName = categories?.find(c => store.categoryIds?.includes(c.id))?.name || "عام";
 
-              return (
-                <Link key={store.id} href={`/store/${store.id}`}>
-                  <Card className="border-none shadow-sm rounded-xl overflow-hidden bg-white transition-all active:scale-[0.98] group aspect-[1/1.5]">
-                    <CardContent className="p-0 flex flex-col h-full">
-                      
-                      {/* صورة المتجر (أعلى) - مستطيل عمودي */}
-                      <div className="relative w-full h-[120px] shrink-0">
-                        <Image 
-                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/300/400`} 
-                          alt={store.name} 
-                          fill 
-                          className="object-cover" 
-                        />
-                        {/* حالة المتجر - أعلى اليسار */}
+            return (
+              <Link key={store.id} href={`/store/${store.id}`}>
+                <Card className="border-none shadow-sm rounded-xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-32">
+                  {/* زر المفضلة - أعلى اليمين */}
+                  <button 
+                    onClick={(e) => toggleFavorite(e, store.id)}
+                    className="absolute top-3 left-3 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm transition-transform active:scale-75 z-10"
+                  >
+                    <Heart className={cn("h-3.5 w-3.5 transition-colors", isFav ? "fill-destructive text-destructive" : "text-muted-foreground/40")} />
+                  </button>
+
+                  <CardContent className="p-3 h-full flex flex-row-reverse gap-4 items-center">
+                    {/* صورة المتجر - اليمين (في الاتجاه العربي) */}
+                    <div className="relative w-[90px] h-[90px] shrink-0">
+                      <Image 
+                        src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
+                        alt={store.name} 
+                        fill 
+                        className="object-cover rounded-xl" 
+                      />
+                    </div>
+
+                    {/* معلومات المتجر - اليسار */}
+                    <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
+                      <div className="flex items-center justify-end gap-2">
+                         <div className="flex items-center gap-0.5 text-accent">
+                          <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
+                          <Star className="h-3 w-3 fill-accent" />
+                        </div>
+                        <h4 className="font-bold text-sm text-foreground truncate">{store.name}</h4>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-1 text-muted-foreground">
+                        <span className="text-[10px] truncate">{store.address || 'المكلا'}</span>
+                        <MapPin className="h-2.5 w-2.5" />
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 mt-1">
+                         <span className="text-[9px] font-bold text-muted-foreground/50">يبعد 2.3 كم</span>
+                         <span className="text-[9px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-md">{categoryName}</span>
+                      </div>
+
+                      <div className="flex items-center justify-end mt-1">
                         <Badge 
                           className={cn(
-                            "absolute top-2 left-2 text-[8px] h-5 px-1.5 border-none font-black shadow-sm",
-                            isOpen ? "bg-green-500 text-white" : "bg-destructive text-white"
+                            "text-[8px] h-4 px-1.5 border-none font-black shadow-none",
+                            isOpen ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                           )}
                         >
                           {isOpen ? 'مفتوح' : 'مغلق'}
                         </Badge>
-                        {/* زر المفضلة - أعلى اليمين */}
-                        <button 
-                          onClick={(e) => toggleFavorite(e, store.id)}
-                          className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm transition-transform active:scale-75 z-10"
-                        >
-                          <Heart className={cn("h-3 w-3 transition-colors", isFav ? "fill-destructive text-destructive" : "text-muted-foreground/40")} />
-                        </button>
                       </div>
-
-                      {/* معلومات المتجر (أسفل) */}
-                      <div className="p-2 space-y-1 text-right flex flex-col flex-1">
-                        {/* التقييم */}
-                        <div className="flex items-center gap-1 justify-end text-accent">
-                          <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
-                          <Star className="h-3 w-3 fill-accent" />
-                        </div>
-
-                        {/* اسم المتجر */}
-                        <h4 className="font-bold text-xs text-foreground truncate">{store.name}</h4>
-
-                        {/* الموقع */}
-                        <p className="text-[9px] text-muted-foreground truncate">{store.address || 'المكلا'}</p>
-
-                        {/* التصنيف والمسافة */}
-                        <div className="flex items-center justify-between mt-auto pt-1">
-                          <span className="text-[8px] font-bold text-muted-foreground/60">{categoryName}</span>
-                          <span className="text-[8px] font-bold text-muted-foreground/40 italic">2.3 كم</span>
-                        </div>
-                      </div>
-
-                    </CardContent>
-                  </Card>
-                </Link>
-              )
-            })
-          ) : (
-            <div className="col-span-2 text-center py-10 border-2 border-dashed rounded-xl border-secondary/50 bg-secondary/5">
-              <Database className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-[10px] text-muted-foreground font-bold">يرجى تهيئة البيانات</p>
-              {user && (
-                <Button 
-                  onClick={seedData} 
-                  disabled={isSeeding} 
-                  variant="outline" 
-                  className="mt-3 rounded-lg h-8 text-[10px] border-primary text-primary font-bold"
-                >
-                  {isSeeding ? "جاري البناء..." : "تجهيز تطبيق أبشر"}
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            )
+          })
+        ) : (
+          <div className="text-center py-10 border-2 border-dashed rounded-xl border-secondary/50 bg-secondary/5">
+            <Database className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-[10px] text-muted-foreground font-bold">يرجى تهيئة البيانات</p>
+            {user && (
+              <Button 
+                onClick={seedData} 
+                disabled={isSeeding} 
+                variant="outline" 
+                className="mt-3 rounded-lg h-8 text-[10px] border-primary text-primary font-bold"
+              >
+                {isSeeding ? "جاري البناء..." : "تجهيز تطبيق أبشر"}
+              </Button>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Developer Tooling */}
