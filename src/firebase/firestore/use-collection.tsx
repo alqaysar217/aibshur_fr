@@ -29,8 +29,8 @@ export interface UseCollectionResult<T> {
   https://github.com/firebase/firebase-js-sdk/blob/c5f08a9bc5da0d2b0207802c972d53724ccef055/packages/firestore/src/lite-api/reference.ts#L143
 */
 export interface InternalQuery extends Query<DocumentData> {
-  _query: {
-    path: {
+  _query?: {
+    path?: {
       canonicalString(): string;
       toString(): string;
     }
@@ -79,6 +79,7 @@ export function useCollection<T = any>(
             path = (memoizedTargetRefOrQuery as CollectionReference).path;
           } else {
             const internal = memoizedTargetRefOrQuery as unknown as InternalQuery;
+            // محاولة استخراج اسم المجموعة أو المسار من الاستعلام الداخلي
             path = internal._query?.path?.toString() || 'collection-group';
           }
         } catch (e) {

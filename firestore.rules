@@ -2,8 +2,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- 1. قواعد البحث الشامل (Collection Group) ---
-    // ضروري جداً لعمل صفحة البحث والمفضلة (الوجبات عبر المتاجر)
+    // --- 1. قواعد المجموعة المشتركة (Collection Group) ---
+    // ضرورية لعمل البحث والمفضلة عبر جميع المتاجر
     match /{path=**}/products/{productId} {
       allow read, list: if request.auth != null;
     }
@@ -38,7 +38,7 @@ service cloud.firestore {
       }
     }
 
-    // --- 4. البيانات العامة (الإعلانات والأقسام) ---
+    // --- 4. البيانات العامة ---
     match /ads/{id} { 
       allow read: if true;
       allow write: if isSignedIn();
