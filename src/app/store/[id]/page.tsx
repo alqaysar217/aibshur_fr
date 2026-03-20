@@ -420,7 +420,7 @@ export default function StoreDetailPage() {
                 fill
                 className="object-cover"
               />
-              <DialogClose className="absolute top-4 left-4 h-10 w-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white outline-none">
+              <DialogClose className="absolute top-4 left-4 h-10 w-10 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white outline-none z-50">
                 <X className="h-5 w-5" />
               </DialogClose>
               <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-2xl flex items-center gap-1 shadow-sm">
@@ -454,34 +454,62 @@ export default function StoreDetailPage() {
                 <div className="space-y-4 pt-4 border-t">
                   <h4 className="font-black text-sm text-right">اختر الحجم أو النوع</h4>
                   <div className="space-y-3">
-                    {getProductVariations(selectedProduct).map((variation) => (
-                      <div key={variation.id} className="flex items-center justify-between p-3 bg-secondary/20 rounded-2xl border border-transparent hover:border-primary/30 transition-all">
-                        <div className="flex items-center gap-3">
-                          <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-white shrink-0">
-                            <Image src={variation.image} fill alt={variation.name} className="object-cover" />
+                    {getProductVariations(selectedProduct).map((variation) => {
+                      const variationId = `${selectedProduct.id}-${variation.id}`
+                      const inCartVariation = cart.find(item => item.id === variationId)
+                      
+                      return (
+                        <div key={variation.id} className="flex items-center justify-between p-3 bg-secondary/20 rounded-2xl border border-transparent hover:border-primary/30 transition-all">
+                          <div className="flex items-center gap-3">
+                            <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-white shrink-0">
+                              <Image src={variation.image} fill alt={variation.name} className="object-cover" />
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-sm">{variation.name}</p>
+                              <p className="text-primary font-black text-xs">{variation.price} ر.س</p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-bold text-sm">{variation.name}</p>
-                            <p className="text-primary font-black text-xs">{variation.price} ر.س</p>
-                          </div>
+                          
+                          {inCartVariation ? (
+                            <div className="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm">
+                              <Button 
+                                onClick={() => removeFromCart(variationId)}
+                                variant="ghost" size="icon" className="h-8 w-8 rounded-lg"
+                              >
+                                <Minus className="h-3 w-3 text-primary" />
+                              </Button>
+                              <span className="font-black text-sm min-w-[12px] text-center">{inCartVariation.quantity}</span>
+                              <Button 
+                                onClick={() => addToCart({ 
+                                  ...selectedProduct, 
+                                  id: variationId, 
+                                  name: `${selectedProduct.name} - ${variation.name}`, 
+                                  price: variation.price 
+                                })}
+                                variant="ghost" size="icon" className="h-8 w-8 rounded-lg bg-primary text-white"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button 
+                              size="sm" 
+                              className="rounded-xl h-9 px-4 font-bold text-xs"
+                              onClick={() => {
+                                addToCart({ 
+                                  ...selectedProduct, 
+                                  id: variationId, 
+                                  name: `${selectedProduct.name} - ${variation.name}`, 
+                                  price: variation.price 
+                                });
+                              }}
+                            >
+                              إضافة
+                            </Button>
+                          )}
                         </div>
-                        <Button 
-                          size="sm" 
-                          className="rounded-xl h-9 px-4 font-bold text-xs"
-                          onClick={() => {
-                            addToCart({ 
-                              ...selectedProduct, 
-                              id: `${selectedProduct.id}-${variation.id}`, 
-                              name: `${selectedProduct.name} - ${variation.name}`, 
-                              price: variation.price 
-                            });
-                            setSelectedProduct(null);
-                          }}
-                        >
-                          إضافة
-                        </Button>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               )}
