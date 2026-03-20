@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2 } from "lucide-react"
+import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -21,6 +21,7 @@ export default function AddressesPage() {
   const [mounted, setMounted] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   
   // حقول العنوان الجديد
   const [newLabel, setNewLabel] = useState("")
@@ -53,20 +54,25 @@ export default function AddressesPage() {
           lng: position.coords.longitude
         })
         setIsLocating(false)
-        toast({ title: "تم تحديد الموقع", description: "تم التقاط إحداثيات موقعك الحالي بنجاح" })
+        toast({ title: "تم تحديد الموقع", description: "تم استخراج إحداثيات موقعك بنجاح" })
       },
       (error) => {
         console.error(error)
         setIsLocating(false)
-        toast({ title: "فشل التحديد", description: "يرجى إعطاء صلاحية الوصول للموقع من إعدادات المتصفح", variant: "destructive" })
+        toast({ title: "فشل التحديد", description: "يرجى السماح بالوصول للموقع من الإعدادات", variant: "destructive" })
       },
       { enableHighAccuracy: true }
     )
   }
 
   const handleAddAddress = async () => {
-    if (!user || !db || !newLabel || !newCity || !newDetails) return
+    if (!user || !db) return
+    if (!newLabel || !newCity || !newDetails) {
+      toast({ title: "بيانات ناقصة", description: "يرجى ملء جميع الحقول المطلوبة", variant: "destructive" })
+      return
+    }
 
+    setIsSaving(true)
     const addressData = {
       label: newLabel,
       city: newCity,
@@ -79,11 +85,19 @@ export default function AddressesPage() {
 
     try {
       await addDoc(collection(db, "users", user.uid, "addresses"), addressData)
-      toast({ title: "تمت الإضافة", description: "تم حفظ العنوان الجديد بنجاح" })
-      setNewLabel(""); setNewCity(""); setNewDetails(""); setCoordinates(null);
+      toast({ title: "تم الحفظ", description: "تم إضافة العنوان الجديد بنجاح" })
+      
+      // إعادة ضبط الحقول وإغلاق النافذة
+      setNewLabel("")
+      setNewCity("")
+      setNewDetails("")
+      setCoordinates(null)
       setIsAdding(false)
     } catch (e) {
-      toast({ title: "خطأ", description: "فشلت إضافة العنوان", variant: "destructive" })
+      console.error(e)
+      toast({ title: "خطأ في الحفظ", description: "فشلت عملية الحفظ، حاول مجدداً", variant: "destructive" })
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -117,8 +131,8 @@ export default function AddressesPage() {
   if (!mounted) return null
 
   return (
-    <div className="pb-10 bg-secondary/5 min-h-screen">
-      <header className="p-4 glass sticky top-0 z-50 flex items-center gap-4">
+    <div className="pb-10 bg-secondary/5 min-h-screen font-body" dir="rtl">
+      <header className="p-4 glass sticky top-0 z-50 flex items-center gap-4 shadow-sm">
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
           <ArrowRight className="h-6 w-6" />
         </Button>
@@ -127,10 +141,10 @@ export default function AddressesPage() {
 
       <div className="p-4 space-y-4">
         {isLoading ? (
-          [1, 2].map(i => <div key={i} className="h-32 bg-white rounded-2xl animate-pulse" />)
+          [1, 2].map(i => <div key={i} className="h-32 bg-white rounded-3xl animate-pulse" />)
         ) : addresses && addresses.length > 0 ? (
           addresses.map((addr) => (
-            <Card key={addr.id} className={`border-none shadow-sm rounded-3xl overflow-hidden transition-all ${addr.isDefault ? 'ring-2 ring-primary bg-primary/5' : 'bg-white'}`}>
+            <Card key={addr.id} className={`border-none shadow-sm rounded-[2rem] overflow-hidden transition-all ${addr.isDefault ? 'ring-2 ring-primary bg-primary/5' : 'bg-white'}`}>
               <CardContent className="p-5">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-3">
@@ -143,7 +157,7 @@ export default function AddressesPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {addr.latitude && <Navigation className="h-4 w-4 text-green-500" title="موقع محدد بدقة" />}
+                    {addr.latitude && <Navigation className="h-4 w-4 text-green-500" />}
                     {addr.isDefault && <CheckCircle2 className="h-5 w-5 text-primary" />}
                   </div>
                 </div>
@@ -173,19 +187,20 @@ export default function AddressesPage() {
 
         <Dialog open={isAdding} onOpenChange={setIsAdding}>
           <DialogTrigger asChild>
-            <Button className="w-full h-14 rounded-2xl gap-2 font-bold shadow-lg shadow-primary/20 mt-4">
-              <Plus className="h-5 w-5" /> إضافة عنوان جديد
+            <Button className="w-full h-16 rounded-[2rem] gap-2 font-black text-lg shadow-xl shadow-primary/20 mt-4">
+              <Plus className="h-6 w-6" /> إضافة عنوان جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-[2.5rem] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none">
-            <DialogHeader className="p-6 bg-primary text-white">
+          <DialogContent className="rounded-[2.5rem] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0">
+            <DialogHeader className="p-6 bg-primary text-white relative">
               <DialogTitle className="text-right flex items-center justify-between">
                 <span>إضافة عنوان جديد</span>
                 <MapPin className="h-5 w-5" />
               </DialogTitle>
             </DialogHeader>
-            <div className="p-6 space-y-5 bg-white" dir="rtl">
+            <div className="p-6 space-y-5 bg-white max-h-[80vh] overflow-y-auto" dir="rtl">
               
+              {/* قسم الخريطة الذكي */}
               <div className="space-y-4">
                 <Button 
                   onClick={handleDetectLocation} 
@@ -204,15 +219,28 @@ export default function AddressesPage() {
                     <Navigation className="h-5 w-5" />
                   )}
                   <div className="text-right">
-                    <p className="text-sm font-black">{coordinates ? "تم تحديد موقعك بدقة" : "تحديد موقعي الحالي"}</p>
-                    <p className="text-[10px] opacity-70">استخدام الـ GPS لتحديد الإحداثيات</p>
+                    <p className="text-sm font-black">{coordinates ? "تم تحديد موقعك بنجاح" : "تحديد موقعي الحالي بالـ GPS"}</p>
+                    <p className="text-[10px] opacity-70">سيتم ملء الإحداثيات تلقائياً</p>
                   </div>
                 </Button>
 
                 {coordinates && (
-                  <div className="p-3 bg-secondary/30 rounded-xl text-[10px] font-mono text-center flex justify-around">
-                    <span>خط العرض: {coordinates.lat.toFixed(4)}</span>
-                    <span>خط الطول: {coordinates.lng.toFixed(4)}</span>
+                  <div className="space-y-3 animate-in fade-in zoom-in duration-300">
+                    <div className="w-full h-40 rounded-2xl overflow-hidden border-2 border-primary/10 relative">
+                      <iframe 
+                        width="100%" 
+                        height="100%" 
+                        frameBorder="0" 
+                        scrolling="no" 
+                        marginHeight={0} 
+                        marginWidth={0} 
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng-0.005}%2C${coordinates.lat-0.005}%2C${coordinates.lng+0.005}%2C${coordinates.lat+0.005}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lng}`}
+                      ></iframe>
+                    </div>
+                    <div className="p-3 bg-secondary/30 rounded-xl text-[10px] font-mono text-center flex justify-around">
+                      <span>Lat: {coordinates.lat.toFixed(5)}</span>
+                      <span>Lng: {coordinates.lng.toFixed(5)}</span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -225,29 +253,40 @@ export default function AddressesPage() {
                       key={label}
                       variant={newLabel === label ? "default" : "outline"}
                       onClick={() => setNewLabel(label)}
-                      className="flex-1 h-10 rounded-xl text-xs font-bold"
+                      className="flex-1 h-12 rounded-xl text-xs font-bold transition-all"
                     >
                       {label}
                     </Button>
                   ))}
                 </div>
-                {!["المنزل", "العمل", "آخر"].includes(newLabel) && (
-                   <Input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="أدخل اسم مخصص..." className="h-12 rounded-xl mt-2" />
+                {!["المنزل", "العمل", "آخر"].includes(newLabel) && newLabel !== "" && (
+                   <Input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="اسم مخصص (مثال: شقة الوالد)" className="h-12 rounded-xl mt-2 border-primary/20" />
+                )}
+                {newLabel === "آخر" && (
+                   <Input onChange={(e) => setNewLabel(e.target.value)} placeholder="أدخل اسم مخصص..." className="h-12 rounded-xl mt-2 border-primary/20" />
                 )}
               </div>
 
               <div className="space-y-2 text-right">
-                <label className="text-xs font-bold text-muted-foreground mr-1">المدينة / الحي</label>
-                <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا - فوه" className="h-12 rounded-xl" />
+                <label className="text-xs font-bold text-muted-foreground mr-1">المدينة / المنطقة</label>
+                <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا - حي السلام" className="h-12 rounded-xl border-primary/10" />
               </div>
 
               <div className="space-y-2 text-right">
-                <label className="text-xs font-bold text-muted-foreground mr-1">تفاصيل إضافية (رقم الشقة، علامة مميزة)</label>
-                <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="بجانب مسجد...، عمارة..." className="h-12 rounded-xl" />
+                <label className="text-xs font-bold text-muted-foreground mr-1">تفاصيل إضافية (الشارع، رقم المنزل)</label>
+                <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: عمارة رقم 4، بجانب سوبر ماركت..." className="h-12 rounded-xl border-primary/10" />
               </div>
 
-              <Button onClick={handleAddAddress} className="w-full h-14 rounded-2xl font-black text-lg mt-4 shadow-xl shadow-primary/20">
-                حفظ هذا العنوان
+              <Button 
+                onClick={handleAddAddress} 
+                disabled={isSaving}
+                className="w-full h-16 rounded-2xl font-black text-lg mt-4 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  "حفظ العنوان والبدء بالطلب"
+                )}
               </Button>
             </div>
           </DialogContent>
