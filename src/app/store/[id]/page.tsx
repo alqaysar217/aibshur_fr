@@ -3,7 +3,7 @@
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, ChevronLeft } from "lucide-react"
+import { Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, ChevronLeft, Info, X } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 
 export default function StoreDetailPage() {
   const { id } = useParams()
@@ -26,6 +27,7 @@ export default function StoreDetailPage() {
   const [cart, setCart] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("الكل")
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
 
   useEffect(() => {
     const savedCart = localStorage.getItem('absher_cart')
@@ -94,15 +96,17 @@ export default function StoreDetailPage() {
     if (!products) return []
     return products.filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesCategory = selectedCategory === "الكل" || p.category === selectedCategory
+      const matchesCategory = selectedCategory === "الكل" || 
+                             (selectedCategory === "المفضلة" && userData?.favoritesProductIds?.includes(p.id)) ||
+                             p.category === selectedCategory
       return matchesSearch && matchesCategory
     })
-  }, [products, searchQuery, selectedCategory])
+  }, [products, searchQuery, selectedCategory, userData?.favoritesProductIds])
 
   const categories = useMemo(() => {
-    if (!products) return ["الكل"]
+    if (!products) return ["الكل", "المفضلة"]
     const cats = Array.from(new Set(products.map((p: any) => p.category).filter(Boolean)))
-    return ["الكل", ...cats]
+    return ["الكل", "المفضلة", ...cats]
   }, [products])
 
   const toggleFavoriteStore = () => {
@@ -127,7 +131,8 @@ export default function StoreDetailPage() {
       })
   }
 
-  const toggleFavoriteProduct = (productId: string) => {
+  const toggleFavoriteProduct = (e: React.MouseEvent, productId: string) => {
+    e.stopPropagation()
     if (!user) {
       router.push('/login')
       return
@@ -165,121 +170,118 @@ export default function StoreDetailPage() {
   const isFavoriteStore = userData?.favoritesStoreIds?.includes(id as string)
   const isStoreOpen = store.status === 'open' || store.status === 'مفتوح';
 
+  // تحديد ما إذا كان المنتج يحتاج خيارات (بناءً على الاسم كمثال)
+  const hasOptions = (productName: string) => {
+    const keywords = ['بيتزا', 'نفر', 'برجر', 'عصير', 'مشوي']
+    return keywords.some(k => productName.includes(k))
+  }
+
   return (
     <div className="pb-32 bg-[#F5F7F6] min-h-screen font-body" dir="rtl">
-      {/* 1. Header Area */}
+      {/* 1. Header Area - Professional Profile Style */}
       <div className="relative">
-        <div className="relative h-56 w-full rounded-b-[2.5rem] overflow-hidden shadow-lg">
+        <div className="relative h-64 w-full overflow-hidden">
           <Image 
             src={store.logoUrl || `https://picsum.photos/seed/${store.id}/800/600`}
             alt={store.name}
             fill
-            className="object-cover"
+            className="object-cover blur-[2px] scale-110"
           />
-          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         </div>
 
-        {/* Top Navigation */}
-        <div className="absolute top-6 left-4 right-4 flex items-center gap-2">
+        {/* Top Sticky Bar */}
+        <div className="absolute top-0 left-0 right-0 z-50 p-4 flex items-center gap-3">
           <button 
             onClick={() => router.back()}
-            className="h-10 w-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform shrink-0"
+            className="h-10 w-10 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform text-white"
           >
-            <ArrowRight className="h-6 w-6 text-foreground" />
+            <ArrowRight className="h-6 w-6" />
           </button>
           
-          <div className="flex-1 relative group">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+          <div className="flex-1 relative">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
             <Input 
-              placeholder="ابحث عن منتج..."
+              placeholder="ابحث في المتجر..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 pr-10 rounded-full border-none bg-white/95 backdrop-blur-sm shadow-lg text-xs font-bold focus-visible:ring-primary"
+              className="h-10 pr-10 rounded-full border-none bg-white/20 backdrop-blur-md text-white placeholder:text-white/60 text-xs font-bold focus-visible:ring-white/40"
             />
           </div>
 
           <button 
             onClick={() => router.push('/cart')}
-            className="h-10 w-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform shrink-0 relative"
+            className="h-10 w-10 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform relative text-white"
           >
-            <ShoppingBag className="h-5 w-5 text-foreground" />
+            <ShoppingBag className="h-5 w-5" />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -left-1 bg-primary text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+              <span className="absolute -top-1 -left-1 bg-destructive text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
                 {cartCount}
               </span>
             )}
           </button>
         </div>
 
-        {/* Store Logo Circle */}
-        <div className="absolute -bottom-10 right-8">
-          <div className="relative h-20 w-20 rounded-3xl border-4 border-white shadow-xl overflow-hidden bg-white">
-            <Image 
-              src={store.logoUrl || `https://picsum.photos/seed/${store.id}_logo/200`}
-              alt="logo"
-              fill
-              className="object-cover"
-            />
+        {/* Store Profile Floating Info */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col gap-4 text-white">
+          <div className="flex items-end gap-4">
+            <div className="relative h-24 w-24 rounded-3xl border-4 border-white/20 shadow-2xl overflow-hidden bg-white shrink-0">
+              <Image 
+                src={store.logoUrl || `https://picsum.photos/seed/${store.id}_logo/200`}
+                alt="logo"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="pb-2 space-y-1">
+              <h1 className="text-3xl font-black tracking-tight">{store.name}</h1>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 bg-amber-500 text-white px-2 py-0.5 rounded-lg text-xs font-black">
+                  <Star className="h-3 w-3 fill-white" />
+                  <span>{store.averageRating || '4.5'}</span>
+                  <span className="opacity-70 font-bold mr-1">(120+ تقييم)</span>
+                </div>
+                <Badge className={cn("text-[10px] font-black border-none", isStoreOpen ? "bg-green-500" : "bg-red-500")}>
+                  {isStoreOpen ? 'مفتوح الآن' : 'مغلق حالياً'}
+                </Badge>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 2. Store Info Card */}
-      <div className="px-4 mt-14">
-        <Card className="border-none shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-3xl overflow-hidden bg-white">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <h1 className="text-2xl font-black text-[#111827]">{store.name}</h1>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1 text-amber-500 bg-amber-50 px-2 py-0.5 rounded-lg">
-                    <Star className="h-3 w-3 fill-amber-500" />
-                    <span className="text-xs font-black">{store.averageRating || '4.5'}</span>
-                  </div>
-                  <Badge 
-                    className={cn(
-                      "text-[10px] h-5 px-2 border-none font-black rounded-md",
-                      isStoreOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]"
-                    )}
-                  >
-                    {isStoreOpen ? 'مفتوح الآن 🟢' : 'مغلق حالياً 🔴'}
-                  </Badge>
-                </div>
-              </div>
-              <button 
-                onClick={toggleFavoriteStore}
-                className="h-10 w-10 bg-secondary/30 rounded-full flex items-center justify-center active:scale-90 transition-transform"
-              >
-                <Heart className={cn("h-5 w-5", isFavoriteStore ? "fill-destructive text-destructive" : "text-gray-400")} />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-6 mt-5 pt-4 border-t border-secondary/50">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary" />
-                <span className="text-xs font-bold text-gray-500">{store.deliveryTime || '30-45 دقيقة'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <ShoppingBag className="h-4 w-4 text-primary" />
-                <span className="text-xs font-bold text-gray-500">توصيل 10 ر.س</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* 2. Store Extra Stats */}
+      <div className="px-6 py-4 bg-white border-b flex items-center justify-between shadow-sm">
+        <div className="flex flex-col items-center gap-1">
+          <MapPin className="h-5 w-5 text-primary" />
+          <span className="text-[10px] font-black text-gray-400">{store.address || 'المكلا'}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <Clock className="h-5 w-5 text-primary" />
+          <span className="text-[10px] font-black text-gray-400">{store.deliveryTime || '30-45 دقيقة'}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <Info className="h-5 w-5 text-primary" />
+          <span className="text-[10px] font-black text-gray-400">يبعد 2.3 كم</span>
+        </div>
+        <button onClick={toggleFavoriteStore} className="flex flex-col items-center gap-1 group">
+          <Heart className={cn("h-5 w-5 transition-colors", isFavoriteStore ? "fill-destructive text-destructive" : "text-gray-300")} />
+          <span className="text-[10px] font-black text-gray-400">المفضلة</span>
+        </button>
       </div>
 
-      {/* 3. Categories Scroll */}
-      <div className="mt-8">
-        <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide" dir="rtl">
+      {/* 3. Categories Horizontal Scroll */}
+      <div className="sticky top-[72px] z-40 bg-[#F5F7F6]/80 backdrop-blur-md py-4 border-b">
+        <div className="flex gap-2 overflow-x-auto px-6 scrollbar-hide" dir="rtl">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={cn(
-                "px-5 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all duration-300 shadow-sm border",
+                "px-5 py-2.5 rounded-2xl text-[11px] font-black whitespace-nowrap transition-all border",
                 selectedCategory === cat 
-                  ? "bg-primary text-white border-primary shadow-primary/20 scale-105" 
-                  : "bg-white text-gray-500 border-transparent hover:border-primary/20"
+                  ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105" 
+                  : "bg-white text-gray-500 border-gray-100 hover:border-primary/20"
               )}
             >
               {cat}
@@ -288,108 +290,170 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      {/* 4. Product List */}
-      <div className="p-4 space-y-4">
-        <h2 className="text-lg font-black text-[#111827] flex items-center gap-2 px-1">
-          <div className="w-1.5 h-6 bg-primary rounded-full" />
-          {selectedCategory}
-        </h2>
+      {/* 4. Product List - Modern Cards */}
+      <div className="p-6 space-y-5">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-black text-[#111827]">{selectedCategory}</h2>
+          <span className="text-[10px] font-bold text-gray-400">{filteredProducts.length} منتج</span>
+        </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-5">
           {isProductsLoading ? (
-            [1, 2, 3].map(i => <div key={i} className="h-28 bg-white rounded-3xl animate-pulse" />)
+            [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-3xl animate-pulse" />)
           ) : filteredProducts.length > 0 ? (
             filteredProducts.map((product: any) => {
               const inCart = cart.find(item => item.id === product.id)
               const isFavProd = userData?.favoritesProductIds?.includes(product.id)
+              const needsOptions = hasOptions(product.name)
               
               return (
-                <Card key={product.id} className="border-none shadow-sm rounded-3xl overflow-hidden bg-white active:scale-[0.98] transition-transform">
-                  <CardContent className="p-3 flex flex-row items-center gap-4">
-                    {/* Right: Product Image */}
-                    <div className="relative h-20 w-20 shrink-0 rounded-2xl overflow-hidden bg-secondary/10">
+                <Card 
+                  key={product.id} 
+                  onClick={() => setSelectedProduct(product)}
+                  className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-white hover:shadow-xl transition-all cursor-pointer group"
+                >
+                  <CardContent className="p-4 flex flex-row items-center gap-4">
+                    {/* Image Area */}
+                    <div className="relative h-24 w-24 shrink-0 rounded-2xl overflow-hidden bg-secondary/10">
                       <Image 
                         src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`}
                         alt={product.name}
                         fill
-                        className="object-cover"
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                       <button 
-                        onClick={(e) => { e.preventDefault(); toggleFavoriteProduct(product.id); }}
-                        className="absolute top-1 left-1 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm"
+                        onClick={(e) => toggleFavoriteProduct(e, product.id)}
+                        className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm z-10 active:scale-90 transition-transform"
                       >
-                        <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
+                        <Heart className={cn("h-3.5 w-3.5", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
                       </button>
                     </div>
 
-                    {/* Middle: Info */}
-                    <div className="flex-1 flex flex-col justify-center text-right overflow-hidden">
-                      <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
-                      <p className="text-[10px] text-gray-400 line-clamp-1 mb-1.5">{product.description || 'لا يوجد وصف متاح'}</p>
-                      <span className="text-primary font-black text-sm">{product.price} ر.س</span>
-                    </div>
-
-                    {/* Left: Button Logic */}
-                    <div className="shrink-0 flex items-center justify-center min-w-[80px]">
-                      {inCart ? (
-                        <div className="flex items-center gap-2 bg-secondary/30 p-1 rounded-xl">
-                          <Button 
-                            onClick={() => removeFromCart(product.id)}
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 rounded-lg bg-white shadow-sm hover:bg-white active:scale-90"
-                          >
-                            <Minus className="h-4 w-4 text-primary" />
-                          </Button>
-                          <span className="font-black text-sm w-4 text-center">{inCart.quantity}</span>
-                          <Button 
-                            onClick={() => addToCart(product)}
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 rounded-lg bg-primary shadow-sm hover:bg-primary active:scale-90"
-                          >
-                            <Plus className="h-4 w-4 text-white" />
-                          </Button>
+                    {/* Content Area */}
+                    <div className="flex-1 text-right space-y-1 overflow-hidden">
+                      <h3 className="font-black text-base text-[#111827] truncate">{product.name}</h3>
+                      <p className="text-[10px] text-gray-400 line-clamp-2 leading-relaxed h-7">
+                        {product.description || 'تذوق طعم الأصالة مع هذا المنتج الرائع من مطبخنا.'}
+                      </p>
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-primary font-black text-lg">{product.price} <small className="text-[10px] font-bold">ر.س</small></span>
+                        
+                        {/* Interactive Button */}
+                        <div onClick={(e) => e.stopPropagation()}>
+                          {needsOptions ? (
+                            <Button size="sm" variant="outline" className="rounded-xl border-primary text-primary font-bold text-[10px] px-3 h-8">
+                              عرض الخيارات
+                            </Button>
+                          ) : inCart ? (
+                            <div className="flex items-center gap-2 bg-secondary/30 p-1 rounded-xl">
+                              <Button 
+                                onClick={() => removeFromCart(product.id)}
+                                variant="ghost" size="icon" className="h-8 w-8 rounded-lg bg-white shadow-sm"
+                              >
+                                <Minus className="h-3 w-3 text-primary" />
+                              </Button>
+                              <span className="font-black text-sm min-w-[12px] text-center">{inCart.quantity}</span>
+                              <Button 
+                                onClick={() => addToCart(product)}
+                                variant="ghost" size="icon" className="h-8 w-8 rounded-lg bg-primary text-white"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button 
+                              onClick={() => addToCart(product)}
+                              className="h-9 rounded-xl px-4 gap-2 shadow-md active:scale-95"
+                            >
+                              <Plus className="h-4 w-4" />
+                              <span className="text-xs font-bold">إضافة</span>
+                            </Button>
+                          )}
                         </div>
-                      ) : (
-                        <Button 
-                          onClick={() => addToCart(product)}
-                          className="h-10 rounded-xl px-4 gap-1.5 shadow-md shadow-primary/10 active:scale-95"
-                        >
-                          <Plus className="h-4 w-4" />
-                          <span className="text-xs font-bold">إضافة</span>
-                        </Button>
-                      )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               )
             })
           ) : (
-            <div className="text-center py-20 bg-white rounded-[2.5rem] border border-dashed border-gray-200">
-              <ShoppingBag className="h-10 w-10 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm text-gray-400 font-bold">عذراً، لا توجد منتجات مطابقة</p>
+            <div className="text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-gray-100">
+              <ShoppingBag className="h-16 w-16 text-gray-100 mx-auto mb-4" />
+              <p className="text-sm text-gray-400 font-bold">عذراً، لا توجد منتجات مطابقة في هذا القسم</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* 5. Floating Cart Summary */}
+      {/* 5. Product Detail Modal */}
+      {selectedProduct && (
+        <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
+          <DialogContent className="p-0 border-none rounded-[3rem] overflow-hidden max-w-lg w-[90%] mx-auto bg-white" dir="rtl">
+            <div className="relative h-64 w-full">
+              <Image 
+                src={selectedProduct.imageUrl || `https://picsum.photos/seed/${selectedProduct.id}/600`}
+                alt={selectedProduct.name}
+                fill
+                className="object-cover"
+              />
+              <DialogClose className="absolute top-4 left-4 h-10 w-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white outline-none">
+                <X className="h-5 w-5" />
+              </DialogClose>
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-black text-[#111827]">{selectedProduct.name}</h2>
+                  <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-bold">
+                    {selectedProduct.category || 'وجبة رئيسية'}
+                  </Badge>
+                </div>
+                <div className="text-2xl font-black text-primary">{selectedProduct.price} <small className="text-xs">ر.س</small></div>
+              </div>
+              
+              <div className="space-y-2">
+                <h4 className="font-black text-sm">التفاصيل</h4>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  {selectedProduct.description || 'يتم تحضير هذا المنتج بعناية فائقة باستخدام أجود المكونات الطازجة لضمان تجربة طعم لا تُنسى. وجبة متكاملة تناسب جميع الأذواق.'}
+                </p>
+              </div>
+
+              <div className="pt-4 border-t flex gap-3">
+                <Button 
+                  onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
+                  className="flex-1 h-14 rounded-2xl font-black text-lg gap-2"
+                >
+                  <ShoppingBag className="h-5 w-5" />
+                  إضافة للسلة
+                </Button>
+                <button 
+                  onClick={(e: any) => toggleFavoriteProduct(e, selectedProduct.id)}
+                  className="h-14 w-14 border rounded-2xl flex items-center justify-center active:scale-90 transition-transform"
+                >
+                  <Heart className={cn("h-6 w-6", userData?.favoritesProductIds?.includes(selectedProduct.id) ? "fill-destructive text-destructive" : "text-gray-300")} />
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* 6. Bottom Cart Action Bar */}
       {cart.length > 0 && (
         <div className="fixed bottom-6 left-6 right-6 z-[70] animate-in slide-in-from-bottom-10">
           <Button 
             onClick={() => router.push('/cart')}
-            className="w-full h-14 rounded-2xl shadow-2xl shadow-primary/40 text-lg font-black flex justify-between px-6 bg-primary"
+            className="w-full h-16 rounded-[2rem] shadow-[0_20px_50px_rgba(31,175,154,0.3)] text-xl font-black flex justify-between px-8 bg-primary hover:bg-primary/90 transition-all active:scale-95"
           >
-            <div className="flex items-center gap-2">
-              <div className="bg-white text-primary px-2.5 py-0.5 rounded-lg text-sm font-black">
+            <div className="flex items-center gap-3">
+              <div className="bg-white text-primary px-3 py-1 rounded-xl text-sm font-black">
                 {cartCount}
               </div>
-              <span className="text-sm">عرض السلة</span>
+              <span>عرض السلة</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 border-r border-white/20 pr-4">
               <span>{cartTotal}</span>
-              <span className="text-xs opacity-80">ر.س</span>
+              <span className="text-xs opacity-80 font-bold">ر.س</span>
             </div>
           </Button>
         </div>
