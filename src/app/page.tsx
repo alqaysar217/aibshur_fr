@@ -235,10 +235,10 @@ export default function Home() {
 
               return (
                 <Link key={store.id} href={`/store/${store.id}`}>
-                  <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
+                  <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[115px]">
                     <CardContent className="p-3 h-full flex flex-row items-center gap-4">
                       {/* Right Side: Store Image */}
-                      <div className="relative w-20 h-20 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
+                      <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                         <Image 
                           src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
                           alt={store.name} 
@@ -249,21 +249,28 @@ export default function Home() {
 
                       {/* Middle Side: Information */}
                       <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="font-bold text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
-                        </div>
+                        {/* Row 1: Name */}
+                        <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
 
+                        {/* Row 2: Address */}
                         <div className="flex items-center gap-1 text-[#6B7280]">
-                          <MapPin className="h-2.5 w-2.5" />
-                          <span className="text-[10px] truncate">{store.address || 'المكلا'}</span>
-                          <span className="mx-0.5 opacity-30">•</span>
-                          <span className="text-[10px]">يبعد 2.3 كم</span>
+                          <MapPin className="h-2.5 w-2.5 text-primary/60" />
+                          <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="bg-secondary/50 text-[#6B7280] text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
+                        {/* Row 3: Bottom Meta Info */}
+                        <div className="flex items-center flex-wrap gap-2 pt-1">
+                          {/* Distance */}
+                          <div className="flex items-center gap-1 text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">
+                            <span className="text-[10px] font-bold">2.3 كم</span>
+                          </div>
+
+                          {/* Category */}
+                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                             {categoryName}
                           </Badge>
+
+                          {/* Rating */}
                           <div className="flex items-center gap-0.5 text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-lg shrink-0">
                             <Star className="h-2.5 w-2.5 fill-amber-500" />
                             <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
@@ -271,7 +278,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* Left Side: Heart and Status (Opposite Side) */}
+                      {/* Left Side: Heart and Status */}
                       <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
                         <button 
                           onClick={(e) => toggleFavorite(e, store.id)}
