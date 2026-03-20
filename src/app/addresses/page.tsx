@@ -2,13 +2,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2, X } from "lucide-react"
+import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
-import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, addDoc, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp, writeBatch } from "firebase/firestore"
+import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase"
+import { collection, doc, query, orderBy, serverTimestamp, writeBatch } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
@@ -54,25 +54,30 @@ export default function AddressesPage() {
           lng: position.coords.longitude
         })
         setIsLocating(false)
-        toast({ title: "تم تحديد الموقع", description: "تم استخراج إحداثيات موقعك بنجاح" })
+        toast({ title: "تم التحديد", description: "تم استخراج إحداثيات موقعك بدقة عالية" })
       },
       (error) => {
-        console.error(error)
+        console.error("Geolocation error:", error)
         setIsLocating(false)
-        toast({ title: "فشل التحديد", description: "يرجى السماح بالوصول للموقع من الإعدادات", variant: "destructive" })
+        toast({ title: "فشل التحديد", description: "يرجى السماح بالوصول للموقع من إعدادات المتصفح", variant: "destructive" })
       },
-      { enableHighAccuracy: true }
+      { 
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
     )
   }
 
-  const handleAddAddress = async () => {
+  const handleAddAddress = () => {
     if (!user || !db) return
     if (!newLabel || !newCity || !newDetails) {
-      toast({ title: "بيانات ناقصة", description: "يرجى ملء جميع الحقول المطلوبة", variant: "destructive" })
+      toast({ title: "بيانات ناقصة", description: "يرجى ملء الاسم والمدينة والتفاصيل", variant: "destructive" })
       return
     }
 
     setIsSaving(true)
+    const addressesRef = collection(db, "users", user.uid, "addresses")
     const addressData = {
       label: newLabel,
       city: newCity,
@@ -83,32 +88,26 @@ export default function AddressesPage() {
       createdAt: serverTimestamp()
     }
 
-    try {
-      await addDoc(collection(db, "users", user.uid, "addresses"), addressData)
-      toast({ title: "تم الحفظ", description: "تم إضافة العنوان الجديد بنجاح" })
-      
-      // إعادة ضبط الحقول وإغلاق النافذة
-      setNewLabel("")
-      setNewCity("")
-      setNewDetails("")
-      setCoordinates(null)
-      setIsAdding(false)
-    } catch (e) {
-      console.error(e)
-      toast({ title: "خطأ في الحفظ", description: "فشلت عملية الحفظ، حاول مجدداً", variant: "destructive" })
-    } finally {
-      setIsSaving(false)
-    }
+    // استخدام الوظيفة غير الحاجبة للحفظ مع معالجة الأخطاء مركزياً
+    addDocumentNonBlocking(addressesRef, addressData)
+      .then(() => {
+        toast({ title: "تم الحفظ", description: "تم إضافة العنوان الجديد إلى قائمتك" })
+        setNewLabel("")
+        setNewCity("")
+        setNewDetails("")
+        setCoordinates(null)
+        setIsAdding(false)
+      })
+      .finally(() => {
+        setIsSaving(false)
+      })
   }
 
-  const handleDeleteAddress = async (id: string) => {
+  const handleDeleteAddress = (id: string) => {
     if (!user || !db) return
-    try {
-      await deleteDoc(doc(db, "users", user.uid, "addresses", id))
-      toast({ title: "تم الحذف", description: "تم إزالة العنوان من قائمتك" })
-    } catch (e) {
-      toast({ title: "خطأ", description: "فشل حذف العنوان", variant: "destructive" })
-    }
+    const addressRef = doc(db, "users", user.uid, "addresses", id)
+    deleteDocumentNonBlocking(addressRef)
+    toast({ title: "تم الحذف", description: "تم إزالة العنوان من قائمتك" })
   }
 
   const setAsDefault = async (addressId: string) => {
@@ -124,7 +123,7 @@ export default function AddressesPage() {
       await batch.commit()
       toast({ title: "تم التغيير", description: "تم تعيين العنوان كافتراضي للتوصيل" })
     } catch (e) {
-      toast({ title: "خطأ", description: "فشل تحديث العنوان الافتراضي", variant: "destructive" })
+      console.error(e)
     }
   }
 
@@ -149,7 +148,7 @@ export default function AddressesPage() {
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-3">
                     <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${addr.isDefault ? 'bg-primary text-white' : 'bg-secondary text-muted-foreground'}`}>
-                      {addr.label.includes("منزل") ? <Home className="h-5 w-5" /> : addr.label.includes("عمل") ? <Briefcase className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
+                      {addr.label === "المنزل" ? <Home className="h-5 w-5" /> : addr.label === "العمل" ? <Briefcase className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
                     </div>
                     <div>
                       <h3 className="font-bold">{addr.label}</h3>
@@ -157,7 +156,6 @@ export default function AddressesPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {addr.latitude && <Navigation className="h-4 w-4 text-green-500" />}
                     {addr.isDefault && <CheckCircle2 className="h-5 w-5 text-primary" />}
                   </div>
                 </div>
@@ -200,7 +198,6 @@ export default function AddressesPage() {
             </DialogHeader>
             <div className="p-6 space-y-5 bg-white max-h-[80vh] overflow-y-auto" dir="rtl">
               
-              {/* قسم الخريطة الذكي */}
               <div className="space-y-4">
                 <Button 
                   onClick={handleDetectLocation} 
@@ -219,14 +216,14 @@ export default function AddressesPage() {
                     <Navigation className="h-5 w-5" />
                   )}
                   <div className="text-right">
-                    <p className="text-sm font-black">{coordinates ? "تم تحديد موقعك بنجاح" : "تحديد موقعي الحالي بالـ GPS"}</p>
-                    <p className="text-[10px] opacity-70">سيتم ملء الإحداثيات تلقائياً</p>
+                    <p className="text-sm font-black">{coordinates ? "تم التقاط الموقع بنجاح" : "تحديد موقعي الحالي GPS"}</p>
+                    <p className="text-[10px] opacity-70">اضغط للحصول على الإحداثيات الدقيقة</p>
                   </div>
                 </Button>
 
                 {coordinates && (
                   <div className="space-y-3 animate-in fade-in zoom-in duration-300">
-                    <div className="w-full h-40 rounded-2xl overflow-hidden border-2 border-primary/10 relative">
+                    <div className="w-full h-48 rounded-2xl overflow-hidden border-2 border-primary/10 relative shadow-inner">
                       <iframe 
                         width="100%" 
                         height="100%" 
@@ -234,12 +231,8 @@ export default function AddressesPage() {
                         scrolling="no" 
                         marginHeight={0} 
                         marginWidth={0} 
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng-0.005}%2C${coordinates.lat-0.005}%2C${coordinates.lng+0.005}%2C${coordinates.lat+0.005}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lng}`}
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng-0.002}%2C${coordinates.lat-0.002}%2C${coordinates.lng+0.002}%2C${coordinates.lat+0.002}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lng}`}
                       ></iframe>
-                    </div>
-                    <div className="p-3 bg-secondary/30 rounded-xl text-[10px] font-mono text-center flex justify-around">
-                      <span>Lat: {coordinates.lat.toFixed(5)}</span>
-                      <span>Lng: {coordinates.lng.toFixed(5)}</span>
                     </div>
                   </div>
                 )}
@@ -259,11 +252,12 @@ export default function AddressesPage() {
                     </Button>
                   ))}
                 </div>
-                {!["المنزل", "العمل", "آخر"].includes(newLabel) && newLabel !== "" && (
-                   <Input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="اسم مخصص (مثال: شقة الوالد)" className="h-12 rounded-xl mt-2 border-primary/20" />
-                )}
                 {newLabel === "آخر" && (
-                   <Input onChange={(e) => setNewLabel(e.target.value)} placeholder="أدخل اسم مخصص..." className="h-12 rounded-xl mt-2 border-primary/20" />
+                   <Input 
+                    placeholder="أدخل اسم مخصص (مثال: شقة الوالد)" 
+                    className="h-12 rounded-xl mt-2 border-primary/20" 
+                    onChange={(e) => setNewLabel(e.target.value)}
+                   />
                 )}
               </div>
 
@@ -273,14 +267,14 @@ export default function AddressesPage() {
               </div>
 
               <div className="space-y-2 text-right">
-                <label className="text-xs font-bold text-muted-foreground mr-1">تفاصيل إضافية (الشارع، رقم المنزل)</label>
+                <label className="text-xs font-bold text-muted-foreground mr-1">تفاصيل (الشارع، رقم المنزل)</label>
                 <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: عمارة رقم 4، بجانب سوبر ماركت..." className="h-12 rounded-xl border-primary/10" />
               </div>
 
               <Button 
                 onClick={handleAddAddress} 
-                disabled={isSaving}
-                className="w-full h-16 rounded-2xl font-black text-lg mt-4 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90"
+                disabled={isSaving || !newLabel || !newCity || !newDetails}
+                className="w-full h-16 rounded-2xl font-black text-lg mt-4 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 transition-all active:scale-[0.98]"
               >
                 {isSaving ? (
                   <Loader2 className="h-6 w-6 animate-spin" />
