@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2, Info } from "lucide-react"
+import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2, Info, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -21,6 +21,7 @@ export default function AddressesPage() {
   const [mounted, setMounted] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   
   // حالات العنوان الجديد
@@ -28,6 +29,7 @@ export default function AddressesPage() {
   const [customLabel, setCustomLabel] = useState("")
   const [newCity, setNewCity] = useState("")
   const [newDetails, setNewDetails] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
   const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null)
 
   useEffect(() => {
@@ -40,6 +42,30 @@ export default function AddressesPage() {
   }, [db, user])
 
   const { data: addresses, isLoading } = useCollection(addressesQuery)
+
+  // البحث عن موقع بالاسم (Geocoding) لتمكين المستخدم من تحديد موقع أهله
+  const handleSearchLocation = async () => {
+    if (!searchQuery) return
+    setIsSearching(true)
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`)
+      const data = await response.json()
+      if (data && data.length > 0) {
+        const result = data[0]
+        setCoordinates({
+          lat: parseFloat(result.lat),
+          lng: parseFloat(result.lon)
+        })
+        toast({ title: "تم العثور على الموقع", description: "تم تحديث الخريطة بناءً على بحثك" })
+      } else {
+        toast({ title: "عذراً", description: "لم نتمكن من العثور على هذا المكان، جرب كتابته بشكل مختلف", variant: "destructive" })
+      }
+    } catch (error) {
+      toast({ title: "خطأ", description: "فشل الاتصال بخدمة الخرائط", variant: "destructive" })
+    } finally {
+      setIsSearching(false)
+    }
+  }
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
@@ -55,18 +81,13 @@ export default function AddressesPage() {
           lng: position.coords.longitude
         })
         setIsLocating(false)
-        toast({ title: "تم التحديد", description: "تم التقاط إحداثيات موقعك الحالي بنجاح" })
+        toast({ title: "تم التحديد", description: "تم التقاط موقعك الحالي بنجاح" })
       },
       (error) => {
-        console.error("Geolocation error:", error)
         setIsLocating(false)
-        toast({ title: "فشل التحديد", description: "يرجى السماح بالوصول للموقع أو أدخل العنوان يدوياً", variant: "destructive" })
+        toast({ title: "فشل التحديد", description: "يرجى السماح بالوصول للموقع أو ابحث عن العنوان يدوياً", variant: "destructive" })
       },
-      { 
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     )
   }
 
@@ -108,6 +129,7 @@ export default function AddressesPage() {
     setCustomLabel("")
     setNewCity("")
     setNewDetails("")
+    setSearchQuery("")
     setCoordinates(null)
   }
 
@@ -120,13 +142,11 @@ export default function AddressesPage() {
 
   const setAsDefault = async (addressId: string) => {
     if (!user || !db || !addresses) return
-    
     const batch = writeBatch(db)
     addresses.forEach((addr) => {
       const ref = doc(db, "users", user.uid, "addresses", addr.id)
       batch.update(ref, { isDefault: addr.id === addressId })
     })
-    
     try {
       await batch.commit()
       toast({ title: "تم التغيير", description: "تم تعيين العنوان كافتراضي للتوصيل" })
@@ -167,16 +187,13 @@ export default function AddressesPage() {
                     {addr.isDefault && <CheckCircle2 className="h-5 w-5 text-primary" />}
                   </div>
                 </div>
-                
                 <p className="text-xs text-muted-foreground mb-4 leading-relaxed">{addr.details}</p>
-                
                 <div className="flex items-center justify-between pt-3 border-t border-secondary/50">
                   {!addr.isDefault ? (
                     <Button variant="ghost" size="sm" onClick={() => setAsDefault(addr.id)} className="text-[10px] font-bold text-primary p-0 h-auto">
                       تعيين كافتراضي
                     </Button>
                   ) : <span className="text-[10px] font-bold text-primary">العنوان الافتراضي</span>}
-                  
                   <Button variant="ghost" size="sm" onClick={() => handleDeleteAddress(addr.id)} className="text-destructive p-0 h-8 w-8 rounded-full hover:bg-destructive/10">
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -193,7 +210,7 @@ export default function AddressesPage() {
 
         <Dialog open={isAdding} onOpenChange={(val) => { setIsAdding(val); if(!val) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="w-full h-16 rounded-[2rem] gap-2 font-black text-lg shadow-xl shadow-primary/20 mt-4">
+            <Button className="w-full h-16 rounded-[2rem] gap-2 font-black text-lg shadow-xl shadow-primary/20 mt-4 bg-primary hover:bg-primary/90">
               <Plus className="h-6 w-6" /> إضافة عنوان جديد
             </Button>
           </DialogTrigger>
@@ -207,27 +224,37 @@ export default function AddressesPage() {
             <div className="p-6 space-y-5 bg-white max-h-[80vh] overflow-y-auto" dir="rtl">
               
               <div className="space-y-4">
-                <Button 
-                  onClick={handleDetectLocation} 
-                  variant="outline" 
-                  disabled={isLocating}
-                  className={cn(
-                    "w-full h-16 rounded-2xl border-dashed border-2 gap-3 transition-all",
-                    coordinates ? "border-green-500 bg-green-50 text-green-700" : "border-primary/30 text-primary hover:bg-primary/5"
-                  )}
-                >
-                  {isLocating ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : coordinates ? (
-                    <CheckCircle2 className="h-5 w-5" />
-                  ) : (
-                    <Navigation className="h-5 w-5" />
-                  )}
-                  <div className="text-right">
-                    <p className="text-sm font-black">{coordinates ? "تم التقاط الموقع بنجاح" : "تحديد موقعي الحالي GPS"}</p>
-                    <p className="text-[10px] opacity-70">استخدم موقعك الحالي أو أدخل البيانات يدوياً أدناه</p>
-                  </div>
-                </Button>
+                <div className="relative group">
+                   <Input 
+                    placeholder="ابحث عن مدينة أو شارع (مثال: صنعاء حدة)" 
+                    className="h-14 pr-12 rounded-2xl border-primary/20 bg-secondary/20"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearchLocation()}
+                   />
+                   <Button 
+                    onClick={handleSearchLocation} 
+                    disabled={isSearching}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 rounded-xl"
+                   >
+                    {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                   </Button>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleDetectLocation} 
+                    variant="outline" 
+                    disabled={isLocating}
+                    className={cn(
+                      "flex-1 h-12 rounded-xl border-dashed border-2 gap-2 text-xs font-bold",
+                      coordinates ? "border-green-500 bg-green-50 text-green-700" : "border-primary/30 text-primary"
+                    )}
+                  >
+                    {isLocating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Navigation className="h-4 w-4" />}
+                    موقعي الحالي
+                  </Button>
+                </div>
 
                 {coordinates && (
                   <div className="space-y-3 animate-in fade-in zoom-in duration-300">
@@ -239,7 +266,7 @@ export default function AddressesPage() {
                         scrolling="no" 
                         marginHeight={0} 
                         marginWidth={0} 
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng-0.002}%2C${coordinates.lat-0.002}%2C${coordinates.lng+0.002}%2C${coordinates.lat+0.002}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lng}`}
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng-0.005}%2C${coordinates.lat-0.005}%2C${coordinates.lng+0.005}%2C${coordinates.lat+0.005}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lng}`}
                       ></iframe>
                     </div>
                   </div>
@@ -252,6 +279,7 @@ export default function AddressesPage() {
                   {(["المنزل", "العمل", "آخر"] as const).map((type) => (
                     <Button 
                       key={type}
+                      type="button"
                       variant={labelType === type ? "default" : "outline"}
                       onClick={() => setLabelType(type)}
                       className="flex-1 h-12 rounded-xl text-xs font-bold transition-all"
@@ -287,7 +315,7 @@ export default function AddressesPage() {
               <div className="bg-secondary/20 p-3 rounded-xl flex gap-2 items-start">
                 <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <p className="text-[10px] text-muted-foreground leading-relaxed">
-                  يمكنك الطلب لأهلك في مدينة أخرى بإدخال اسم مدينتهم وتفاصيل سكنهم يدوياً حتى لو كنت في مكان آخر.
+                  يمكنك البحث عن مدينة أهلك في الخريطة بالأعلى لتحديد موقعهم، أو أدخل البيانات يدوياً وسيعرف المندوب العنوان.
                 </p>
               </div>
 
@@ -296,11 +324,7 @@ export default function AddressesPage() {
                 disabled={isSaving || !newCity || !newDetails || (labelType === "آخر" && !customLabel)}
                 className="w-full h-16 rounded-2xl font-black text-lg mt-4 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 transition-all active:scale-[0.98]"
               >
-                {isSaving ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : (
-                  "حفظ العنوان"
-                )}
+                {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "حفظ العنوان"}
               </Button>
             </div>
           </DialogContent>
@@ -309,3 +333,4 @@ export default function AddressesPage() {
     </div>
   )
 }
+    
