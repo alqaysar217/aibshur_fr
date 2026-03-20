@@ -261,11 +261,6 @@ export default function StoreDetailPage() {
                 <span className="text-[9px] text-gray-400 font-bold ml-1">(120+ تقييم)</span>
               </div>
             </div>
-
-            <div className="flex items-center gap-1 text-[#6B7280] text-[10px] font-bold">
-              <MapPin className="h-3 w-3 text-primary/60" />
-              <span>{store.address || 'المكلا'}</span>
-            </div>
           </div>
         </div>
 
@@ -280,8 +275,8 @@ export default function StoreDetailPage() {
             <span className="text-[9px] font-black text-gray-700">{store.deliveryTime || '30-45 دقيقة'}</span>
           </div>
           <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
-            <ShoppingBag className="h-3 w-3 text-primary" />
-            <span className="text-[9px] font-black text-gray-700">توصيل 10 ر.س</span>
+            <MapPin className="h-3 w-3 text-primary" />
+            <span className="text-[9px] font-black text-gray-700">{store.address || 'المكلا'}</span>
           </div>
         </div>
       </div>
@@ -381,7 +376,7 @@ export default function StoreDetailPage() {
                               onClick={() => needsOptions ? setSelectedProduct(product) : addToCart(product)}
                               className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                             >
-                              {needsOptions ? "عرض الخيارات" : "إضافة"}
+                              {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
                             </Button>
                           )}
                         </div>
