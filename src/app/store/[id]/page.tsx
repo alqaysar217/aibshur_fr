@@ -3,12 +3,17 @@
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, ChevronLeft, Info, X, Navigation, LayoutGrid, Zap, Utensils, Soup, Flame, Coffee, Beef, ChefHat, Pizza, Sandwich } from "lucide-react"
+import { 
+  Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, 
+  Navigation, LayoutGrid, Zap, Utensils, Soup, Flame, Coffee, Beef, ChefHat, 
+  Pizza, Sandwich, Pill, Sparkles, Droplets, Baby, Milk, Package, Eraser, 
+  Candy, Croissant, Smartphone, Watch, Laptop, Home, Gamepad2, User, Wind, 
+  Gift, Leaf, Droplet, Cookie, CupSoda, X, Calculator
+} from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { collection, doc, setDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { useState, useEffect, useMemo } from "react"
 import { useToast } from "@/hooks/use-toast"
@@ -92,6 +97,39 @@ export default function StoreDetailPage() {
   }, [db, id])
   const { data: products, isLoading: isProductsLoading } = useCollection(productsQuery)
 
+  const categories = useMemo(() => {
+    const base = ["الكل", "الأكثر طلباً", "المفضلة"]
+    if (!store || !store.categoryIds) return base
+    
+    const categoryFilters: Record<string, string[]> = {
+      'restaurants': ["مقبلات", "غداء", "مشويات", "فتة", "شاورما", "وجبات خفيفة", "لحم", "مشروبات", "حلى"],
+      'cafe': ["مقبلات", "غداء", "مشويات", "فتة", "شاورما", "وجبات خفيفة", "لحم", "مشروبات", "حلى"],
+      'pharmacy': ["أدوية", "مستحضرات تجميل", "عناية بالبشرة", "مكملات غذائية", "رعاية أطفال"],
+      'grocery': ["ألبان وأجبان", "معلبات", "منظفات", "حلويات ومسليات", "مخبوزات"],
+      'electronics': ["هواتف", "إكسسوارات", "كمبيوتر", "أجهزة منزلية", "ألعاب"],
+      'perfume': ["عطور رجالية", "عطور نسائية", "بخور", "أطقم هدايا"],
+      'dates': ["تمور فاخرة", "بهارات مشكلة", "عسل سدر", "مكسرات"],
+      'spices': ["تمور فاخرة", "بهارات مشكلة", "عسل سدر", "مكسرات"],
+      'sweets': ["حلويات شرقية", "حلويات غربية", "كيك", "موالح"] 
+    }
+
+    const dynamicFilters = new Set<string>()
+    store.categoryIds.forEach((catId: string) => {
+      if (categoryFilters[catId]) {
+        categoryFilters[catId].forEach(f => dynamicFilters.add(f))
+      }
+    })
+
+    // Also include categories found in products
+    if (products) {
+      products.forEach((p: any) => {
+        if (p.category) dynamicFilters.add(p.category)
+      })
+    }
+
+    return [...base, ...Array.from(dynamicFilters)]
+  }, [store, products])
+
   const filteredProducts = useMemo(() => {
     if (!products) return []
     return products.filter(p => {
@@ -103,13 +141,6 @@ export default function StoreDetailPage() {
       return matchesSearch && matchesCategory
     })
   }, [products, searchQuery, selectedCategory, userData?.favoritesProductIds])
-
-  const categories = useMemo(() => {
-    const base = ["الكل", "المفضلة", "الأكثر طلباً"]
-    if (!products) return base
-    const cats = Array.from(new Set(products.map((p: any) => p.category).filter(Boolean)))
-    return [...base, ...cats as string[]]
-  }, [products])
 
   const toggleFavoriteStore = () => {
     if (!user) {
@@ -161,13 +192,45 @@ export default function StoreDetailPage() {
       case "الكل": return <LayoutGrid className="h-3.5 w-3.5" />
       case "المفضلة": return <Heart className="h-3.5 w-3.5" />
       case "الأكثر طلباً": return <Zap className="h-3.5 w-3.5" />
+      // المطاعم
       case "مقبلات": return <Soup className="h-3.5 w-3.5" />
       case "مشويات": return <Flame className="h-3.5 w-3.5" />
-      case "الغداء": return <Utensils className="h-3.5 w-3.5" />
+      case "غداء": return <Utensils className="h-3.5 w-3.5" />
       case "لحم": return <Beef className="h-3.5 w-3.5" />
       case "بيتزا": return <Pizza className="h-3.5 w-3.5" />
       case "شاورما": return <Sandwich className="h-3.5 w-3.5" />
-      case "كافيه": return <Coffee className="h-3.5 w-3.5" />
+      case "وجبات خفيفة": return <Cookie className="h-3.5 w-3.5" />
+      case "مشروبات": return <CupSoda className="h-3.5 w-3.5" />
+      case "حلى": return <CakeSlice className="h-3.5 w-3.5" />
+      // الصيدليات
+      case "أدوية": return <Pill className="h-3.5 w-3.5" />
+      case "مستحضرات تجميل": return <Sparkles className="h-3.5 w-3.5" />
+      case "عناية بالبشرة": return <Droplets className="h-3.5 w-3.5" />
+      case "مكملات غذائية": return <Zap className="h-3.5 w-3.5" />
+      case "رعاية أطفال": return <Baby className="h-3.5 w-3.5" />
+      // السوبر ماركت
+      case "ألبان وأجبان": return <Milk className="h-3.5 w-3.5" />
+      case "معلبات": return <Package className="h-3.5 w-3.5" />
+      case "منظفات": return <Eraser className="h-3.5 w-3.5" />
+      case "حلويات ومسليات": return <Candy className="h-3.5 w-3.5" />
+      case "مخبوزات": return <Croissant className="h-3.5 w-3.5" />
+      // الإلكترونيات
+      case "هواتف": return <Smartphone className="h-3.5 w-3.5" />
+      case "إكسسوارات": return <Watch className="h-3.5 w-3.5" />
+      case "كمبيوتر": return <Laptop className="h-3.5 w-3.5" />
+      case "أجهزة منزلية": return <Home className="h-3.5 w-3.5" />
+      case "ألعاب": return <Gamepad2 className="h-3.5 w-3.5" />
+      // العطور
+      case "عطور رجالية": return <User className="h-3.5 w-3.5" />
+      case "عطور نسائية": return <User className="h-3.5 w-3.5" />
+      case "بخور": return <Wind className="h-3.5 w-3.5" />
+      case "أطقم هدايا": return <Gift className="h-3.5 w-3.5" />
+      // التمور والبهارات
+      case "تمور فاخرة": return <Leaf className="h-3.5 w-3.5" />
+      case "بهارات مشكلة": return <Flame className="h-3.5 w-3.5" />
+      case "عسل سدر": return <Droplet className="h-3.5 w-3.5" />
+      case "مكسرات": return <LayoutGrid className="h-3.5 w-3.5" />
+      
       default: return <ChefHat className="h-3.5 w-3.5" />
     }
   }
@@ -189,7 +252,7 @@ export default function StoreDetailPage() {
   const isStoreOpen = store.status === 'open' || store.status === 'مفتوح';
 
   const hasOptions = (productName: string) => {
-    const keywords = ['بيتزا', 'نفر', 'برجر', 'عصير', 'مشوي', 'برمة', 'مندي']
+    const keywords = ['بيتزا', 'نفر', 'برجر', 'عصير', 'مشوي', 'برمة', 'مندي', 'حجم', 'نوع']
     return keywords.some(k => productName.includes(k))
   }
 
@@ -241,10 +304,10 @@ export default function StoreDetailPage() {
         </div>
       </header>
 
-      {/* 2. Compact Profile Header */}
-      <div className="bg-white p-5 space-y-4">
+      {/* 2. Optimized Mobile Header */}
+      <div className="bg-white p-5 border-b">
         <div className="flex items-center gap-4">
-          <div className="relative h-20 w-20 rounded-full border-2 border-secondary overflow-hidden shrink-0 shadow-sm bg-secondary/10">
+          <div className="relative h-16 w-16 rounded-full border-2 border-secondary overflow-hidden shrink-0 shadow-sm bg-secondary/10">
             <Image 
               src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`}
               alt={store.name}
@@ -254,8 +317,8 @@ export default function StoreDetailPage() {
           </div>
 
           <div className="flex-1 space-y-1">
-            <div className="flex items-start justify-between">
-              <h1 className="text-xl font-black text-[#111827] leading-tight">{store.name}</h1>
+            <div className="flex items-center justify-between">
+              <h1 className="text-lg font-black text-[#111827] leading-tight truncate">{store.name}</h1>
               <button 
                 onClick={toggleFavoriteStore}
                 className={cn(
@@ -263,24 +326,28 @@ export default function StoreDetailPage() {
                   isFavoriteStore ? "text-destructive" : "text-gray-300"
                 )}
               >
-                <Heart className={cn("h-5 w-5", isFavoriteStore && "fill-current")} />
+                <Heart className={cn("h-4 w-4", isFavoriteStore && "fill-current")} />
               </button>
             </div>
             
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge className={cn("text-[8px] font-black border-none px-2 h-4", isStoreOpen ? "bg-green-500" : "bg-red-500")}>
-                {isStoreOpen ? 'مفتوح الآن' : 'مغلق'}
-              </Badge>
               <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-black">
                 <Star className="h-3 w-3 fill-amber-500" />
                 <span>{store.averageRating || '4.5'}</span>
                 <span className="text-[9px] text-gray-400 font-bold ml-1">(120+ تقييم)</span>
               </div>
+              <Badge className={cn("text-[8px] font-black border-none px-2 h-4", isStoreOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
+                {isStoreOpen ? 'مفتوح الآن' : 'مغلق'}
+              </Badge>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        <div className="flex items-center gap-2 overflow-x-auto mt-4 pb-1 scrollbar-hide">
+          <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
+            <MapPin className="h-3 w-3 text-primary" />
+            <span className="text-[9px] font-black text-gray-700">{store.address || 'المكلا'}</span>
+          </div>
           <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
             <Navigation className="h-3 w-3 text-primary" />
             <span className="text-[9px] font-black text-gray-700">يبعد 2.3 كم</span>
@@ -289,25 +356,21 @@ export default function StoreDetailPage() {
             <Clock className="h-3 w-3 text-primary" />
             <span className="text-[9px] font-black text-gray-700">{store.deliveryTime || '30-45 دقيقة'}</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
-            <MapPin className="h-3 w-3 text-primary" />
-            <span className="text-[9px] font-black text-gray-700">{store.address || 'المكلا'}</span>
-          </div>
         </div>
       </div>
 
-      {/* 3. Categories Horizontal Scroll with Icons */}
-      <div className="sticky top-[57px] z-40 bg-[#F5F7F6]/90 backdrop-blur-md py-3 border-b">
+      {/* 3. Dynamic Pill Filters System */}
+      <div className="sticky top-[57px] z-40 bg-white/90 backdrop-blur-md py-4 border-b">
         <div className="flex gap-2 overflow-x-auto px-5 scrollbar-hide" dir="rtl">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={cn(
-                "px-4 py-2.5 rounded-2xl text-[10px] font-black whitespace-nowrap transition-all border flex items-center gap-2",
+                "px-5 py-2 rounded-full text-[10px] font-black whitespace-nowrap transition-all flex items-center gap-2 border",
                 selectedCategory === cat 
-                  ? "bg-primary text-white border-primary shadow-lg scale-105" 
-                  : "bg-white text-gray-500 border-gray-100 hover:bg-gray-50"
+                  ? "bg-primary text-white border-primary shadow-md scale-105" 
+                  : "bg-[#F3F4F6] text-gray-500 border-transparent hover:bg-gray-200"
               )}
             >
               {getCategoryIcon(cat)}
@@ -320,7 +383,7 @@ export default function StoreDetailPage() {
       {/* 4. Product List */}
       <div className="p-5 space-y-4">
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-lg font-black text-[#111827]">{selectedCategory}</h2>
+          <h2 className="text-base font-black text-[#111827]">{selectedCategory}</h2>
           <span className="text-[9px] font-bold text-gray-400">{filteredProducts.length} منتج</span>
         </div>
 
@@ -360,7 +423,7 @@ export default function StoreDetailPage() {
                         <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
                         <div className="flex items-center gap-0.5 text-amber-500 text-[9px] font-black">
                           <Star className="h-2.5 w-2.5 fill-amber-500" />
-                          <span>4.8</span>
+                          <span>{product.rating || '4.8'}</span>
                         </div>
                       </div>
                       <p className="text-[9px] text-gray-400 line-clamp-2 leading-snug min-h-[2.4rem]">
@@ -428,7 +491,7 @@ export default function StoreDetailPage() {
               
               <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-xl flex items-center gap-1 shadow-sm">
                 <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
-                <span className="text-[10px] font-black">4.8</span>
+                <span className="text-[10px] font-black">{selectedProduct.rating || '4.8'}</span>
                 <span className="text-[8px] text-gray-500 font-bold">(45 تقييم)</span>
               </div>
             </div>
