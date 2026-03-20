@@ -12,10 +12,11 @@ service cloud.firestore {
     }
 
     // --- 1. قواعد المجموعة المشتركة (Collection Group) ---
-    // يجب أن تكون في القمة لضمان عمل استعلامات المجموعات (مثل البحث والمفضلة)
+    // هذه القاعدة يجب أن تكون في القمة ومستقلة لضمان عمل استعلامات المجموعات (مثل البحث والمفضلة)
+    // النمط {path=**} يسمح بالوصول لمجموعة "products" أينما وجدت في قاعدة البيانات
     match /{path=**}/products/{productId} {
       allow read, list: if isSignedIn();
-      allow write: if isSignedIn(); // للسماح بالتهيئة (Seed)
+      allow write: if isSignedIn(); // للسماح بالتهيئة (Seed) للمطور
     }
 
     // --- 2. ملفات المستخدمين ---
@@ -32,7 +33,7 @@ service cloud.firestore {
       allow read, list: if isSignedIn();
       allow write: if isSignedIn(); // للتهيئة
 
-      // المنتجات هنا مغطاة أيضاً بقاعدة المجموعات المشتركة أعلاه
+      // المنتجات هنا مغطاة أيضاً بقاعدة المجموعات المشتركة أعلاه لضمان شمولية القراءة
       match /products/{productId} {
         allow read, list: if isSignedIn();
         allow write: if isSignedIn();

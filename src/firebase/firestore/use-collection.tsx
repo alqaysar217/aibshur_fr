@@ -76,8 +76,10 @@ export function useCollection<T = any>(
           if ('path' in memoizedTargetRefOrQuery) {
             path = (memoizedTargetRefOrQuery as CollectionReference).path;
           } else {
-            const internal = memoizedTargetRefOrQuery as unknown as InternalQuery;
-            path = internal._query?.path?.canonicalString() || 'collection-group';
+            // For collectionGroup queries, we attempt to extract the collection name
+            const internal = memoizedTargetRefOrQuery as any;
+            const queryPath = internal._query?.path?.canonicalString();
+            path = queryPath || 'collection-group';
           }
         } catch (e) {
           path = 'collection-group';

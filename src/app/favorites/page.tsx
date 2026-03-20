@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -34,19 +33,21 @@ export default function FavoritesPage() {
 
   const favoritesStoresQuery = useMemoFirebase(() => {
     const ids = userData?.favoritesStoreIds || []
-    if (!db || ids.length === 0) return null
+    const validIds = ids.filter(id => typeof id === 'string' && id.length > 0)
+    if (!db || validIds.length === 0) return null
     return query(
       collection(db, "stores"), 
-      where(documentId(), "in", ids.slice(0, 10))
+      where(documentId(), "in", validIds.slice(0, 10))
     )
   }, [db, userData?.favoritesStoreIds])
 
   const favoritesProductsQuery = useMemoFirebase(() => {
     const ids = userData?.favoritesProductIds || []
-    if (!db || ids.length === 0) return null
+    const validIds = ids.filter(id => typeof id === 'string' && id.length > 0)
+    if (!db || validIds.length === 0) return null
     return query(
       collectionGroup(db, "products"),
-      where("id", "in", ids.slice(0, 10)),
+      where("id", "in", validIds.slice(0, 10)),
       limit(10)
     )
   }, [db, userData?.favoritesProductIds])
