@@ -74,17 +74,16 @@ export function useCollection<T = any>(
         setIsLoading(false);
       },
       (error: FirestoreError) => {
-        // تحسين استخراج المسار للاستعلامات الشاملة (Collection Groups)
-        let path: string = '/';
+        let path: string = 'collection-group';
         try {
-          if (memoizedTargetRefOrQuery.type === 'collection') {
+          if ('path' in memoizedTargetRefOrQuery) {
             path = (memoizedTargetRefOrQuery as CollectionReference).path;
           } else {
             const internal = memoizedTargetRefOrQuery as unknown as InternalQuery;
             path = internal._query.path.canonicalString() || 'collection-group';
           }
         } catch (e) {
-          path = 'unknown-path';
+          path = 'collection-group';
         }
 
         const contextualError = new FirestorePermissionError({

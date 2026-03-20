@@ -32,7 +32,6 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
-  // استعلام المتاجر المفضلة
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesStoreIds || userData.favoritesStoreIds.length === 0) return null
     return query(
@@ -41,10 +40,8 @@ export default function FavoritesPage() {
     )
   }, [db, userData?.favoritesStoreIds])
 
-  // استعلام الوجبات المفضلة باستخدام Collection Group
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData?.favoritesProductIds || userData.favoritesProductIds.length === 0) return null
-    // ملاحظة: استعلام الوجبات عبر المجموعات يتطلب وجود حقل id داخل الوثيقة نفسها وفهرس مفعل
     return query(
       collectionGroup(db, "products"),
       where("id", "in", userData.favoritesProductIds.slice(0, 10)),

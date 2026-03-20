@@ -24,7 +24,6 @@ export default function SearchPage() {
     setMounted(true)
   }, [])
 
-  // جلب كافة المتاجر والمنتجات بشكل لحظي
   const storesQuery = useMemoFirebase(() => {
     if (!db) return null
     return query(collection(db, "stores"))
@@ -38,20 +37,16 @@ export default function SearchPage() {
   const { data: stores, isLoading: loadingStores } = useCollection(storesQuery)
   const { data: products, isLoading: loadingProducts } = useCollection(productsQuery)
 
-  // دمج وتصفية النتائج بناءً على النص المدخل
   const results = useMemo(() => {
     if (!mounted) return []
     const searchVal = queryText.trim().toLowerCase()
     
-    // تحويل البيانات لشكل موحد للدمج
     const allStores = (stores || []).map(s => ({ ...s, type: 'store' }))
     const allProducts = (products || []).map(p => ({ ...p, type: 'product' }))
     const combined = [...allStores, ...allProducts]
 
-    // إذا لم يوجد نص بحث، نعرض قائمة أولية من الكل
     if (!searchVal) return combined.slice(0, 20)
 
-    // فلترة النتائج بحيث تبحث في أي مكان في النص
     return combined.filter((item: any) => {
       const nameMatch = item.name?.toLowerCase().includes(searchVal)
       const descMatch = item.description?.toLowerCase().includes(searchVal)
@@ -74,7 +69,6 @@ export default function SearchPage() {
       </header>
 
       <div className="p-4 space-y-4">
-        {/* حقل البحث اللحظي */}
         <div className="relative group">
           <div className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors">
             <Search className="h-full w-full" />
@@ -87,7 +81,6 @@ export default function SearchPage() {
           />
         </div>
 
-        {/* قائمة النتائج الموحدة */}
         <div className="space-y-3 animate-in fade-in duration-500">
           {isLoading && (
             <div className="text-center py-10 text-muted-foreground text-sm font-bold">جاري البحث...</div>
@@ -118,7 +111,7 @@ export default function SearchPage() {
                           item.type === 'store' ? "bg-primary text-white" : "bg-orange-100 text-orange-600"
                         )}
                       >
-                        {item.type === 'store' ? 'اسم المتجر' : 'اسم الوجبة'}
+                        {item.type === 'store' ? 'متجر' : 'وجبة'}
                       </Badge>
                       <p className="font-black text-sm">{item.name}</p>
                     </div>
