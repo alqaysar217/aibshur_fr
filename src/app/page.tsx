@@ -241,7 +241,7 @@ export default function Home() {
             return (
               <Link key={store.id} href={`/store/${store.id}`}>
                 <Card className="border-none shadow-sm rounded-xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-32">
-                  {/* زر المفضلة - أعلى اليمين */}
+                  {/* زر المفضلة - أعلى اليسار (لأنه تم عكس الاتجاه وأصبحت الصورة على اليمين) */}
                   <button 
                     onClick={(e) => toggleFavorite(e, store.id)}
                     className="absolute top-3 left-3 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm transition-transform active:scale-75 z-10"
@@ -249,7 +249,7 @@ export default function Home() {
                     <Heart className={cn("h-3.5 w-3.5 transition-colors", isFav ? "fill-destructive text-destructive" : "text-muted-foreground/40")} />
                   </button>
 
-                  <CardContent className="p-3 h-full flex flex-row-reverse gap-4 items-center">
+                  <CardContent className="p-3 h-full flex flex-row gap-4 items-center">
                     {/* صورة المتجر - اليمين (في الاتجاه العربي) */}
                     <div className="relative w-[90px] h-[90px] shrink-0">
                       <Image 
