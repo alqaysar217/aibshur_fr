@@ -3,7 +3,7 @@
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, ChevronLeft, Info, X, Navigation } from "lucide-react"
+import { Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, ChevronLeft, Info, X, Navigation, LayoutGrid, Zap, Utensils, Soup, Flame, Coffee, Beef, ChefHat, Pizza, Sandwich } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -98,15 +98,17 @@ export default function StoreDetailPage() {
       const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = selectedCategory === "الكل" || 
                              (selectedCategory === "المفضلة" && userData?.favoritesProductIds?.includes(p.id)) ||
+                             (selectedCategory === "الأكثر طلباً" && p.rating >= 4.8) ||
                              p.category === selectedCategory
       return matchesSearch && matchesCategory
     })
   }, [products, searchQuery, selectedCategory, userData?.favoritesProductIds])
 
   const categories = useMemo(() => {
-    if (!products) return ["الكل", "المفضلة"]
+    const base = ["الكل", "المفضلة", "الأكثر طلباً"]
+    if (!products) return base
     const cats = Array.from(new Set(products.map((p: any) => p.category).filter(Boolean)))
-    return ["الكل", "المفضلة", ...cats]
+    return [...base, ...cats as string[]]
   }, [products])
 
   const toggleFavoriteStore = () => {
@@ -152,6 +154,22 @@ export default function StoreDetailPage() {
         })
         errorEmitter.emit('permission-error', permissionError)
       })
+  }
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "الكل": return <LayoutGrid className="h-3.5 w-3.5" />
+      case "المفضلة": return <Heart className="h-3.5 w-3.5" />
+      case "الأكثر طلباً": return <Zap className="h-3.5 w-3.5" />
+      case "مقبلات": return <Soup className="h-3.5 w-3.5" />
+      case "مشويات": return <Flame className="h-3.5 w-3.5" />
+      case "الغداء": return <Utensils className="h-3.5 w-3.5" />
+      case "لحم": return <Beef className="h-3.5 w-3.5" />
+      case "بيتزا": return <Pizza className="h-3.5 w-3.5" />
+      case "شاورما": return <Sandwich className="h-3.5 w-3.5" />
+      case "كافيه": return <Coffee className="h-3.5 w-3.5" />
+      default: return <ChefHat className="h-3.5 w-3.5" />
+    }
   }
 
   if (isStoreLoading) return (
@@ -226,7 +244,6 @@ export default function StoreDetailPage() {
       {/* 2. Compact Profile Header */}
       <div className="bg-white p-5 space-y-4">
         <div className="flex items-center gap-4">
-          {/* Circular Store Image on the right (RTL) */}
           <div className="relative h-20 w-20 rounded-full border-2 border-secondary overflow-hidden shrink-0 shadow-sm bg-secondary/10">
             <Image 
               src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`}
@@ -236,7 +253,6 @@ export default function StoreDetailPage() {
             />
           </div>
 
-          {/* Store Info on the left (RTL) */}
           <div className="flex-1 space-y-1">
             <div className="flex items-start justify-between">
               <h1 className="text-xl font-black text-[#111827] leading-tight">{store.name}</h1>
@@ -264,7 +280,6 @@ export default function StoreDetailPage() {
           </div>
         </div>
 
-        {/* Compact Stats Row */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
           <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
             <Navigation className="h-3 w-3 text-primary" />
@@ -281,7 +296,7 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      {/* 3. Categories Horizontal Scroll */}
+      {/* 3. Categories Horizontal Scroll with Icons */}
       <div className="sticky top-[57px] z-40 bg-[#F5F7F6]/90 backdrop-blur-md py-3 border-b">
         <div className="flex gap-2 overflow-x-auto px-5 scrollbar-hide" dir="rtl">
           {categories.map((cat) => (
@@ -289,12 +304,13 @@ export default function StoreDetailPage() {
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={cn(
-                "px-4 py-2 rounded-xl text-[10px] font-black whitespace-nowrap transition-all border",
+                "px-4 py-2.5 rounded-2xl text-[10px] font-black whitespace-nowrap transition-all border flex items-center gap-2",
                 selectedCategory === cat 
-                  ? "bg-primary text-white border-primary shadow-md scale-105" 
-                  : "bg-white text-gray-500 border-gray-100"
+                  ? "bg-primary text-white border-primary shadow-lg scale-105" 
+                  : "bg-white text-gray-500 border-gray-100 hover:bg-gray-50"
               )}
             >
+              {getCategoryIcon(cat)}
               {cat}
             </button>
           ))}
