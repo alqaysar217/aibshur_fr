@@ -243,18 +243,28 @@ export default function Home() {
                   <Card className="h-[120px] border-none shadow-sm rounded-xl overflow-hidden bg-white transition-all active:scale-[0.98]">
                     <CardContent className="p-3 h-full flex flex-row gap-4 items-center">
                       
-                      {/* محتوى البطاقة (اليمين في RTL) */}
+                      {/* صورة المتجر (اليمين في RTL) */}
+                      <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0 shadow-sm">
+                        <Image 
+                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
+                          alt={store.name} 
+                          fill 
+                          className="object-cover" 
+                        />
+                      </div>
+
+                      {/* محتوى البطاقة (اليسار في RTL) */}
                       <div className="flex-1 flex flex-col justify-between h-full text-right relative">
-                        {/* زر المفضلة - أعلى اليمين */}
+                        {/* زر المفضلة - أعلى اليسار بعد العكس */}
                         <button 
                           onClick={(e) => toggleFavorite(e, store.id)}
-                          className="absolute -top-1 -right-1 p-1.5 transition-transform active:scale-75 z-10"
+                          className="absolute -top-1 -left-1 p-1.5 transition-transform active:scale-75 z-10"
                         >
                           <Heart className={cn("h-4 w-4 transition-colors", isFav ? "fill-destructive text-destructive" : "text-muted-foreground/40")} />
                         </button>
 
                         <div className="pt-1">
-                          <h4 className="font-bold text-sm text-foreground truncate ml-6">{store.name}</h4>
+                          <h4 className="font-bold text-sm text-foreground truncate">{store.name}</h4>
                           <div className="flex items-center gap-1 mt-1 justify-end">
                             <span className="text-[10px] font-bold text-muted-foreground">({store.averageRating || '4.5'})</span>
                             <Star className="h-3 w-3 fill-accent text-accent" />
@@ -276,16 +286,6 @@ export default function Home() {
                             {isOpen ? 'مفتوح' : 'مغلق'}
                           </Badge>
                         </div>
-                      </div>
-
-                      {/* صورة المتجر (اليسار في RTL) */}
-                      <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0 shadow-sm">
-                        <Image 
-                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
-                          alt={store.name} 
-                          fill 
-                          className="object-cover" 
-                        />
                       </div>
 
                     </CardContent>
