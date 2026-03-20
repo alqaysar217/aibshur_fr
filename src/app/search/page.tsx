@@ -46,15 +46,23 @@ export default function SearchPage() {
     const allProducts = (products || []).map(p => ({ ...p, type: 'product' }))
     const combined = [...allStores, ...allProducts]
 
-    if (!searchVal) return combined.slice(0, 10) // عرض نتائج مقترحة عند فراغ البحث
+    const filtered = !searchVal 
+      ? combined.slice(0, 10) 
+      : combined.filter((item: any) => {
+          const nameMatch = item.name?.toLowerCase().includes(searchVal)
+          const descMatch = item.description?.toLowerCase().includes(searchVal)
+          const addressMatch = item.address?.toLowerCase().includes(searchVal)
+          return nameMatch || descMatch || addressMatch
+        })
 
-    return combined.filter((item: any) => {
-      const nameMatch = item.name?.toLowerCase().includes(searchVal)
-      const descMatch = item.description?.toLowerCase().includes(searchVal)
-      const addressMatch = item.address?.toLowerCase().includes(searchVal)
-      
-      return nameMatch || descMatch || addressMatch
-    })
+    // إزالة التكرار بناءً على النوع والمعرف لضمان عدم حدوث خطأ في مفاتيح React
+    const seen = new Set();
+    return filtered.filter(item => {
+      const key = `${item.type}-${item.id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }, [queryText, stores, products, mounted])
 
   const isLoading = loadingStores || loadingProducts
