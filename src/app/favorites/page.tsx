@@ -36,14 +36,13 @@ export default function FavoritesPage() {
   const favoritesStoresQuery = useMemoFirebase(() => {
     const ids = userData?.favoritesStoreIds || []
     if (!db || ids.length === 0) return null
-    console.log("Checking Favorite Store IDs in Firestore:", ids);
     return query(
       collection(db, "stores"), 
       where(documentId(), "in", ids.slice(0, 10))
     )
   }, [db, userData?.favoritesStoreIds])
 
-  // استعلام الوجبات المفضلة
+  // استعلام الوجبات المفضلة باستخدام حقل 'id' الداخلي ليتوافق مع collectionGroup
   const favoritesProductsQuery = useMemoFirebase(() => {
     const ids = userData?.favoritesProductIds || []
     if (!db || ids.length === 0) return null

@@ -8,7 +8,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { collection, doc, setDoc, arrayUnion, arrayRemove } from "firebase/firestore"
+import { collection, doc, setDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -91,7 +91,8 @@ export default function StoreDetailPage() {
     
     const updateData = {
       id: user.uid,
-      favoritesStoreIds: isFav ? arrayRemove(id) : arrayUnion(id)
+      favoritesStoreIds: isFav ? arrayRemove(id) : arrayUnion(id),
+      updatedAt: serverTimestamp()
     }
 
     setDoc(ref, updateData, { merge: true })
@@ -111,12 +112,15 @@ export default function StoreDetailPage() {
       return
     }
 
+    console.log("Adding product to favorites:", productId);
+    
     const isFav = userData?.favoritesProductIds?.includes(productId)
     const ref = doc(db, "users", user.uid)
     
     const updateData = {
       id: user.uid,
-      favoritesProductIds: isFav ? arrayRemove(productId) : arrayUnion(productId)
+      favoritesProductIds: isFav ? arrayRemove(productId) : arrayUnion(productId),
+      updatedAt: serverTimestamp()
     }
 
     setDoc(ref, updateData, { merge: true })
