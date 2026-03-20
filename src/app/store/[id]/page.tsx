@@ -334,8 +334,8 @@ export default function StoreDetailPage() {
               return (
                 <Card 
                   key={product.id} 
-                  onClick={() => setSelectedProduct(product)}
                   className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-white hover:shadow-xl transition-all cursor-pointer group"
+                  onClick={() => setSelectedProduct(product)}
                 >
                   <CardContent className="p-4 flex flex-row items-center gap-4">
                     <div className="relative h-24 w-24 shrink-0 rounded-2xl overflow-hidden bg-secondary/10">
@@ -354,10 +354,17 @@ export default function StoreDetailPage() {
                     </div>
 
                     <div className="flex-1 text-right space-y-1 overflow-hidden">
-                      <h3 className="font-black text-base text-[#111827] truncate">{product.name}</h3>
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-black text-base text-[#111827] truncate">{product.name}</h3>
+                        <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-black">
+                          <Star className="h-3 w-3 fill-amber-500" />
+                          <span>4.8</span>
+                        </div>
+                      </div>
                       <p className="text-[10px] text-gray-400 line-clamp-2 leading-relaxed h-7">
                         {product.description || 'تذوق طعم الأصالة مع هذا المنتج الرائع من مطبخنا.'}
                       </p>
+                      
                       <div className="flex items-center justify-between pt-2">
                         <span className="text-primary font-black text-lg">{product.price} <small className="text-[10px] font-bold">ر.س</small></span>
                         
@@ -381,10 +388,9 @@ export default function StoreDetailPage() {
                           ) : (
                             <Button 
                               onClick={() => needsOptions ? setSelectedProduct(product) : addToCart(product)}
-                              size="icon"
-                              className="h-10 w-10 rounded-xl shadow-md bg-primary text-white active:scale-95 transition-transform"
+                              className="h-10 px-4 rounded-xl shadow-md bg-primary text-white active:scale-95 transition-transform text-[10px] font-black"
                             >
-                              <Plus className="h-5 w-5" />
+                              {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
                             </Button>
                           )}
                         </div>
@@ -406,7 +412,7 @@ export default function StoreDetailPage() {
       {/* 5. Product Detail Modal */}
       {selectedProduct && (
         <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
-          <DialogContent className="p-0 border-none rounded-[3rem] overflow-hidden max-w-lg w-[90%] mx-auto bg-white" dir="rtl">
+          <DialogContent className="p-0 border-none rounded-[3rem] overflow-hidden max-w-lg w-[90%] mx-auto bg-white shadow-2xl" dir="rtl">
             <div className="relative h-64 w-full">
               <Image 
                 src={selectedProduct.imageUrl || `https://picsum.photos/seed/${selectedProduct.id}/600`}
@@ -417,6 +423,11 @@ export default function StoreDetailPage() {
               <DialogClose className="absolute top-4 left-4 h-10 w-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white outline-none">
                 <X className="h-5 w-5" />
               </DialogClose>
+              <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-2xl flex items-center gap-1 shadow-sm">
+                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                <span className="text-xs font-black">4.8</span>
+                <span className="text-[10px] text-gray-400">(45 تقييم)</span>
+              </div>
             </div>
             <div className="p-8 space-y-6">
               <DialogHeader className="flex flex-col space-y-1 text-right">
