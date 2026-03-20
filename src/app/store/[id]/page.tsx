@@ -401,17 +401,19 @@ export default function StoreDetailPage() {
               </DialogClose>
             </div>
             <div className="p-8 space-y-6">
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <h2 className="text-2xl font-black text-[#111827]">{selectedProduct.name}</h2>
-                  <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-bold">
-                    {selectedProduct.category || 'وجبة رئيسية'}
-                  </Badge>
+              <DialogHeader className="flex flex-col space-y-1 text-right">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                    <DialogTitle className="text-2xl font-black text-[#111827]">{selectedProduct.name}</DialogTitle>
+                    <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-bold">
+                      {selectedProduct.category || 'وجبة رئيسية'}
+                    </Badge>
+                  </div>
+                  <div className="text-2xl font-black text-primary">{selectedProduct.price} <small className="text-xs">ر.س</small></div>
                 </div>
-                <div className="text-2xl font-black text-primary">{selectedProduct.price} <small className="text-xs">ر.س</small></div>
-              </div>
+              </DialogHeader>
               
-              <div className="space-y-2">
+              <div className="space-y-2 text-right">
                 <h4 className="font-black text-sm">التفاصيل</h4>
                 <p className="text-gray-500 text-sm leading-relaxed">
                   {selectedProduct.description || 'يتم تحضير هذا المنتج بعناية فائقة باستخدام أجود المكونات الطازجة لضمان تجربة طعم لا تُنسى. وجبة متكاملة تناسب جميع الأذواق.'}
