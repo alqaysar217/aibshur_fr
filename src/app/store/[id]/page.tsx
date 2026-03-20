@@ -170,15 +170,42 @@ export default function StoreDetailPage() {
   const isFavoriteStore = userData?.favoritesStoreIds?.includes(id as string)
   const isStoreOpen = store.status === 'open' || store.status === 'مفتوح';
 
-  // تحديد ما إذا كان المنتج يحتاج خيارات (بناءً على الاسم كمثال)
+  // تحديد ما إذا كان المنتج يحتاج خيارات
   const hasOptions = (productName: string) => {
-    const keywords = ['بيتزا', 'نفر', 'برجر', 'عصير', 'مشوي']
+    const keywords = ['بيتزا', 'نفر', 'برجر', 'عصير', 'مشوي', 'برمة', 'مندي']
     return keywords.some(k => productName.includes(k))
+  }
+
+  // محاكاة خيارات المنتج (الأنواع والأحجام)
+  const getProductVariations = (product: any) => {
+    const isMeat = product.name.includes('لحم') || product.name.includes('برمة') || product.name.includes('مندي')
+    const isPizza = product.name.includes('بيتزا')
+    
+    if (isMeat) {
+      return [
+        { id: 'v1', name: 'ربع نفر', price: Math.round(product.price * 0.25), image: product.imageUrl },
+        { id: 'v2', name: 'نص نفر', price: Math.round(product.price * 0.5), image: product.imageUrl },
+        { id: 'v3', name: 'نفر كامل', price: product.price, image: product.imageUrl },
+      ]
+    }
+    
+    if (isPizza) {
+      return [
+        { id: 'v1', name: 'حجم صغير', price: Math.round(product.price * 0.6), image: product.imageUrl },
+        { id: 'v2', name: 'حجم وسط', price: Math.round(product.price * 0.8), image: product.imageUrl },
+        { id: 'v3', name: 'حجم كبير', price: product.price, image: product.imageUrl },
+      ]
+    }
+
+    return [
+      { id: 'v1', name: 'عادي', price: product.price, image: product.imageUrl },
+      { id: 'v2', name: 'دبل / إضافي', price: Math.round(product.price * 1.5), image: product.imageUrl },
+    ]
   }
 
   return (
     <div className="pb-32 bg-[#F5F7F6] min-h-screen font-body" dir="rtl">
-      {/* 1. Header Area - Professional Profile Style */}
+      {/* 1. Header Area */}
       <div className="relative">
         <div className="relative h-64 w-full overflow-hidden">
           <Image 
@@ -271,7 +298,7 @@ export default function StoreDetailPage() {
       </div>
 
       {/* 3. Categories Horizontal Scroll */}
-      <div className="sticky top-[72px] z-40 bg-[#F5F7F6]/80 backdrop-blur-md py-4 border-b">
+      <div className="sticky top-0 z-40 bg-[#F5F7F6]/80 backdrop-blur-md py-4 border-b">
         <div className="flex gap-2 overflow-x-auto px-6 scrollbar-hide" dir="rtl">
           {categories.map((cat) => (
             <button
@@ -290,7 +317,7 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      {/* 4. Product List - Modern Cards */}
+      {/* 4. Product List */}
       <div className="p-6 space-y-5">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-black text-[#111827]">{selectedCategory}</h2>
@@ -313,7 +340,6 @@ export default function StoreDetailPage() {
                   className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-white hover:shadow-xl transition-all cursor-pointer group"
                 >
                   <CardContent className="p-4 flex flex-row items-center gap-4">
-                    {/* Image Area */}
                     <div className="relative h-24 w-24 shrink-0 rounded-2xl overflow-hidden bg-secondary/10">
                       <Image 
                         src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`}
@@ -329,7 +355,6 @@ export default function StoreDetailPage() {
                       </button>
                     </div>
 
-                    {/* Content Area */}
                     <div className="flex-1 text-right space-y-1 overflow-hidden">
                       <h3 className="font-black text-base text-[#111827] truncate">{product.name}</h3>
                       <p className="text-[10px] text-gray-400 line-clamp-2 leading-relaxed h-7">
@@ -338,10 +363,12 @@ export default function StoreDetailPage() {
                       <div className="flex items-center justify-between pt-2">
                         <span className="text-primary font-black text-lg">{product.price} <small className="text-[10px] font-bold">ر.س</small></span>
                         
-                        {/* Interactive Button */}
                         <div onClick={(e) => e.stopPropagation()}>
                           {needsOptions ? (
-                            <Button size="sm" variant="outline" className="rounded-xl border-primary text-primary font-bold text-[10px] px-3 h-8">
+                            <Button 
+                              onClick={() => setSelectedProduct(product)}
+                              size="sm" variant="outline" className="rounded-xl border-primary text-primary font-bold text-[10px] px-3 h-8 shadow-sm"
+                            >
                               عرض الخيارات
                             </Button>
                           ) : inCart ? (
@@ -416,18 +443,57 @@ export default function StoreDetailPage() {
               <div className="space-y-2 text-right">
                 <h4 className="font-black text-sm">التفاصيل</h4>
                 <p className="text-gray-500 text-sm leading-relaxed">
-                  {selectedProduct.description || 'يتم تحضير هذا المنتج بعناية فائقة باستخدام أجود المكونات الطازجة لضمان تجربة طعم لا تُنسى. وجبة متكاملة تناسب جميع الأذواق.'}
+                  {selectedProduct.description || 'يتم تحضير هذا المنتج بعناية فائقة باستخدام أجود المكونات الطازجة لضمان تجربة طعم لا تُنسى.'}
                 </p>
               </div>
 
+              {/* قسم الخيارات (إذا وجد) */}
+              {hasOptions(selectedProduct.name) && (
+                <div className="space-y-4 pt-4 border-t">
+                  <h4 className="font-black text-sm text-right">اختر الحجم أو النوع</h4>
+                  <div className="space-y-3">
+                    {getProductVariations(selectedProduct).map((variation) => (
+                      <div key={variation.id} className="flex items-center justify-between p-3 bg-secondary/20 rounded-2xl border border-transparent hover:border-primary/30 transition-all">
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-white shrink-0">
+                            <Image src={variation.image} fill alt={variation.name} className="object-cover" />
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-sm">{variation.name}</p>
+                            <p className="text-primary font-black text-xs">{variation.price} ر.س</p>
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="rounded-xl h-9 px-4 font-bold text-xs"
+                          onClick={() => {
+                            addToCart({ 
+                              ...selectedProduct, 
+                              id: `${selectedProduct.id}-${variation.id}`, 
+                              name: `${selectedProduct.name} - ${variation.name}`, 
+                              price: variation.price 
+                            });
+                            setSelectedProduct(null);
+                          }}
+                        >
+                          إضافة
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="pt-4 border-t flex gap-3">
-                <Button 
-                  onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
-                  className="flex-1 h-14 rounded-2xl font-black text-lg gap-2"
-                >
-                  <ShoppingBag className="h-5 w-5" />
-                  إضافة للسلة
-                </Button>
+                {!hasOptions(selectedProduct.name) && (
+                  <Button 
+                    onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
+                    className="flex-1 h-14 rounded-2xl font-black text-lg gap-2"
+                  >
+                    <ShoppingBag className="h-5 w-5" />
+                    إضافة للسلة
+                  </Button>
+                )}
                 <button 
                   onClick={(e: any) => toggleFavoriteProduct(e, selectedProduct.id)}
                   className="h-14 w-14 border rounded-2xl flex items-center justify-center active:scale-90 transition-transform"
