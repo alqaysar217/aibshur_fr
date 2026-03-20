@@ -49,6 +49,7 @@ export default function AddressesPage() {
     if (!searchQuery) return
     setIsSearching(true)
     try {
+      // استخدام API للبحث عن العناوين (Nominatim - OpenStreetMap)
       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`)
       const data = await response.json()
       if (data && data.length > 0) {
@@ -58,12 +59,12 @@ export default function AddressesPage() {
           lng: parseFloat(result.lon)
         }
         setCoordinates(newCoords)
-        // محاولة استخراج المدينة تلقائياً من نتيجة البحث
-        if (result.display_name) {
-          const parts = result.display_name.split(',')
-          setNewCity(parts[0] || "")
-        }
-        toast({ title: "تم تحديد الموقع", description: "يمكنك الآن إكمال بقية التفاصيل" })
+        
+        // محاولة استخراج اسم المدينة أو الحي من النتيجة
+        const addressName = result.display_name.split(',')[0]
+        setNewCity(addressName || "")
+        
+        toast({ title: "تم العثور على الموقع", description: "تم وضع الدبوس على الخريطة بنجاح" })
       } else {
         toast({ title: "عذراً", description: "لم نتمكن من العثور على هذا المكان، حاول كتابة اسم الحي والمدينة", variant: "destructive" })
       }
@@ -83,10 +84,11 @@ export default function AddressesPage() {
     setIsLocating(true)
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setCoordinates({
+        const newCoords = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
-        })
+        }
+        setCoordinates(newCoords)
         setIsLocating(false)
         toast({ title: "تم التحديد", description: "تم التقاط موقعك الحالي بنجاح" })
       },
@@ -104,7 +106,7 @@ export default function AddressesPage() {
     const finalLabel = labelType === "آخر" ? customLabel : labelType
     
     if (!finalLabel || !newCity || !newDetails) {
-      toast({ title: "بيانات ناقصة", description: "يرجى التأكد من ملء المدينة وتفاصيل العنوان", variant: "destructive" })
+      toast({ title: "بيانات ناقصة", description: "يرجى ملء المدينة وتفاصيل العنوان", variant: "destructive" })
       return
     }
 
@@ -122,7 +124,7 @@ export default function AddressesPage() {
 
     addDocumentNonBlocking(addressesRef, addressData)
       .then(() => {
-        toast({ title: "تم الحفظ", description: "تم إضافة العنوان الجديد بنجاح" })
+        toast({ title: "تم الحفظ", description: "تم إضافة العنوان بنجاح" })
         resetForm()
         setIsAdding(false)
       })
@@ -157,7 +159,7 @@ export default function AddressesPage() {
     })
     try {
       await batch.commit()
-      toast({ title: "تم التغيير", description: "تم تعيين العنوان كافتراضي للتوصيل" })
+      toast({ title: "تم التغيير", description: "تم تعيين العنوان كافتراضي" })
     } catch (e) {
       console.error(e)
     }
@@ -244,7 +246,7 @@ export default function AddressesPage() {
                 <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
                   <TabsContent value="current" className="mt-0 space-y-4">
                     <div className="text-center space-y-3 pb-2 border-b border-dashed">
-                      <p className="text-xs text-muted-foreground">استخدم الـ GPS لتحديد موقعك الحالي بدقة وسرعة</p>
+                      <p className="text-xs text-muted-foreground">استخدم الـ GPS لتحديد موقعك الحالي بدقة</p>
                       <Button 
                         onClick={handleDetectLocation} 
                         variant="outline" 
@@ -262,7 +264,7 @@ export default function AddressesPage() {
 
                   <TabsContent value="someone_else" className="mt-0 space-y-4">
                     <div className="space-y-3">
-                      <p className="text-xs text-muted-foreground">ابحث عن عنوان الأهل أو الأصدقاء على الخريطة</p>
+                      <p className="text-xs text-muted-foreground">ابحث عن عنوان الأهل أو الأصدقاء لوضع الدبوس</p>
                       <div className="relative">
                         <Input 
                           placeholder="مثال: صنعاء، حي حدة، شارع صفر" 
@@ -282,7 +284,7 @@ export default function AddressesPage() {
                     </div>
                   </TabsContent>
 
-                  {/* منطقة الخريطة المشتركة */}
+                  {/* منطقة الخريطة التفاعلية */}
                   {coordinates && (
                     <div className="space-y-3 animate-in fade-in zoom-in duration-300">
                       <div className="w-full h-48 rounded-2xl overflow-hidden border-2 border-primary/10 relative shadow-inner group">
@@ -300,12 +302,11 @@ export default function AddressesPage() {
                         </div>
                       </div>
                       <p className="text-[9px] text-center text-muted-foreground flex items-center justify-center gap-1">
-                        <Info className="h-3 w-3" /> الدبوس يحدد مكان التوصيل بدقة لحساب المسافة
+                        <Info className="h-3 w-3" /> الدبوس يحدد مكان التوصيل بدقة لحساب المسافة لاحقاً
                       </p>
                     </div>
                   )}
 
-                  {/* الحقول النصية */}
                   <div className="space-y-4 pt-2">
                     <div className="space-y-2 text-right">
                       <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mr-1">تسمية العنوان</label>
@@ -327,7 +328,7 @@ export default function AddressesPage() {
                       </div>
                       {labelType === "آخر" && (
                          <Input 
-                          placeholder="أدخل اسم مخصص (مثال: بيت جدي)" 
+                          placeholder="أدخل اسم مخصص (مثل: بيت جدي)" 
                           className="h-12 rounded-xl mt-2 border-primary/20 font-bold" 
                           value={customLabel}
                           onChange={(e) => setCustomLabel(e.target.value)}
@@ -342,7 +343,7 @@ export default function AddressesPage() {
                       </div>
                       <div className="space-y-1 text-right">
                         <label className="text-[10px] font-black text-muted-foreground mr-1">رقم الشارع / العمارة</label>
-                        <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: حي السلام" className="h-12 rounded-xl border-secondary font-bold" />
+                        <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: حي أكتوبر" className="h-12 rounded-xl border-secondary font-bold" />
                       </div>
                     </div>
                   </div>
