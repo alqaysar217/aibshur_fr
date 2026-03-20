@@ -3,6 +3,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // --- دالات مساعدة ---
+    
     function isSignedIn() {
       return request.auth != null;
     }
@@ -11,41 +13,59 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // 1. قاعدة البحث الشامل للمنتجات (Collection Group)
-    // يجب أن تكون في الأعلى وبصيغة شاملة للسماح بالبحث عبر كل المتاجر
+    // --- 1. قواعد البحث الشامل (Collection Group Queries) ---
+    // يجب أن تكون خارج أي بلوك آخر لتعمل بشكل صحيح مع استعلامات المجموعات
     match /{path=**}/products/{productId} {
+      allow read, list: if true; 
+    }
+
+    match /{path=**}/ratings/{ratingId} {
       allow read, list: if true;
     }
 
-    // 2. المتاجر والمنتجات (بيانات عامة للقراءة)
+    // --- 2. المتاجر والبيانات العامة ---
     match /stores/{storeId} {
       allow read: if true;
-      allow write: if isSignedIn(); // السماح للمسجلين بالتهيئة مؤقتاً
-      
+      allow write: if isSignedIn(); // للمطور لتهيئة البيانات
+
       match /products/{productId} {
         allow read: if true;
-        allow write: if isSignedIn();
       }
     }
 
-    // 3. ملف المستخدم وبياناته الخاصة
+    match /ads/{id} { allow read: if true; allow write: if isSignedIn(); }
+    match /categories/{id} { allow read: if true; allow write: if isSignedIn(); }
+    match /governorates/{id} { allow read: if true; }
+
+    // --- 3. ملفات المستخدمين وبياناتهم الخاصة ---
     match /users/{userId} {
       allow read, write: if isOwner(userId);
       
-      match /{allSubcollections=**} {
+      // قواعد فرعية للطلبات والمحفظة داخل وثيقة المستخدم
+      match /orders/{orderId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /wallet/{walletId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /donations/{id} {
+        allow read, write: if isOwner(userId);
+      }
+      match /subscriptions/{id} {
+        allow read, write: if isOwner(userId);
+      }
+      match /notifications/{id} {
+        allow read, write: if isOwner(userId);
+      }
+      match /loyaltyPointTransactions/{id} {
         allow read, write: if isOwner(userId);
       }
     }
 
-    // 4. الطلبات
+    // --- 4. الطلبات العامة (للمندوبين والربط) ---
     match /orders/{orderId} {
       allow create: if isSignedIn();
       allow read, update: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.driverId == request.auth.uid);
     }
-
-    // 5. البيانات العامة الأخرى
-    match /ads/{id} { allow read: if true; allow write: if isSignedIn(); }
-    match /categories/{id} { allow read: if true; allow write: if isSignedIn(); }
-    match /governorates/{id} { allow read: if true; }
   }
 }

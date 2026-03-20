@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -31,16 +32,19 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
+  // استعلام المتاجر المفضلة
   const favoritesStoresQuery = useMemoFirebase(() => {
-    if (!db || !userData?.favoritesStoreIds?.length) return null
+    if (!db || !userData?.favoritesStoreIds || userData.favoritesStoreIds.length === 0) return null
     return query(
       collection(db, "stores"), 
       where("id", "in", userData.favoritesStoreIds.slice(0, 10))
     )
   }, [db, userData?.favoritesStoreIds])
 
+  // استعلام الوجبات المفضلة باستخدام Collection Group
   const favoritesProductsQuery = useMemoFirebase(() => {
-    if (!db || !userData?.favoritesProductIds?.length) return null
+    if (!db || !userData?.favoritesProductIds || userData.favoritesProductIds.length === 0) return null
+    // ملاحظة: استعلام الوجبات عبر المجموعات يتطلب وجود حقل id داخل الوثيقة نفسها وفهرس مفعل
     return query(
       collectionGroup(db, "products"),
       where("id", "in", userData.favoritesProductIds.slice(0, 10)),
