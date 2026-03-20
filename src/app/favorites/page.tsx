@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -34,27 +35,22 @@ export default function FavoritesPage() {
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData) return null
     const ids = userData?.favoritesStoreIds || []
-    const validIds = ids.filter(id => typeof id === 'string' && id.length > 0)
-    // منع الاستعلام بمصفوفة فارغة لتجنب أخطاء Firebase
-    if (validIds.length === 0) return null
+    if (ids.length === 0) return null
     
     return query(
       collection(db, "stores"), 
-      where(documentId(), "in", validIds.slice(0, 10))
+      where(documentId(), "in", ids.slice(0, 10))
     )
   }, [db, userData?.favoritesStoreIds])
 
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData) return null
     const ids = userData?.favoritesProductIds || []
-    const validIds = ids.filter(id => typeof id === 'string' && id.length > 0)
-    // منع الاستعلام بمصفوفة فارغة لتجنب أخطاء Firebase
-    if (validIds.length === 0) return null
+    if (ids.length === 0) return null
 
-    // استخدام استعلام المجموعة المشتركة (مغطى بقواعد الأمان في القمة)
     return query(
       collectionGroup(db, "products"),
-      where("id", "in", validIds.slice(0, 10)),
+      where(documentId(), "in", ids.slice(0, 10)),
       limit(10)
     )
   }, [db, userData?.favoritesProductIds])
@@ -147,28 +143,36 @@ export default function FavoritesPage() {
             {isLoadingStores ? (
               [1, 2].map(i => <div key={i} className="h-64 bg-white rounded-[2rem] animate-pulse" />)
             ) : favoriteStores && favoriteStores.length > 0 ? (
-              favoriteStores.map((store: any) => (
-                <Link key={store.id} href={`/store/${store.id}`}>
-                  <Card className="overflow-hidden border-none shadow-xl rounded-[2rem] relative">
-                    <CardContent className="p-0">
-                      <div className="relative h-56 w-full">
-                        <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/600/400`} alt={store.name} fill className="object-cover" />
-                        <div className="absolute top-4 left-4 bg-white/95 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-                          <Star className="h-4 w-4 fill-accent text-accent" />
-                          <span className="text-sm font-black">{store.averageRating || '4.5'}</span>
+              favoriteStores.map((store: any) => {
+                const isStoreOpen = store.status === 'open' || store.status === 'مفتوح';
+                return (
+                  <Link key={store.id} href={`/store/${store.id}`}>
+                    <Card className="overflow-hidden border-none shadow-xl rounded-[2rem] relative">
+                      <CardContent className="p-0">
+                        <div className="relative h-56 w-full">
+                          <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/600/400`} alt={store.name} fill className="object-cover" />
+                          <div className="absolute top-4 left-4 bg-white/95 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                            <Star className="h-4 w-4 fill-accent text-accent" />
+                            <span className="text-sm font-black">{store.averageRating || '4.5'}</span>
+                          </div>
+                          <button onClick={(e) => toggleStoreFavorite(e, store.id)} className="absolute top-4 right-4 h-10 w-10 bg-white/95 rounded-full flex items-center justify-center shadow-lg">
+                            <Heart className="h-5 w-5 fill-destructive text-destructive" />
+                          </button>
+                          {!isStoreOpen && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <Badge variant="destructive" className="text-lg font-bold px-6 py-2">مغلق حالياً</Badge>
+                            </div>
+                          )}
                         </div>
-                        <button onClick={(e) => toggleStoreFavorite(e, store.id)} className="absolute top-4 right-4 h-10 w-10 bg-white/95 rounded-full flex items-center justify-center shadow-lg">
-                          <Heart className="h-5 w-5 fill-destructive text-destructive" />
-                        </button>
-                      </div>
-                      <div className="p-5 bg-white">
-                        <h4 className="font-black text-xl text-foreground mb-3">{store.name}</h4>
-                        <Badge variant="secondary" className="font-bold text-[10px] px-3">{store.address}</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))
+                        <div className="p-5 bg-white">
+                          <h4 className="font-black text-xl text-foreground mb-3">{store.name}</h4>
+                          <Badge variant="secondary" className="font-bold text-[10px] px-3">{store.address}</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )
+              })
             ) : (
               <EmptyState message="قائمة المتاجر المفضلة فارغة" />
             )}

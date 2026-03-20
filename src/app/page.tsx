@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice, Database } from "lucide-react"
@@ -75,7 +76,7 @@ export default function Home() {
           categoryIds: ["restaurants"],
           address: "المكلا - فوه - مساكن",
           openingHours: "01:00 PM - 12:00 AM",
-          status: "open",
+          status: "مفتوح",
           averageRating: 4.9
         },
         {
@@ -85,7 +86,7 @@ export default function Home() {
           categoryIds: ["restaurants"],
           address: "المكلا - حي أكتوبر",
           openingHours: "12:00 PM - 11:30 PM",
-          status: "open",
+          status: "مفتوح",
           averageRating: 4.8
         },
         {
@@ -95,7 +96,7 @@ export default function Home() {
           categoryIds: ["restaurants"],
           address: "المكلا - الشرج - شارع الستين",
           openingHours: "11:00 AM - 12:00 AM",
-          status: "open",
+          status: "مفتوح",
           averageRating: 4.9
         },
         {
@@ -105,18 +106,8 @@ export default function Home() {
           categoryIds: ["grocery"],
           address: "المكلا - المكلا مول",
           openingHours: "08:00 AM - 11:00 PM",
-          status: "open",
+          status: "مفتوح",
           averageRating: 4.7
-        },
-        {
-          id: "al_shifa_yem",
-          name: "صيدلية الشفاء اليمنية",
-          logoUrl: "https://picsum.photos/seed/pharmacy_yem/600/400",
-          categoryIds: ["pharmacy"],
-          address: "المكلا - حي السلام",
-          openingHours: "24/7",
-          status: "open",
-          averageRating: 4.5
         }
       ]
 
@@ -124,23 +115,15 @@ export default function Home() {
         await setDoc(doc(db, "stores", s.id), s)
       }
 
-      // إضافة منتجات لمذاقي (كما تظهر في الهيكلية في الصورة)
+      // إضافة منتجات
       const mathaqiProducts = [
-        { id: "mathaqi_p1", name: "عقدة لحم مذاقي", price: 4500, description: "لحم صغير مع الخضار الطازجة والبهارات الحضرمية", imageUrl: "https://picsum.photos/seed/mathaqi1/400/300", status: "available" },
-        { id: "mathaqi_p2", name: "سلته يمنية", price: 1800, description: "السلته اليمنية الأصيلة تقدم ساخنة مع المرق", imageUrl: "https://picsum.photos/seed/selte/400/300", status: "available" }
+        { name: "عقدة لحم مذاقي", price: 4500, description: "لحم صغير مع الخضار الطازجة والبهارات الحضرمية", imageUrl: "https://picsum.photos/seed/mathaqi1/400/300", status: "available" },
+        { name: "سلته يمنية", price: 1800, description: "السلته اليمنية الأصيلة تقدم ساخنة مع المرق", imageUrl: "https://picsum.photos/seed/selte/400/300", status: "available" }
       ]
       for (const p of mathaqiProducts) {
-        const prodRef = doc(db, "stores", "mathaqi_rest", "products", p.id)
+        const prodId = `prod_${Math.random().toString(36).substr(2, 9)}`;
+        const prodRef = doc(db, "stores", "mathaqi_rest", "products", prodId)
         await setDoc(prodRef, { ...p, storeId: "mathaqi_rest" })
-      }
-
-      const alKhaleejProducts = [
-        { id: "khaleej_p1", name: "أرز بسمتي 5كجم", price: 3500, description: "أرز هندي درجة أولى", imageUrl: "https://picsum.photos/seed/rice/400/300", status: "available" },
-        { id: "khaleej_p2", name: "زيت نباتي 1.5لتر", price: 2200, description: "زيت نقي للطبخ", imageUrl: "https://picsum.photos/seed/oil/400/300", status: "available" }
-      ]
-      for (const p of alKhaleejProducts) {
-        const prodRef = doc(db, "stores", "al_khaleej_market", "products", p.id)
-        await setDoc(prodRef, { ...p, storeId: "al_khaleej_market" })
       }
       
       toast({ title: "تمت التهيئة", description: "تم تحديث البيانات لتطابق الهيكلية الجديدة بنجاح!" })

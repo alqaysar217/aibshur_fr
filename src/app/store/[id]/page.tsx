@@ -90,7 +90,6 @@ export default function StoreDetailPage() {
     const ref = doc(db, "users", user.uid)
     
     const updateData = {
-      id: user.uid,
       favoritesStoreIds: isFav ? arrayRemove(id) : arrayUnion(id),
       updatedAt: serverTimestamp()
     }
@@ -111,14 +110,11 @@ export default function StoreDetailPage() {
       router.push('/login')
       return
     }
-
-    console.log("Adding product to favorites:", productId);
     
     const isFav = userData?.favoritesProductIds?.includes(productId)
     const ref = doc(db, "users", user.uid)
     
     const updateData = {
-      id: user.uid,
       favoritesProductIds: isFav ? arrayRemove(productId) : arrayUnion(productId),
       updatedAt: serverTimestamp()
     }
@@ -154,6 +150,7 @@ export default function StoreDetailPage() {
   )
 
   const isFavoriteStore = userData?.favoritesStoreIds?.includes(id as string)
+  const isStoreOpen = store.status === 'open' || store.status === 'مفتوح';
 
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen">
@@ -210,8 +207,8 @@ export default function StoreDetailPage() {
                   <p className="text-xs font-black">{store.openingHours}</p>
                 </div>
               </div>
-              <Badge variant="outline" className={store.status === 'open' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}>
-                {store.status === 'open' ? 'مفتوح' : 'مغلق'}
+              <Badge variant="outline" className={isStoreOpen ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}>
+                {isStoreOpen ? 'مفتوح' : 'مغلق'}
               </Badge>
             </div>
           </CardContent>
