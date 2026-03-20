@@ -2,6 +2,12 @@
 {
   "placeholderImages": [
     {
+      "id": "absher-logo",
+      "description": "شعار تطبيق أبشر",
+      "imageUrl": "https://picsum.photos/seed/absher_logo_green/200/200",
+      "imageHint": "app logo"
+    },
+    {
       "id": "mandi-restaurant",
       "description": "مطعم مندي يمني",
       "imageUrl": "https://picsum.photos/seed/mandi1/600/400",

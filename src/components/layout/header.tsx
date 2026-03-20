@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -6,11 +7,14 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { PlaceHolderImages } from "@/lib/placeholder-images"
 
 export function Header() {
   const [selectedCity, setSelectedCity] = useState("جاري التحديد...")
   const [cartCount, setCartCount] = useState(0)
   const router = useRouter()
+
+  const logoImage = PlaceHolderImages.find(img => img.id === 'absher-logo')?.imageUrl || "https://picsum.photos/seed/absher_logo/200/200"
 
   useEffect(() => {
     const city = localStorage.getItem('selected_city')
@@ -27,11 +31,14 @@ export function Header() {
     <header className="sticky top-0 z-[60] w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm px-5 py-3 flex items-center justify-between">
       <div className="flex flex-col">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative w-10 h-10 active:scale-95 transition-transform">
-             {/* Note: Replace with actual logo.png if available, using placeholder for now */}
-            <div className="bg-primary/10 rounded-xl flex items-center justify-center h-full w-full">
-               <span className="text-primary font-black text-xs">أبشر</span>
-            </div>
+          <div className="relative w-10 h-10 active:scale-95 transition-transform overflow-hidden rounded-xl">
+            <Image 
+              src={logoImage} 
+              alt="أبشر" 
+              fill 
+              className="object-cover"
+              data-ai-hint="app logo"
+            />
           </div>
           <h1 className="text-xl font-black text-[#111827] tracking-tight">أبشر</h1>
         </Link>
