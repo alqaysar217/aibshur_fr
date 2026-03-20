@@ -8,7 +8,7 @@ import {
   Navigation, LayoutGrid, Zap, Utensils, Soup, Flame, Coffee, Beef, ChefHat, 
   Pizza, Sandwich, Pill, Sparkles, Droplets, Baby, Milk, Package, Eraser, 
   Candy, Croissant, Smartphone, Watch, Laptop, Home, Gamepad2, User, Wind, 
-  Gift, Leaf, Droplet, Cookie, CupSoda, X, Calculator
+  Gift, Leaf, Droplet, Cookie, CupSoda, X, CakeSlice
 } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -120,7 +120,6 @@ export default function StoreDetailPage() {
       }
     })
 
-    // Also include categories found in products
     if (products) {
       products.forEach((p: any) => {
         if (p.category) dynamicFilters.add(p.category)
@@ -192,7 +191,6 @@ export default function StoreDetailPage() {
       case "الكل": return <LayoutGrid className="h-3.5 w-3.5" />
       case "المفضلة": return <Heart className="h-3.5 w-3.5" />
       case "الأكثر طلباً": return <Zap className="h-3.5 w-3.5" />
-      // المطاعم
       case "مقبلات": return <Soup className="h-3.5 w-3.5" />
       case "مشويات": return <Flame className="h-3.5 w-3.5" />
       case "غداء": return <Utensils className="h-3.5 w-3.5" />
@@ -202,35 +200,29 @@ export default function StoreDetailPage() {
       case "وجبات خفيفة": return <Cookie className="h-3.5 w-3.5" />
       case "مشروبات": return <CupSoda className="h-3.5 w-3.5" />
       case "حلى": return <CakeSlice className="h-3.5 w-3.5" />
-      // الصيدليات
       case "أدوية": return <Pill className="h-3.5 w-3.5" />
       case "مستحضرات تجميل": return <Sparkles className="h-3.5 w-3.5" />
       case "عناية بالبشرة": return <Droplets className="h-3.5 w-3.5" />
       case "مكملات غذائية": return <Zap className="h-3.5 w-3.5" />
       case "رعاية أطفال": return <Baby className="h-3.5 w-3.5" />
-      // السوبر ماركت
       case "ألبان وأجبان": return <Milk className="h-3.5 w-3.5" />
       case "معلبات": return <Package className="h-3.5 w-3.5" />
       case "منظفات": return <Eraser className="h-3.5 w-3.5" />
       case "حلويات ومسليات": return <Candy className="h-3.5 w-3.5" />
       case "مخبوزات": return <Croissant className="h-3.5 w-3.5" />
-      // الإلكترونيات
       case "هواتف": return <Smartphone className="h-3.5 w-3.5" />
       case "إكسسوارات": return <Watch className="h-3.5 w-3.5" />
       case "كمبيوتر": return <Laptop className="h-3.5 w-3.5" />
       case "أجهزة منزلية": return <Home className="h-3.5 w-3.5" />
       case "ألعاب": return <Gamepad2 className="h-3.5 w-3.5" />
-      // العطور
       case "عطور رجالية": return <User className="h-3.5 w-3.5" />
       case "عطور نسائية": return <User className="h-3.5 w-3.5" />
       case "بخور": return <Wind className="h-3.5 w-3.5" />
       case "أطقم هدايا": return <Gift className="h-3.5 w-3.5" />
-      // التمور والبهارات
       case "تمور فاخرة": return <Leaf className="h-3.5 w-3.5" />
       case "بهارات مشكلة": return <Flame className="h-3.5 w-3.5" />
       case "عسل سدر": return <Droplet className="h-3.5 w-3.5" />
       case "مكسرات": return <LayoutGrid className="h-3.5 w-3.5" />
-      
       default: return <ChefHat className="h-3.5 w-3.5" />
     }
   }
@@ -284,7 +276,6 @@ export default function StoreDetailPage() {
 
   return (
     <div className="pb-32 bg-[#F5F7F6] min-h-screen font-body" dir="rtl">
-      {/* 1. Header Navigation Bar */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md px-5 py-3 flex items-center justify-between border-b shadow-sm">
         <button onClick={() => router.back()} className="h-9 w-9 bg-secondary/50 rounded-full flex items-center justify-center text-gray-700 active:scale-90 transition-transform">
           <ArrowRight className="h-5 w-5" />
@@ -304,7 +295,6 @@ export default function StoreDetailPage() {
         </div>
       </header>
 
-      {/* 2. Optimized Mobile Header */}
       <div className="bg-white p-5 border-b">
         <div className="flex items-center gap-4">
           <div className="relative h-16 w-16 rounded-full border-2 border-secondary overflow-hidden shrink-0 shadow-sm bg-secondary/10">
@@ -359,7 +349,6 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      {/* 3. Dynamic Pill Filters System */}
       <div className="sticky top-[57px] z-40 bg-white/90 backdrop-blur-md py-4 border-b">
         <div className="flex gap-2 overflow-x-auto px-5 scrollbar-hide" dir="rtl">
           {categories.map((cat) => (
@@ -380,7 +369,6 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      {/* 4. Product List */}
       <div className="p-5 space-y-4">
         <div className="flex items-center justify-between mb-1">
           <h2 className="text-base font-black text-[#111827]">{selectedCategory}</h2>
@@ -474,7 +462,6 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      {/* 5. Product Detail Modal */}
       {selectedProduct && (
         <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
           <DialogContent className="p-0 border-none rounded-[2.5rem] overflow-hidden max-w-lg w-[92%] mx-auto bg-white shadow-2xl z-[100]" dir="rtl">
@@ -601,7 +588,6 @@ export default function StoreDetailPage() {
         </Dialog>
       )}
 
-      {/* 6. Bottom Cart Action Bar */}
       {cart.length > 0 && (
         <div className="fixed bottom-6 left-5 right-5 z-[70] animate-in slide-in-from-bottom-10">
           <Button 
