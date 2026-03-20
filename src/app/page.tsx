@@ -124,31 +124,30 @@ export default function Home() {
         await setDoc(doc(db, "stores", s.id), s)
       }
 
-      // إضافة منتجات لمذاقي
+      // إضافة منتجات لمذاقي (كما تظهر في الهيكلية في الصورة)
       const mathaqiProducts = [
         { id: "mathaqi_p1", name: "عقدة لحم مذاقي", price: 4500, description: "لحم صغير مع الخضار الطازجة والبهارات الحضرمية", imageUrl: "https://picsum.photos/seed/mathaqi1/400/300", status: "available" },
         { id: "mathaqi_p2", name: "سلته يمنية", price: 1800, description: "السلته اليمنية الأصيلة تقدم ساخنة مع المرق", imageUrl: "https://picsum.photos/seed/selte/400/300", status: "available" }
       ]
       for (const p of mathaqiProducts) {
-        await setDoc(doc(db, "stores", "mathaqi_rest", "products", p.id), { ...p, storeId: "mathaqi_rest" })
+        const prodRef = doc(db, "stores", "mathaqi_rest", "products", p.id)
+        await setDoc(prodRef, { ...p, storeId: "mathaqi_rest" })
       }
 
-      const madaqiProducts = [
-        { id: "madaqi_p1", name: "مضبي دجاج", price: 2800, description: "دجاج مطهو على الحجر الساخن مع أرز حضرمي", imageUrl: "https://picsum.photos/seed/madhbi/400/300", status: "available" },
-        { id: "madaqi_p2", name: "برمة لحم بلدي", price: 6000, description: "لحم مطهو في أواني فخارية مع المرق والبهارات", imageUrl: "https://picsum.photos/seed/barma/400/300", status: "available" }
+      const alKhaleejProducts = [
+        { id: "khaleej_p1", name: "أرز بسمتي 5كجم", price: 3500, description: "أرز هندي درجة أولى", imageUrl: "https://picsum.photos/seed/rice/400/300", status: "available" },
+        { id: "khaleej_p2", name: "زيت نباتي 1.5لتر", price: 2200, description: "زيت نقي للطبخ", imageUrl: "https://picsum.photos/seed/oil/400/300", status: "available" }
       ]
-      for (const p of madaqiProducts) {
-        await setDoc(doc(db, "stores", "madaqi_rest", "products", p.id), { ...p, storeId: "madaqi_rest" })
+      for (const p of alKhaleejProducts) {
+        const prodRef = doc(db, "stores", "al_khaleej_market", "products", p.id)
+        await setDoc(prodRef, { ...p, storeId: "al_khaleej_market" })
       }
-
-      await setDoc(doc(db, "ads", "ad_1"), { title: "خصم 20% على المندي", imageUrl: "https://picsum.photos/seed/promo1/800/400", storeId: "mandi_king" })
-      await setDoc(doc(db, "ads", "ad_3"), { title: "مذاقي: الطعم الأصيل للضيافة", imageUrl: "https://picsum.photos/seed/mathaqi_ad/800/400", storeId: "mathaqi_rest" })
       
-      toast({ title: "تمت التهيئة", description: "تمت إضافة مطعم مذاقي وكافة البيانات بنجاح!" })
+      toast({ title: "تمت التهيئة", description: "تم تحديث البيانات لتطابق الهيكلية الجديدة بنجاح!" })
       router.refresh()
     } catch (e) {
       console.error(e)
-      toast({ title: "خطأ", description: "فشلت تهيئة البيانات، يرجى مراجعة الصلاحيات", variant: "destructive" })
+      toast({ title: "خطأ", description: "فشلت تهيئة البيانات", variant: "destructive" })
     } finally {
       setIsSeeding(false)
     }
@@ -165,7 +164,6 @@ export default function Home() {
     const isFav = userData?.favoritesStoreIds?.includes(storeId)
     const ref = doc(db, "users", user.uid)
     const updateData = {
-      id: user.uid,
       favoritesStoreIds: isFav ? arrayRemove(storeId) : arrayUnion(storeId),
       updatedAt: serverTimestamp()
     }
@@ -229,7 +227,7 @@ export default function Home() {
           <Link href="/search">
             <div className="w-full h-16 px-12 rounded-2xl border-none shadow-xl bg-white text-muted-foreground flex items-center text-sm cursor-text">
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-              ابحث عن مطعم، بقالة، أو صيدلية...
+              ابحث عن مطعم، بقالة، أو وجبة...
             </div>
           </Link>
         </div>

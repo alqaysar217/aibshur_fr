@@ -2,7 +2,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- دالات مساعدة ---
+    // --- 1. قاعدة المجموعات المشتركة (مهمة جداً للبحث والمفضلة) ---
+    // هذه القاعدة يجب أن تكون في القمة وخارج أي تداخل لتسمح باستعلامات collectionGroup
+    match /{path=**}/products/{productId} {
+      // الوجبات بيانات عامة يجب أن تظهر للجميع لنجاح تجربة الاكتشاف
+      allow read, list: if true;
+    }
+
+    // --- 2. دالات مساعدة ---
     function isSignedIn() {
       return request.auth != null;
     }
@@ -11,41 +18,35 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // --- 1. قواعد المجموعات المشتركة (Collection Group) ---
-    // يجب أن تكون في القمة لتمكين البحث الشامل عبر كل المتاجر
-    match /{path=**}/products/{productId} {
-      // المنتجات والوجبات هي بيانات عامة يجب أن تظهر للجميع لنجاح تجربة البحث
-      allow read, list: if true;
-      allow write: if isSignedIn(); 
-    }
-
-    // --- 2. المتاجر والبيانات العامة ---
+    // --- 3. المتاجر (البيانات العامة) ---
     match /stores/{storeId} {
-      allow read, list: if true; // القائمة العامة للمتاجر
-      allow write: if isSignedIn(); // فقط للمسؤولين أو التهيئة
+      allow read, list: if true; 
+      // منع الكتابة العشوائية إلا للمسؤولين (أو عبر كود التهيئة حالياً)
+      allow write: if isSignedIn();
 
-      // المنتجات هنا مغطاة أيضاً بقاعدة المجموعات المشتركة أعلاه
+      // المنتجات هنا مغطاة أيضاً بالقاعدة رقم 1 أعلاه
       match /products/{productId} {
         allow read, list: if true;
         allow write: if isSignedIn();
       }
     }
 
-    // --- 3. ملفات المستخدمين ---
+    // --- 4. ملفات المستخدمين (خصوصية تامة) ---
     match /users/{userId} {
       allow read, write: if isOwner(userId);
       
+      // التنبيهات، الطلبات، المحفظة داخل ملف المستخدم
       match /{allSubcollections=**} {
         allow read, write: if isOwner(userId);
       }
     }
 
-    // --- 4. البيانات العامة المفتوحة ---
+    // --- 5. البيانات المفتوحة الأخرى ---
     match /ads/{id} { allow read: if true; allow write: if isSignedIn(); }
     match /categories/{id} { allow read: if true; allow write: if isSignedIn(); }
     match /governorates/{id} { allow read: if true; allow write: if isSignedIn(); }
 
-    // --- 5. الطلبات ---
+    // --- 6. الطلبات (صلاحيات مشتركة بين العميل والمندوب) ---
     match /orders/{orderId} {
       allow create: if isSignedIn();
       allow read, update: if isSignedIn() && (

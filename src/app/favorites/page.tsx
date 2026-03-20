@@ -51,6 +51,7 @@ export default function FavoritesPage() {
     // منع الاستعلام بمصفوفة فارغة لتجنب أخطاء Firebase
     if (validIds.length === 0) return null
 
+    // استخدام استعلام المجموعة المشتركة (مغطى بقواعد الأمان في القمة)
     return query(
       collectionGroup(db, "products"),
       where("id", "in", validIds.slice(0, 10)),
@@ -186,7 +187,7 @@ export default function FavoritesPage() {
                     <div className="relative h-28 w-28 shrink-0">
                       <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                     </div>
-                    <div className="p-4 flex-1">
+                    <div className="p-4 flex-1 text-right">
                       <h3 className="font-black text-sm mb-1">{product.name}</h3>
                       <span className="text-primary font-black">{product.price} ر.س</span>
                     </div>
