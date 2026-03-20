@@ -170,13 +170,11 @@ export default function StoreDetailPage() {
   const isFavoriteStore = userData?.favoritesStoreIds?.includes(id as string)
   const isStoreOpen = store.status === 'open' || store.status === 'مفتوح';
 
-  // تحديد ما إذا كان المنتج يحتاج خيارات
   const hasOptions = (productName: string) => {
     const keywords = ['بيتزا', 'نفر', 'برجر', 'عصير', 'مشوي', 'برمة', 'مندي']
     return keywords.some(k => productName.includes(k))
   }
 
-  // محاكاة خيارات المنتج (الأنواع والأحجام)
   const getProductVariations = (product: any) => {
     const isMeat = product.name.includes('لحم') || product.name.includes('برمة') || product.name.includes('مندي')
     const isPizza = product.name.includes('بيتزا')
@@ -364,14 +362,7 @@ export default function StoreDetailPage() {
                         <span className="text-primary font-black text-lg">{product.price} <small className="text-[10px] font-bold">ر.س</small></span>
                         
                         <div onClick={(e) => e.stopPropagation()}>
-                          {needsOptions ? (
-                            <Button 
-                              onClick={() => setSelectedProduct(product)}
-                              size="sm" variant="outline" className="rounded-xl border-primary text-primary font-bold text-[10px] px-3 h-8 shadow-sm"
-                            >
-                              عرض الخيارات
-                            </Button>
-                          ) : inCart ? (
+                          {inCart && !needsOptions ? (
                             <div className="flex items-center gap-2 bg-secondary/30 p-1 rounded-xl">
                               <Button 
                                 onClick={() => removeFromCart(product.id)}
@@ -389,11 +380,11 @@ export default function StoreDetailPage() {
                             </div>
                           ) : (
                             <Button 
-                              onClick={() => addToCart(product)}
-                              className="h-9 rounded-xl px-4 gap-2 shadow-md active:scale-95"
+                              onClick={() => needsOptions ? setSelectedProduct(product) : addToCart(product)}
+                              size="icon"
+                              className="h-10 w-10 rounded-xl shadow-md bg-primary text-white active:scale-95 transition-transform"
                             >
-                              <Plus className="h-4 w-4" />
-                              <span className="text-xs font-bold">إضافة</span>
+                              <Plus className="h-5 w-5" />
                             </Button>
                           )}
                         </div>
