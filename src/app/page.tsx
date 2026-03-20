@@ -1,7 +1,6 @@
-
 "use client"
 
-import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Database, Sparkles, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Trees, Flower2, Clock } from "lucide-react"
+import { Search, MapPin, Bell, ChevronLeft, Star, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Trees, Flower2, Clock } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -41,21 +40,18 @@ export default function Home() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
-  // جلب الأقسام
   const categoriesQuery = useMemoFirebase(() => {
     if (!db) return null
     return query(collection(db, "categories"), limit(12))
   }, [db])
   const { data: categories } = useCollection(categoriesQuery)
 
-  // جلب الإعلانات للسلايدر
   const adsQuery = useMemoFirebase(() => {
     if (!db) return null
     return query(collection(db, "ads"), limit(5))
   }, [db])
   const { data: ads } = useCollection(adsQuery)
 
-  // جلب المتاجر
   const storesQuery = useMemoFirebase(() => {
     if (!db) return null;
     let baseQuery = collection(db, "stores");
@@ -97,9 +93,8 @@ export default function Home() {
     if (!user || !db) return
     setIsSeeding(true)
     try {
-      // 1. تهيئة الأقسام الموسعة
       const categoriesToSeed = [
-        { id: "restaurants", name: "طعام", color: "bg-orange-50", textColor: "text-orange-600" },
+        { id: "restaurants", name: "طعام", color: "bg-emerald-50", textColor: "text-emerald-600" },
         { id: "cafe", name: "كافيه", color: "bg-amber-50", textColor: "text-amber-800" },
         { id: "perfume", name: "عطور", color: "bg-purple-50", textColor: "text-purple-600" },
         { id: "dates", name: "تمور", color: "bg-amber-100", textColor: "text-amber-900" },
@@ -113,7 +108,6 @@ export default function Home() {
         await setDoc(doc(db, "categories", cat.id), cat)
       }
 
-      // 2. تهيئة الإعلانات
       const adsToSeed = [
         { id: "ad1", title: "توصيل مجاني 🚚", subtitle: "لأول طلب لك بالكامل!", code: "ABSHER24", imageUrl: "https://picsum.photos/seed/ad1/800/400" },
         { id: "ad2", title: "وجبات عائلية 🥘", subtitle: "خصم 20% على المشويات", code: "FAMILY", imageUrl: "https://picsum.photos/seed/ad2/800/400" },
@@ -123,7 +117,6 @@ export default function Home() {
         await setDoc(doc(db, "ads", ad.id), ad)
       }
 
-      // 3. تهيئة المتاجر
       const storesToSeed = [
         { id: "mathaqi_rest", name: "مطعم مذاقي", logoUrl: "https://picsum.photos/seed/mathaqi/600/400", categoryIds: ["restaurants"], address: "المكلا", status: "مفتوح", averageRating: 4.9, deliveryTime: "30-45 دقيقة" },
         { id: "al_khaleej_market", name: "سوبر ماركت الخليج", logoUrl: "https://picsum.photos/seed/grocery_yem/600/400", categoryIds: ["grocery"], address: "المكلا", status: "مفتوح", averageRating: 4.7, deliveryTime: "20-30 دقيقة" },
@@ -160,9 +153,9 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className="bg-secondary/5 min-h-screen font-body transition-colors duration-500">
-      {/* 1. السلايدر العلوي */}
-      <section className="px-4 py-4 mb-2">
+    <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300">
+      {/* 1. Offers Slider */}
+      <section className="px-4 pt-4 pb-2">
         <Carousel 
           opts={{ loop: true, direction: 'rtl' }} 
           plugins={[Autoplay({ delay: 5000 })]}
@@ -172,124 +165,122 @@ export default function Home() {
             {ads && ads.length > 0 ? ads.map((ad: any) => (
               <CarouselItem key={ad.id}>
                 <Link href={`/search?q=${ad.code}`}>
-                  <Card className="border-none shadow-md rounded-[1.5rem] overflow-hidden relative h-36 bg-primary transition-all active:scale-[0.98]">
-                    <Image src={ad.imageUrl} alt={ad.title} fill className="object-cover opacity-60" />
-                    <div className="absolute inset-0 p-5 flex flex-col justify-center text-white text-right">
-                      <h2 className="text-xl font-black mb-1">{ad.title}</h2>
-                      <p className="text-[10px] opacity-90">{ad.subtitle}</p>
+                  <Card className="border-none shadow-sm rounded-[1.25rem] overflow-hidden relative h-40 bg-primary/90 transition-all active:scale-[0.98]">
+                    <Image src={ad.imageUrl} alt={ad.title} fill className="object-cover opacity-50" />
+                    <div className="absolute inset-0 p-6 flex flex-col justify-center text-white text-right">
+                      <h2 className="text-2xl font-black mb-1">{ad.title}</h2>
+                      <p className="text-sm opacity-90">{ad.subtitle}</p>
                     </div>
                   </Card>
                 </Link>
               </CarouselItem>
             )) : (
               <CarouselItem>
-                <div className="h-36 bg-secondary/30 rounded-[1.5rem] animate-pulse" />
+                <div className="h-40 bg-white rounded-[1.25rem] animate-pulse" />
               </CarouselItem>
             )}
           </CarouselContent>
         </Carousel>
       </section>
 
-      {/* 2. شريط الفئات */}
-      <section className="mb-6">
-        <div className="flex items-center justify-between px-5 mb-3">
-          <h3 className="font-black text-sm">الأقسام</h3>
-          <Button variant="link" className="text-primary text-[10px] font-bold p-0">عرض الكل</Button>
+      {/* 2. Horizontal Categories Bar */}
+      <section className="py-6">
+        <div className="flex items-center justify-between px-6 mb-4">
+          <h3 className="font-bold text-[#111827]">الأقسام</h3>
+          <Button variant="link" className="text-primary text-xs font-bold p-0">عرض الكل</Button>
         </div>
-        <div className="flex gap-4 overflow-x-auto px-5 pb-2 scrollbar-hide">
+        <div className="flex gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide">
           {categories ? categories.map((cat: any) => (
             <button 
               key={cat.id} 
               onClick={() => setActiveCategory(cat.id === activeCategory ? null : cat.id)}
-              className="flex flex-col items-center gap-1.5 shrink-0 group"
+              className="flex flex-col items-center gap-2 shrink-0 group"
             >
               <div className={cn(
-                "h-14 w-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm border",
-                cat.color || "bg-secondary/20",
-                activeCategory === cat.id ? "ring-2 ring-primary border-primary scale-105" : "border-transparent",
-                cat.textColor || "text-foreground"
+                "h-16 w-16 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm border",
+                cat.color || "bg-white",
+                activeCategory === cat.id ? "ring-2 ring-primary border-transparent scale-105" : "border-transparent bg-white",
+                cat.textColor || "text-gray-600"
               )}>
                 {getCategoryIcon(cat.id)}
               </div>
               <span className={cn(
-                "text-[10px] font-bold transition-colors",
-                activeCategory === cat.id ? "text-primary" : "text-muted-foreground"
+                "text-[11px] font-bold transition-colors",
+                activeCategory === cat.id ? "text-primary" : "text-gray-500"
               )}>
                 {cat.name}
               </span>
             </button>
           )) : (
-            [1, 2, 3, 4, 5].map(i => <div key={i} className="h-14 w-14 bg-secondary/20 rounded-2xl animate-pulse" />)
+            [1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 w-16 bg-white rounded-2xl animate-pulse" />)
           )}
         </div>
       </section>
 
-      {/* 3. قائمة المتاجر */}
-      <section className="px-4 pb-24 space-y-4">
-        <div className="flex items-center justify-between mb-2 px-1">
-          <h3 className="font-black text-sm text-foreground/80">المتاجر المتاحة</h3>
+      {/* 3. Stores List - Single Column Modern Layout */}
+      <section className="px-5 pb-24 space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="font-bold text-[#111827]">المتاجر المتاحة</h3>
         </div>
 
         {isStoresLoading ? (
-          [1, 2, 3].map(i => <div key={i} className="h-28 w-full bg-white rounded-xl animate-pulse border border-secondary/20" />)
+          [1, 2, 3].map(i => <div key={i} className="h-28 w-full bg-white rounded-2xl animate-pulse" />)
         ) : stores && stores.length > 0 ? (
           stores.map((store: any) => {
             const isOpen = store.status === 'مفتوح' || store.status === 'open'
             const isFav = userData?.favoritesStoreIds?.includes(store.id)
-            const categoryName = categories?.find(c => store.categoryIds?.includes(c.id))?.name || "عام";
+            const categoryName = categories?.find(c => store.categoryIds?.includes(c.id))?.name || "متجر";
 
             return (
               <Link key={store.id} href={`/store/${store.id}`}>
-                <Card className="border border-secondary/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
-                  <CardContent className="p-2.5 h-full flex flex-row items-center gap-3">
-                    {/* 1. الصورة في اليمين */}
-                    <div className="relative w-20 h-20 shrink-0 shadow-sm overflow-hidden rounded-xl border border-secondary/10">
+                <Card className="border-none shadow-[0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-28">
+                  <CardContent className="p-3 h-full flex flex-row-reverse items-center gap-4">
+                    {/* Image on the Right */}
+                    <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl">
                       <Image 
                         src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
                         alt={store.name} 
                         fill 
                         className="object-cover transition-transform duration-500 group-hover:scale-110" 
                       />
-                    </div>
-
-                    {/* 2. المحتوى في الوسط */}
-                    <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
-                      <div className="flex items-center gap-1.5 text-accent">
-                        <Star className="h-3 w-3 fill-accent" />
-                        <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
-                      </div>
-                      
-                      <h4 className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">
-                        {store.name}
-                      </h4>
-
-                      <div className="flex items-center gap-1 text-muted-foreground/60">
-                        <MapPin className="h-2.5 w-2.5" />
-                        <span className="text-[9px] truncate max-w-[100px]">{store.address || 'المكلا'}</span>
-                        <span className="mx-0.5 opacity-20">•</span>
-                        <span className="text-[9px]">يبعد 2.3 كم</span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-[8px] font-bold text-primary/80 bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">
-                          {categoryName}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* 3. الإجراءات والحالة في أقصى اليسار */}
-                    <div className="flex flex-col justify-between items-end h-full py-1 pl-1 shrink-0">
                       <button 
                         onClick={(e) => toggleFavorite(e, store.id)}
-                        className="p-1.5 bg-secondary/30 rounded-full transition-all active:scale-75 hover:bg-destructive/10"
+                        className="absolute top-1.5 right-1.5 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm active:scale-75"
                       >
-                        <Heart className={cn("h-3.5 w-3.5 transition-colors", isFav ? "fill-destructive text-destructive" : "text-muted-foreground/30")} />
+                        <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
                       </button>
+                    </div>
 
+                    {/* Middle Info Content */}
+                    <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center gap-1 text-amber-500">
+                          <Star className="h-3 w-3 fill-amber-500" />
+                          <span className="text-[11px] font-bold">{store.averageRating || '4.5'}</span>
+                        </div>
+                        <h4 className="font-bold text-sm text-[#111827] truncate">{store.name}</h4>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-1 text-[#6B7280]">
+                        <MapPin className="h-2.5 w-2.5" />
+                        <span className="text-[10px] truncate">{store.address || 'المكلا'}</span>
+                        <span className="mx-0.5 opacity-30">•</span>
+                        <span className="text-[10px]">يبعد 2.3 كم</span>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2">
+                        <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-5 border-none font-bold">
+                          {categoryName}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Left Actions/Status */}
+                    <div className="flex flex-col justify-end items-start h-full py-1 shrink-0">
                       <Badge 
                         className={cn(
-                          "text-[8px] h-4.5 px-2 border-none font-black shadow-none rounded-lg",
-                          isOpen ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
+                          "text-[9px] h-5 px-2 border-none font-bold rounded-lg shadow-none",
+                          isOpen ? "bg-green-100 text-[#22C55E]" : "bg-red-100 text-[#EF4444]"
                         )}
                       >
                         {isOpen ? 'مفتوح' : 'مغلق'}
@@ -301,15 +292,15 @@ export default function Home() {
             )
           })
         ) : (
-          <div className="text-center py-10 border-2 border-dashed rounded-2xl border-secondary/50 bg-white/50 shadow-inner">
-            <Database className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-[10px] text-muted-foreground font-bold">يرجى تهيئة البيانات</p>
+          <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-200">
+            <Database className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-xs text-gray-400">لا توجد بيانات متاحة</p>
             {user && (
               <Button 
                 onClick={seedData} 
                 disabled={isSeeding} 
                 variant="outline" 
-                className="mt-3 rounded-xl h-8 text-[10px] border-primary text-primary font-bold shadow-sm"
+                className="mt-4 rounded-xl h-10 text-xs border-primary text-primary font-bold"
               >
                 {isSeeding ? "جاري البناء..." : "تجهيز تطبيق أبشر"}
               </Button>
@@ -318,7 +309,7 @@ export default function Home() {
         )}
       </section>
 
-      {/* Developer Tooling */}
+      {/* Developer Seed Tool */}
       {user && stores && stores.length > 0 && (
         <div className="fixed bottom-24 right-4 z-50 opacity-10 hover:opacity-100 transition-opacity">
           <Button 
@@ -326,9 +317,9 @@ export default function Home() {
             variant="ghost" 
             onClick={seedData} 
             disabled={isSeeding}
-            className="bg-white shadow-md rounded-full h-8 w-8 border"
+            className="bg-white shadow-md rounded-full h-10 w-10 border"
           >
-            <Database className="h-4 w-4" />
+            <Database className="h-5 w-5" />
           </Button>
         </div>
       )}
