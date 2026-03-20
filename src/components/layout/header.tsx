@@ -7,14 +7,15 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
 
 export function Header() {
   const [selectedCity, setSelectedCity] = useState("جاري التحديد...")
   const [cartCount, setCartCount] = useState(0)
   const router = useRouter()
 
-  const logoImage = PlaceHolderImages.find(img => img.id === 'absher-logo')?.imageUrl || "https://picsum.photos/seed/absher_logo/200/200"
+  // استخدام الصورة الموجودة في مجلد public مباشرة
+  // نفترض أن اسم الملف هو logo.png أو يمكنك تغييره للمسار الصحيح
+  const logoImage = "/logo.png"
 
   useEffect(() => {
     const city = localStorage.getItem('selected_city')
@@ -37,7 +38,12 @@ export function Header() {
               alt="أبشر" 
               fill 
               className="object-cover"
-              data-ai-hint="app logo"
+              priority
+              onError={(e) => {
+                // في حال عدم وجود الصورة، يمكن الرجوع لصورة احتياطية أو نص
+                const target = e.target as HTMLImageElement;
+                target.src = "https://picsum.photos/seed/absher_logo/200/200";
+              }}
             />
           </div>
           <h1 className="text-xl font-black text-[#111827] tracking-tight">أبشر</h1>
