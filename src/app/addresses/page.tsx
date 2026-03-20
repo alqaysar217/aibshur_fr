@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2, Info, Search } from "lucide-react"
+import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2, Info, Search, Crosshair } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,7 @@ import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBl
 import { collection, doc, query, orderBy, serverTimestamp, writeBatch } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
 export default function AddressesPage() {
@@ -25,6 +26,7 @@ export default function AddressesPage() {
   const [isSaving, setIsSaving] = useState(false)
   
   // حالات العنوان الجديد
+  const [addMode, setAddMode] = useState<"current" | "someone_else">("current")
   const [labelType, setLabelType] = useState<"المنزل" | "العمل" | "آخر">("المنزل")
   const [customLabel, setCustomLabel] = useState("")
   const [newCity, setNewCity] = useState("")
@@ -43,7 +45,6 @@ export default function AddressesPage() {
 
   const { data: addresses, isLoading } = useCollection(addressesQuery)
 
-  // البحث عن موقع بالاسم (Geocoding) لتمكين المستخدم من تحديد موقع أهله
   const handleSearchLocation = async () => {
     if (!searchQuery) return
     setIsSearching(true)
@@ -52,13 +53,19 @@ export default function AddressesPage() {
       const data = await response.json()
       if (data && data.length > 0) {
         const result = data[0]
-        setCoordinates({
+        const newCoords = {
           lat: parseFloat(result.lat),
           lng: parseFloat(result.lon)
-        })
-        toast({ title: "تم العثور على الموقع", description: "تم تحديث الخريطة بناءً على بحثك" })
+        }
+        setCoordinates(newCoords)
+        // محاولة استخراج المدينة تلقائياً من نتيجة البحث
+        if (result.display_name) {
+          const parts = result.display_name.split(',')
+          setNewCity(parts[0] || "")
+        }
+        toast({ title: "تم تحديد الموقع", description: "يمكنك الآن إكمال بقية التفاصيل" })
       } else {
-        toast({ title: "عذراً", description: "لم نتمكن من العثور على هذا المكان، جرب كتابته بشكل مختلف", variant: "destructive" })
+        toast({ title: "عذراً", description: "لم نتمكن من العثور على هذا المكان، حاول كتابة اسم الحي والمدينة", variant: "destructive" })
       }
     } catch (error) {
       toast({ title: "خطأ", description: "فشل الاتصال بخدمة الخرائط", variant: "destructive" })
@@ -97,7 +104,7 @@ export default function AddressesPage() {
     const finalLabel = labelType === "آخر" ? customLabel : labelType
     
     if (!finalLabel || !newCity || !newDetails) {
-      toast({ title: "بيانات ناقصة", description: "يرجى التأكد من ملء كافة الحقول المطلوبة", variant: "destructive" })
+      toast({ title: "بيانات ناقصة", description: "يرجى التأكد من ملء المدينة وتفاصيل العنوان", variant: "destructive" })
       return
     }
 
@@ -131,6 +138,7 @@ export default function AddressesPage() {
     setNewDetails("")
     setSearchQuery("")
     setCoordinates(null)
+    setAddMode("current")
   }
 
   const handleDeleteAddress = (id: string) => {
@@ -217,115 +225,137 @@ export default function AddressesPage() {
           <DialogContent className="rounded-[2.5rem] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0">
             <DialogHeader className="p-6 bg-primary text-white relative">
               <DialogTitle className="text-right flex items-center justify-between">
-                <span>إضافة عنوان جديد</span>
+                <span>أين تريد التوصيل؟</span>
                 <MapPin className="h-5 w-5" />
               </DialogTitle>
             </DialogHeader>
-            <div className="p-6 space-y-5 bg-white max-h-[80vh] overflow-y-auto" dir="rtl">
-              
-              <div className="space-y-4">
-                <div className="relative group">
-                   <Input 
-                    placeholder="ابحث عن مدينة أو شارع (مثال: صنعاء حدة)" 
-                    className="h-14 pr-12 rounded-2xl border-primary/20 bg-secondary/20"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearchLocation()}
-                   />
-                   <Button 
-                    onClick={handleSearchLocation} 
-                    disabled={isSearching}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 rounded-xl"
-                   >
-                    {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                   </Button>
-                </div>
+            
+            <div className="bg-white" dir="rtl">
+              <Tabs defaultValue="current" className="w-full" onValueChange={(v) => setAddMode(v as any)}>
+                <TabsList className="grid w-full grid-cols-2 bg-secondary/30 rounded-none h-12">
+                  <TabsTrigger value="current" className="font-bold text-xs gap-2">
+                    <Navigation className="h-3 w-3" /> موقعي الحالي
+                  </TabsTrigger>
+                  <TabsTrigger value="someone_else" className="font-bold text-xs gap-2">
+                    <Search className="h-3 w-3" /> تحديد عنوان آخر
+                  </TabsTrigger>
+                </TabsList>
 
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleDetectLocation} 
-                    variant="outline" 
-                    disabled={isLocating}
-                    className={cn(
-                      "flex-1 h-12 rounded-xl border-dashed border-2 gap-2 text-xs font-bold",
-                      coordinates ? "border-green-500 bg-green-50 text-green-700" : "border-primary/30 text-primary"
-                    )}
-                  >
-                    {isLocating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Navigation className="h-4 w-4" />}
-                    موقعي الحالي
-                  </Button>
-                </div>
+                <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                  <TabsContent value="current" className="mt-0 space-y-4">
+                    <div className="text-center space-y-3 pb-2 border-b border-dashed">
+                      <p className="text-xs text-muted-foreground">استخدم الـ GPS لتحديد موقعك الحالي بدقة وسرعة</p>
+                      <Button 
+                        onClick={handleDetectLocation} 
+                        variant="outline" 
+                        disabled={isLocating}
+                        className={cn(
+                          "w-full h-14 rounded-2xl border-2 gap-3 font-bold transition-all",
+                          coordinates ? "border-green-500 bg-green-50 text-green-700 shadow-sm" : "border-primary/30 text-primary hover:bg-primary/5"
+                        )}
+                      >
+                        {isLocating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Crosshair className="h-5 w-5" />}
+                        {coordinates ? "تم التقاط موقعك بنجاح" : "تحديد موقعي الآن"}
+                      </Button>
+                    </div>
+                  </TabsContent>
 
-                {coordinates && (
-                  <div className="space-y-3 animate-in fade-in zoom-in duration-300">
-                    <div className="w-full h-48 rounded-2xl overflow-hidden border-2 border-primary/10 relative shadow-inner">
-                      <iframe 
-                        width="100%" 
-                        height="100%" 
-                        frameBorder="0" 
-                        scrolling="no" 
-                        marginHeight={0} 
-                        marginWidth={0} 
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng-0.005}%2C${coordinates.lat-0.005}%2C${coordinates.lng+0.005}%2C${coordinates.lat+0.005}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lng}`}
-                      ></iframe>
+                  <TabsContent value="someone_else" className="mt-0 space-y-4">
+                    <div className="space-y-3">
+                      <p className="text-xs text-muted-foreground">ابحث عن عنوان الأهل أو الأصدقاء على الخريطة</p>
+                      <div className="relative">
+                        <Input 
+                          placeholder="مثال: صنعاء، حي حدة، شارع صفر" 
+                          className="h-14 pr-12 rounded-2xl border-primary/20 bg-secondary/10 font-bold"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSearchLocation()}
+                        />
+                        <Button 
+                          onClick={handleSearchLocation} 
+                          disabled={isSearching}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 rounded-xl"
+                        >
+                          {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  {/* منطقة الخريطة المشتركة */}
+                  {coordinates && (
+                    <div className="space-y-3 animate-in fade-in zoom-in duration-300">
+                      <div className="w-full h-48 rounded-2xl overflow-hidden border-2 border-primary/10 relative shadow-inner group">
+                        <iframe 
+                          width="100%" 
+                          height="100%" 
+                          frameBorder="0" 
+                          scrolling="no" 
+                          marginHeight={0} 
+                          marginWidth={0} 
+                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng-0.003}%2C${coordinates.lat-0.003}%2C${coordinates.lng+0.003}%2C${coordinates.lat+0.003}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lng}`}
+                        ></iframe>
+                        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                           <MapPin className="h-8 w-8 text-primary animate-bounce fill-primary/20" />
+                        </div>
+                      </div>
+                      <p className="text-[9px] text-center text-muted-foreground flex items-center justify-center gap-1">
+                        <Info className="h-3 w-3" /> الدبوس يحدد مكان التوصيل بدقة لحساب المسافة
+                      </p>
+                    </div>
+                  )}
+
+                  {/* الحقول النصية */}
+                  <div className="space-y-4 pt-2">
+                    <div className="space-y-2 text-right">
+                      <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mr-1">تسمية العنوان</label>
+                      <div className="flex gap-2">
+                        {(["المنزل", "العمل", "آخر"] as const).map((type) => (
+                          <Button 
+                            key={type}
+                            type="button"
+                            variant={labelType === type ? "default" : "outline"}
+                            onClick={() => setLabelType(type)}
+                            className={cn(
+                              "flex-1 h-12 rounded-xl text-xs font-bold transition-all",
+                              labelType === type ? "bg-primary shadow-lg shadow-primary/20" : "border-secondary"
+                            )}
+                          >
+                            {type}
+                          </Button>
+                        ))}
+                      </div>
+                      {labelType === "آخر" && (
+                         <Input 
+                          placeholder="أدخل اسم مخصص (مثال: بيت جدي)" 
+                          className="h-12 rounded-xl mt-2 border-primary/20 font-bold" 
+                          value={customLabel}
+                          onChange={(e) => setCustomLabel(e.target.value)}
+                         />
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1 text-right">
+                        <label className="text-[10px] font-black text-muted-foreground mr-1">المدينة / الحي</label>
+                        <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا" className="h-12 rounded-xl border-secondary font-bold" />
+                      </div>
+                      <div className="space-y-1 text-right">
+                        <label className="text-[10px] font-black text-muted-foreground mr-1">رقم الشارع / العمارة</label>
+                        <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: حي السلام" className="h-12 rounded-xl border-secondary font-bold" />
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
 
-              <div className="space-y-2 text-right">
-                <label className="text-xs font-bold text-muted-foreground mr-1">تسمية العنوان</label>
-                <div className="flex gap-2">
-                  {(["المنزل", "العمل", "آخر"] as const).map((type) => (
-                    <Button 
-                      key={type}
-                      type="button"
-                      variant={labelType === type ? "default" : "outline"}
-                      onClick={() => setLabelType(type)}
-                      className="flex-1 h-12 rounded-xl text-xs font-bold transition-all"
-                    >
-                      {type}
-                    </Button>
-                  ))}
+                  <Button 
+                    onClick={handleAddAddress} 
+                    disabled={isSaving || !newCity || !newDetails || (labelType === "آخر" && !customLabel)}
+                    className="w-full h-16 rounded-2xl font-black text-lg mt-4 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 transition-all active:scale-[0.98]"
+                  >
+                    {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "حفظ العنوان وتأكيده"}
+                  </Button>
                 </div>
-                {labelType === "آخر" && (
-                   <Input 
-                    placeholder="أدخل اسم مخصص (مثال: بيت الأهل)" 
-                    className="h-12 rounded-xl mt-2 border-primary/20" 
-                    value={customLabel}
-                    onChange={(e) => setCustomLabel(e.target.value)}
-                   />
-                )}
-              </div>
-
-              <div className="space-y-2 text-right">
-                <label className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1">
-                  المدينة / المنطقة <span className="text-destructive">*</span>
-                </label>
-                <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا - حي السلام" className="h-12 rounded-xl border-primary/10" />
-              </div>
-
-              <div className="space-y-2 text-right">
-                <label className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1">
-                  تفاصيل العنوان <span className="text-destructive">*</span>
-                </label>
-                <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: عمارة رقم 4، بجانب سوبر ماركت..." className="h-12 rounded-xl border-primary/10" />
-              </div>
-
-              <div className="bg-secondary/20 p-3 rounded-xl flex gap-2 items-start">
-                <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                <p className="text-[10px] text-muted-foreground leading-relaxed">
-                  يمكنك البحث عن مدينة أهلك في الخريطة بالأعلى لتحديد موقعهم، أو أدخل البيانات يدوياً وسيعرف المندوب العنوان.
-                </p>
-              </div>
-
-              <Button 
-                onClick={handleAddAddress} 
-                disabled={isSaving || !newCity || !newDetails || (labelType === "آخر" && !customLabel)}
-                className="w-full h-16 rounded-2xl font-black text-lg mt-4 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 transition-all active:scale-[0.98]"
-              >
-                {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "حفظ العنوان"}
-              </Button>
+              </Tabs>
             </div>
           </DialogContent>
         </Dialog>
@@ -333,4 +363,3 @@ export default function AddressesPage() {
     </div>
   )
 }
-    
