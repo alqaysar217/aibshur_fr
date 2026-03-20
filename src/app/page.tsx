@@ -224,14 +224,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. قائمة المتاجر - عمود واحد (Horizontal Card) بتصميم احترافي */}
-      <section className="px-4 pb-24 space-y-4">
+      {/* 3. قائمة المتاجر */}
+      <section className="px-4 pb-24 space-y-3">
         <div className="flex items-center justify-between mb-2 px-1">
           <h3 className="font-black text-sm">المتاجر المتاحة</h3>
         </div>
 
         {isStoresLoading ? (
-          [1, 2, 3].map(i => <div key={i} className="h-32 w-full bg-secondary/10 rounded-xl animate-pulse" />)
+          [1, 2, 3].map(i => <div key={i} className="h-28 w-full bg-secondary/10 rounded-xl animate-pulse" />)
         ) : stores && stores.length > 0 ? (
           stores.map((store: any) => {
             const isOpen = store.status === 'مفتوح' || store.status === 'open'
@@ -240,18 +240,10 @@ export default function Home() {
 
             return (
               <Link key={store.id} href={`/store/${store.id}`}>
-                <Card className="border-none shadow-sm rounded-xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-32">
-                  {/* زر المفضلة - أعلى اليمين (فوق الصورة) */}
-                  <button 
-                    onClick={(e) => toggleFavorite(e, store.id)}
-                    className="absolute top-3 right-3 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm transition-transform active:scale-75 z-10"
-                  >
-                    <Heart className={cn("h-3.5 w-3.5 transition-colors", isFav ? "fill-destructive text-destructive" : "text-muted-foreground/40")} />
-                  </button>
-
-                  <CardContent className="p-3 h-full flex flex-row gap-4 items-center">
-                    {/* صورة المتجر - اليمين */}
-                    <div className="relative w-[90px] h-[90px] shrink-0">
+                <Card className="border-none shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
+                  <CardContent className="p-2.5 h-full flex flex-row items-center gap-3">
+                    {/* 1. الصورة في اليمين */}
+                    <div className="relative w-20 h-20 shrink-0">
                       <Image 
                         src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
                         alt={store.name} 
@@ -260,36 +252,53 @@ export default function Home() {
                       />
                     </div>
 
-                    {/* معلومات المتجر - اليسار بتوزيع احترافي */}
-                    <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
-                      <div className="flex items-center justify-start gap-2">
-                        <h4 className="font-bold text-sm text-foreground truncate">{store.name}</h4>
-                        <div className="flex items-center gap-0.5 text-accent">
-                          <Star className="h-3 w-3 fill-accent" />
-                          <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
+                    {/* 2. المحتوى في الوسط */}
+                    <div className="flex-1 flex flex-col justify-between py-0.5 text-right overflow-hidden">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-sm text-foreground truncate">{store.name}</h4>
+                          <div className="flex items-center gap-0.5 text-accent shrink-0">
+                            <Star className="h-3 w-3 fill-accent" />
+                            <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 text-muted-foreground/60">
+                          <MapPin className="h-2.5 w-2.5" />
+                          <span className="text-[9px] truncate">{store.address || 'المكلا'}</span>
+                          <span className="mx-1 opacity-20">|</span>
+                          <span className="text-[9px]">2.3 كم</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-start gap-1 text-muted-foreground">
-                        <MapPin className="h-2.5 w-2.5" />
-                        <span className="text-[10px] truncate">{store.address || 'المكلا'}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[8px] font-bold text-primary/70 bg-primary/5 px-2 py-0.5 rounded-md">
+                          {categoryName}
+                        </span>
+                        <div className="flex items-center gap-1 text-muted-foreground/50">
+                          <Clock className="h-2.5 w-2.5" />
+                          <span className="text-[9px]">{store.deliveryTime || '30 دقيقة'}</span>
+                        </div>
                       </div>
+                    </div>
 
-                      <div className="flex items-center justify-start gap-3 mt-1">
-                         <span className="text-[9px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-md">{categoryName}</span>
-                         <span className="text-[9px] font-bold text-muted-foreground/50">يبعد 2.3 كم</span>
-                      </div>
+                    {/* 3. الإجراءات والحالة في أقصى اليسار */}
+                    <div className="flex flex-col justify-between items-end h-full py-0.5 pl-1 shrink-0">
+                      <button 
+                        onClick={(e) => toggleFavorite(e, store.id)}
+                        className="p-1.5 bg-secondary/30 rounded-full transition-transform active:scale-75"
+                      >
+                        <Heart className={cn("h-3.5 w-3.5 transition-colors", isFav ? "fill-destructive text-destructive" : "text-muted-foreground/30")} />
+                      </button>
 
-                      <div className="flex items-center justify-start mt-1">
-                        <Badge 
-                          className={cn(
-                            "text-[8px] h-4 px-1.5 border-none font-black shadow-none",
-                            isOpen ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                          )}
-                        >
-                          {isOpen ? 'مفتوح' : 'مغلق'}
-                        </Badge>
-                      </div>
+                      <Badge 
+                        className={cn(
+                          "text-[8px] h-4.5 px-2 border-none font-black shadow-none rounded-lg",
+                          isOpen ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
+                        )}
+                      >
+                        {isOpen ? 'مفتوح' : 'مغلق'}
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
