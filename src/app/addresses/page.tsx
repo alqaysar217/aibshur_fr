@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2, Info, Crosshair } from "lucide-react"
+import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2, Crosshair } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
-import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase"
+import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { addDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { collection, doc, query, orderBy, serverTimestamp, writeBatch } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -56,7 +57,7 @@ export default function AddressesPage() {
         }
         setCoordinates(newCoords)
         setIsLocating(false)
-        toast({ title: "تم التحديد", description: "تم التقاط موقعك الحالي بنجاح" })
+        toast({ title: "تم التحديد", description: "تم التقاط موقعك الحالي بنجاح وتحديث الخريطة" })
       },
       (error) => {
         setIsLocating(false)
@@ -189,80 +190,97 @@ export default function AddressesPage() {
             </Button>
           </DialogTrigger>
           <DialogContent className="rounded-[2.5rem] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0">
-            <DialogHeader className="p-6 bg-primary text-white relative">
-              <DialogTitle className="text-right flex items-center justify-between">
-                <span>أين تريد التوصيل؟</span>
-                <Navigation className="h-5 w-5" />
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="bg-white p-6 space-y-6" dir="rtl">
-              {/* زر تحديد الموقع الحالي */}
-              <div className="text-center space-y-3 pb-4 border-b border-dashed">
-                <p className="text-xs text-muted-foreground">استخدم الـ GPS لتحديد موقعك الحالي بدقة</p>
+            <div className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader className="p-6 bg-primary text-white relative">
+                <DialogTitle className="text-right flex items-center justify-between">
+                  <span>أين تريد التوصيل؟</span>
+                  <Navigation className="h-5 w-5" />
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="bg-white p-6 space-y-6" dir="rtl">
+                {/* زر تحديد الموقع الحالي */}
+                <div className="text-center space-y-3 pb-4 border-b border-dashed">
+                  <p className="text-xs text-muted-foreground">استخدم الـ GPS لتحديد موقعك الحالي بدقة</p>
+                  <Button 
+                    onClick={handleDetectLocation} 
+                    variant="outline" 
+                    disabled={isLocating}
+                    className={cn(
+                      "w-full h-14 rounded-2xl border-2 gap-3 font-bold transition-all",
+                      coordinates ? "border-green-500 bg-green-50 text-green-700 shadow-sm" : "border-primary/30 text-primary hover:bg-primary/5"
+                    )}
+                  >
+                    {isLocating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Crosshair className="h-5 w-5" />}
+                    {coordinates ? "تم التقاط موقعك الحالي" : "تحديد موقعي الآن"}
+                  </Button>
+
+                  {/* الخريطة التفاعلية تظهر هنا */}
+                  {coordinates && (
+                    <div className="w-full h-48 rounded-2xl overflow-hidden border-2 border-primary/20 shadow-inner mt-4 animate-in fade-in zoom-in duration-500">
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        frameBorder="0"
+                        scrolling="no"
+                        marginHeight={0}
+                        marginWidth={0}
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng - 0.005}%2C${coordinates.lat - 0.005}%2C${coordinates.lng + 0.005}%2C${coordinates.lat + 0.005}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lng}`}
+                      ></iframe>
+                    </div>
+                  )}
+
+                  {coordinates && (
+                    <p className="text-[9px] text-green-600 font-bold flex items-center justify-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" /> تم بنجاح التقاط الإحداثيات وتحديدها على الخريطة
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <div className="space-y-2 text-right">
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mr-1">تسمية العنوان</label>
+                    <Select onValueChange={(v) => setLabelType(v)} defaultValue={labelType}>
+                      <SelectTrigger className="h-14 rounded-2xl border-secondary bg-secondary/10 font-bold">
+                        <SelectValue placeholder="اختر نوع العنوان" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="المنزل">المنزل</SelectItem>
+                        <SelectItem value="العمل">العمل</SelectItem>
+                        <SelectItem value="آخر">أخرى (مثل: بيت الأهل)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    {labelType === "آخر" && (
+                      <Input 
+                        placeholder="أدخل اسم مخصص (مثل: بيت الأهل)" 
+                        className="h-12 rounded-xl mt-2 border-primary/20 font-bold" 
+                        value={customLabel}
+                        onChange={(e) => setCustomLabel(e.target.value)}
+                      />
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-1 text-right">
+                      <label className="text-[10px] font-black text-muted-foreground mr-1">المدينة / الحي</label>
+                      <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا - فوه" className="h-14 rounded-2xl border-secondary bg-secondary/5 font-bold" />
+                    </div>
+                    <div className="space-y-1 text-right">
+                      <label className="text-[10px] font-black text-muted-foreground mr-1">تفاصيل الشارع / العمارة</label>
+                      <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: شارع الستين - عمارة الأمل" className="h-14 rounded-2xl border-secondary bg-secondary/5 font-bold" />
+                    </div>
+                  </div>
+                </div>
+
                 <Button 
-                  onClick={handleDetectLocation} 
-                  variant="outline" 
-                  disabled={isLocating}
-                  className={cn(
-                    "w-full h-14 rounded-2xl border-2 gap-3 font-bold transition-all",
-                    coordinates ? "border-green-500 bg-green-50 text-green-700 shadow-sm" : "border-primary/30 text-primary hover:bg-primary/5"
-                  )}
+                  onClick={handleAddAddress} 
+                  disabled={isSaving || !newCity || !newDetails || (labelType === "آخر" && !customLabel)}
+                  className="w-full h-16 rounded-2xl font-black text-lg mt-2 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 transition-all active:scale-[0.98]"
                 >
-                  {isLocating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Crosshair className="h-5 w-5" />}
-                  {coordinates ? "تم التقاط موقعك الحالي" : "تحديد موقعي الآن"}
+                  {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "حفظ العنوان وتأكيده"}
                 </Button>
-                {coordinates && (
-                  <p className="text-[9px] text-green-600 font-bold flex items-center justify-center gap-1">
-                    <CheckCircle2 className="h-3 w-3" /> تم بنجاح التقاط الإحداثيات
-                  </p>
-                )}
               </div>
-
-              <div className="space-y-4 pt-2">
-                {/* قائمة منسدلة لنوع العنوان */}
-                <div className="space-y-2 text-right">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mr-1">تسمية العنوان</label>
-                  <Select onValueChange={(v) => setLabelType(v)} defaultValue={labelType}>
-                    <SelectTrigger className="h-14 rounded-2xl border-secondary bg-secondary/10 font-bold">
-                      <SelectValue placeholder="اختر نوع العنوان" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="المنزل">المنزل</SelectItem>
-                      <SelectItem value="العمل">العمل</SelectItem>
-                      <SelectItem value="آخر">أخرى (مثل: بيت الأهل)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  {labelType === "آخر" && (
-                     <Input 
-                      placeholder="أدخل اسم مخصص (مثل: بيت الأهل)" 
-                      className="h-12 rounded-xl mt-2 border-primary/20 font-bold" 
-                      value={customLabel}
-                      onChange={(e) => setCustomLabel(e.target.value)}
-                     />
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-1 text-right">
-                    <label className="text-[10px] font-black text-muted-foreground mr-1">المدينة / الحي</label>
-                    <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا - فوه" className="h-14 rounded-2xl border-secondary bg-secondary/5 font-bold" />
-                  </div>
-                  <div className="space-y-1 text-right">
-                    <label className="text-[10px] font-black text-muted-foreground mr-1">تفاصيل الشارع / العمارة</label>
-                    <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: شارع الستين - عمارة الأمل" className="h-14 rounded-2xl border-secondary bg-secondary/5 font-bold" />
-                  </div>
-                </div>
-              </div>
-
-              <Button 
-                onClick={handleAddAddress} 
-                disabled={isSaving || !newCity || !newDetails || (labelType === "آخر" && !customLabel)}
-                className="w-full h-16 rounded-2xl font-black text-lg mt-2 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 transition-all active:scale-[0.98]"
-              >
-                {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "حفظ العنوان وتأكيده"}
-              </Button>
             </div>
           </DialogContent>
         </Dialog>
