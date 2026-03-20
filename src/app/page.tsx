@@ -241,7 +241,7 @@ export default function Home() {
             return (
               <Link key={store.id} href={`/store/${store.id}`}>
                 <Card className="border-none shadow-sm rounded-xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-32">
-                  {/* زر المفضلة - أعلى اليسار (لأنه تم عكس الاتجاه وأصبحت الصورة على اليمين) */}
+                  {/* زر المفضلة - أعلى اليسار */}
                   <button 
                     onClick={(e) => toggleFavorite(e, store.id)}
                     className="absolute top-3 left-3 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm transition-transform active:scale-75 z-10"
@@ -250,17 +250,7 @@ export default function Home() {
                   </button>
 
                   <CardContent className="p-3 h-full flex flex-row gap-4 items-center">
-                    {/* صورة المتجر - اليمين (في الاتجاه العربي) */}
-                    <div className="relative w-[90px] h-[90px] shrink-0">
-                      <Image 
-                        src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
-                        alt={store.name} 
-                        fill 
-                        className="object-cover rounded-xl" 
-                      />
-                    </div>
-
-                    {/* معلومات المتجر - اليسار */}
+                    {/* معلومات المتجر - اليمين */}
                     <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
                       <div className="flex items-center justify-end gap-2">
                          <div className="flex items-center gap-0.5 text-accent">
@@ -290,6 +280,16 @@ export default function Home() {
                           {isOpen ? 'مفتوح' : 'مغلق'}
                         </Badge>
                       </div>
+                    </div>
+
+                    {/* صورة المتجر - اليسار */}
+                    <div className="relative w-[90px] h-[90px] shrink-0">
+                      <Image 
+                        src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
+                        alt={store.name} 
+                        fill 
+                        className="object-cover rounded-xl" 
+                      />
                     </div>
                   </CardContent>
                 </Card>
