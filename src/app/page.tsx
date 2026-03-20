@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice, Database } from "lucide-react"
+import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Database, Sparkles } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -16,13 +16,6 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-
-const CATEGORIES = [
-  { id: "restaurants", name: "مطاعم", icon: <Utensils className="h-6 w-6" />, color: "bg-orange-50", textColor: "text-orange-600" },
-  { id: "grocery", name: "بقالة", icon: <ShoppingBasket className="h-6 w-6" />, color: "bg-green-50", textColor: "text-green-600" },
-  { id: "pharmacy", name: "صيدلية", icon: <Pill className="h-6 w-6" />, color: "bg-blue-50", textColor: "text-blue-600" },
-  { id: "sweets", name: "حلويات", icon: <CakeSlice className="h-6 w-6" />, color: "bg-pink-50", textColor: "text-pink-600" }
-]
 
 export default function Home() {
   const router = useRouter()
@@ -50,6 +43,14 @@ export default function Home() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
+  // جلب الأقسام من Firestore
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!db) return null
+    return query(collection(db, "categories"), limit(10))
+  }, [db])
+  const { data: categories } = useCollection(categoriesQuery)
+
+  // جلب المتاجر
   const storesQuery = useMemoFirebase(() => {
     if (!db) return null;
     let baseQuery = collection(db, "stores");
@@ -68,14 +69,25 @@ export default function Home() {
     }
     setIsSeeding(true)
     try {
+      // 1. تهيئة الأقسام
+      const categoriesToSeed = [
+        { id: "restaurants", name: "مطاعم", icon: "Utensils", color: "bg-orange-50", textColor: "text-orange-600" },
+        { id: "grocery", name: "بقالة", icon: "ShoppingBasket", color: "bg-green-50", textColor: "text-green-600" },
+        { id: "pharmacy", name: "صيدلية", icon: "Pill", color: "bg-blue-50", textColor: "text-blue-600" },
+        { id: "sweets", name: "حلويات", icon: "CakeSlice", color: "bg-pink-50", textColor: "text-pink-600" }
+      ]
+      for (const cat of categoriesToSeed) {
+        await setDoc(doc(db, "categories", cat.id), cat)
+      }
+
+      // 2. تهيئة المتاجر
       const storesToSeed = [
         {
           id: "mathaqi_rest",
           name: "مطعم مذاقي",
           logoUrl: "https://picsum.photos/seed/mathaqi/600/400",
           categoryIds: ["restaurants"],
-          address: "المكلا - فوه - مساكن",
-          openingHours: "01:00 PM - 12:00 AM",
+          address: "المكلا - فوه",
           status: "مفتوح",
           averageRating: 4.9
         },
@@ -85,19 +97,8 @@ export default function Home() {
           logoUrl: "https://picsum.photos/seed/madaqi/600/400",
           categoryIds: ["restaurants"],
           address: "المكلا - حي أكتوبر",
-          openingHours: "12:00 PM - 11:30 PM",
           status: "مفتوح",
           averageRating: 4.8
-        },
-        {
-          id: "mandi_king",
-          name: "مطعم مندي الملك",
-          logoUrl: "https://picsum.photos/seed/mandi1/600/400",
-          categoryIds: ["restaurants"],
-          address: "المكلا - الشرج - شارع الستين",
-          openingHours: "11:00 AM - 12:00 AM",
-          status: "مفتوح",
-          averageRating: 4.9
         },
         {
           id: "al_khaleej_market",
@@ -105,7 +106,6 @@ export default function Home() {
           logoUrl: "https://picsum.photos/seed/grocery_yem/600/400",
           categoryIds: ["grocery"],
           address: "المكلا - المكلا مول",
-          openingHours: "08:00 AM - 11:00 PM",
           status: "مفتوح",
           averageRating: 4.7
         }
@@ -115,19 +115,22 @@ export default function Home() {
         await setDoc(doc(db, "stores", s.id), s)
       }
 
-      // إضافة منتجات
-      const mathaqiProducts = [
-        { name: "عقدة لحم مذاقي", price: 4500, description: "لحم صغير مع الخضار الطازجة والبهارات الحضرمية", imageUrl: "https://picsum.photos/seed/mathaqi1/400/300", status: "available" },
-        { name: "سلته يمنية", price: 1800, description: "السلته اليمنية الأصيلة تقدم ساخنة مع المرق", imageUrl: "https://picsum.photos/seed/selte/400/300", status: "available" }
+      // 3. تهيئة المنتجات
+      const sampleProducts = [
+        { id: "mandi_p1", name: "عقدة لحم", price: 4500, description: "لحم صغير مع بهارات حضرمية", imageUrl: "https://picsum.photos/seed/mathaqi1/400/300" },
+        { id: "mandi_p2", name: "سلته يمنية", price: 1800, description: "السلته اليمنية الأصيلة", imageUrl: "https://picsum.photos/seed/selte/400/300" }
       ]
-      for (const p of mathaqiProducts) {
-        const prodId = `prod_${Math.random().toString(36).substr(2, 9)}`;
-        const prodRef = doc(db, "stores", "mathaqi_rest", "products", prodId)
-        await setDoc(prodRef, { ...p, storeId: "mathaqi_rest" })
+      for (const p of sampleProducts) {
+        await setDoc(doc(db, "stores", "mathaqi_rest", "products", p.id), { ...p, storeId: "mathaqi_rest" })
+      }
+
+      // 4. تهيئة المحافظات
+      const govs = ["حضرموت", "عدن", "صنعاء", "تعز"]
+      for (const g of govs) {
+        await setDoc(doc(db, "governorates", g), { name: g })
       }
       
-      toast({ title: "تمت التهيئة", description: "تم تحديث البيانات لتطابق الهيكلية الجديدة بنجاح!" })
-      router.refresh()
+      toast({ title: "تمت التهيئة", description: "تم بناء هيكل تطبيق أبشر بالكامل!" })
     } catch (e) {
       console.error(e)
       toast({ title: "خطأ", description: "فشلت تهيئة البيانات", variant: "destructive" })
@@ -168,7 +171,7 @@ export default function Home() {
     <div className="pb-24 bg-secondary/5 min-h-screen">
       {user && (
         <div className="p-2 bg-accent/10 border-b border-accent/20 flex items-center justify-between px-4">
-          <p className="text-[10px] font-bold text-accent">وضع التطوير: تهيئة البيانات</p>
+          <p className="text-[10px] font-bold text-accent">إدارة البيانات</p>
           <Button 
             size="sm" 
             variant="ghost" 
@@ -177,7 +180,7 @@ export default function Home() {
             disabled={isSeeding}
           >
             <Database className="h-3 w-3" />
-            {isSeeding ? "جاري البناء..." : "تجهيز بيانات أبشر"}
+            {isSeeding ? "جاري البناء..." : "تجهيز تطبيق أبشر"}
           </Button>
         </div>
       )}
@@ -208,9 +211,14 @@ export default function Home() {
       <section className="p-4 space-y-6">
         <div className="relative">
           <Link href="/search">
-            <div className="w-full h-16 px-12 rounded-2xl border-none shadow-xl bg-white text-muted-foreground flex items-center text-sm cursor-text">
+            <div className="w-full h-16 px-12 rounded-2xl border-none shadow-xl bg-white text-muted-foreground flex items-center text-sm cursor-text relative overflow-hidden group">
+              <div className="absolute inset-y-0 left-0 w-1 bg-primary/20 group-hover:bg-primary transition-all"></div>
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-              ابحث عن مطعم، بقالة، أو وجبة...
+              ابحث عن أي شيء...
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded-lg">
+                <Sparkles className="h-3 w-3" />
+                بحث ذكي
+              </div>
             </div>
           </Link>
         </div>
@@ -235,21 +243,24 @@ export default function Home() {
           <h3 className="font-black text-xl text-foreground">الأقسام الرئيسية</h3>
         </div>
         <div className="grid grid-cols-4 gap-4">
-          {CATEGORIES.map((cat) => (
+          {categories ? categories.map((cat: any) => (
             <button key={cat.id} onClick={() => setActiveCategory(cat.id === activeCategory ? null : cat.id)} className="flex flex-col items-center gap-3">
               <div className={cn(
                 "h-16 w-16 rounded-2xl flex items-center justify-center shadow-sm border transition-all",
-                cat.color,
+                cat.color || "bg-secondary/20",
                 activeCategory === cat.id ? "border-primary ring-2 ring-primary/20 scale-110" : "border-transparent",
-                cat.textColor
+                cat.textColor || "text-foreground"
               )}>
-                {cat.icon}
+                {/* تمثيل الأيقونات برمجياً بناءً على الاسم من Firestore */}
+                <Search className="h-6 w-6" /> 
               </div>
               <span className={cn("text-[11px] font-black", activeCategory === cat.id ? "text-primary" : "text-foreground/80")}>
                 {cat.name}
               </span>
             </button>
-          ))}
+          )) : (
+            <div className="col-span-4 h-20 bg-white rounded-2xl animate-pulse" />
+          )}
         </div>
       </section>
 
@@ -290,7 +301,7 @@ export default function Home() {
             ))
           ) : (
             <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-secondary">
-              <p className="text-muted-foreground font-bold">المتاجر فارغة، اضغط على زر التهيئة أعلاه</p>
+              <p className="text-muted-foreground font-bold">اضغط على زر التهيئة بالأعلى لبناء التطبيق</p>
             </div>
           )}
         </div>

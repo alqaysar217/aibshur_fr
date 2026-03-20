@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Search, Store, ArrowRight, Utensils, ShoppingBag } from "lucide-react"
+import { Search, Store, ArrowRight, Utensils, ShoppingBag, Sparkles, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -13,9 +13,12 @@ import { collection, query, collectionGroup, limit } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { smartSearch, SmartSearchOutput } from "@/ai/flows/ai-powered-smart-search-flow"
 
 export default function SearchPage() {
   const [queryText, setQueryText] = useState("")
+  const [isAiLoading, setIsAiLoading] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState<SmartSearchOutput | null>(null)
   const [mounted, setMounted] = useState(false)
   const db = useFirestore()
   const router = useRouter()
@@ -24,18 +27,39 @@ export default function SearchPage() {
     setMounted(true)
   }, [])
 
+  // جلب كافة البيانات للتصفية الأولية
   const storesQuery = useMemoFirebase(() => {
     if (!db) return null
-    return query(collection(db, "stores"), limit(20))
+    return query(collection(db, "stores"), limit(50))
   }, [db])
 
   const productsQuery = useMemoFirebase(() => {
     if (!db) return null
-    return query(collectionGroup(db, "products"), limit(50))
+    return query(collectionGroup(db, "products"), limit(100))
   }, [db])
   
   const { data: stores, isLoading: loadingStores } = useCollection(storesQuery)
   const { data: products, isLoading: loadingProducts } = useCollection(productsQuery)
+
+  // تفعيل البحث بالذكاء الاصطناعي عند التوقف عن الكتابة
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (queryText.length > 3) {
+        setIsAiLoading(true)
+        try {
+          const result = await smartSearch({ query: queryText })
+          setAiSuggestions(result)
+        } catch (error) {
+          console.error("AI Search Error:", error)
+        } finally {
+          setIsAiLoading(false)
+        }
+      } else {
+        setAiSuggestions(null)
+      }
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [queryText])
 
   const results = useMemo(() => {
     if (!mounted) return []
@@ -45,15 +69,22 @@ export default function SearchPage() {
     const allProducts = (products || []).map(p => ({ ...p, type: 'product' }))
     const combined = [...allStores, ...allProducts]
 
-    if (!searchVal) return combined.slice(0, 20)
+    if (!searchVal) return combined.slice(0, 10)
 
+    // التصفية بناءً على النص أو اقتراحات الذكاء الاصطناعي
     return combined.filter((item: any) => {
       const nameMatch = item.name?.toLowerCase().includes(searchVal)
-      const descMatch = item.description?.toLowerCase().includes(searchVal)
-      const addrMatch = item.address?.toLowerCase()?.includes(searchVal)
-      return nameMatch || descMatch || addrMatch
+      
+      // إذا كان هناك اقتراح AI، نتحقق من التصنيفات
+      let aiMatch = false
+      if (aiSuggestions) {
+        if (item.type === 'store' && aiSuggestions.storeFilters?.types.some(t => item.name.toLowerCase().includes(t))) aiMatch = true
+        if (item.type === 'product' && aiSuggestions.productFilters?.categories.some(c => item.name.toLowerCase().includes(c))) aiMatch = true
+      }
+
+      return nameMatch || aiMatch
     })
-  }, [queryText, stores, products, mounted])
+  }, [queryText, stores, products, aiSuggestions, mounted])
 
   const isLoading = loadingStores || loadingProducts
 
@@ -76,16 +107,31 @@ export default function SearchPage() {
           <Input 
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
-            placeholder="ابحث عن مطعم أو وجبة..." 
-            className="pr-12 h-16 rounded-2xl border-none shadow-xl bg-white text-base focus-visible:ring-primary text-right"
+            placeholder="ابحث عن مطعم، وجبة، أو طلب خاص..." 
+            className="pr-12 h-16 rounded-2xl border-none shadow-xl bg-white text-base focus-visible:ring-primary text-right pl-12"
           />
+          {isAiLoading && (
+            <div className="absolute left-4 top-1/2 -translate-y-1/2">
+              <Loader2 className="h-5 w-5 text-primary animate-spin" />
+            </div>
+          )}
         </div>
 
-        <div className="space-y-3 animate-in fade-in duration-500">
-          {isLoading && (
-            <div className="text-center py-10 text-muted-foreground text-sm font-bold">جاري البحث...</div>
-          )}
+        {aiSuggestions && (
+          <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar">
+            <Badge className="bg-primary/10 text-primary border-none whitespace-nowrap gap-1">
+              <Sparkles className="h-3 w-3" /> تم التحليل بالذكاء الاصطناعي
+            </Badge>
+            {aiSuggestions.storeFilters?.types.map(t => (
+              <Badge key={t} variant="outline" className="rounded-lg">{t}</Badge>
+            ))}
+            {aiSuggestions.productFilters?.categories.map(c => (
+              <Badge key={c} variant="outline" className="rounded-lg">{c}</Badge>
+            ))}
+          </div>
+        )}
 
+        <div className="space-y-3 animate-in fade-in duration-500">
           {!isLoading && results.length > 0 ? (
             results.map((item: any) => (
               <Card 
