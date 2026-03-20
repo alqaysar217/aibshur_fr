@@ -76,11 +76,12 @@ export function useCollection<T = any>(
       (error: FirestoreError) => {
         let path: string = 'collection-group';
         try {
+          // Improved path detection for logging
           if ('path' in memoizedTargetRefOrQuery) {
             path = (memoizedTargetRefOrQuery as CollectionReference).path;
           } else {
             const internal = memoizedTargetRefOrQuery as unknown as InternalQuery;
-            path = internal._query.path.canonicalString() || 'collection-group';
+            path = internal._query?.path?.toString() || 'collection-group';
           }
         } catch (e) {
           path = 'collection-group';
