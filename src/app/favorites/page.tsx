@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId } from "firebase/firestore"
 import { Heart, Star, ShoppingBag, Loader2 } from "lucide-react"
@@ -32,6 +32,7 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userRef)
 
+  // استعلام المتاجر - يمكننا استخدام documentId هنا لأنها مجموعة جذور (Root Collection)
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData) return null
     const ids = userData?.favoritesStoreIds || []
@@ -43,20 +44,27 @@ export default function FavoritesPage() {
     )
   }, [db, userData?.favoritesStoreIds])
 
+  // استعلام المنتجات - نقوم بجلب قائمة واسعة وتصفيتها برمجياً لتجنب خطأ مسارات documentId في الـ Collection Group
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData) return null
     const ids = userData?.favoritesProductIds || []
     if (ids.length === 0) return null
 
+    // جلب المنتجات بشكل عام (بحد أقصى 100) للتصفية برمجياً
     return query(
       collectionGroup(db, "products"),
-      where(documentId(), "in", ids.slice(0, 10)),
-      limit(10)
+      limit(100)
     )
   }, [db, userData?.favoritesProductIds])
 
   const { data: favoriteStores, isLoading: isLoadingStores } = useCollection(favoritesStoresQuery)
-  const { data: favoriteProducts, isLoading: isLoadingProducts } = useCollection(favoritesProductsQuery)
+  const { data: allProducts, isLoading: isLoadingProducts } = useCollection(favoritesProductsQuery)
+
+  // تصفية المنتجات برمجياً لضمان التوافق مع المعرفات المختلطة
+  const filteredFavoriteProducts = useMemo(() => {
+    if (!allProducts || !userData?.favoritesProductIds) return []
+    return allProducts.filter(p => userData.favoritesProductIds.includes(p.id))
+  }, [allProducts, userData?.favoritesProductIds])
 
   const toggleStoreFavorite = (e: React.MouseEvent, storeId: string) => {
     e.preventDefault()
@@ -181,8 +189,8 @@ export default function FavoritesPage() {
           <TabsContent value="products" className="space-y-4">
             {isLoadingProducts ? (
               [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-2xl animate-pulse" />)
-            ) : favoriteProducts && favoriteProducts.length > 0 ? (
-              favoriteProducts.map((product: any) => (
+            ) : filteredFavoriteProducts.length > 0 ? (
+              filteredFavoriteProducts.map((product: any) => (
                 <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden relative">
                   <button onClick={(e) => toggleProductFavorite(e, product.id)} className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow-sm">
                     <Heart className="h-4 w-4 fill-destructive text-destructive" />
