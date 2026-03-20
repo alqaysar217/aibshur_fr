@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, collectionGroup } from "firebase/firestore"
+import { collection, query, collectionGroup, limit } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
@@ -26,12 +26,12 @@ export default function SearchPage() {
 
   const storesQuery = useMemoFirebase(() => {
     if (!db) return null
-    return query(collection(db, "stores"))
+    return query(collection(db, "stores"), limit(20))
   }, [db])
 
   const productsQuery = useMemoFirebase(() => {
     if (!db) return null
-    return query(collectionGroup(db, "products"))
+    return query(collectionGroup(db, "products"), limit(50))
   }, [db])
   
   const { data: stores, isLoading: loadingStores } = useCollection(storesQuery)

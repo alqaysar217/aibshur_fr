@@ -32,7 +32,6 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
-  // استعلام المتاجر المفضلة باستخدام documentId لضمان الدقة
   const favoritesStoresQuery = useMemoFirebase(() => {
     const ids = userData?.favoritesStoreIds || []
     if (!db || ids.length === 0) return null
@@ -42,7 +41,6 @@ export default function FavoritesPage() {
     )
   }, [db, userData?.favoritesStoreIds])
 
-  // استعلام الوجبات المفضلة باستخدام حقل 'id' الداخلي ليتوافق مع collectionGroup
   const favoritesProductsQuery = useMemoFirebase(() => {
     const ids = userData?.favoritesProductIds || []
     if (!db || ids.length === 0) return null
@@ -177,7 +175,7 @@ export default function FavoritesPage() {
                   <button onClick={(e) => toggleProductFavorite(e, product.id)} className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow-sm">
                     <Heart className="h-4 w-4 fill-destructive text-destructive" />
                   </button>
-                  <CardContent className="p-0 flex items-center">
+                  <CardContent className="p-0 flex items-center" onClick={() => router.push(`/store/${product.storeId}`)}>
                     <div className="relative h-28 w-28 shrink-0">
                       <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                     </div>

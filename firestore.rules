@@ -4,7 +4,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // --- 1. قواعد البحث الشامل (Collection Group) ---
-    // ضرورية جداً لعمل صفحة "المفضلة" والبحث الذكي عن المنتجات عبر جميع المتاجر
+    // هذه القاعدة ضرورية جداً لعمل صفحة "المفضلة" والبحث الذكي عن المنتجات
+    // يجب أن تكون في أعلى مستوى لضمان عمل استعلامات collectionGroup
     match /{path=**}/products/{productId} {
       allow read, list: if true; 
     }
@@ -20,9 +21,7 @@ service cloud.firestore {
 
     // --- 2. المتاجر والبيانات العامة ---
     match /stores/{storeId} {
-      // أي شخص يمكنه تصفح المتاجر (ضروري للصفحة الرئيسية)
       allow read, list: if true;
-      // السماح بتهيئة البيانات للمطور المسجل
       allow write: if isSignedIn();
 
       match /products/{productId} {
