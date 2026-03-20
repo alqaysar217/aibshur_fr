@@ -224,14 +224,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. قائمة المتاجر - عمود واحد (Horizontal Card) */}
+      {/* 3. قائمة المتاجر - عمود واحد (Horizontal Card) بتصميم احترافي */}
       <section className="px-4 pb-24 space-y-4">
         <div className="flex items-center justify-between mb-2 px-1">
           <h3 className="font-black text-sm">المتاجر المتاحة</h3>
         </div>
 
         {isStoresLoading ? (
-          [1, 2, 3].map(i => <div key={i} className="h-28 w-full bg-secondary/10 rounded-xl animate-pulse" />)
+          [1, 2, 3].map(i => <div key={i} className="h-32 w-full bg-secondary/10 rounded-xl animate-pulse" />)
         ) : stores && stores.length > 0 ? (
           stores.map((store: any) => {
             const isOpen = store.status === 'مفتوح' || store.status === 'open'
@@ -260,7 +260,7 @@ export default function Home() {
                       />
                     </div>
 
-                    {/* معلومات المتجر - اليسار */}
+                    {/* معلومات المتجر - اليسار بتوزيع احترافي */}
                     <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
                       <div className="flex items-center justify-start gap-2">
                         <h4 className="font-bold text-sm text-foreground truncate">{store.name}</h4>
