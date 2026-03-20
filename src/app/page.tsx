@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Search, MapPin, Bell, ChevronLeft, Star, Navigation, Heart, Utensils, ShoppingBasket, Pill, CakeSlice, Database } from "lucide-react"
@@ -70,6 +69,16 @@ export default function Home() {
     try {
       const storesToSeed = [
         {
+          id: "madaqi_rest",
+          name: "مطعم مداقي",
+          logoUrl: "https://picsum.photos/seed/madaqi/600/400",
+          categoryIds: ["restaurants"],
+          address: "المكلا - حي أكتوبر",
+          openingHours: "12:00 PM - 11:30 PM",
+          status: "open",
+          averageRating: 4.8
+        },
+        {
           id: "mandi_king",
           name: "مطعم مندي الملك",
           logoUrl: "https://picsum.photos/seed/mandi1/600/400",
@@ -105,6 +114,14 @@ export default function Home() {
         await setDoc(doc(db, "stores", s.id), s)
       }
 
+      const madaqiProducts = [
+        { id: "madaqi_p1", name: "مضبي دجاج", price: 2800, description: "دجاج مطهو على الحجر الساخن مع أرز حضرمي", imageUrl: "https://picsum.photos/seed/madhbi/400/300", status: "available" },
+        { id: "madaqi_p2", name: "برمة لحم بلدي", price: 6000, description: "لحم مطهو في أواني فخارية مع المرق والبهارات", imageUrl: "https://picsum.photos/seed/barma/400/300", status: "available" }
+      ]
+      for (const p of madaqiProducts) {
+        await setDoc(doc(db, "stores", "madaqi_rest", "products", p.id), { ...p, storeId: "madaqi_rest" })
+      }
+
       const mandiProducts = [
         { id: "mandi_p1", name: "مندي دجاج ربع", price: 2500, description: "ربع دجاجة مع الأرز الحضرمي الأصيل والمرق", imageUrl: "https://picsum.photos/seed/mandi_dish/400/300", status: "available" },
         { id: "mandi_p2", name: "مندي لحم نفر", price: 5500, description: "لحم بلدي طازج مطهو في التنور مع أرز المندي", imageUrl: "https://picsum.photos/seed/meat/400/300", status: "available" }
@@ -122,8 +139,9 @@ export default function Home() {
       }
 
       await setDoc(doc(db, "ads", "ad_1"), { title: "خصم 20% على المندي", imageUrl: "https://picsum.photos/seed/promo1/800/400", storeId: "mandi_king" })
+      await setDoc(doc(db, "ads", "ad_2"), { title: "مداقي: مذاق الضيافة العربية", imageUrl: "https://picsum.photos/seed/madaqi_ad/800/400", storeId: "madaqi_rest" })
       
-      toast({ title: "تمت التهيئة", description: "بيانات أبشر جاهزة للاستخدام الآن!" })
+      toast({ title: "تمت التهيئة", description: "تمت إضافة مطعم مداقي وكافة البيانات بنجاح!" })
       router.refresh()
     } catch (e) {
       console.error(e)
@@ -142,8 +160,9 @@ export default function Home() {
     }
 
     const isFav = userData?.favoritesStoreIds?.includes(storeId)
-    const ref = doc(db, "users", user.uid)
+    console.log("Toggle Favorite Store:", storeId, "Current Status:", isFav ? "Removing" : "Adding");
     
+    const ref = doc(db, "users", user.uid)
     const updateData = {
       id: user.uid,
       favoritesStoreIds: isFav ? arrayRemove(storeId) : arrayUnion(storeId),

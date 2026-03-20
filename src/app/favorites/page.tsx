@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp } from "firebase/firestore"
-import { Heart, Star, ShoppingBag } from "lucide-react"
+import { Heart, Star, ShoppingBag, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -31,19 +31,25 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
+  // استعلام المتاجر المفضلة
   const favoritesStoresQuery = useMemoFirebase(() => {
-    if (!db || !userData?.favoritesStoreIds || userData.favoritesStoreIds.length === 0) return null
+    const ids = userData?.favoritesStoreIds || []
+    if (!db || ids.length === 0) return null
+    console.log("Fetching Favorite Stores with IDs:", ids);
     return query(
       collection(db, "stores"), 
-      where("id", "in", userData.favoritesStoreIds.slice(0, 10))
+      where("id", "in", ids.slice(0, 10))
     )
   }, [db, userData?.favoritesStoreIds])
 
+  // استعلام الوجبات المفضلة (Collection Group)
   const favoritesProductsQuery = useMemoFirebase(() => {
-    if (!db || !userData?.favoritesProductIds || userData.favoritesProductIds.length === 0) return null
+    const ids = userData?.favoritesProductIds || []
+    if (!db || ids.length === 0) return null
+    console.log("Fetching Favorite Products with IDs:", ids);
     return query(
       collectionGroup(db, "products"),
-      where("id", "in", userData.favoritesProductIds.slice(0, 10)),
+      where("id", "in", ids.slice(0, 10)),
       limit(10)
     )
   }, [db, userData?.favoritesProductIds])
@@ -56,6 +62,7 @@ export default function FavoritesPage() {
     e.stopPropagation()
     if (!user || !db) return
 
+    console.log("Removing Store from Favorites:", storeId);
     const ref = doc(db, "users", user.uid)
     const updateData = {
       id: user.uid,
@@ -79,6 +86,7 @@ export default function FavoritesPage() {
     e.stopPropagation()
     if (!user || !db) return
 
+    console.log("Removing Product from Favorites:", productId);
     const ref = doc(db, "users", user.uid)
     const updateData = {
       id: user.uid,
@@ -101,8 +109,9 @@ export default function FavoritesPage() {
 
   if (isUserLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/5 space-y-4">
+        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+        <div className="font-black text-primary">جاري التحميل...</div>
       </div>
     )
   }
@@ -147,7 +156,7 @@ export default function FavoritesPage() {
                           <Star className="h-4 w-4 fill-accent text-accent" />
                           <span className="text-sm font-black">{store.averageRating || '4.5'}</span>
                         </div>
-                        <button onClick={(e) => toggleStoreFavorite(e, store.id)} className="absolute top-4 right-4 h-10 w-10 bg-white/95 rounded-full flex items-center justify-center">
+                        <button onClick={(e) => toggleStoreFavorite(e, store.id)} className="absolute top-4 right-4 h-10 w-10 bg-white/95 rounded-full flex items-center justify-center shadow-lg">
                           <Heart className="h-5 w-5 fill-destructive text-destructive" />
                         </button>
                       </div>
@@ -170,7 +179,7 @@ export default function FavoritesPage() {
             ) : favoriteProducts && favoriteProducts.length > 0 ? (
               favoriteProducts.map((product: any) => (
                 <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden relative">
-                  <button onClick={(e) => toggleProductFavorite(e, product.id)} className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full">
+                  <button onClick={(e) => toggleProductFavorite(e, product.id)} className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow-sm">
                     <Heart className="h-4 w-4 fill-destructive text-destructive" />
                   </button>
                   <CardContent className="p-0 flex items-center">

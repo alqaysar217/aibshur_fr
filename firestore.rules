@@ -4,8 +4,9 @@ service cloud.firestore {
 
     // --- 1. قواعد البحث الشامل (Collection Group Queries) ---
     // يجب أن تكون خارج أي تداخلات أخرى لتعمل بشكل صحيح مع استعلامات collectionGroup
+    // هذه القاعدة تسمح لصفحة المفضلة والبحث بجلب أي "وجبة" من أي متجر
     match /{path=**}/products/{productId} {
-      allow read, list: if true; // السماح للجميع برؤية الوجبات لضمان عمل البحث والمفضلة
+      allow read, list: if true; 
     }
 
     match /{path=**}/ratings/{ratingId} {
