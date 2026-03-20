@@ -257,10 +257,18 @@ export default function Home() {
                         {/* Row 1: Name */}
                         <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
 
-                        {/* Row 2: Address */}
-                        <div className="flex items-center gap-1 text-[#6B7280]">
-                          <MapPin className="h-2.5 w-2.5 text-primary/60" />
-                          <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
+                        {/* Row 2: Address and Favorite Button (Opposite to address) */}
+                        <div className="flex items-center justify-between gap-1 text-[#6B7280]">
+                          <div className="flex items-center gap-1 overflow-hidden">
+                            <MapPin className="h-2.5 w-2.5 text-primary/60" />
+                            <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
+                          </div>
+                          <button 
+                            onClick={(e) => toggleFavorite(e, store.id)}
+                            className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform shrink-0"
+                          >
+                            <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
+                          </button>
                         </div>
 
                         {/* Row 3: Bottom Meta Info */}
@@ -277,14 +285,8 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* Left Side: Heart and Status */}
-                      <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
-                        <button 
-                          onClick={(e) => toggleFavorite(e, store.id)}
-                          className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform"
-                        >
-                          <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
-                        </button>
+                      {/* Left Side: Status */}
+                      <div className="flex flex-col justify-end items-end h-full py-1.5 shrink-0">
                         <Badge 
                           className={cn(
                             "text-[8px] h-4 px-1.5 border-none font-black rounded-md shadow-none",
