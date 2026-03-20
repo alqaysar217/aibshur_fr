@@ -203,97 +203,91 @@ export default function StoreDetailPage() {
 
   return (
     <div className="pb-32 bg-[#F5F7F6] min-h-screen font-body" dir="rtl">
-      {/* 1. Compact Header Image */}
-      <div className="relative h-52 w-full overflow-hidden">
-        <Image 
-          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/800/600`}
-          alt={store.name}
-          fill
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-        
-        {/* Overlaid Navigation Buttons */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-50">
-          <button 
-            onClick={() => router.back()}
-            className="h-9 w-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20 shadow-lg active:scale-90 transition-transform"
-          >
-            <ArrowRight className="h-5 w-5" />
+      {/* 1. Header Navigation Bar */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md px-5 py-3 flex items-center justify-between border-b shadow-sm">
+        <button onClick={() => router.back()} className="h-9 w-9 bg-secondary/50 rounded-full flex items-center justify-center text-gray-700 active:scale-90 transition-transform">
+          <ArrowRight className="h-5 w-5" />
+        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => router.push('/search')} className="h-9 w-9 bg-secondary/50 rounded-full flex items-center justify-center text-gray-700 active:scale-90 transition-transform">
+            <Search className="h-4 w-4" />
           </button>
-          
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => router.push('/search')}
-              className="h-9 w-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20 shadow-lg active:scale-90 transition-transform"
-            >
-              <Search className="h-4 w-4" />
-            </button>
-            <button 
-              onClick={() => router.push('/cart')}
-              className="h-9 w-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20 shadow-lg active:scale-90 transition-transform relative"
-            >
-              <ShoppingBag className="h-4 w-4" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -left-1 bg-destructive text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-          </div>
+          <button onClick={() => router.push('/cart')} className="h-9 w-9 bg-secondary/50 rounded-full flex items-center justify-center text-gray-700 active:scale-90 transition-transform relative">
+            <ShoppingBag className="h-4 w-4" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -left-1 bg-destructive text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+                {cartCount}
+              </span>
+            )}
+          </button>
         </div>
-      </div>
+      </header>
 
-      {/* 2. Compact Store Info Section */}
-      <div className="bg-white px-5 pt-5 pb-4 rounded-t-[2.5rem] -mt-10 relative z-10 shadow-sm space-y-4">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <h1 className="text-xl font-black text-[#111827] leading-tight">{store.name}</h1>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Badge className={cn("text-[9px] font-black border-none px-2 h-5", isStoreOpen ? "bg-green-500" : "bg-red-500")}>
-                {isStoreOpen ? 'مفتوح' : 'مغلق'}
+      {/* 2. Compact Profile Header */}
+      <div className="bg-white p-5 space-y-4">
+        <div className="flex items-center gap-4">
+          {/* Circular Store Image on the right (RTL) */}
+          <div className="relative h-20 w-20 rounded-full border-2 border-secondary overflow-hidden shrink-0 shadow-sm bg-secondary/10">
+            <Image 
+              src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`}
+              alt={store.name}
+              fill
+              className="object-cover"
+            />
+          </div>
+
+          {/* Store Info on the left (RTL) */}
+          <div className="flex-1 space-y-1">
+            <div className="flex items-start justify-between">
+              <h1 className="text-xl font-black text-[#111827] leading-tight">{store.name}</h1>
+              <button 
+                onClick={toggleFavoriteStore}
+                className={cn(
+                  "p-2 rounded-xl active:scale-90 transition-transform",
+                  isFavoriteStore ? "text-destructive" : "text-gray-300"
+                )}
+              >
+                <Heart className={cn("h-5 w-5", isFavoriteStore && "fill-current")} />
+              </button>
+            </div>
+            
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge className={cn("text-[8px] font-black border-none px-2 h-4", isStoreOpen ? "bg-green-500" : "bg-red-500")}>
+                {isStoreOpen ? 'مفتوح الآن' : 'مغلق'}
               </Badge>
-              <div className="flex items-center gap-0.5 bg-amber-500 text-white px-1.5 py-0.5 rounded-lg text-[10px] font-black h-5">
-                <Star className="h-3 w-3 fill-white" />
+              <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-black">
+                <Star className="h-3 w-3 fill-amber-500" />
                 <span>{store.averageRating || '4.5'}</span>
+                <span className="text-[9px] text-gray-400 font-bold ml-1">(120+ تقييم)</span>
               </div>
-              <span className="text-[9px] font-bold text-gray-400">(120+ تقييم)</span>
+            </div>
+
+            <div className="flex items-center gap-1 text-[#6B7280] text-[10px] font-bold">
+              <MapPin className="h-3 w-3 text-primary/60" />
+              <span>{store.address || 'المكلا'}</span>
             </div>
           </div>
-          <button 
-            onClick={toggleFavoriteStore}
-            className={cn(
-              "h-10 w-10 rounded-xl flex items-center justify-center transition-all border shadow-sm active:scale-90",
-              isFavoriteStore ? "bg-destructive/5 border-destructive/20 text-destructive" : "bg-secondary/10 border-transparent text-gray-400"
-            )}
-          >
-            <Heart className={cn("h-5 w-5", isFavoriteStore && "fill-current")} />
-          </button>
         </div>
 
-        {/* Compressed Info Row */}
+        {/* Compact Stats Row */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          <div className="flex items-center gap-2 bg-[#F5F7F6] py-1.5 px-3 rounded-xl shrink-0">
-            <MapPin className="h-3 w-3 text-primary" />
-            <span className="text-[10px] font-black text-gray-700">{store.address || 'المكلا'}</span>
-          </div>
-          <div className="flex items-center gap-2 bg-[#F5F7F6] py-1.5 px-3 rounded-xl shrink-0">
+          <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
             <Navigation className="h-3 w-3 text-primary" />
-            <span className="text-[10px] font-black text-gray-700">2.3 كم</span>
+            <span className="text-[9px] font-black text-gray-700">يبعد 2.3 كم</span>
           </div>
-          <div className="flex items-center gap-2 bg-[#F5F7F6] py-1.5 px-3 rounded-xl shrink-0">
+          <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
             <Clock className="h-3 w-3 text-primary" />
-            <span className="text-[10px] font-black text-gray-700">{store.deliveryTime || '30د'}</span>
+            <span className="text-[9px] font-black text-gray-700">{store.deliveryTime || '30-45 دقيقة'}</span>
           </div>
-          <div className="flex items-center gap-2 bg-[#F5F7F6] py-1.5 px-3 rounded-xl shrink-0">
+          <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
             <ShoppingBag className="h-3 w-3 text-primary" />
-            <span className="text-[10px] font-black text-gray-700">10 ر.س</span>
+            <span className="text-[9px] font-black text-gray-700">توصيل 10 ر.س</span>
           </div>
         </div>
       </div>
 
       {/* 3. Categories Horizontal Scroll */}
-      <div className="sticky top-0 z-40 bg-[#F5F7F6]/90 backdrop-blur-md py-3 border-b">
+      <div className="sticky top-[57px] z-40 bg-[#F5F7F6]/90 backdrop-blur-md py-3 border-b">
         <div className="flex gap-2 overflow-x-auto px-5 scrollbar-hide" dir="rtl">
           {categories.map((cat) => (
             <button
@@ -424,6 +418,7 @@ export default function StoreDetailPage() {
               <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-xl flex items-center gap-1 shadow-sm">
                 <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
                 <span className="text-[10px] font-black">4.8</span>
+                <span className="text-[8px] text-gray-500 font-bold">(45 تقييم)</span>
               </div>
             </div>
             <div className="p-6 space-y-5">
@@ -432,7 +427,7 @@ export default function StoreDetailPage() {
                   <div className="space-y-1">
                     <DialogTitle className="text-xl font-black text-[#111827]">{selectedProduct.name}</DialogTitle>
                     <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-bold text-[9px]">
-                      {selectedProduct.category || 'وجبة'}
+                      {selectedProduct.category || 'وجبة رئيسية'}
                     </Badge>
                   </div>
                   <div className="text-xl font-black text-primary">{selectedProduct.price} <small className="text-[10px]">ر.س</small></div>
@@ -448,7 +443,7 @@ export default function StoreDetailPage() {
 
               {hasOptions(selectedProduct.name) && (
                 <div className="space-y-3 pt-3 border-t">
-                  <h4 className="font-black text-xs text-right">الأحجام المتوفرة</h4>
+                  <h4 className="font-black text-xs text-right">اختر الحجم أو النوع</h4>
                   <div className="space-y-2">
                     {getProductVariations(selectedProduct).map((variation) => {
                       const variationId = `${selectedProduct.id}-${variation.id}`
