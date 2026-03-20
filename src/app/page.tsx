@@ -254,21 +254,21 @@ export default function Home() {
 
                       {/* Middle Side: Information */}
                       <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
-                        {/* Row 1: Name */}
-                        <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
-
-                        {/* Row 2: Address and Favorite Button (Opposite to address) */}
-                        <div className="flex items-center justify-between gap-1 text-[#6B7280]">
-                          <div className="flex items-center gap-1 overflow-hidden">
-                            <MapPin className="h-2.5 w-2.5 text-primary/60" />
-                            <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
-                          </div>
+                        {/* Row 1: Name and Favorite */}
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
                           <button 
                             onClick={(e) => toggleFavorite(e, store.id)}
                             className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform shrink-0"
                           >
                             <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
+                        </div>
+
+                        {/* Row 2: Address */}
+                        <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden">
+                          <MapPin className="h-2.5 w-2.5 text-primary/60" />
+                          <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                         </div>
 
                         {/* Row 3: Bottom Meta Info */}
