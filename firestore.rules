@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -11,24 +12,19 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // --- 1. قواعد البحث الشامل (Collection Group Queries) ---
-    // يجب أن تكون في أعلى مستوى لتعمل مع استعلامات collectionGroup
-    // الوجبات والمنتجات هي بيانات عامة يحق للجميع تصفحها
+    // --- 1. قواعد البحث الشامل (Collection Group) ---
+    // الوجبات هي بيانات عامة يجب أن تظهر للجميع لنجاح تجربة البحث والمفضلة
     match /{path=**}/products/{productId} {
       allow read, list: if true; 
     }
 
-    // التقييمات تتطلب تسجيل دخول للقراءة
-    match /{path=**}/ratings/{ratingId} {
-      allow read, list: if isSignedIn();
-    }
-
     // --- 2. المتاجر والبيانات العامة ---
     match /stores/{storeId} {
+      // أي شخص يمكنه تصفح المتاجر (ضروري للصفحة الرئيسية)
       allow read, list: if true;
-      allow write: if isSignedIn(); // للسماح بتهيئة البيانات
+      // السماح بتهيئة البيانات للمطور المسجل
+      allow write: if isSignedIn();
 
-      // السماح بالوصول المباشر للمنتجات داخل المتجر
       match /products/{productId} {
         allow read, list: if true;
       }
@@ -38,11 +34,10 @@ service cloud.firestore {
     match /categories/{id} { allow read: if true; }
     match /governorates/{id} { allow read: if true; }
 
-    // --- 3. ملفات المستخدمين وبياناتهم الخاصة ---
+    // --- 3. ملفات المستخدمين ---
     match /users/{userId} {
       allow read, write: if isOwner(userId);
       
-      // جميع المجموعات الفرعية (الطلبات، المحفظة، المفضلة، إلخ)
       match /{allSubcollections=**} {
         allow read, write: if isOwner(userId);
       }

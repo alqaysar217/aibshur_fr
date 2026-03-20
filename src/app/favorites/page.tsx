@@ -1,8 +1,9 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
-import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp } from "firebase/firestore"
+import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId } from "firebase/firestore"
 import { Heart, Star, ShoppingBag, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -31,22 +32,21 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
-  // استعلام المتاجر المفضلة
+  // استعلام المتاجر المفضلة باستخدام documentId لضمان الدقة
   const favoritesStoresQuery = useMemoFirebase(() => {
     const ids = userData?.favoritesStoreIds || []
     if (!db || ids.length === 0) return null
-    console.log("Fetching Favorite Stores with IDs:", ids);
+    console.log("Checking Favorite Store IDs in Firestore:", ids);
     return query(
       collection(db, "stores"), 
-      where("id", "in", ids.slice(0, 10))
+      where(documentId(), "in", ids.slice(0, 10))
     )
   }, [db, userData?.favoritesStoreIds])
 
-  // استعلام الوجبات المفضلة (Collection Group)
+  // استعلام الوجبات المفضلة
   const favoritesProductsQuery = useMemoFirebase(() => {
     const ids = userData?.favoritesProductIds || []
     if (!db || ids.length === 0) return null
-    console.log("Fetching Favorite Products with IDs:", ids);
     return query(
       collectionGroup(db, "products"),
       where("id", "in", ids.slice(0, 10)),
@@ -62,10 +62,8 @@ export default function FavoritesPage() {
     e.stopPropagation()
     if (!user || !db) return
 
-    console.log("Removing Store from Favorites:", storeId);
     const ref = doc(db, "users", user.uid)
     const updateData = {
-      id: user.uid,
       favoritesStoreIds: arrayRemove(storeId),
       updatedAt: serverTimestamp()
     }
@@ -86,10 +84,8 @@ export default function FavoritesPage() {
     e.stopPropagation()
     if (!user || !db) return
 
-    console.log("Removing Product from Favorites:", productId);
     const ref = doc(db, "users", user.uid)
     const updateData = {
-      id: user.uid,
       favoritesProductIds: arrayRemove(productId),
       updatedAt: serverTimestamp()
     }
