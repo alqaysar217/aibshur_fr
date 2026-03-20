@@ -219,93 +219,97 @@ export default function Home() {
       </section>
 
       {/* 3. Stores List - Single Column Modern Layout */}
-      <section className="px-5 pb-24 space-y-4">
-        <div className="flex items-center justify-between px-1">
+      <section className="px-5 pb-24">
+        <div className="flex items-center justify-between px-1 mb-4">
           <h3 className="font-bold text-[#111827]">المتاجر المتاحة</h3>
         </div>
 
-        {isStoresLoading ? (
-          [1, 2, 3].map(i => <div key={i} className="h-28 w-full bg-white rounded-2xl animate-pulse" />)
-        ) : stores && stores.length > 0 ? (
-          stores.map((store: any) => {
-            const isOpen = store.status === 'مفتوح' || store.status === 'open'
-            const isFav = userData?.favoritesStoreIds?.includes(store.id)
-            const categoryName = categories?.find(c => store.categoryIds?.includes(c.id))?.name || "متجر";
+        <div className="flex flex-col gap-5">
+          {isStoresLoading ? (
+            [1, 2, 3].map(i => <div key={i} className="h-28 w-full bg-white rounded-2xl animate-pulse" />)
+          ) : stores && stores.length > 0 ? (
+            stores.map((store: any) => {
+              const isOpen = store.status === 'مفتوح' || store.status === 'open'
+              const isFav = userData?.favoritesStoreIds?.includes(store.id)
+              const categoryName = categories?.find(c => store.categoryIds?.includes(c.id))?.name || "متجر";
 
-            return (
-              <Link key={store.id} href={`/store/${store.id}`}>
-                <Card className="border-none shadow-[0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-28">
-                  <CardContent className="p-3 h-full flex flex-row items-center gap-4">
-                    {/* Image on the Right in RTL */}
-                    <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl">
-                      <Image 
-                        src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
-                        alt={store.name} 
-                        fill 
-                        className="object-cover transition-transform duration-500 group-hover:scale-110" 
-                      />
-                    </div>
-
-                    {/* Middle Info Content - Aligned to Right in RTL */}
-                    <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
-                      <h4 className="font-bold text-sm text-[#111827] truncate">{store.name}</h4>
-
-                      <div className="flex items-center gap-1 text-[#6B7280]">
-                        <MapPin className="h-2.5 w-2.5" />
-                        <span className="text-[10px] truncate">{store.address || 'المكلا'}</span>
-                        <span className="mx-0.5 opacity-30">•</span>
-                        <span className="text-[10px]">يبعد 2.3 كم</span>
+              return (
+                <Link key={store.id} href={`/store/${store.id}`}>
+                  <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
+                    <CardContent className="p-3 h-full flex flex-row items-center gap-4">
+                      {/* Right Side: Store Image */}
+                      <div className="relative w-20 h-20 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
+                        <Image 
+                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
+                          alt={store.name} 
+                          fill 
+                          className="object-cover transition-transform duration-500 group-hover:scale-110" 
+                        />
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-5 border-none font-bold">
-                          {categoryName}
-                        </Badge>
-                        <div className="flex items-center gap-1 text-amber-500">
-                          <Star className="h-3 w-3 fill-amber-500" />
-                          <span className="text-[11px] font-bold">{store.averageRating || '4.5'}</span>
+                      {/* Middle Side: Information */}
+                      <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="font-bold text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
+                          <div className="flex items-center gap-0.5 text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-lg shrink-0">
+                            <Star className="h-2.5 w-2.5 fill-amber-500" />
+                            <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 text-[#6B7280]">
+                          <MapPin className="h-2.5 w-2.5" />
+                          <span className="text-[10px] truncate">{store.address || 'المكلا'}</span>
+                          <span className="mx-0.5 opacity-30">•</span>
+                          <span className="text-[10px]">يبعد 2.3 كم</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="bg-secondary/50 text-[#6B7280] text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
+                            {categoryName}
+                          </Badge>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Left Actions/Status - Aligned to Left in RTL */}
-                    <div className="flex flex-col justify-between items-end h-full py-1 shrink-0">
-                      <button 
-                        onClick={(e) => toggleFavorite(e, store.id)}
-                        className="p-1.5 bg-secondary/20 backdrop-blur-sm rounded-full active:scale-75 transition-transform"
-                      >
-                        <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
-                      </button>
-                      <Badge 
-                        className={cn(
-                          "text-[9px] h-5 px-2 border-none font-bold rounded-lg shadow-none",
-                          isOpen ? "bg-green-100 text-[#22C55E]" : "bg-red-100 text-[#EF4444]"
-                        )}
-                      >
-                        {isOpen ? 'مفتوح' : 'مغلق'}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            )
-          })
-        ) : (
-          <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-200">
-            <Database className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-            <p className="text-xs text-gray-400">لا توجد بيانات متاحة</p>
-            {user && (
-              <Button 
-                onClick={seedData} 
-                disabled={isSeeding} 
-                variant="outline" 
-                className="mt-4 rounded-xl h-10 text-xs border-primary text-primary font-bold"
-              >
-                {isSeeding ? "جاري البناء..." : "تجهيز تطبيق أبشر"}
-              </Button>
-            )}
-          </div>
-        )}
+                      {/* Left Side: Heart and Status (Opposite Side) */}
+                      <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
+                        <button 
+                          onClick={(e) => toggleFavorite(e, store.id)}
+                          className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform"
+                        >
+                          <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
+                        </button>
+                        <Badge 
+                          className={cn(
+                            "text-[8px] h-4 px-1.5 border-none font-black rounded-md shadow-none",
+                            isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]"
+                          )}
+                        >
+                          {isOpen ? 'مفتوح' : 'مغلق'}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })
+          ) : (
+            <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-200">
+              <Database className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+              <p className="text-xs text-gray-400">لا توجد بيانات متاحة</p>
+              {user && (
+                <Button 
+                  onClick={seedData} 
+                  disabled={isSeeding} 
+                  variant="outline" 
+                  className="mt-4 rounded-xl h-10 text-xs border-primary text-primary font-bold"
+                >
+                  {isSeeding ? "جاري البناء..." : "تجهيز تطبيق أبشر"}
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Developer Seed Tool */}
