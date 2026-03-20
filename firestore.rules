@@ -11,37 +11,41 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // السماح بالبحث الشامل للمنتجات عبر المجموعات
+    // 1. قاعدة البحث الشامل للمنتجات (Collection Group)
+    // يجب أن تكون في الأعلى وبصيغة شاملة للسماح بالبحث عبر كل المتاجر
     match /{path=**}/products/{productId} {
       allow read, list: if true;
     }
 
-    // السماح للمسجلين بإنشاء المتاجر والمنتجات (لغرض التهيئة والتطوير)
+    // 2. المتاجر والمنتجات (بيانات عامة للقراءة)
     match /stores/{storeId} {
       allow read: if true;
-      allow create, update: if isSignedIn();
+      allow write: if isSignedIn(); // السماح للمسجلين بالتهيئة مؤقتاً
       
       match /products/{productId} {
         allow read: if true;
-        allow create, update: if isSignedIn();
+        allow write: if isSignedIn();
       }
     }
 
+    // 3. ملف المستخدم وبياناته الخاصة
     match /users/{userId} {
       allow read, write: if isOwner(userId);
+      
       match /{allSubcollections=**} {
         allow read, write: if isOwner(userId);
       }
     }
 
+    // 4. الطلبات
     match /orders/{orderId} {
       allow create: if isSignedIn();
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.driverId == request.auth.uid);
-      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.driverId == request.auth.uid);
+      allow read, update: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.driverId == request.auth.uid);
     }
 
-    match /ads/{id} { allow read: if true; allow create: if isSignedIn(); }
-    match /categories/{id} { allow read: if true; allow create: if isSignedIn(); }
+    // 5. البيانات العامة الأخرى
+    match /ads/{id} { allow read: if true; allow write: if isSignedIn(); }
+    match /categories/{id} { allow read: if true; allow write: if isSignedIn(); }
     match /governorates/{id} { allow read: if true; }
   }
 }

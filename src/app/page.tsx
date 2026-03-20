@@ -68,7 +68,6 @@ export default function Home() {
     }
     setIsSeeding(true)
     try {
-      // 1. إضافة المتاجر
       const storesToSeed = [
         {
           id: "mandi_king",
@@ -106,39 +105,24 @@ export default function Home() {
         await setDoc(doc(db, "stores", s.id), s)
       }
 
-      // 2. إضافة وجبات لمطعم المندي
       const mandiProducts = [
         { id: "mandi_p1", name: "مندي دجاج ربع", price: 2500, description: "ربع دجاجة مع الأرز الحضرمي الأصيل والمرق", imageUrl: "https://picsum.photos/seed/mandi_dish/400/300", status: "available" },
-        { id: "mandi_p2", name: "مندي لحم نفر", price: 5500, description: "لحم بلدي طازج مطهو في التنور مع أرز المندي", imageUrl: "https://picsum.photos/seed/meat/400/300", status: "available" },
-        { id: "mandi_p3", name: "عقدة دجاج", price: 1800, description: "دجاج مقطع مع الخضار والبهارات اليمنية", imageUrl: "https://picsum.photos/seed/ogda/400/300", status: "available" }
+        { id: "mandi_p2", name: "مندي لحم نفر", price: 5500, description: "لحم بلدي طازج مطهو في التنور مع أرز المندي", imageUrl: "https://picsum.photos/seed/meat/400/300", status: "available" }
       ]
       for (const p of mandiProducts) {
         await setDoc(doc(db, "stores", "mandi_king", "products", p.id), { ...p, storeId: "mandi_king" })
       }
 
-      // 3. إضافة منتجات للبقالة
       const groceryProducts = [
         { id: "groc_p1", name: "زبادي المراعي", price: 250, description: "زبادي طازج 170 جرام", imageUrl: "https://picsum.photos/seed/yogurt/400/300", status: "available" },
-        { id: "groc_p2", name: "خبز رغيف (كيس)", price: 150, description: "خبز طازج من مخابزنا", imageUrl: "https://picsum.photos/seed/bread/400/300", status: "available" },
-        { id: "groc_p3", name: "ماء معدني 1.5ل", price: 200, description: "ماء شرب نقي", imageUrl: "https://picsum.photos/seed/water_bot/400/300", status: "available" }
+        { id: "groc_p2", name: "خبز رغيف (كيس)", price: 150, description: "خبز طازج من مخابزنا", imageUrl: "https://picsum.photos/seed/bread/400/300", status: "available" }
       ]
       for (const p of groceryProducts) {
         await setDoc(doc(db, "stores", "al_khaleej_market", "products", p.id), { ...p, storeId: "al_khaleej_market" })
       }
 
-      // 4. إضافة منتجات للصيدلية
-      const pharProducts = [
-        { id: "phar_p1", name: "بنادول إكسترا", price: 1200, description: "مسكن للآلام وخافض للحرارة - 24 قرص", imageUrl: "https://picsum.photos/seed/panadol/400/300", status: "available" },
-        { id: "phar_p2", name: "فيتامين سي 1000مجم", price: 2500, description: "فوار لتقوية المناعة", imageUrl: "https://picsum.photos/seed/vitc/400/300", status: "available" }
-      ]
-      for (const p of pharProducts) {
-        await setDoc(doc(db, "stores", "al_shifa_yem", "products", p.id), { ...p, storeId: "al_shifa_yem" })
-      }
-
-      // 5. إضافة إعلانات
       await setDoc(doc(db, "ads", "ad_1"), { title: "خصم 20% على المندي", imageUrl: "https://picsum.photos/seed/promo1/800/400", storeId: "mandi_king" })
-      await setDoc(doc(db, "ads", "ad_2"), { title: "توصيل مجاني من الصيدليات", imageUrl: "https://picsum.photos/seed/promo2/800/400", storeId: "al_shifa_yem" })
-
+      
       toast({ title: "تمت التهيئة", description: "بيانات أبشر جاهزة للاستخدام الآن!" })
       router.refresh()
     } catch (e) {
@@ -163,8 +147,7 @@ export default function Home() {
     const updateData = {
       id: user.uid,
       favoritesStoreIds: isFav ? arrayRemove(storeId) : arrayUnion(storeId),
-      updatedAt: serverTimestamp(),
-      createdAt: userData?.createdAt || serverTimestamp()
+      updatedAt: serverTimestamp()
     }
 
     setDoc(ref, updateData, { merge: true })
@@ -178,11 +161,10 @@ export default function Home() {
       })
   }
 
-  if (!mounted) return <div className="min-h-screen bg-background" />;
+  if (!mounted) return null;
 
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">
-      {/* زر تهيئة البيانات للمطور */}
       {user && (
         <div className="p-2 bg-accent/10 border-b border-accent/20 flex items-center justify-between px-4">
           <p className="text-[10px] font-bold text-accent">وضع التطوير: تهيئة البيانات</p>
@@ -215,11 +197,6 @@ export default function Home() {
           </Link>
         </div>
         <div className="flex gap-3">
-          {!user && (
-            <button onClick={() => router.push('/login')} className="bg-accent/10 px-4 py-2 rounded-xl text-xs font-black text-accent border border-accent/20">
-              دخول
-            </button>
-          )}
           <Link href="/notifications" className="relative bg-white shadow-md p-2 rounded-xl border border-border">
             <Bell className="h-5 w-5 text-foreground" />
             <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-white animate-pulse"></span>
@@ -293,7 +270,6 @@ export default function Home() {
                         alt={store.name} 
                         fill 
                         className="object-cover"
-                        data-ai-hint="store facade" 
                       />
                       <div className="absolute top-4 left-4 bg-white/95 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
                         <Star className="h-4 w-4 fill-accent text-accent" />
@@ -305,9 +281,7 @@ export default function Home() {
                     </div>
                     <div className="p-5 bg-white">
                       <h4 className="font-black text-xl text-foreground mb-2">{store.name}</h4>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="secondary" className="font-bold text-[10px] bg-secondary/50 px-3">{store.address}</Badge>
-                      </div>
+                      <Badge variant="secondary" className="font-bold text-[10px] bg-secondary/50 px-3">{store.address}</Badge>
                     </div>
                   </CardContent>
                 </Card>
