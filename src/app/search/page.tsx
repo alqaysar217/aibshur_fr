@@ -12,6 +12,7 @@ import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, collectionGroup } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { cn } from "@/lib/utils"
 
 export default function SearchPage() {
   const [queryText, setQueryText] = useState("")
