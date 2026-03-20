@@ -251,10 +251,6 @@ export default function Home() {
                       <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
                         <div className="flex items-center gap-1.5">
                           <h4 className="font-bold text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
-                          <div className="flex items-center gap-0.5 text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-lg shrink-0">
-                            <Star className="h-2.5 w-2.5 fill-amber-500" />
-                            <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
-                          </div>
                         </div>
 
                         <div className="flex items-center gap-1 text-[#6B7280]">
@@ -268,6 +264,10 @@ export default function Home() {
                           <Badge variant="secondary" className="bg-secondary/50 text-[#6B7280] text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                             {categoryName}
                           </Badge>
+                          <div className="flex items-center gap-0.5 text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-lg shrink-0">
+                            <Star className="h-2.5 w-2.5 fill-amber-500" />
+                            <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
+                          </div>
                         </div>
                       </div>
 
