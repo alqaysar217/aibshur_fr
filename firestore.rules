@@ -11,48 +11,41 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // --- 1. قواعد المجموعة المشتركة (Collection Group) ---
-    // هذه القاعدة يجب أن تكون في القمة ومستقلة لضمان عمل استعلامات المجموعات (مثل البحث والمفضلة)
-    // النمط {path=**} يسمح بالوصول لمجموعة "products" أينما وجدت في قاعدة البيانات
+    // --- 1. قواعد المجموعات المشتركة (Collection Group) ---
+    // ضرورية جداً لعمل صفحة البحث والمفضلة عبر كل المتاجر
+    // يجب أن تكون في القمة ومستقلة تماماً
     match /{path=**}/products/{productId} {
       allow read, list: if isSignedIn();
-      allow write: if isSignedIn(); // للسماح بالتهيئة (Seed) للمطور
+      allow write: if isSignedIn(); // للسماح بالتهيئة (Seed)
     }
 
     // --- 2. ملفات المستخدمين ---
     match /users/{userId} {
+      // السماح بالقراءة والكتابة فقط لصاحب الحساب
       allow read, write: if isOwner(userId);
       
+      // السماح بالوصول للمجموعات الفرعية داخل المستخدم (مثل الطلبات، المحفظة، المفضلات)
       match /{allSubcollections=**} {
         allow read, write: if isOwner(userId);
       }
     }
 
-    // --- 3. المتاجر ---
+    // --- 3. المتاجر والبيانات العامة ---
     match /stores/{storeId} {
       allow read, list: if isSignedIn();
       allow write: if isSignedIn(); // للتهيئة
 
-      // المنتجات هنا مغطاة أيضاً بقاعدة المجموعات المشتركة أعلاه لضمان شمولية القراءة
+      // المنتجات هنا مغطاة أيضاً بقاعدة المجموعات المشتركة أعلاه
       match /products/{productId} {
         allow read, list: if isSignedIn();
         allow write: if isSignedIn();
       }
     }
 
-    // --- 4. البيانات العامة ---
-    match /ads/{id} { 
-      allow read: if true;
-      allow write: if isSignedIn();
-    }
-    match /categories/{id} { 
-      allow read: if true; 
-      allow write: if isSignedIn();
-    }
-    match /governorates/{id} { 
-      allow read: if true; 
-      allow write: if isSignedIn();
-    }
+    // --- 4. البيانات العامة المفتوحة ---
+    match /ads/{id} { allow read: if true; allow write: if isSignedIn(); }
+    match /categories/{id} { allow read: if true; allow write: if isSignedIn(); }
+    match /governorates/{id} { allow read: if true; allow write: if isSignedIn(); }
 
     // --- 5. الطلبات ---
     match /orders/{orderId} {

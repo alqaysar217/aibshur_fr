@@ -29,12 +29,15 @@ export default function FavoritesPage() {
     if (!db || !user) return null
     return doc(db, "users", user.uid)
   }, [db, user])
-  const { data: userData } = useDoc(userRef)
+  const { data: userData, isLoading: isUserDataLoading } = useDoc(userRef)
 
   const favoritesStoresQuery = useMemoFirebase(() => {
+    if (!db || !userData) return null
     const ids = userData?.favoritesStoreIds || []
     const validIds = ids.filter(id => typeof id === 'string' && id.length > 0)
-    if (!db || validIds.length === 0) return null
+    // منع الاستعلام بمصفوفة فارغة لتجنب أخطاء Firebase
+    if (validIds.length === 0) return null
+    
     return query(
       collection(db, "stores"), 
       where(documentId(), "in", validIds.slice(0, 10))
@@ -42,9 +45,12 @@ export default function FavoritesPage() {
   }, [db, userData?.favoritesStoreIds])
 
   const favoritesProductsQuery = useMemoFirebase(() => {
+    if (!db || !userData) return null
     const ids = userData?.favoritesProductIds || []
     const validIds = ids.filter(id => typeof id === 'string' && id.length > 0)
-    if (!db || validIds.length === 0) return null
+    // منع الاستعلام بمصفوفة فارغة لتجنب أخطاء Firebase
+    if (validIds.length === 0) return null
+
     return query(
       collectionGroup(db, "products"),
       where("id", "in", validIds.slice(0, 10)),
@@ -101,7 +107,7 @@ export default function FavoritesPage() {
 
   if (!mounted) return <div className="min-h-screen bg-background" />
 
-  if (isUserLoading) {
+  if (isUserLoading || isUserDataLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/5 space-y-4">
         <Loader2 className="h-10 w-10 text-primary animate-spin" />
