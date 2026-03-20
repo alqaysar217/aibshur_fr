@@ -180,10 +180,10 @@ export default function StoreDetailPage() {
         </div>
 
         {/* Top Navigation */}
-        <div className="absolute top-6 left-4 right-4 flex items-center gap-3">
+        <div className="absolute top-6 left-4 right-4 flex items-center gap-2">
           <button 
             onClick={() => router.back()}
-            className="h-10 w-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+            className="h-10 w-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform shrink-0"
           >
             <ArrowRight className="h-6 w-6 text-foreground" />
           </button>
@@ -197,6 +197,18 @@ export default function StoreDetailPage() {
               className="h-10 pr-10 rounded-full border-none bg-white/95 backdrop-blur-sm shadow-lg text-xs font-bold focus-visible:ring-primary"
             />
           </div>
+
+          <button 
+            onClick={() => router.push('/cart')}
+            className="h-10 w-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform shrink-0 relative"
+          >
+            <ShoppingBag className="h-5 w-5 text-foreground" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -left-1 bg-primary text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+                {cartCount}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Store Logo Circle */}
