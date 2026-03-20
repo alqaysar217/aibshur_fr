@@ -20,6 +20,8 @@
         "label": { "type": "string", "description": "مثال: المنزل، العمل" },
         "city": { "type": "string" },
         "details": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
         "isDefault": { "type": "boolean" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
