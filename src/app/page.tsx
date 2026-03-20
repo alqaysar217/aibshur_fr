@@ -224,7 +224,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. قائمة المتاجر - تصميم شبكي (Grid) */}
+      {/* 3. قائمة المتاجر - مستطيلة عمودية (2 في الصف) */}
       <section className="px-4 pb-24">
         <div className="flex items-center justify-between mb-4 px-1">
           <h3 className="font-black text-sm">المتاجر المتاحة</h3>
@@ -232,7 +232,7 @@ export default function Home() {
 
         <div className="grid grid-cols-2 gap-3">
           {isStoresLoading ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="aspect-[4/5] w-full bg-secondary/10 rounded-xl animate-pulse" />)
+            [1, 2, 3, 4].map(i => <div key={i} className="aspect-[2/3] w-full bg-secondary/10 rounded-xl animate-pulse" />)
           ) : stores && stores.length > 0 ? (
             stores.map((store: any) => {
               const isOpen = store.status === 'مفتوح' || store.status === 'open'
@@ -241,10 +241,10 @@ export default function Home() {
 
               return (
                 <Link key={store.id} href={`/store/${store.id}`}>
-                  <Card className="border-none shadow-sm rounded-xl overflow-hidden bg-white transition-all active:scale-[0.98] group">
+                  <Card className="border-none shadow-sm rounded-xl overflow-hidden bg-white transition-all active:scale-[0.98] group aspect-[1/1.5]">
                     <CardContent className="p-0 flex flex-col h-full">
                       
-                      {/* صورة المتجر (أعلى) */}
+                      {/* صورة المتجر (أعلى) - مستطيل عمودي */}
                       <div className="relative w-full h-[100px] shrink-0">
                         <Image 
                           src={store.logoUrl || `https://picsum.photos/seed/${store.id}/300/200`} 
