@@ -2,17 +2,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- 1. قواعد البحث الشامل (Collection Group Queries) ---
-    // يجب أن تكون خارج أي تداخلات أخرى لتعمل بشكل صحيح مع استعلامات collectionGroup
-    // هذه القاعدة تسمح لصفحة المفضلة والبحث بجلب أي "وجبة" من أي متجر
-    match /{path=**}/products/{productId} {
-      allow read, list: if true; 
-    }
-
-    match /{path=**}/ratings/{ratingId} {
-      allow read, list: if request.auth != null;
-    }
-
     // --- دالات مساعدة ---
     function isSignedIn() {
       return request.auth != null;
@@ -22,25 +11,38 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    // --- 1. قواعد البحث الشامل (Collection Group Queries) ---
+    // يجب أن تكون في أعلى مستوى لتعمل مع استعلامات collectionGroup
+    // الوجبات والمنتجات هي بيانات عامة يحق للجميع تصفحها
+    match /{path=**}/products/{productId} {
+      allow read, list: if true; 
+    }
+
+    // التقييمات تتطلب تسجيل دخول للقراءة
+    match /{path=**}/ratings/{ratingId} {
+      allow read, list: if isSignedIn();
+    }
+
     // --- 2. المتاجر والبيانات العامة ---
     match /stores/{storeId} {
       allow read, list: if true;
-      allow write: if isSignedIn();
+      allow write: if isSignedIn(); // للسماح بتهيئة البيانات
 
-      // القواعد الفرعية للمنتجات داخل المتجر (للوصول المباشر)
+      // السماح بالوصول المباشر للمنتجات داخل المتجر
       match /products/{productId} {
         allow read, list: if true;
       }
     }
 
-    match /ads/{id} { allow read: if true; allow write: if isSignedIn(); }
-    match /categories/{id} { allow read: if true; allow write: if isSignedIn(); }
+    match /ads/{id} { allow read: if true; }
+    match /categories/{id} { allow read: if true; }
     match /governorates/{id} { allow read: if true; }
 
     // --- 3. ملفات المستخدمين وبياناتهم الخاصة ---
     match /users/{userId} {
       allow read, write: if isOwner(userId);
       
+      // جميع المجموعات الفرعية (الطلبات، المحفظة، المفضلة، إلخ)
       match /{allSubcollections=**} {
         allow read, write: if isOwner(userId);
       }
@@ -49,7 +51,10 @@ service cloud.firestore {
     // --- 4. الطلبات العامة ---
     match /orders/{orderId} {
       allow create: if isSignedIn();
-      allow read, update: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.driverId == request.auth.uid);
+      allow read, update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || 
+        resource.data.driverId == request.auth.uid
+      );
     }
   }
 }
