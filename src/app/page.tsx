@@ -125,9 +125,9 @@ export default function Home() {
 
       // 3. تهيئة المتاجر
       const storesToSeed = [
-        { id: "mathaqi_rest", name: "مطعم مذاقي", logoUrl: "https://picsum.photos/seed/mathaqi/600/400", categoryIds: ["restaurants"], address: "المكلا - فوه", status: "مفتوح", averageRating: 4.9, deliveryTime: "30-45 دقيقة" },
-        { id: "al_khaleej_market", name: "سوبر ماركت الخليج", logoUrl: "https://picsum.photos/seed/grocery_yem/600/400", categoryIds: ["grocery"], address: "المكلا - المكلا مول", status: "مفتوح", averageRating: 4.7, deliveryTime: "20-30 دقيقة" },
-        { id: "sweet_home", name: "سويت هوم", logoUrl: "https://picsum.photos/seed/sweets/600/400", categoryIds: ["sweets"], address: "المكلا - الشرج", status: "مفتوح", averageRating: 4.5, deliveryTime: "15-25 دقيقة" }
+        { id: "mathaqi_rest", name: "مطعم مذاقي", logoUrl: "https://picsum.photos/seed/mathaqi/600/400", categoryIds: ["restaurants"], address: "المكلا", status: "مفتوح", averageRating: 4.9, deliveryTime: "30-45 دقيقة" },
+        { id: "al_khaleej_market", name: "سوبر ماركت الخليج", logoUrl: "https://picsum.photos/seed/grocery_yem/600/400", categoryIds: ["grocery"], address: "المكلا", status: "مفتوح", averageRating: 4.7, deliveryTime: "20-30 دقيقة" },
+        { id: "sweet_home", name: "سويت هوم", logoUrl: "https://picsum.photos/seed/sweets/600/400", categoryIds: ["sweets"], address: "المكلا", status: "مفتوح", averageRating: 4.5, deliveryTime: "15-25 دقيقة" }
       ]
       for (const s of storesToSeed) {
         await setDoc(doc(db, "stores", s.id), s)
@@ -224,67 +224,70 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. قائمة المتاجر - تصميم أفقي صغير */}
+      {/* 3. قائمة المتاجر - تصميم شبكي (Grid) */}
       <section className="px-4 pb-24">
         <div className="flex items-center justify-between mb-4 px-1">
           <h3 className="font-black text-sm">المتاجر المتاحة</h3>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {isStoresLoading ? (
-            [1, 2, 3].map(i => <div key={i} className="h-[120px] w-full bg-secondary/10 rounded-xl animate-pulse" />)
+            [1, 2, 3, 4].map(i => <div key={i} className="aspect-[4/5] w-full bg-secondary/10 rounded-xl animate-pulse" />)
           ) : stores && stores.length > 0 ? (
             stores.map((store: any) => {
               const isOpen = store.status === 'مفتوح' || store.status === 'open'
               const isFav = userData?.favoritesStoreIds?.includes(store.id)
+              const categoryName = categories?.find(c => store.categoryIds?.includes(c.id))?.name || "عام";
 
               return (
                 <Link key={store.id} href={`/store/${store.id}`}>
-                  <Card className="h-[120px] border-none shadow-sm rounded-xl overflow-hidden bg-white transition-all active:scale-[0.98]">
-                    <CardContent className="p-3 h-full flex flex-row gap-4 items-center">
+                  <Card className="border-none shadow-sm rounded-xl overflow-hidden bg-white transition-all active:scale-[0.98] group">
+                    <CardContent className="p-0 flex flex-col h-full">
                       
-                      {/* صورة المتجر (اليمين في RTL) */}
-                      <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0 shadow-sm">
+                      {/* صورة المتجر (أعلى) */}
+                      <div className="relative w-full h-[100px] shrink-0">
                         <Image 
-                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
+                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/300/200`} 
                           alt={store.name} 
                           fill 
                           className="object-cover" 
                         />
-                      </div>
-
-                      {/* محتوى البطاقة (اليسار في RTL) */}
-                      <div className="flex-1 flex flex-col justify-between h-full text-right relative">
-                        {/* زر المفضلة - أعلى اليسار بعد العكس */}
+                        {/* حالة المتجر - أعلى اليسار */}
+                        <Badge 
+                          className={cn(
+                            "absolute top-2 left-2 text-[8px] h-5 px-1.5 border-none font-black shadow-sm",
+                            isOpen ? "bg-green-500 text-white" : "bg-destructive text-white"
+                          )}
+                        >
+                          {isOpen ? 'مفتوح' : 'مغلق'}
+                        </Badge>
+                        {/* زر المفضلة - أعلى اليمين */}
                         <button 
                           onClick={(e) => toggleFavorite(e, store.id)}
-                          className="absolute -top-1 -left-1 p-1.5 transition-transform active:scale-75 z-10"
+                          className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm transition-transform active:scale-75 z-10"
                         >
-                          <Heart className={cn("h-4 w-4 transition-colors", isFav ? "fill-destructive text-destructive" : "text-muted-foreground/40")} />
+                          <Heart className={cn("h-3 w-3 transition-colors", isFav ? "fill-destructive text-destructive" : "text-muted-foreground/40")} />
                         </button>
+                      </div>
 
-                        <div className="pt-1">
-                          <h4 className="font-bold text-sm text-foreground truncate">{store.name}</h4>
-                          <div className="flex items-center gap-1 mt-1 justify-end">
-                            <span className="text-[10px] font-bold text-muted-foreground">({store.averageRating || '4.5'})</span>
-                            <Star className="h-3 w-3 fill-accent text-accent" />
-                          </div>
+                      {/* معلومات المتجر (أسفل) */}
+                      <div className="p-2 space-y-1 text-right flex flex-col flex-1">
+                        {/* التقييم */}
+                        <div className="flex items-center gap-1 justify-end text-accent">
+                          <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
+                          <Star className="h-3 w-3 fill-accent" />
                         </div>
 
-                        <div className="flex items-center justify-between mt-auto">
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            <span className="text-[9px] font-medium">{store.deliveryTime || '30 دقيقة'}</span>
-                          </div>
-                          <Badge 
-                            variant="outline" 
-                            className={cn(
-                              "text-[8px] h-5 px-2 border-none font-bold",
-                              isOpen ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
-                            )}
-                          >
-                            {isOpen ? 'مفتوح' : 'مغلق'}
-                          </Badge>
+                        {/* اسم المتجر */}
+                        <h4 className="font-bold text-xs text-foreground truncate">{store.name}</h4>
+
+                        {/* الموقع */}
+                        <p className="text-[9px] text-muted-foreground truncate">{store.address || 'المكلا'}</p>
+
+                        {/* التصنيف والمسافة */}
+                        <div className="flex items-center justify-between mt-auto pt-1">
+                          <span className="text-[8px] font-bold text-muted-foreground/60">{categoryName}</span>
+                          <span className="text-[8px] font-bold text-muted-foreground/40 italic">2.3 كم</span>
                         </div>
                       </div>
 
@@ -294,7 +297,7 @@ export default function Home() {
               )
             })
           ) : (
-            <div className="text-center py-10 border-2 border-dashed rounded-xl border-secondary/50 bg-secondary/5">
+            <div className="col-span-2 text-center py-10 border-2 border-dashed rounded-xl border-secondary/50 bg-secondary/5">
               <Database className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
               <p className="text-[10px] text-muted-foreground font-bold">يرجى تهيئة البيانات</p>
               {user && (
