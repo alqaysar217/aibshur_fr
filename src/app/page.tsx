@@ -248,13 +248,7 @@ export default function Home() {
 
                     {/* Middle Info Content - Aligned to Right in RTL */}
                     <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-bold text-sm text-[#111827] truncate">{store.name}</h4>
-                        <div className="flex items-center gap-1 text-amber-500">
-                          <Star className="h-3 w-3 fill-amber-500" />
-                          <span className="text-[11px] font-bold">{store.averageRating || '4.5'}</span>
-                        </div>
-                      </div>
+                      <h4 className="font-bold text-sm text-[#111827] truncate">{store.name}</h4>
 
                       <div className="flex items-center gap-1 text-[#6B7280]">
                         <MapPin className="h-2.5 w-2.5" />
@@ -263,10 +257,14 @@ export default function Home() {
                         <span className="text-[10px]">يبعد 2.3 كم</span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-5 border-none font-bold">
                           {categoryName}
                         </Badge>
+                        <div className="flex items-center gap-1 text-amber-500">
+                          <Star className="h-3 w-3 fill-amber-500" />
+                          <span className="text-[11px] font-bold">{store.averageRating || '4.5'}</span>
+                        </div>
                       </div>
                     </div>
 
