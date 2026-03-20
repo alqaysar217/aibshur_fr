@@ -12,33 +12,31 @@ service cloud.firestore {
     }
 
     // --- 1. قواعد المجموعات المشتركة (Collection Group) ---
-    // ضرورية جداً لعمل صفحة البحث والمفضلة عبر كل المتاجر
-    // يجب أن تكون في القمة ومستقلة تماماً
+    // يجب أن تكون في القمة لتمكين البحث الشامل عبر كل المتاجر
     match /{path=**}/products/{productId} {
-      allow read, list: if isSignedIn();
-      allow write: if isSignedIn(); // للسماح بالتهيئة (Seed)
+      // المنتجات والوجبات هي بيانات عامة يجب أن تظهر للجميع لنجاح تجربة البحث
+      allow read, list: if true;
+      allow write: if isSignedIn(); 
     }
 
-    // --- 2. ملفات المستخدمين ---
-    match /users/{userId} {
-      // السماح بالقراءة والكتابة فقط لصاحب الحساب
-      allow read, write: if isOwner(userId);
-      
-      // السماح بالوصول للمجموعات الفرعية داخل المستخدم (مثل الطلبات، المحفظة، المفضلات)
-      match /{allSubcollections=**} {
-        allow read, write: if isOwner(userId);
-      }
-    }
-
-    // --- 3. المتاجر والبيانات العامة ---
+    // --- 2. المتاجر والبيانات العامة ---
     match /stores/{storeId} {
-      allow read, list: if isSignedIn();
-      allow write: if isSignedIn(); // للتهيئة
+      allow read, list: if true; // القائمة العامة للمتاجر
+      allow write: if isSignedIn(); // فقط للمسؤولين أو التهيئة
 
       // المنتجات هنا مغطاة أيضاً بقاعدة المجموعات المشتركة أعلاه
       match /products/{productId} {
-        allow read, list: if isSignedIn();
+        allow read, list: if true;
         allow write: if isSignedIn();
+      }
+    }
+
+    // --- 3. ملفات المستخدمين ---
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+      
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId);
       }
     }
 

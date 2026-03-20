@@ -76,9 +76,9 @@ export function useCollection<T = any>(
           if ('path' in memoizedTargetRefOrQuery) {
             path = (memoizedTargetRefOrQuery as CollectionReference).path;
           } else {
-            // For collectionGroup queries, we attempt to extract the collection name
+            // المحاولة لاستخراج المسار البرمجي للاستعلامات المشتركة
             const internal = memoizedTargetRefOrQuery as any;
-            const queryPath = internal._query?.path?.canonicalString();
+            const queryPath = internal._query?.path?.canonicalString?.();
             path = queryPath || 'collection-group';
           }
         } catch (e) {
@@ -94,7 +94,7 @@ export function useCollection<T = any>(
         setData(null);
         setIsLoading(false);
 
-        // Emit for central error handler
+        // التنبيه المركزي بالأخطاء
         errorEmitter.emit('permission-error', contextualError);
       }
     );
