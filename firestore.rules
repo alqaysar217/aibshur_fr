@@ -3,64 +3,58 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // --- 1. قواعد البحث الشامل (Collection Group) ---
-    // هذه القاعدة ضرورية لعمل صفحة "المفضلة" والبحث الذكي عن المنتجات عبر جميع المتاجر.
-    // يجب أن تظل في أعلى مستوى لضمان عمل استعلامات collectionGroup برمجياً.
+    // ضروري جداً لعمل صفحة البحث والمفضلة (الوجبات عبر المتاجر)
     match /{path=**}/products/{productId} {
-      // يسمح بالقراءة والقائمة (list) لجميع المستخدمين المسجلين فقط
-      allow read, list: if isSignedIn();
+      allow read, list: if request.auth != null;
     }
 
-    // --- دالات مساعدة (Helper Functions) ---
-    // للتحقق من أن المستخدم قام بتسجيل الدخول
+    // --- دالات مساعدة ---
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // للتحقق من أن المستخدم هو صاحب البيانات (بناءً على UID)
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // --- 2. ملفات المستخدمين (Users) ---
-    // تشمل المفضلة (favoritesProductIds)، المحفظة، والبيانات الشخصية.
+    // --- 2. ملفات المستخدمين ---
     match /users/{userId} {
-      // يسمح للقراءة والكتابة فقط لصاحب الحساب
       allow read, write: if isOwner(userId);
       
-      // السماح بجميع العمليات على المجموعات الفرعية (Subcollections) الخاصة بالمستخدم
-      // مثل: /users/{uid}/orders أو /users/{uid}/notifications
       match /{allSubcollections=**} {
         allow read, write: if isOwner(userId);
       }
     }
 
-    // --- 3. المتاجر والمنتجات (Stores & Products) ---
+    // --- 3. المتاجر والمنتجات ---
     match /stores/{storeId} {
-      // المتاجر قابلة للقراءة لجميع المستخدمين المسجلين لاكتشافها
       allow read, list: if isSignedIn();
-      
-      // الكتابة في المتاجر (مثل إنشاء متجر جديد) تتطلب صلاحيات خاصة (هنا للمسجلين مؤقتاً)
+      // السماح بالكتابة للمطور المسجل لتهيئة البيانات
       allow write: if isSignedIn();
 
-      // المنتجات داخل المتجر (للقراءة المباشرة من خلال مسار المتجر)
       match /products/{productId} {
         allow read, list: if isSignedIn();
-        // لا أحد يستطيع الكتابة أو حذف المنتجات مباشرة كما طلبت
-        allow write: if false;
+        allow write: if isSignedIn();
       }
     }
 
-    // --- 4. البيانات العامة (Public Data) ---
-    // بيانات عامة يمكن لأي شخص (حتى غير المسجل) رؤيتها لتسهيل التصفح الأولي
-    match /ads/{id} { allow read: if true; }
-    match /categories/{id} { allow read: if true; }
-    match /governorates/{id} { allow read: if true; }
+    // --- 4. البيانات العامة (الإعلانات والأقسام) ---
+    match /ads/{id} { 
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+    match /categories/{id} { 
+      allow read: if true; 
+      allow write: if isSignedIn();
+    }
+    match /governorates/{id} { 
+      allow read: if true; 
+      allow write: if isSignedIn();
+    }
 
-    // --- 5. الطلبات العامة (Orders) ---
+    // --- 5. الطلبات ---
     match /orders/{orderId} {
-      // يسمح بإنشاء طلب لأي مستخدم مسجل
       allow create: if isSignedIn();
-      // لا يمكن قراءة أو تحديث الطلب إلا لصاحب الطلب أو المندوب المعني
       allow read, update: if isSignedIn() && (
         resource.data.userId == request.auth.uid || 
         resource.data.driverId == request.auth.uid
