@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2 } from "lucide-react"
+import { ArrowRight, MapPin, Plus, Trash2, CheckCircle2, Home, Briefcase, Map, Navigation, Loader2, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -23,8 +23,9 @@ export default function AddressesPage() {
   const [isLocating, setIsLocating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   
-  // حقول العنوان الجديد
-  const [newLabel, setNewLabel] = useState("")
+  // حالات العنوان الجديد
+  const [labelType, setLabelType] = useState<"المنزل" | "العمل" | "آخر">("المنزل")
+  const [customLabel, setCustomLabel] = useState("")
   const [newCity, setNewCity] = useState("")
   const [newDetails, setNewDetails] = useState("")
   const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null)
@@ -54,12 +55,12 @@ export default function AddressesPage() {
           lng: position.coords.longitude
         })
         setIsLocating(false)
-        toast({ title: "تم التحديد", description: "تم استخراج إحداثيات موقعك بدقة عالية" })
+        toast({ title: "تم التحديد", description: "تم التقاط إحداثيات موقعك الحالي بنجاح" })
       },
       (error) => {
         console.error("Geolocation error:", error)
         setIsLocating(false)
-        toast({ title: "فشل التحديد", description: "يرجى السماح بالوصول للموقع من إعدادات المتصفح", variant: "destructive" })
+        toast({ title: "فشل التحديد", description: "يرجى السماح بالوصول للموقع أو أدخل العنوان يدوياً", variant: "destructive" })
       },
       { 
         enableHighAccuracy: true,
@@ -71,15 +72,18 @@ export default function AddressesPage() {
 
   const handleAddAddress = () => {
     if (!user || !db) return
-    if (!newLabel || !newCity || !newDetails) {
-      toast({ title: "بيانات ناقصة", description: "يرجى ملء الاسم والمدينة والتفاصيل", variant: "destructive" })
+    
+    const finalLabel = labelType === "آخر" ? customLabel : labelType
+    
+    if (!finalLabel || !newCity || !newDetails) {
+      toast({ title: "بيانات ناقصة", description: "يرجى التأكد من ملء كافة الحقول المطلوبة", variant: "destructive" })
       return
     }
 
     setIsSaving(true)
     const addressesRef = collection(db, "users", user.uid, "addresses")
     const addressData = {
-      label: newLabel,
+      label: finalLabel,
       city: newCity,
       details: newDetails,
       latitude: coordinates?.lat || null,
@@ -88,19 +92,23 @@ export default function AddressesPage() {
       createdAt: serverTimestamp()
     }
 
-    // استخدام الوظيفة غير الحاجبة للحفظ مع معالجة الأخطاء مركزياً
     addDocumentNonBlocking(addressesRef, addressData)
       .then(() => {
-        toast({ title: "تم الحفظ", description: "تم إضافة العنوان الجديد إلى قائمتك" })
-        setNewLabel("")
-        setNewCity("")
-        setNewDetails("")
-        setCoordinates(null)
+        toast({ title: "تم الحفظ", description: "تم إضافة العنوان الجديد بنجاح" })
+        resetForm()
         setIsAdding(false)
       })
       .finally(() => {
         setIsSaving(false)
       })
+  }
+
+  const resetForm = () => {
+    setLabelType("المنزل")
+    setCustomLabel("")
+    setNewCity("")
+    setNewDetails("")
+    setCoordinates(null)
   }
 
   const handleDeleteAddress = (id: string) => {
@@ -183,7 +191,7 @@ export default function AddressesPage() {
           </div>
         )}
 
-        <Dialog open={isAdding} onOpenChange={setIsAdding}>
+        <Dialog open={isAdding} onOpenChange={(val) => { setIsAdding(val); if(!val) resetForm(); }}>
           <DialogTrigger asChild>
             <Button className="w-full h-16 rounded-[2rem] gap-2 font-black text-lg shadow-xl shadow-primary/20 mt-4">
               <Plus className="h-6 w-6" /> إضافة عنوان جديد
@@ -217,7 +225,7 @@ export default function AddressesPage() {
                   )}
                   <div className="text-right">
                     <p className="text-sm font-black">{coordinates ? "تم التقاط الموقع بنجاح" : "تحديد موقعي الحالي GPS"}</p>
-                    <p className="text-[10px] opacity-70">اضغط للحصول على الإحداثيات الدقيقة</p>
+                    <p className="text-[10px] opacity-70">استخدم موقعك الحالي أو أدخل البيانات يدوياً أدناه</p>
                   </div>
                 </Button>
 
@@ -241,45 +249,57 @@ export default function AddressesPage() {
               <div className="space-y-2 text-right">
                 <label className="text-xs font-bold text-muted-foreground mr-1">تسمية العنوان</label>
                 <div className="flex gap-2">
-                  {["المنزل", "العمل", "آخر"].map((label) => (
+                  {(["المنزل", "العمل", "آخر"] as const).map((type) => (
                     <Button 
-                      key={label}
-                      variant={newLabel === label ? "default" : "outline"}
-                      onClick={() => setNewLabel(label)}
+                      key={type}
+                      variant={labelType === type ? "default" : "outline"}
+                      onClick={() => setLabelType(type)}
                       className="flex-1 h-12 rounded-xl text-xs font-bold transition-all"
                     >
-                      {label}
+                      {type}
                     </Button>
                   ))}
                 </div>
-                {newLabel === "آخر" && (
+                {labelType === "آخر" && (
                    <Input 
-                    placeholder="أدخل اسم مخصص (مثال: شقة الوالد)" 
+                    placeholder="أدخل اسم مخصص (مثال: بيت الأهل)" 
                     className="h-12 rounded-xl mt-2 border-primary/20" 
-                    onChange={(e) => setNewLabel(e.target.value)}
+                    value={customLabel}
+                    onChange={(e) => setCustomLabel(e.target.value)}
                    />
                 )}
               </div>
 
               <div className="space-y-2 text-right">
-                <label className="text-xs font-bold text-muted-foreground mr-1">المدينة / المنطقة</label>
+                <label className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1">
+                  المدينة / المنطقة <span className="text-destructive">*</span>
+                </label>
                 <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا - حي السلام" className="h-12 rounded-xl border-primary/10" />
               </div>
 
               <div className="space-y-2 text-right">
-                <label className="text-xs font-bold text-muted-foreground mr-1">تفاصيل (الشارع، رقم المنزل)</label>
+                <label className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1">
+                  تفاصيل العنوان <span className="text-destructive">*</span>
+                </label>
                 <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: عمارة رقم 4، بجانب سوبر ماركت..." className="h-12 rounded-xl border-primary/10" />
+              </div>
+
+              <div className="bg-secondary/20 p-3 rounded-xl flex gap-2 items-start">
+                <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  يمكنك الطلب لأهلك في مدينة أخرى بإدخال اسم مدينتهم وتفاصيل سكنهم يدوياً حتى لو كنت في مكان آخر.
+                </p>
               </div>
 
               <Button 
                 onClick={handleAddAddress} 
-                disabled={isSaving || !newLabel || !newCity || !newDetails}
+                disabled={isSaving || !newCity || !newDetails || (labelType === "آخر" && !customLabel)}
                 className="w-full h-16 rounded-2xl font-black text-lg mt-4 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 transition-all active:scale-[0.98]"
               >
                 {isSaving ? (
                   <Loader2 className="h-6 w-6 animate-spin" />
                 ) : (
-                  "حفظ العنوان والبدء بالطلب"
+                  "حفظ العنوان"
                 )}
               </Button>
             </div>
