@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Search, MapPin, Bell, ChevronLeft, Star, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Trees, Flower2, Clock } from "lucide-react"
@@ -153,7 +154,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300">
+    <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300" dir="rtl">
       {/* 1. Offers Slider */}
       <section className="px-4 pt-4 pb-2">
         <Carousel 
@@ -189,7 +190,7 @@ export default function Home() {
           <h3 className="font-bold text-[#111827]">الأقسام</h3>
           <Button variant="link" className="text-primary text-xs font-bold p-0">عرض الكل</Button>
         </div>
-        <div className="flex gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide">
+        <div className="flex gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide" dir="rtl">
           {categories ? categories.map((cat: any) => (
             <button 
               key={cat.id} 
@@ -234,8 +235,8 @@ export default function Home() {
             return (
               <Link key={store.id} href={`/store/${store.id}`}>
                 <Card className="border-none shadow-[0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-28">
-                  <CardContent className="p-3 h-full flex flex-row-reverse items-center gap-4">
-                    {/* Image on the Right */}
+                  <CardContent className="p-3 h-full flex flex-row items-center gap-4">
+                    {/* Image on the Right in RTL */}
                     <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl">
                       <Image 
                         src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
@@ -243,40 +244,40 @@ export default function Home() {
                         fill 
                         className="object-cover transition-transform duration-500 group-hover:scale-110" 
                       />
-                      <button 
-                        onClick={(e) => toggleFavorite(e, store.id)}
-                        className="absolute top-1.5 right-1.5 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm active:scale-75"
-                      >
-                        <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
-                      </button>
                     </div>
 
-                    {/* Middle Info Content */}
+                    {/* Middle Info Content - Aligned to Right in RTL */}
                     <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-sm text-[#111827] truncate">{store.name}</h4>
                         <div className="flex items-center gap-1 text-amber-500">
                           <Star className="h-3 w-3 fill-amber-500" />
                           <span className="text-[11px] font-bold">{store.averageRating || '4.5'}</span>
                         </div>
-                        <h4 className="font-bold text-sm text-[#111827] truncate">{store.name}</h4>
                       </div>
 
-                      <div className="flex items-center justify-end gap-1 text-[#6B7280]">
+                      <div className="flex items-center gap-1 text-[#6B7280]">
                         <MapPin className="h-2.5 w-2.5" />
                         <span className="text-[10px] truncate">{store.address || 'المكلا'}</span>
                         <span className="mx-0.5 opacity-30">•</span>
                         <span className="text-[10px]">يبعد 2.3 كم</span>
                       </div>
 
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center gap-2">
                         <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-5 border-none font-bold">
                           {categoryName}
                         </Badge>
                       </div>
                     </div>
 
-                    {/* Left Actions/Status */}
-                    <div className="flex flex-col justify-end items-start h-full py-1 shrink-0">
+                    {/* Left Actions/Status - Aligned to Left in RTL */}
+                    <div className="flex flex-col justify-between items-end h-full py-1 shrink-0">
+                      <button 
+                        onClick={(e) => toggleFavorite(e, store.id)}
+                        className="p-1.5 bg-secondary/20 backdrop-blur-sm rounded-full active:scale-75 transition-transform"
+                      >
+                        <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
+                      </button>
                       <Badge 
                         className={cn(
                           "text-[9px] h-5 px-2 border-none font-bold rounded-lg shadow-none",

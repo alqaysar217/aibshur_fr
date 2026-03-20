@@ -28,8 +28,8 @@ export function Header() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-[60] w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm px-5 py-3 flex items-center justify-between">
-      <div className="flex flex-col">
+    <header className="sticky top-0 z-[60] w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm px-5 py-3 flex items-center justify-between" dir="rtl">
+      <div className="flex flex-col items-start">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="relative w-10 h-10 active:scale-95 transition-transform overflow-hidden rounded-xl">
             <Image 
@@ -50,7 +50,7 @@ export function Header() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -69,7 +69,7 @@ export function Header() {
             <ShoppingBag className="h-5 w-5" />
           </Button>
           {cartCount > 0 && (
-            <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white animate-in zoom-in">
+            <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white animate-in zoom-in">
               {cartCount}
             </span>
           )}

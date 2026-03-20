@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -25,7 +26,7 @@ export function BottomNav() {
   if (!mounted) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-xl border-t border-gray-100 flex items-center justify-around h-18 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-[60] rounded-t-[1.5rem]">
+    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-xl border-t border-gray-100 flex items-center justify-around h-18 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-[60] rounded-t-[1.5rem]" dir="rtl">
       {navItems.map((item) => {
         const isActive = pathname === item.href
         return (

@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
@@ -21,7 +22,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased selection:bg-primary/20 bg-secondary/30 overflow-hidden">
+      <body className="font-body antialiased selection:bg-primary/20 bg-secondary/30 overflow-hidden text-right">
         <FirebaseClientProvider>
           <div className="mobile-container h-screen relative flex flex-col overflow-hidden shadow-2xl">
             <Header />

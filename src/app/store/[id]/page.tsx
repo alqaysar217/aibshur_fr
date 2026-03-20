@@ -143,7 +143,7 @@ export default function StoreDetailPage() {
   )
 
   if (!store) return (
-    <div className="p-10 text-center">
+    <div className="p-10 text-center" dir="rtl">
       <p>المتجر غير موجود</p>
       <Button onClick={() => router.push("/")} className="mt-4">العودة للرئيسية</Button>
     </div>
@@ -153,7 +153,7 @@ export default function StoreDetailPage() {
   const isStoreOpen = store.status === 'open' || store.status === 'مفتوح';
 
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen">
+    <div className="pb-32 bg-secondary/5 min-h-screen" dir="rtl">
       <div className="relative h-64 w-full">
         <Image 
           src={store.logoUrl || `https://picsum.photos/seed/${store.id}/800/600`}
@@ -163,6 +163,7 @@ export default function StoreDetailPage() {
         />
         <div className="absolute inset-0 bg-black/30"></div>
         <div className="absolute top-6 left-6 right-6 flex justify-between items-center">
+          {/* Back Button points Right in RTL */}
           <button 
             onClick={() => router.back()}
             className="h-10 w-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
@@ -182,7 +183,7 @@ export default function StoreDetailPage() {
         <Card className="border-none shadow-2xl rounded-[2rem] overflow-hidden bg-white">
           <CardContent className="p-6">
             <div className="flex justify-between items-start mb-4">
-              <div>
+              <div className="text-right">
                 <h1 className="text-2xl font-black mb-2">{store.name}</h1>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-3 w-3" /> {store.address}
@@ -202,7 +203,7 @@ export default function StoreDetailPage() {
                 <div className="bg-primary/10 p-2 rounded-lg">
                   <Clock className="h-4 w-4 text-primary" />
                 </div>
-                <div>
+                <div className="text-right">
                   <p className="text-[10px] text-muted-foreground font-bold">وقت العمل</p>
                   <p className="text-xs font-black">{store.openingHours}</p>
                 </div>
@@ -232,7 +233,7 @@ export default function StoreDetailPage() {
                 <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all relative">
                   <button 
                     onClick={() => toggleFavoriteProduct(product.id)}
-                    className="absolute top-2 right-2 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform"
+                    className="absolute top-2 left-2 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform"
                   >
                     <Heart className={cn("h-4 w-4", isFavProd ? "fill-destructive text-destructive" : "text-muted-foreground")} />
                   </button>
@@ -245,7 +246,7 @@ export default function StoreDetailPage() {
                         className="object-cover"
                       />
                     </div>
-                    <div className="p-4 flex-1">
+                    <div className="p-4 flex-1 text-right">
                       <h3 className="font-black text-sm mb-1">{product.name}</h3>
                       <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{product.description}</p>
                       <div className="flex justify-between items-center">
@@ -253,7 +254,7 @@ export default function StoreDetailPage() {
                         
                         <div className="flex items-center gap-3">
                           {inCart && (
-                            <>
+                            <div className="flex items-center gap-2">
                               <Button 
                                 onClick={() => removeFromCart(product.id)}
                                 variant="outline" 
@@ -263,7 +264,7 @@ export default function StoreDetailPage() {
                                 <Minus className="h-4 w-4" />
                               </Button>
                               <span className="font-bold text-sm">{inCart.quantity}</span>
-                            </>
+                            </div>
                           )}
                           <Button 
                             onClick={() => addToCart(product)}
