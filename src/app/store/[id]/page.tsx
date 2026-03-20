@@ -412,7 +412,7 @@ export default function StoreDetailPage() {
       {/* 5. Product Detail Modal */}
       {selectedProduct && (
         <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
-          <DialogContent className="p-0 border-none rounded-[3rem] overflow-hidden max-w-lg w-[90%] mx-auto bg-white shadow-2xl" dir="rtl">
+          <DialogContent className="p-0 border-none rounded-[3rem] overflow-hidden max-w-lg w-[90%] mx-auto bg-white shadow-2xl z-[100]" dir="rtl">
             <div className="relative h-64 w-full">
               <Image 
                 src={selectedProduct.imageUrl || `https://picsum.photos/seed/${selectedProduct.id}/600`}
@@ -420,9 +420,11 @@ export default function StoreDetailPage() {
                 fill
                 className="object-cover"
               />
-              <DialogClose className="absolute top-4 left-4 h-10 w-10 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white outline-none z-50">
-                <X className="h-5 w-5" />
+              {/* زر إغلاق واضح جداً في الأعلى */}
+              <DialogClose className="absolute top-4 left-4 h-12 w-12 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white outline-none z-[110] active:scale-90 transition-all border border-white/20">
+                <X className="h-6 w-6" />
               </DialogClose>
+              
               <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-2xl flex items-center gap-1 shadow-sm">
                 <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
                 <span className="text-xs font-black">4.8</span>
