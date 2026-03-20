@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -8,16 +9,30 @@
         "phone": { "type": "string" },
         "favoritesStoreIds": { "type": "array" },
         "favoritesProductIds": { "type": "array" },
-        "loyaltyPoints": { "type": "number" }
+        "loyaltyPoints": { "type": "number" },
+        "subscriptionId": { "type": "string" }
       }
     },
-    "Driver": {
-      "description": "بيانات المندوب",
+    "Address": {
+      "description": "عنوان التوصيل",
       "properties": {
         "id": { "type": "string" },
-        "name": { "type": "string" },
-        "vehicleType": { "type": "string" },
-        "status": { "type": "string", "enum": ["online", "offline", "busy"] }
+        "label": { "type": "string", "description": "مثال: المنزل، العمل" },
+        "city": { "type": "string" },
+        "details": { "type": "string" },
+        "isDefault": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Notification": {
+      "description": "التنبيهات والرسائل",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "type": { "type": "string", "enum": ["order_status", "promotion", "system"] },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
       }
     },
     "Store": {
@@ -28,7 +43,8 @@
         "logoUrl": { "type": "string" },
         "categoryIds": { "type": "array" },
         "address": { "type": "string" },
-        "status": { "type": "string", "enum": ["open", "closed"] }
+        "status": { "type": "string" },
+        "averageRating": { "type": "number" }
       }
     },
     "Product": {
@@ -38,7 +54,8 @@
         "name": { "type": "string" },
         "price": { "type": "number" },
         "imageUrl": { "type": "string" },
-        "description": { "type": "string" }
+        "description": { "type": "string" },
+        "storeId": { "type": "string" }
       }
     },
     "Order": {
@@ -47,7 +64,6 @@
         "id": { "type": "string" },
         "userId": { "type": "string" },
         "storeId": { "type": "string" },
-        "driverId": { "type": "string" },
         "totalAmount": { "type": "number" },
         "status": { "type": "string", "enum": ["pending", "accepted", "preparing", "on_the_way", "delivered"] }
       }
@@ -55,12 +71,12 @@
   },
   "firestore": {
     "/users/{userId}": { "schema": "User" },
-    "/drivers/{driverId}": { "schema": "Driver" },
+    "/users/{userId}/addresses/{addressId}": { "schema": "Address" },
+    "/users/{userId}/notifications/{notifId}": { "schema": "Notification" },
     "/stores/{storeId}": { "schema": "Store" },
     "/stores/{storeId}/products/{productId}": { "schema": "Product" },
     "/orders/{orderId}": { "schema": "Order" },
     "/categories/{id}": { "description": "الأقسام" },
-    "/governorates/{id}": { "description": "المحافظات" },
-    "/ads/{id}": { "description": "الإعلانات" }
+    "/governorates/{id}": { "description": "المحافظات" }
   }
 }

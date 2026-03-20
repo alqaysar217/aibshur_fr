@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Trash2, Plus, Minus, ArrowRight, CreditCard, ShoppingBag, Tag } from "lucide-react"
+import { Trash2, Plus, Minus, ArrowRight, CreditCard, ShoppingBag, Tag, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -79,9 +79,19 @@ export default function CartPage() {
     }
 
     const ordersRef = collection(db, "users", user.uid, "orders")
+    const notificationsRef = collection(db, "users", user.uid, "notifications")
     
     addDoc(ordersRef, orderData)
-      .then(() => {
+      .then((docRef) => {
+        // إنشاء تنبيه حقيقي للمستخدم عند نجاح الطلب
+        addDoc(notificationsRef, {
+          title: "تم استلام طلبك!",
+          body: `طلبك رقم #${docRef.id.substring(0, 6)} قيد المراجعة الآن. سنوافيك بالتحديثات قريباً.`,
+          type: "order_status_update",
+          isRead: false,
+          createdAt: serverTimestamp()
+        })
+
         localStorage.removeItem('absher_cart')
         setCart([])
         toast({ title: "تم إرسال الطلب بنجاح", description: "شكراً لك! سيتم التواصل معك قريباً" })

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { User, MapPin, CreditCard, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart } from "lucide-react"
@@ -65,7 +66,7 @@ export default function ProfilePage() {
   }
 
   const menuItems = [
-    { icon: MapPin, label: "عناوين التوصيل", description: "أضف أو عدل عناوينك", href: "#" },
+    { icon: MapPin, label: "عناوين التوصيل", description: "أضف أو عدل عناوينك", href: "/addresses" },
     { 
       icon: CreditCard, 
       label: "المحفظة وطرق الدفع", 
