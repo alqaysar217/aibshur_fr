@@ -262,25 +262,25 @@ export default function Home() {
 
                     {/* معلومات المتجر - اليسار */}
                     <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
-                      <div className="flex items-center justify-end gap-2">
-                         <div className="flex items-center gap-0.5 text-accent">
-                          <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
-                          <Star className="h-3 w-3 fill-accent" />
-                        </div>
+                      <div className="flex items-center justify-start gap-2">
                         <h4 className="font-bold text-sm text-foreground truncate">{store.name}</h4>
+                        <div className="flex items-center gap-0.5 text-accent">
+                          <Star className="h-3 w-3 fill-accent" />
+                          <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
+                        </div>
                       </div>
 
-                      <div className="flex items-center justify-end gap-1 text-muted-foreground">
-                        <span className="text-[10px] truncate">{store.address || 'المكلا'}</span>
+                      <div className="flex items-center justify-start gap-1 text-muted-foreground">
                         <MapPin className="h-2.5 w-2.5" />
+                        <span className="text-[10px] truncate">{store.address || 'المكلا'}</span>
                       </div>
 
-                      <div className="flex items-center justify-end gap-3 mt-1">
-                         <span className="text-[9px] font-bold text-muted-foreground/50">يبعد 2.3 كم</span>
+                      <div className="flex items-center justify-start gap-3 mt-1">
                          <span className="text-[9px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-md">{categoryName}</span>
+                         <span className="text-[9px] font-bold text-muted-foreground/50">يبعد 2.3 كم</span>
                       </div>
 
-                      <div className="flex items-center justify-end mt-1">
+                      <div className="flex items-center justify-start mt-1">
                         <Badge 
                           className={cn(
                             "text-[8px] h-4 px-1.5 border-none font-black shadow-none",
