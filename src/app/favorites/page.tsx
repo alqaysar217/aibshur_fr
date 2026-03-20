@@ -3,8 +3,8 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
-import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId } from "firebase/firestore"
-import { Heart, Star, ShoppingBag, Loader2 } from "lucide-react"
+import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId, arrayUnion } from "firebase/firestore"
+import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -15,16 +15,27 @@ import { BottomNav } from "@/components/layout/bottom-nav"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 export default function FavoritesPage() {
   const { user, isUserLoading } = useUser()
   const db = useFirestore()
   const router = useRouter()
+  const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
+  const [cart, setCart] = useState<any[]>([])
 
   useEffect(() => {
     setMounted(true)
+    const savedCart = localStorage.getItem('absher_cart')
+    if (savedCart) setCart(JSON.parse(savedCart))
   }, [])
+
+  const saveCart = (newCart: any[]) => {
+    setCart(newCart)
+    localStorage.setItem('absher_cart', JSON.stringify(newCart))
+  }
 
   const userRef = useMemoFirebase(() => {
     if (!db || !user) return null
@@ -32,7 +43,14 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userRef)
 
-  // استعلام المتاجر - يمكننا استخدام documentId هنا لأنها مجموعة جذور (Root Collection)
+  // جلب التصنيفات لعرض أسمائها في بطاقات المتاجر
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!db) return null
+    return query(collection(db, "categories"))
+  }, [db])
+  const { data: categories } = useCollection(categoriesQuery)
+
+  // استعلام المتاجر المفضلة
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData) return null
     const ids = userData?.favoritesStoreIds || []
@@ -44,13 +62,12 @@ export default function FavoritesPage() {
     )
   }, [db, userData?.favoritesStoreIds])
 
-  // استعلام المنتجات - نقوم بجلب قائمة واسعة وتصفيتها برمجياً لتجنب خطأ مسارات documentId في الـ Collection Group
+  // استعلام المنتجات المفضلة (Collection Group)
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData) return null
     const ids = userData?.favoritesProductIds || []
     if (ids.length === 0) return null
 
-    // جلب المنتجات بشكل عام (بحد أقصى 100) للتصفية برمجياً
     return query(
       collectionGroup(db, "products"),
       limit(100)
@@ -60,20 +77,21 @@ export default function FavoritesPage() {
   const { data: favoriteStores, isLoading: isLoadingStores } = useCollection(favoritesStoresQuery)
   const { data: allProducts, isLoading: isLoadingProducts } = useCollection(favoritesProductsQuery)
 
-  // تصفية المنتجات برمجياً لضمان التوافق مع المعرفات المختلطة
+  // تصفية المنتجات برمجياً لضمان التوافق
   const filteredFavoriteProducts = useMemo(() => {
     if (!allProducts || !userData?.favoritesProductIds) return []
     return allProducts.filter(p => userData.favoritesProductIds.includes(p.id))
   }, [allProducts, userData?.favoritesProductIds])
 
-  const toggleStoreFavorite = (e: React.MouseEvent, storeId: string) => {
+  const toggleFavoriteStore = (e: React.MouseEvent, storeId: string) => {
     e.preventDefault()
     e.stopPropagation()
     if (!user || !db) return
 
+    const isFav = userData?.favoritesStoreIds?.includes(storeId)
     const ref = doc(db, "users", user.uid)
     const updateData = {
-      favoritesStoreIds: arrayRemove(storeId),
+      favoritesStoreIds: isFav ? arrayRemove(storeId) : arrayUnion(storeId),
       updatedAt: serverTimestamp()
     }
 
@@ -88,14 +106,15 @@ export default function FavoritesPage() {
       })
   }
 
-  const toggleProductFavorite = (e: React.MouseEvent, productId: string) => {
+  const toggleFavoriteProduct = (e: React.MouseEvent, productId: string) => {
     e.preventDefault()
     e.stopPropagation()
     if (!user || !db) return
 
+    const isFav = userData?.favoritesProductIds?.includes(productId)
     const ref = doc(db, "users", user.uid)
     const updateData = {
-      favoritesProductIds: arrayRemove(productId),
+      favoritesProductIds: isFav ? arrayRemove(productId) : arrayUnion(productId),
       updatedAt: serverTimestamp()
     }
 
@@ -108,6 +127,39 @@ export default function FavoritesPage() {
         })
         errorEmitter.emit('permission-error', permissionError)
       })
+  }
+
+  const addToCart = (e: React.MouseEvent, product: any) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const existing = cart.find(item => item.id === product.id)
+    let newCart;
+    if (existing) {
+      newCart = cart.map(item => 
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    } else {
+      newCart = [...cart, { ...product, quantity: 1 }]
+    }
+    saveCart(newCart)
+    toast({ title: "تمت الإضافة", description: `${product.name} أضيف إلى السلة` })
+  }
+
+  const removeFromCart = (e: React.MouseEvent, productId: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const existing = cart.find(item => item.id === productId)
+    if (!existing) return
+    
+    let newCart;
+    if (existing.quantity === 1) {
+      newCart = cart.filter(item => item.id !== productId)
+    } else {
+      newCart = cart.map(item => 
+        item.id === productId ? { ...item, quantity: item.quantity - 1 } : item
+      )
+    }
+    saveCart(newCart)
   }
 
   if (!mounted) return <div className="min-h-screen bg-background" />
@@ -135,46 +187,71 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="pb-24 bg-secondary/5 min-h-screen">
-      <header className="p-4 glass sticky top-0 z-40 flex items-center justify-between">
-        <h1 className="text-xl font-bold">المفضلة</h1>
+    <div className="pb-24 bg-secondary/5 min-h-screen" dir="rtl">
+      <header className="p-4 glass sticky top-0 z-40 flex items-center justify-between shadow-sm">
+        <h1 className="text-xl font-black">المفضلة</h1>
+        <Link href="/cart">
+          <Button variant="ghost" size="icon" className="relative">
+            <ShoppingBag className="h-5 w-5" />
+            {cart.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+                {cart.reduce((s, i) => s + i.quantity, 0)}
+              </span>
+            )}
+          </Button>
+        </Link>
       </header>
 
       <div className="p-4">
         <Tabs defaultValue="stores" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6 bg-white rounded-xl p-1">
-            <TabsTrigger value="stores" className="rounded-lg font-bold">المتاجر</TabsTrigger>
-            <TabsTrigger value="products" className="rounded-lg font-bold">الوجبات</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/50 backdrop-blur-sm rounded-2xl p-1 shadow-sm">
+            <TabsTrigger value="stores" className="rounded-xl font-black text-xs h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">المتاجر</TabsTrigger>
+            <TabsTrigger value="products" className="rounded-xl font-black text-xs h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">الوجبات</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="stores" className="space-y-6">
+          <TabsContent value="stores" className="space-y-4">
             {isLoadingStores ? (
-              [1, 2].map(i => <div key={i} className="h-64 bg-white rounded-[2rem] animate-pulse" />)
+              [1, 2, 3].map(i => <div key={i} className="h-28 bg-white rounded-2xl animate-pulse" />)
             ) : favoriteStores && favoriteStores.length > 0 ? (
               favoriteStores.map((store: any) => {
-                const isStoreOpen = store.status === 'open' || store.status === 'مفتوح';
+                const isOpen = store.status === 'مفتوح' || store.status === 'open'
+                const categoryName = categories?.find(c => store.categoryIds?.includes(c.id))?.name || "متجر"
+
                 return (
                   <Link key={store.id} href={`/store/${store.id}`}>
-                    <Card className="overflow-hidden border-none shadow-xl rounded-[2rem] relative">
-                      <CardContent className="p-0">
-                        <div className="relative h-56 w-full">
-                          <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/600/400`} alt={store.name} fill className="object-cover" />
-                          <div className="absolute top-4 left-4 bg-white/95 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-                            <Star className="h-4 w-4 fill-accent text-accent" />
-                            <span className="text-sm font-black">{store.averageRating || '4.5'}</span>
+                    <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
+                      <CardContent className="p-3 h-full flex flex-row items-center gap-4">
+                        {/* اليمين: صورة المتجر والتقييم */}
+                        <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
+                          <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform group-hover:scale-110" />
+                          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
+                            <Star className="h-2.5 w-2.5 fill-amber-500" />
+                            <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
                           </div>
-                          <button onClick={(e) => toggleStoreFavorite(e, store.id)} className="absolute top-4 right-4 h-10 w-10 bg-white/95 rounded-full flex items-center justify-center shadow-lg">
-                            <Heart className="h-5 w-5 fill-destructive text-destructive" />
-                          </button>
-                          {!isStoreOpen && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <Badge variant="destructive" className="text-lg font-bold px-6 py-2">مغلق حالياً</Badge>
-                            </div>
-                          )}
                         </div>
-                        <div className="p-5 bg-white">
-                          <h4 className="font-black text-xl text-foreground mb-3">{store.name}</h4>
-                          <Badge variant="secondary" className="font-bold text-[10px] px-3">{store.address}</Badge>
+
+                        {/* الوسط: المعلومات */}
+                        <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
+                          <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
+                          <div className="flex items-center gap-1 text-[#6B7280]">
+                            <MapPin className="h-2.5 w-2.5 text-primary/60" />
+                            <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
+                          </div>
+                          <div className="flex items-center gap-2 pt-1">
+                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
+                              {categoryName}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* اليسار: المفضلة والحالة */}
+                        <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
+                          <button onClick={(e) => toggleFavoriteStore(e, store.id)} className="p-1.5 bg-secondary/30 rounded-full active:scale-75 transition-transform">
+                            <Heart className="h-3.5 w-3.5 fill-destructive text-destructive" />
+                          </button>
+                          <Badge className={cn("text-[8px] h-4 px-1.5 border-none font-black rounded-md", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
+                            {isOpen ? 'مفتوح' : 'مغلق'}
+                          </Badge>
                         </div>
                       </CardContent>
                     </Card>
@@ -190,22 +267,63 @@ export default function FavoritesPage() {
             {isLoadingProducts ? (
               [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-2xl animate-pulse" />)
             ) : filteredFavoriteProducts.length > 0 ? (
-              filteredFavoriteProducts.map((product: any) => (
-                <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden relative">
-                  <button onClick={(e) => toggleProductFavorite(e, product.id)} className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow-sm">
-                    <Heart className="h-4 w-4 fill-destructive text-destructive" />
-                  </button>
-                  <CardContent className="p-0 flex items-center" onClick={() => router.push(`/store/${product.storeId}`)}>
-                    <div className="relative h-28 w-28 shrink-0">
-                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
-                    </div>
-                    <div className="p-4 flex-1 text-right">
-                      <h3 className="font-black text-sm mb-1">{product.name}</h3>
-                      <span className="text-primary font-black">{product.price} ر.س</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+              filteredFavoriteProducts.map((product: any) => {
+                const inCart = cart.find(item => item.id === product.id)
+                const isMeatOrPizza = product.name.includes('لحم') || product.name.includes('بيتزا') || product.name.includes('مندي')
+
+                return (
+                  <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => router.push(`/store/${product.storeId}`)}>
+                    <CardContent className="p-3 flex flex-row items-center gap-3">
+                      {/* اليمين: الصورة والمفضلة */}
+                      <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
+                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform" />
+                        <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                          <Heart className="h-3 w-3 fill-destructive text-destructive" />
+                        </button>
+                      </div>
+
+                      {/* الوسط: التفاصيل */}
+                      <div className="flex-1 text-right space-y-0.5 overflow-hidden">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
+                          <div className="flex items-center gap-0.5 text-amber-500 text-[9px] font-black">
+                            <Star className="h-2.5 w-2.5 fill-amber-500" />
+                            <span>{product.rating || '4.8'}</span>
+                          </div>
+                        </div>
+                        <p className="text-[9px] text-gray-400 line-clamp-2 leading-snug min-h-[2.4rem]">
+                          {product.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
+                        </p>
+                        
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-primary font-black text-base">{product.price} <small className="text-[9px] font-bold">ر.س</small></span>
+                          
+                          <div onClick={(e) => e.stopPropagation()}>
+                            {inCart && !isMeatOrPizza ? (
+                              <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
+                                <Button onClick={(e) => removeFromCart(e, product.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
+                                  <Minus className="h-3 w-3 text-primary" />
+                                </Button>
+                                <span className="font-black text-xs min-w-[10px] text-center">{inCart.quantity}</span>
+                                <Button onClick={(e) => addToCart(e, product)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
+                                  <Plus className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button 
+                                onClick={(e) => isMeatOrPizza ? router.push(`/store/${product.storeId}`) : addToCart(e, product)}
+                                className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
+                              >
+                                {isMeatOrPizza ? "عرض الخيارات" : "إضافة للسلة"}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })
             ) : (
               <EmptyState message="قائمة الوجبات المفضلة فارغة" />
             )}
@@ -219,12 +337,12 @@ export default function FavoritesPage() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="text-center py-20 space-y-4">
+    <div className="text-center py-24 space-y-4">
       <div className="bg-secondary/20 p-8 rounded-full w-fit mx-auto">
-        <Heart className="h-16 w-16 text-muted-foreground opacity-20" />
+        <Heart className="h-12 w-12 text-muted-foreground opacity-20" />
       </div>
-      <h2 className="font-bold text-lg">{message}</h2>
-      <p className="text-muted-foreground text-sm">ابدأ بتمييز ما تحبه ليظهر هنا.</p>
+      <h2 className="font-black text-lg text-gray-400">{message}</h2>
+      <p className="text-muted-foreground text-[10px] font-bold">ابدأ بتمييز ما تحبه ليظهر هنا.</p>
     </div>
   )
 }
