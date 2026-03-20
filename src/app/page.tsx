@@ -245,6 +245,11 @@ export default function Home() {
                           fill 
                           className="object-cover transition-transform duration-500 group-hover:scale-110" 
                         />
+                        {/* Rating Badge - Floating on Image */}
+                        <div className="absolute top-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10">
+                          <Star className="h-2.5 w-2.5 fill-amber-500" />
+                          <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
+                        </div>
                       </div>
 
                       {/* Middle Side: Information */}
@@ -269,12 +274,6 @@ export default function Home() {
                           <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                             {categoryName}
                           </Badge>
-
-                          {/* Rating */}
-                          <div className="flex items-center gap-0.5 text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-lg shrink-0">
-                            <Star className="h-2.5 w-2.5 fill-amber-500" />
-                            <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
-                          </div>
                         </div>
                       </div>
 
