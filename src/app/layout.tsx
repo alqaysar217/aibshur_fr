@@ -2,7 +2,6 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { Header } from '@/components/layout/header';
 import { BottomNav } from '@/components/layout/bottom-nav';
 
 export const metadata: Metadata = {
@@ -25,7 +24,6 @@ export default function RootLayout({
       <body className="font-body antialiased selection:bg-primary/20 bg-secondary/30 overflow-hidden text-right">
         <FirebaseClientProvider>
           <div className="mobile-container h-screen relative flex flex-col overflow-hidden shadow-2xl">
-            <Header />
             <main className="flex-1 overflow-y-auto pb-24 scrollbar-hide bg-[#F5F7F6]">
               {children}
             </main>

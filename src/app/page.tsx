@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Bell, ChevronLeft, Star, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Trees, Flower2, Clock } from "lucide-react"
+import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Flower2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -15,6 +15,7 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
+import { Header } from "@/components/layout/header"
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
 import Autoplay from "embla-carousel-autoplay"
 
@@ -141,7 +142,7 @@ export default function Home() {
       case 'restaurants': return <Utensils className="h-5 w-5" />
       case 'cafe': return <Coffee className="h-5 w-5" />
       case 'perfume': return <Flower2 className="h-5 w-5" />
-      case 'dates': return <Trees className="h-5 w-5" />
+      case 'dates': return <Laptop className="h-5 w-5" />
       case 'grocery': return <ShoppingBasket className="h-5 w-5" />
       case 'pharmacy': return <Pill className="h-5 w-5" />
       case 'electronics': return <Laptop className="h-5 w-5" />
@@ -155,6 +156,9 @@ export default function Home() {
 
   return (
     <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300" dir="rtl">
+      {/* 0. Header (Home Only) */}
+      <Header />
+
       {/* 1. Offers Slider */}
       <section className="px-4 pt-4 pb-2">
         <Carousel 
