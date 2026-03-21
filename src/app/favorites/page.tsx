@@ -43,14 +43,12 @@ export default function FavoritesPage() {
   }, [db, user])
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userRef)
 
-  // جلب التصنيفات لعرض أسمائها في بطاقات المتاجر
   const categoriesQuery = useMemoFirebase(() => {
     if (!db) return null
     return query(collection(db, "categories"))
   }, [db])
   const { data: categories } = useCollection(categoriesQuery)
 
-  // استعلام المتاجر المفضلة
   const favoritesStoresQuery = useMemoFirebase(() => {
     if (!db || !userData) return null
     const ids = userData?.favoritesStoreIds || []
@@ -62,7 +60,6 @@ export default function FavoritesPage() {
     )
   }, [db, userData?.favoritesStoreIds])
 
-  // استعلام المنتجات المفضلة (Collection Group)
   const favoritesProductsQuery = useMemoFirebase(() => {
     if (!db || !userData) return null
     const ids = userData?.favoritesProductIds || []
@@ -77,14 +74,9 @@ export default function FavoritesPage() {
   const { data: favoriteStores, isLoading: isLoadingStores } = useCollection(favoritesStoresQuery)
   const { data: allProducts, isLoading: isLoadingProducts } = useCollection(favoritesProductsQuery)
 
-  // تصفية المنتجات برمجياً لضمان التوافق وإزالة التكرار
   const filteredFavoriteProducts = useMemo(() => {
     if (!allProducts || !userData?.favoritesProductIds) return []
-    
-    // أولاً: تصفية المنتجات التي توجد معرفاتها في قائمة المفضلات
     const filtered = allProducts.filter(p => userData.favoritesProductIds.includes(p.id))
-    
-    // ثانياً: إزالة التكرار بناءً على المعرف (ID) لمنع خطأ React keys
     const seen = new Set();
     return filtered.filter(product => {
       if (seen.has(product.id)) return false;
@@ -230,7 +222,7 @@ export default function FavoritesPage() {
                 return (
                   <Link key={store.id} href={`/store/${store.id}`}>
                     <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
-                      <CardContent className="p-3 h-full flex flex-row items-center gap-4">
+                      <CardContent className="p-3 h-full flex flex-row-reverse items-center gap-4">
                         <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                           <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform group-hover:scale-110" />
                           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
@@ -252,7 +244,7 @@ export default function FavoritesPage() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
+                        <div className="flex flex-col justify-between items-start h-full py-1.5 shrink-0">
                           <button onClick={(e) => toggleFavoriteStore(e, store.id)} className="p-1.5 bg-secondary/30 rounded-full active:scale-75 transition-transform">
                             <Heart className="h-3.5 w-3.5 fill-destructive text-destructive" />
                           </button>
@@ -280,7 +272,7 @@ export default function FavoritesPage() {
 
                 return (
                   <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => router.push(`/store/${product.storeId}`)}>
-                    <CardContent className="p-3 flex flex-row items-center gap-3">
+                    <CardContent className="p-3 flex flex-row-reverse items-center gap-3">
                       <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
                         <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform" />
                         <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
