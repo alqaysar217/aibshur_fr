@@ -227,7 +227,9 @@ export default function SearchPage() {
                               <button onClick={(e) => addToCart(e, item)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-3.5 w-3.5" /></button>
                             </div>
                           ) : (
-                            <Button onClick={(e) => addToCart(e, item)} className="h-8 rounded-[8px] bg-primary text-white text-[9px] font-black px-4 shadow-sm">إضافة للسلة</Button>
+                            <Button onClick={(e) => addToCart(e, item)} className="h-8 rounded-[8px] bg-primary text-white text-[9px] font-black px-4 shadow-sm">
+                              <span className="flex items-center gap-1">إضافة <ShoppingBag className="h-3 w-3" /></span>
+                            </Button>
                           )}
                         </div>
                       </div>
@@ -264,7 +266,7 @@ export default function SearchPage() {
                         </div>
                         
                         <div className="flex items-center gap-2 pt-1">
-                          <span className="text-[9px] text-[#6B7280] font-black">{item.deliveryTime ? item.deliveryTime.split(' ')[0] : '2.3'}كم</span>
+                          <span className="text-[9px] text-[#6B7280] font-black">2.3كم</span>
                           <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-[10px]">متجر</Badge>
                           <div className="flex items-center gap-0.5" dir="rtl">
                             {[1, 2, 3, 4, 5].map((star) => (

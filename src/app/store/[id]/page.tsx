@@ -164,7 +164,7 @@ export default function StoreDetailPage() {
                 <span className="text-[10px] font-black text-primary">{store.averageRating || '4.5'}</span>
                 <span className="text-[8px] text-gray-400 font-bold">(100+)</span>
               </div>
-              <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-none font-black text-[9px] h-4.5 px-2 rounded-md">
+              <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-black text-[9px] h-4.5 px-2 rounded-md">
                 {getCategoryDisplayName(store.categoryIds?.[0] || 'متجر')}
               </Badge>
               <Badge className={cn("text-[9px] font-black h-4.5 px-2 rounded-md border-none shadow-none", isOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
@@ -237,7 +237,7 @@ export default function StoreDetailPage() {
                           </div>
                         ) : (
                           <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[10px] font-black px-4 active:scale-95 transition-all">
-                            {needsOptions ? "التفاصيل" : "إضافة للسلة"}
+                            {needsOptions ? "التفاصيل" : <span className="flex items-center gap-1">إضافة <ShoppingBag className="h-3 w-3" /></span>}
                           </Button>
                         )}
                       </div>
