@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { 
   Trash2, Plus, Minus, ArrowRight, CreditCard, ShoppingBag, 
   Tag, MapPin, ChevronLeft, Loader2, Wallet, Banknote, 
-  MessageSquare, AlertCircle, CheckCircle2, X, Edit2, Check, Store
+  MessageSquare, AlertCircle, CheckCircle2, X, Edit2, Check, Store, Copy
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -64,6 +64,12 @@ export default function CartPage() {
   }, [db, user])
   const { data: addresses } = useCollection(addressesQuery)
 
+  const storesQuery = useMemoFirebase(() => {
+    if (!db) return null
+    return query(collection(db, "stores"))
+  }, [db])
+  const { data: allStores } = useCollection(storesQuery)
+
   useEffect(() => {
     if (addresses && addresses.length > 0 && !selectedAddressId) {
       const defaultAddr = addresses.find(a => a.isDefault) || addresses[0]
@@ -99,7 +105,7 @@ export default function CartPage() {
   }
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  const deliveryFee = 1000 // رسوم توصيل افتراضية
+  const deliveryFee = 1000 
   const discount = isCouponApplied ? 500 : 0
   const total = Math.max(0, cartTotal + deliveryFee - discount)
 
@@ -189,6 +195,11 @@ export default function CartPage() {
     }
   }
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    toast({ title: "تم النسخ", description: "تم نسخ رقم الحساب بنجاح" })
+  }
+
   if (!mounted) return null
   if (cart.length === 0) return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-white" dir="rtl">
@@ -216,7 +227,6 @@ export default function CartPage() {
       </header>
 
       <div className="p-4 space-y-6">
-        {/* قائمة المنتجات */}
         <Card className="border-none shadow-sm rounded-2xl overflow-hidden bg-white">
           <div className="p-4 border-b flex justify-between items-center bg-secondary/10">
             <h2 className="font-bold text-sm flex items-center gap-2">
@@ -240,16 +250,25 @@ export default function CartPage() {
                   <span className="w-12 text-center">الكمية</span>
                   <span className="w-20 text-left">الإجمالي</span>
                 </div>
-                {cart.map((item) => (
-                  <div key={item.id} className="p-4 flex items-center gap-3 justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-xs truncate">{item.name}</p>
+                {cart.map((item) => {
+                  const itemStore = allStores?.find(s => s.id === item.storeId)
+                  return (
+                    <div key={item.id} className="p-4 flex items-center gap-3 justify-between">
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <p className="font-bold text-xs truncate">{item.name}</p>
+                        <div className="flex items-center gap-1.5">
+                          <div className="relative h-3 w-3 rounded-full overflow-hidden bg-secondary/20">
+                            <Image src={itemStore?.logoUrl || `https://picsum.photos/seed/${item.storeId}/50`} alt="" fill className="object-cover" />
+                          </div>
+                          <span className="text-[8px] text-muted-foreground font-bold">{itemStore?.name || "المتجر"}</span>
+                        </div>
+                      </div>
+                      <div className="w-16 text-center font-bold text-[11px] text-muted-foreground">{item.price}</div>
+                      <div className="w-12 text-center font-black text-[11px]">{item.quantity}</div>
+                      <div className="w-20 text-left font-black text-primary text-[11px]">{item.price * item.quantity} <small className="text-[8px]">ر.س</small></div>
                     </div>
-                    <div className="w-16 text-center font-bold text-[11px] text-muted-foreground">{item.price}</div>
-                    <div className="w-12 text-center font-black text-xs">{item.quantity}</div>
-                    <div className="w-20 text-left font-black text-primary text-[11px]">{item.price * item.quantity} <small className="text-[8px]">ر.س</small></div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="p-3 space-y-3">
@@ -277,7 +296,6 @@ export default function CartPage() {
           </CardContent>
         </Card>
 
-        {/* عنوان التوصيل */}
         <section className="space-y-3">
           <div className="flex justify-between items-center px-1">
             <h2 className="font-bold text-sm flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> عنوان التوصيل</h2>
@@ -300,27 +318,47 @@ export default function CartPage() {
           </Select>
         </section>
 
-        {/* الكوبون */}
-        <section className="space-y-3">
-          {!showCouponInput ? (
-            <button onClick={() => setShowCouponInput(true)} className="flex items-center gap-2 text-primary font-bold text-xs px-1">
-              <Tag className="h-4 w-4" /> هل لديك كوبون خصم؟
-            </button>
-          ) : (
-            <div className="relative flex items-center gap-2 animate-in slide-in-from-top-2">
-              <Input 
-                placeholder="أدخل الكود (مثال: ABSHER24)" 
-                className="h-12 rounded-xl bg-white border-none shadow-sm"
-                value={coupon}
-                onChange={(e) => setCoupon(e.target.value)}
-              />
-              <Button onClick={applyCoupon} className="h-12 rounded-xl px-6" disabled={isCouponApplied || !coupon}>تطبيق</Button>
-              <button onClick={() => setShowCouponInput(false)} className="p-2"><X className="h-4 w-4 text-muted-foreground" /></button>
-            </div>
-          )}
+        <section className="flex gap-4 px-1">
+          <div className="flex-1">
+            {!showCouponInput ? (
+              <button onClick={() => setShowCouponInput(true)} className="flex items-center gap-2 text-primary font-bold text-xs">
+                <Tag className="h-4 w-4" /> هل لديك كوبون خصم؟
+              </button>
+            ) : (
+              <div className="relative flex items-center gap-2 animate-in slide-in-from-top-2">
+                <Input 
+                  placeholder="الكود..." 
+                  className="h-10 rounded-xl bg-white border-none shadow-sm text-xs"
+                  value={coupon}
+                  onChange={(e) => setCoupon(e.target.value)}
+                />
+                <Button onClick={applyCoupon} size="sm" className="h-10 rounded-xl px-4 text-xs" disabled={isCouponApplied || !coupon}>تطبيق</Button>
+                <button onClick={() => setShowCouponInput(false)} className="p-1"><X className="h-3 w-3 text-muted-foreground" /></button>
+              </div>
+            )}
+          </div>
+          <div className="flex-1">
+            {!showNoteInput ? (
+              <button onClick={() => setShowNoteInput(true)} className="flex items-center gap-2 text-muted-foreground font-bold text-xs">
+                <MessageSquare className="h-4 w-4" /> إضافة ملاحظة؟
+              </button>
+            ) : (
+              <div className="relative flex flex-col gap-2 animate-in slide-in-from-top-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-muted-foreground">الملاحظة</span>
+                  <button onClick={() => {setShowNoteInput(false); setOrderNotes("");}} className="text-[10px] text-destructive">إلغاء</button>
+                </div>
+                <Textarea 
+                  placeholder="اكتب ملاحظتك..."
+                  className="min-h-[60px] rounded-xl border-none shadow-sm bg-white text-xs"
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
         </section>
 
-        {/* طريقة الدفع */}
         <section className="space-y-3">
           <h2 className="font-bold text-sm px-1 flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> طريقة الدفع</h2>
           <Select value={paymentMethod} onValueChange={setPaymentMethod}>
@@ -349,10 +387,9 @@ export default function CartPage() {
             </SelectContent>
           </Select>
 
-          {/* تفاصيل التحويل البنكي */}
           {paymentMethod === "bank" && (
             <div className="space-y-3 animate-in fade-in slide-in-from-top-4">
-              <p className="text-[10px] font-bold text-muted-foreground mr-1">اختر البنك لتحويل المبلغ وإرسال السند لاحقاً:</p>
+              <p className="text-[10px] font-bold text-muted-foreground mr-1">اختر البنك لنسخ الرقم والتحويل:</p>
               <div className="space-y-2">
                 {BANK_ACCOUNTS.map((bank) => (
                   <button
@@ -366,9 +403,17 @@ export default function CartPage() {
                     <div className="relative h-10 w-10 rounded-lg overflow-hidden shrink-0 border bg-white">
                       <Image src={bank.logo} alt={bank.name} fill className="object-cover" />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="font-black text-xs">{bank.name}</p>
-                      <p className="text-[10px] text-muted-foreground tracking-widest">{bank.account}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-[10px] text-muted-foreground tracking-widest truncate">{bank.account}</p>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); copyToClipboard(bank.account); }}
+                          className="p-1 bg-secondary/50 rounded-md active:scale-90"
+                        >
+                          <Copy className="h-3 w-3 text-primary" />
+                        </button>
+                      </div>
                       <p className="text-[8px] text-primary/70 font-bold leading-relaxed">{bank.holder}</p>
                     </div>
                     {selectedBankId === bank.id && <CheckCircle2 className="h-5 w-5 text-primary" />}
@@ -379,29 +424,6 @@ export default function CartPage() {
           )}
         </section>
 
-        {/* ملاحظات الطلب */}
-        <section className="space-y-3">
-          {!showNoteInput ? (
-            <button onClick={() => setShowNoteInput(true)} className="flex items-center gap-2 text-muted-foreground font-bold text-xs px-1">
-              <MessageSquare className="h-4 w-4" /> هل ترغب في إضافة ملاحظة؟
-            </button>
-          ) : (
-            <div className="space-y-2 animate-in slide-in-from-top-2">
-              <div className="flex justify-between items-center px-1">
-                <label className="text-xs font-black text-muted-foreground">ملاحظات إضافية</label>
-                <button onClick={() => {setShowNoteInput(false); setOrderNotes("");}} className="text-[10px] text-destructive font-bold">إلغاء</button>
-              </div>
-              <Textarea 
-                placeholder="مثال: يرجى جعل الطعام حاراً، أو الاتصال عند الوصول..."
-                className="min-h-[100px] rounded-2xl border-none shadow-sm bg-white resize-none text-xs leading-relaxed"
-                value={orderNotes}
-                onChange={(e) => setOrderNotes(e.target.value)}
-              />
-            </div>
-          )}
-        </section>
-
-        {/* الفاتورة النهائية */}
         <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between text-xs font-bold">
@@ -425,12 +447,11 @@ export default function CartPage() {
           </CardContent>
         </Card>
 
-        {/* تنبيه الأمان والواتساب */}
         <div className="flex items-start gap-3 p-4 bg-blue-50 text-blue-700 rounded-2xl border border-blue-100">
           <AlertCircle className="h-5 w-5 shrink-0" />
           <div className="space-y-1">
             <p className="text-[10px] font-black">بضغطك على زر التنفيذ، سيتم إرسال طلبك فوراً.</p>
-            <p className="text-[9px] font-medium leading-relaxed opacity-80">سيتم التواصل معك عبر الواتساب على رقم خدمة حضرموت (775258830) لتأكيد الفاتورة النهائية وموعد التوصيل.</p>
+            <p className="text-[9px] font-medium leading-relaxed opacity-80">سيتم التواصل معك عبر الواتساب على رقم خدمة حضرموت (775258830) لتأكيد الفاتورة النهائية.</p>
           </div>
         </div>
       </div>
