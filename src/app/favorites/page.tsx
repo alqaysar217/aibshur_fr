@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId, arrayUnion } from "firebase/firestore"
-import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus } from "lucide-react"
+import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus, Filter } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -247,12 +247,12 @@ export default function FavoritesPage() {
                             <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                           </div>
                           <div className="flex items-center flex-wrap gap-2 pt-1 justify-end">
-                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
-                              {categoryName}
-                            </Badge>
                             <div className="flex items-center gap-1 text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">
                               <span className="text-[10px] font-bold">2.3 كم</span>
                             </div>
+                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
+                              {categoryName}
+                            </Badge>
                           </div>
                         </div>
 
