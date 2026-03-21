@@ -261,10 +261,10 @@ export default function SearchPage() {
                             <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
                           </div>
                           <div className="flex items-center flex-wrap gap-2 pt-1 justify-start">
+                            <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">2.3 كم</span>
                             <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                               {categoryName}
                             </Badge>
-                            <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">2.3 كم</span>
                           </div>
                         </div>
 
