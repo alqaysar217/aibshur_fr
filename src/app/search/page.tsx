@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -37,14 +38,18 @@ export default function SearchPage() {
 
   useEffect(() => {
     setMounted(true)
-    const savedCart = localStorage.getItem('absher_cart')
-    if (savedCart) setCart(JSON.parse(savedCart))
+    const updateCart = () => {
+      const savedCart = localStorage.getItem('absher_cart')
+      if (savedCart) setCart(JSON.parse(savedCart))
+    }
+    updateCart()
+    window.addEventListener('cart-updated', updateCart)
+    return () => window.removeEventListener('cart-updated', updateCart)
   }, [])
 
   const saveCart = (newCart: any[]) => {
     setCart(newCart)
     localStorage.setItem('absher_cart', JSON.stringify(newCart))
-    // إطلاق حدث لتحديث السلة العائمة عالمياً
     window.dispatchEvent(new Event('cart-updated'))
   }
 
@@ -197,6 +202,8 @@ export default function SearchPage() {
 
   if (!mounted) return <div className="min-h-screen bg-background" />
 
+  const cartCount = cart.reduce((s, i) => s + i.quantity, 0)
+
   return (
     <div className="pb-24 min-h-screen bg-secondary/5 font-body" dir="rtl">
       <header className="p-4 glass sticky top-0 z-50 flex items-center justify-between shadow-sm">
@@ -206,6 +213,16 @@ export default function SearchPage() {
           </Button>
           <h1 className="text-xl font-bold text-primary">البحث في أبشر</h1>
         </div>
+        <Link href="/cart">
+          <Button variant="ghost" size="icon" className="relative h-10 w-10">
+            <ShoppingBag className="h-5 w-5" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+                {cartCount}
+              </span>
+            )}
+          </Button>
+        </Link>
       </header>
 
       <div className="p-4 space-y-4">

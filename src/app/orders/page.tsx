@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -19,9 +20,22 @@ export default function OrdersPage() {
   const db = useFirestore()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
 
   useEffect(() => {
     setMounted(true)
+    const updateCart = () => {
+      const savedCart = localStorage.getItem('absher_cart')
+      if (savedCart) {
+        const cart = JSON.parse(savedCart)
+        setCartCount(cart.reduce((s: number, i: any) => s + i.quantity, 0))
+      } else {
+        setCartCount(0)
+      }
+    }
+    updateCart()
+    window.addEventListener('cart-updated', updateCart)
+    return () => window.removeEventListener('cart-updated', updateCart)
   }, [])
 
   const ordersQuery = useMemoFirebase(() => {
@@ -86,11 +100,23 @@ export default function OrdersPage() {
 
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">
-      <header className="p-4 glass sticky top-0 z-40 flex items-center gap-4 shadow-sm">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
-          <ArrowRight className="h-6 w-6" />
-        </Button>
-        <h1 className="text-xl font-bold">طلباتي</h1>
+      <header className="p-4 glass sticky top-0 z-40 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
+            <ArrowRight className="h-6 w-6" />
+          </Button>
+          <h1 className="text-xl font-bold">طلباتي</h1>
+        </div>
+        <Link href="/cart">
+          <Button variant="ghost" size="icon" className="relative h-10 w-10">
+            <ShoppingBag className="h-5 w-5" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+                {cartCount}
+              </span>
+            )}
+          </Button>
+        </Link>
       </header>
 
       <div className="p-4 space-y-6">
