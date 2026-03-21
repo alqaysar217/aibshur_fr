@@ -110,7 +110,7 @@ export default function StoreDetailPage() {
   }
 
   const renderStars = (rating: number) => (
-    <div className="flex items-center gap-0.5 mt-1" dir="rtl">
+    <div className="flex items-center gap-0.5" dir="rtl">
       {[1, 2, 3, 4, 5].map((star) => (
         <Star key={star} className={cn("h-2 w-2", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
       ))}
@@ -142,7 +142,11 @@ export default function StoreDetailPage() {
               </button>
             </div>
             <div className="flex items-center gap-2 flex-wrap justify-start">
-              {renderStars(store.averageRating || 4.5)}
+              <div className="flex items-center gap-0.5" dir="rtl">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star key={star} className={cn("h-2.5 w-2.5", (store.averageRating || 4.5) >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
+                ))}
+              </div>
               <Badge className={cn("text-[8px] font-black border-none px-2 h-4 rounded-[10px]", (store.status === 'open' || store.status === 'مفتوح') ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
                 {(store.status === 'open' || store.status === 'مفتوح') ? 'مفتوح الآن' : 'مغلق'}
               </Badge>
@@ -169,13 +173,10 @@ export default function StoreDetailPage() {
           return (
             <Card key={`product-${product.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer" onClick={() => setViewingProduct(product)}>
               <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                <div className="flex flex-col items-center gap-1 shrink-0">
-                  <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">
-                    <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
-                  </div>
-                  {renderStars(product.rating || 4.8)}
+                <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0">
+                  <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                 </div>
-                <div className="flex-1 space-y-1">
+                <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
                   <div className="flex justify-between items-center">
                     <h3 className="font-bold text-sm text-primary truncate">{product.name}</h3>
                     <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="p-1.5 active:scale-75 transition-transform">
@@ -183,19 +184,26 @@ export default function StoreDetailPage() {
                     </button>
                   </div>
                   <p className="text-[10px] text-gray-400 line-clamp-1">{product.description || 'وصف الوجبة المميز'}</p>
-                  <div className="text-primary font-black text-sm">{product.price} ر.س</div>
-                  <div className="pt-2" onClick={(e) => e.stopPropagation()}>
-                    {inCart && !needsOptions ? (
-                      <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px] w-fit">
-                        <button onClick={(e) => removeFromCart(product.id, e)} className="h-8 w-8 rounded-[8px] bg-white shadow-sm flex items-center justify-center"><Minus className="h-4 w-4 text-primary" /></button>
-                        <span className="font-black text-xs min-w-[15px] text-center">{inCart.quantity}</span>
-                        <button onClick={(e) => addToCart(product, e)} className="h-8 w-8 rounded-[8px] bg-primary text-white flex items-center justify-center"><Plus className="h-4 w-4" /></button>
-                      </div>
-                    ) : (
-                      <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-9 rounded-[10px] shadow-sm bg-primary text-white text-[10px] font-black w-full px-4">
-                        {needsOptions ? "عرض التفاصيل" : "إضافة للسلة"}
-                      </Button>
-                    )}
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {renderStars(product.rating || 4.8)}
+                      <div className="text-primary font-black text-xs">{product.price} ر.س</div>
+                    </div>
+                    
+                    <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                      {inCart && !needsOptions ? (
+                        <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
+                          <button onClick={(e) => removeFromCart(product.id, e)} className="h-7 w-7 rounded-[8px] bg-white shadow-sm flex items-center justify-center"><Minus className="h-3.5 w-3.5 text-primary" /></button>
+                          <span className="font-black text-[10px] min-w-[12px] text-center">{inCart.quantity}</span>
+                          <button onClick={(e) => addToCart(product, e)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
+                        </div>
+                      ) : (
+                        <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[9px] font-black px-3">
+                          {needsOptions ? "عرض التفاصيل" : "إضافة للسلة"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>

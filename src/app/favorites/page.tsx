@@ -163,13 +163,10 @@ export default function FavoritesPage() {
               return (
                 <Card key={`product-${product.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
                   <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                    <div className="flex flex-col items-center gap-1 shrink-0">
-                      <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">
-                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
-                      </div>
-                      {renderStars(product.rating || 4.8)}
+                    <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0">
+                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                     </div>
-                    <div className="flex-1 space-y-1">
+                    <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
                       <div className="flex justify-between items-center">
                         <h3 className="font-bold text-sm text-primary truncate">{product.name}</h3>
                         <button onClick={(e) => toggleFavorite(e, 'product', product.id)} className="p-1.5 active:scale-75 transition-transform">
@@ -177,17 +174,24 @@ export default function FavoritesPage() {
                         </button>
                       </div>
                       <p className="text-[10px] text-gray-400 line-clamp-1">{product.description || 'وصف المنتج متاح هنا'}</p>
-                      <div className="text-primary font-black text-sm">{product.price} ر.س</div>
-                      <div className="pt-2">
-                        {inCart ? (
-                          <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px] w-fit">
-                            <button onClick={(e) => removeFromCart(e, product.id)} className="h-8 w-8 rounded-[8px] bg-white flex items-center justify-center shadow-sm"><Minus className="h-4 w-4 text-primary" /></button>
-                            <span className="font-black text-xs min-w-[15px] text-center">{inCart.quantity}</span>
-                            <button onClick={(e) => addToCart(e, product)} className="h-8 w-8 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-4 w-4" /></button>
-                          </div>
-                        ) : (
-                          <Button onClick={(e) => addToCart(e, product)} className="h-9 rounded-[10px] bg-primary text-white text-[11px] font-black px-4 shadow-sm w-full">إضافة للسلة</Button>
-                        )}
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {renderStars(product.rating || 4.8)}
+                          <div className="text-primary font-black text-xs">{product.price} ر.س</div>
+                        </div>
+                        
+                        <div className="shrink-0">
+                          {inCart ? (
+                            <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
+                              <button onClick={(e) => removeFromCart(e, product.id)} className="h-7 w-7 rounded-[8px] bg-white flex items-center justify-center shadow-sm"><Minus className="h-3.5 w-3.5 text-primary" /></button>
+                              <span className="font-black text-[10px] min-w-[12px] text-center">{inCart.quantity}</span>
+                              <button onClick={(e) => addToCart(e, product)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-3.5 w-3.5" /></button>
+                            </div>
+                          ) : (
+                            <Button onClick={(e) => addToCart(e, product)} className="h-8 rounded-[8px] bg-primary text-white text-[9px] font-black px-3 shadow-sm">إضافة للسلة</Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -225,9 +229,13 @@ export default function FavoritesPage() {
                         </div>
                         
                         <div className="flex items-center gap-2 pt-1">
-                          <span className="text-[9px] text-[#6B7280] font-black">2.3كم</span>
+                          <span className="text-[9px] text-[#6B7280] font-black">{store.distance || '2.3كم'}</span>
                           <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-[10px]">متجر</Badge>
-                          {renderStars(store.averageRating || 4.5)}
+                          <div className="flex items-center gap-0.5" dir="rtl">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star key={star} className={cn("h-2.5 w-2.5", (store.averageRating || 4.5) >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
+                            ))}
+                          </div>
                           <div className="flex-1" />
                           <Badge className={cn("text-[8px] h-4 px-2 border-none font-black rounded-[10px] shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
                             {isOpen ? 'مفتوح' : 'مغلق'}
