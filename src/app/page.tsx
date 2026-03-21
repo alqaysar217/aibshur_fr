@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Flower2, ShoppingBag } from "lucide-react"
+import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, Coffee, Laptop, Flame, Flower2, ShoppingBag, Gift, Sparkles, Leaf, Beef } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -44,7 +44,7 @@ export default function Home() {
 
   const categoriesQuery = useMemoFirebase(() => {
     if (!db) return null
-    return query(collection(db, "categories"), limit(12))
+    return query(collection(db, "categories"), limit(15))
   }, [db])
   const { data: categories } = useCollection(categoriesQuery)
 
@@ -96,16 +96,17 @@ export default function Home() {
     setIsSeeding(true)
     try {
       const categoriesToSeed = [
-        { id: "restaurants", name: "مطاعم", color: "bg-emerald-50", textColor: "text-emerald-600" },
-        { id: "cafe", name: "كافيهات", color: "bg-amber-50", textColor: "text-amber-800" },
-        { id: "pharmacy", name: "صيدليات", color: "bg-blue-50", textColor: "text-blue-600" },
-        { id: "grocery", name: "ماركت", color: "bg-green-50", textColor: "text-green-600" },
-        { id: "electronics", name: "إلكترونيات", color: "bg-slate-50", textColor: "text-slate-600" },
-        { id: "perfume", name: "عطور", color: "bg-purple-50", textColor: "text-purple-600" },
-        { id: "dates", name: "تمور", color: "bg-amber-100", textColor: "text-amber-900" },
-        { id: "vegetables", name: "خضروات", color: "bg-green-100", textColor: "text-green-800" },
-        { id: "spices", name: "بهارات", color: "bg-yellow-50", textColor: "text-yellow-700" },
-        { id: "sweets", name: "حلويات", color: "bg-pink-50", textColor: "text-pink-600" }
+        { id: "restaurants", name: "مطاعم", color: "bg-rose-50", textColor: "text-rose-600", order: 1 },
+        { id: "gifts", name: "هدايا", color: "bg-purple-50", textColor: "text-purple-600", order: 2 },
+        { id: "cafe", name: "كافيهات", color: "bg-amber-50", textColor: "text-amber-800", order: 3 },
+        { id: "pharmacy", name: "صيدليات", color: "bg-blue-50", textColor: "text-blue-600", order: 4 },
+        { id: "grocery", name: "ماركت", color: "bg-green-50", textColor: "text-green-600", order: 5 },
+        { id: "electronics", name: "إلكترونيات", color: "bg-slate-100", textColor: "text-slate-700", order: 6 },
+        { id: "beauty", name: "تجميل", color: "bg-pink-50", textColor: "text-pink-600", order: 7 },
+        { id: "vegetables", name: "خضروات", color: "bg-emerald-50", textColor: "text-emerald-700", order: 8 },
+        { id: "meat", name: "لحوم", color: "bg-red-50", textColor: "text-red-700", order: 9 },
+        { id: "spices", name: "بهارات", color: "bg-orange-50", textColor: "text-orange-700", order: 10 },
+        { id: "honey", name: "عسل", color: "bg-yellow-50", textColor: "text-yellow-800", order: 11 }
       ]
       for (const cat of categoriesToSeed) {
         await setDoc(doc(db, "categories", cat.id), cat)
@@ -123,7 +124,7 @@ export default function Home() {
       const storesToSeed = [
         { id: "mathaqi_rest", name: "مطعم مذاقي", logoUrl: "https://picsum.photos/seed/mathaqi/600/400", categoryIds: ["restaurants"], address: "المكلا", status: "مفتوح", averageRating: 4.9, deliveryTime: "30-45 دقيقة" },
         { id: "al_khaleej_market", name: "سوبر ماركت الخليج", logoUrl: "https://picsum.photos/seed/grocery_yem/600/400", categoryIds: ["grocery"], address: "المكلا", status: "مفتوح", averageRating: 4.7, deliveryTime: "20-30 دقيقة" },
-        { id: "sweet_home", name: "سويت هوم", logoUrl: "https://picsum.photos/seed/sweets/600/400", categoryIds: ["sweets"], address: "المكلا", status: "مفتوح", averageRating: 4.5, deliveryTime: "15-25 دقيقة" }
+        { id: "sweet_home", name: "عسل حضرمي", logoUrl: "https://picsum.photos/seed/honey/600/400", categoryIds: ["honey"], address: "المكلا", status: "مفتوح", averageRating: 4.5, deliveryTime: "15-25 دقيقة" }
       ]
       for (const s of storesToSeed) {
         await setDoc(doc(db, "stores", s.id), s)
@@ -142,28 +143,51 @@ export default function Home() {
     switch (id) {
       case 'restaurants': return <Utensils className="h-5 w-5" />
       case 'cafe': return <Coffee className="h-5 w-5" />
-      case 'perfume': return <Flower2 className="h-5 w-5" />
-      case 'dates': return <Laptop className="h-5 w-5" />
+      case 'gifts': return <Gift className="h-5 w-5" />
+      case 'beauty': return <Sparkles className="h-5 w-5" />
       case 'grocery': return <ShoppingBasket className="h-5 w-5" />
       case 'pharmacy': return <Pill className="h-5 w-5" />
       case 'electronics': return <Laptop className="h-5 w-5" />
-      case 'sweets': return <CakeSlice className="h-5 w-5" />
+      case 'meat': return <Beef className="h-5 w-5" />
+      case 'honey': return <Flower2 className="h-5 w-5" />
       case 'spices': return <Flame className="h-5 w-5" />
-      case 'vegetables': return <ShoppingBasket className="h-5 w-5" />
+      case 'vegetables': return <Leaf className="h-5 w-5" />
       default: return <ShoppingBasket className="h-5 w-5" />
     }
   }
 
   if (!mounted) return null;
 
+  // Sorting categories by order
+  const sortedCategories = categories ? [...categories].sort((a, b) => (a.order || 99) - (b.order || 99)) : null;
+
   return (
     <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300" dir="rtl">
       <Header />
 
-      {/* قسم الأقسام - الآن في الأعلى */}
-      <section className="py-4">
+      {/* قسم الأقسام في الأعلى */}
+      <section className="py-4 bg-white border-b border-gray-100">
         <div className="flex gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide" dir="rtl">
-          {categories ? categories.map((cat: any) => (
+          {/* الكل */}
+          <button 
+            onClick={() => setActiveCategory(null)}
+            className="flex flex-col items-center gap-2 shrink-0 group"
+          >
+            <div className={cn(
+              "h-16 w-16 rounded-[10px] flex items-center justify-center transition-all duration-300 shadow-sm border",
+              activeCategory === null ? "bg-primary text-white border-primary scale-105" : "bg-secondary/20 text-gray-500 border-transparent"
+            )}>
+              <div className="text-[10px] font-black">الكل</div>
+            </div>
+            <span className={cn(
+              "text-[11px] font-bold transition-colors",
+              activeCategory === null ? "text-primary" : "text-gray-500"
+            )}>
+              الكل
+            </span>
+          </button>
+
+          {sortedCategories ? sortedCategories.map((cat: any) => (
             <button 
               key={cat.id} 
               onClick={() => setActiveCategory(cat.id === activeCategory ? null : cat.id)}
@@ -190,8 +214,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* قسم الإعلانات */}
-      <section className="px-4 pb-2">
+      {/* قسم الإعلانات - صور فقط بدون نصوص */}
+      <section className="px-4 py-4">
         <Carousel 
           opts={{ loop: true, direction: 'rtl' }} 
           plugins={[Autoplay({ delay: 5000 })]}
@@ -201,14 +225,14 @@ export default function Home() {
             {ads && ads.length > 0 ? ads.map((ad: any) => (
               <CarouselItem key={ad.id}>
                 <Link href={ad.storeId ? `/store/${ad.storeId}` : '#'}>
-                  <Card className="border-none shadow-sm rounded-[10px] overflow-hidden relative h-40 transition-all active:scale-[0.98]">
+                  <Card className="border-none shadow-sm rounded-[10px] overflow-hidden relative h-44 transition-all active:scale-[0.98]">
                     <Image src={ad.imageUrl} alt="banner" fill className="object-cover" />
                   </Card>
                 </Link>
               </CarouselItem>
             )) : (
               <CarouselItem>
-                <div className="h-40 bg-white rounded-[10px] animate-pulse" />
+                <div className="h-44 bg-white rounded-[10px] animate-pulse" />
               </CarouselItem>
             )}
           </CarouselContent>
@@ -228,7 +252,8 @@ export default function Home() {
             stores.map((store: any) => {
               const isOpen = store.status === 'مفتوح' || store.status === 'open'
               const isFav = userData?.favoritesStoreIds?.includes(store.id)
-              const categoryName = categories?.find(c => (store.categoryIds || []).includes(c.id))?.name || "متجر";
+              const categoryObj = categories?.find(c => (store.categoryIds || []).includes(c.id));
+              const categoryName = categoryObj?.name || "متجر";
 
               return (
                 <Link key={store.id} href={`/store/${store.id}`}>

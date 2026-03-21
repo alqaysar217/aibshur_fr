@@ -75,13 +75,14 @@ export default function StoreDetailPage() {
     const translations: Record<string, string> = {
       'grocery': 'ماركت',
       'restaurants': 'مطاعم',
-      'pharmacy': 'صيدلية',
+      'pharmacy': 'صيدليات',
       'cafe': 'كافيهات',
       'electronics': 'إلكترونيات',
-      'sweets': 'حلويات',
+      'beauty': 'تجميل',
+      'meat': 'لحوم',
+      'honey': 'عسل',
+      'gifts': 'هدايا',
       'spices': 'بهارات',
-      'perfume': 'عطور',
-      'dates': 'تمور',
       'vegetables': 'خضروات'
     };
     return translations[categoryId] || categoryId || 'متجر';
@@ -147,6 +148,7 @@ export default function StoreDetailPage() {
 
   return (
     <div className="pb-40 bg-[#F8FAFB] min-h-screen font-body" dir="rtl">
+      {/* قسم الهيدر المحسن والمضغوط */}
       <div className="bg-white px-5 pt-4 pb-5 shadow-sm border-b border-gray-100">
         <div className="flex justify-between items-center mb-5">
           <button onClick={() => router.back()} className="h-10 w-10 bg-secondary/30 rounded-[10px] flex items-center justify-center active:scale-90 transition-all">
@@ -231,10 +233,8 @@ export default function StoreDetailPage() {
             return (
               <Card key={`product-${product.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer" onClick={() => setViewingProduct(product)}>
                 <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                  <div className="flex flex-col items-center gap-1 shrink-0">
-                    <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shadow-sm">
-                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
-                    </div>
+                  <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shadow-sm shrink-0">
+                    <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
                     <div className="flex justify-between items-start">
