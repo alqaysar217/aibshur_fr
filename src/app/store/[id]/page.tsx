@@ -222,15 +222,15 @@ export default function StoreDetailPage() {
 
   const renderStars = (rating: number) => {
     return (
-      <div className="flex flex-row-reverse items-center gap-0.5 mt-0.5">
+      <div className="flex items-center gap-0.5 mt-0.5" dir="rtl">
         {[1, 2, 3, 4, 5].map((star) => (
           <div key={star} className="relative h-2.5 w-2.5">
-            <Star className="absolute inset-0 h-full w-full text-muted-foreground/20 stroke-[2]" />
+            <Star className="absolute inset-0 h-full w-full text-muted-foreground/20 stroke-[1.5]" />
             <div 
-              className="absolute inset-0 overflow-hidden" 
+              className="absolute inset-y-0 right-0 overflow-hidden" 
               style={{ width: rating >= star ? '100%' : rating >= star - 0.5 ? '50%' : '0%' }}
             >
-              <Star className="h-2.5 w-2.5 fill-primary text-primary stroke-primary stroke-[2]" />
+              <Star className="absolute top-0 right-0 h-2.5 w-2.5 fill-primary text-primary stroke-primary stroke-[1.5]" />
             </div>
           </div>
         ))}
@@ -283,12 +283,12 @@ export default function StoreDetailPage() {
           </div>
           <div className="flex-1 space-y-1">
             <div className="flex items-center justify-between">
-              <h1 className="text-lg font-black text-[#111827] leading-tight truncate">{store.name}</h1>
+              <h1 className="text-lg font-black text-[#111827] leading-tight truncate text-right">{store.name}</h1>
               <button onClick={toggleFavoriteStore} className={cn("p-2 rounded-xl active:scale-90 transition-transform", isFavoriteStore ? "text-destructive" : "text-gray-300")}>
                 <Heart className={cn("h-4 w-4", isFavoriteStore && "fill-current")} />
               </button>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap justify-start">
               {renderStars(store.averageRating || 4.5)}
               <Badge className={cn("text-[8px] font-black border-none px-2 h-4", isStoreOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
                 {isStoreOpen ? 'مفتوح الآن' : 'مغلق'}
