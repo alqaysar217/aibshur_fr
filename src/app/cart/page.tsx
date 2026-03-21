@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { 
   Trash2, Plus, Minus, ArrowRight, CreditCard, ShoppingBag, 
   Tag, MapPin, ChevronLeft, Loader2, Wallet, Banknote, 
-  MessageSquare, AlertCircle, CheckCircle2, X 
+  MessageSquare, AlertCircle, CheckCircle2, X, Edit2, Check 
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,6 +27,7 @@ const BANK_ACCOUNTS = [
 
 export default function CartPage() {
   const [cart, setCart] = useState<any[]>([])
+  const [isEditing, setIsEditing] = useState(false)
   const [coupon, setCoupon] = useState("")
   const [showCouponInput, setShowCouponInput] = useState(false)
   const [isCouponApplied, setIsCouponApplied] = useState(false)
@@ -84,6 +85,11 @@ export default function CartPage() {
     saveCart(newCart)
   }
 
+  const removeItem = (productId: string) => {
+    const newCart = cart.filter(item => item.id !== productId)
+    saveCart(newCart)
+  }
+
   const clearCart = () => {
     saveCart([])
     toast({ title: "تم إفراغ السلة" })
@@ -122,7 +128,7 @@ export default function CartPage() {
     const orderData = {
       userId: user.uid,
       storeId: cart[0].storeId,
-      items: cart,
+      orderItems: cart,
       subtotal: cartTotal,
       deliveryFee: deliveryFee,
       discount: discount,
@@ -130,7 +136,7 @@ export default function CartPage() {
       status: "pending",
       paymentMethod: paymentMethod,
       bankDetails: paymentMethod === "bank" ? selectedBank : null,
-      address: selectedAddress,
+      deliveryAddress: `${selectedAddress?.city} - ${selectedAddress?.details}`,
       notes: orderNotes,
       createdAt: serverTimestamp(),
     }
@@ -151,7 +157,7 @@ export default function CartPage() {
 
       await addDoc(collection(db, "users", user.uid, "notifications"), {
         title: "تم استلام طلبك!",
-        body: `طلبك #${docRef.id.substring(0,6)} قيد التجهيز. سنتواصل معك عبر الواتساب لتأكيد الطلب.`,
+        body: `طلبك #${docRef.id.substring(0,6)} قيد التجهيز. سنتواصل معك عبر الواتساب لتأكيد الطلب وإرسال الفاتورة التفصيلية.`,
         type: "order_status",
         isRead: false,
         createdAt: serverTimestamp()
@@ -207,11 +213,24 @@ export default function CartPage() {
       <div className="p-4 space-y-6">
         {/* ملخص المنتجات (الجدول) */}
         <Card className="border-none shadow-sm rounded-2xl overflow-hidden bg-white">
+          <div className="p-4 border-b flex justify-between items-center bg-secondary/10">
+            <h2 className="font-bold text-sm flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4 text-primary" /> قائمة المنتجات
+            </h2>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setIsEditing(!isEditing)}
+              className="text-xs font-bold text-primary gap-1 h-8"
+            >
+              {isEditing ? <><Check className="h-3.5 w-3.5" /> تم</> : <><Edit2 className="h-3.5 w-3.5" /> تعديل</>}
+            </Button>
+          </div>
           <CardContent className="p-0">
-            <div className="bg-primary/5 p-3 flex justify-between text-[10px] font-black text-primary uppercase tracking-widest border-b">
+            <div className="bg-gray-50/50 p-3 flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b">
               <span className="flex-1">المنتج</span>
               <span className="w-16 text-center">السعر</span>
-              <span className="w-24 text-center">الكمية</span>
+              <span className="w-16 text-center">الكمية</span>
               <span className="w-16 text-left">الإجمالي</span>
             </div>
             <div className="divide-y divide-secondary/50">
@@ -219,13 +238,26 @@ export default function CartPage() {
                 <div key={item.id} className="p-4 flex items-center gap-3 justify-between">
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-xs truncate">{item.name}</p>
-                    <p className="text-[9px] text-muted-foreground">{item.storeName || "متجر أبشر"}</p>
+                    {isEditing && (
+                      <button 
+                        onClick={() => removeItem(item.id)} 
+                        className="text-[9px] text-destructive font-bold flex items-center gap-0.5 mt-1"
+                      >
+                        <Trash2 className="h-3 w-3" /> حذف
+                      </button>
+                    )}
                   </div>
                   <div className="w-16 text-center font-bold text-[11px]">{item.price}</div>
-                  <div className="w-24 flex items-center justify-center gap-2">
-                    <button onClick={() => updateQuantity(item.id, -1)} className="h-6 w-6 rounded-full border flex items-center justify-center bg-gray-50 active:scale-90"><Minus className="h-3 w-3" /></button>
-                    <span className="text-xs font-black">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.id, 1)} className="h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center active:scale-90"><Plus className="h-3 w-3" /></button>
+                  <div className="w-16 flex items-center justify-center">
+                    {isEditing ? (
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => updateQuantity(item.id, -1)} className="h-5 w-5 rounded-full border flex items-center justify-center bg-white active:scale-90"><Minus className="h-3 w-3" /></button>
+                        <span className="text-xs font-black">{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, 1)} className="h-5 w-5 rounded-full bg-primary text-white flex items-center justify-center active:scale-90"><Plus className="h-3 w-3" /></button>
+                      </div>
+                    ) : (
+                      <span className="text-xs font-black">{item.quantity}</span>
+                    )}
                   </div>
                   <div className="w-16 text-left font-black text-primary text-[11px]">{item.price * item.quantity}</div>
                 </div>
