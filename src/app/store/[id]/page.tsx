@@ -165,7 +165,7 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="px-5 py-4 flex flex-col gap-4">
         {isProductsLoading ? [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-[10px] animate-pulse" />) : filteredProducts.map((product: any) => {
           const inCart = cart.find(item => item.id === product.id)
           const isFavProd = userData?.favoritesProductIds?.includes(product.id)
@@ -177,18 +177,18 @@ export default function StoreDetailPage() {
                   <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-sm text-primary truncate">{product.name}</h3>
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-sm text-primary truncate leading-tight">{product.name}</h3>
                     <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="p-1.5 active:scale-75 transition-transform">
                       <Heart className={cn("h-4 w-4", isFavProd ? "fill-destructive text-destructive" : "text-gray-300")} />
                     </button>
                   </div>
-                  <p className="text-[10px] text-gray-400 line-clamp-1">{product.description || 'وصف الوجبة المميز'}</p>
+                  <p className="text-[10px] text-gray-400 line-clamp-1 leading-relaxed">{product.description || 'وصف الوجبة المميز'}</p>
                   
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between mt-auto">
+                    <div className="flex items-center gap-3">
                       {renderStars(product.rating || 4.8)}
-                      <div className="text-primary font-black text-xs">{product.price} ر.س</div>
+                      <div className="text-primary font-black text-xs shrink-0">{product.price} ر.س</div>
                     </div>
                     
                     <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -199,7 +199,7 @@ export default function StoreDetailPage() {
                           <button onClick={(e) => addToCart(product, e)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
                         </div>
                       ) : (
-                        <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[9px] font-black px-3">
+                        <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[9px] font-black px-4">
                           {needsOptions ? "عرض التفاصيل" : "إضافة للسلة"}
                         </Button>
                       )}

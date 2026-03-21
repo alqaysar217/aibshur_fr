@@ -163,23 +163,23 @@ export default function FavoritesPage() {
               return (
                 <Card key={`product-${product.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
                   <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                    <div className="flex flex-col items-center gap-1 shrink-0">
-                      <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">
-                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
-                      </div>
-                      {renderStars(product.rating || 4.8)}
+                    <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0">
+                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                     </div>
-                    <div className="flex-1 min-w-0 flex flex-col justify-between h-24">
+                    <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
                       <div className="flex justify-between items-start">
                         <h3 className="font-bold text-sm text-primary truncate leading-tight">{product.name}</h3>
                         <button onClick={(e) => toggleFavorite(e, 'product', product.id)} className="p-1.5 active:scale-75 transition-transform">
                           <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                         </button>
                       </div>
-                      <p className="text-[10px] text-gray-400 line-clamp-2 leading-relaxed">{product.description || 'وصف المنتج متاح هنا'}</p>
+                      <p className="text-[10px] text-gray-400 line-clamp-1 leading-relaxed">{product.description || 'وصف المنتج متاح هنا'}</p>
                       
-                      <div className="flex items-center justify-between gap-2 mt-auto">
-                        <div className="text-primary font-black text-xs shrink-0">{product.price} ر.س</div>
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex items-center gap-3">
+                          {renderStars(product.rating || 4.8)}
+                          <div className="text-primary font-black text-xs shrink-0">{product.price} ر.س</div>
+                        </div>
                         <div className="shrink-0 flex-1 flex justify-end">
                           {inCart ? (
                             <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
@@ -188,7 +188,7 @@ export default function FavoritesPage() {
                               <button onClick={(e) => addToCart(e, product)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-3.5 w-3.5" /></button>
                             </div>
                           ) : (
-                            <Button onClick={(e) => addToCart(e, product)} className="h-8 rounded-[8px] bg-primary text-white text-[10px] font-black px-4 shadow-sm">إضافة للسلة</Button>
+                            <Button onClick={(e) => addToCart(e, product)} className="h-8 rounded-[8px] bg-primary text-white text-[9px] font-black px-4 shadow-sm">إضافة للسلة</Button>
                           )}
                         </div>
                       </div>
@@ -228,7 +228,7 @@ export default function FavoritesPage() {
                         </div>
                         
                         <div className="flex items-center gap-2 pt-1">
-                          <span className="text-[9px] text-[#6B7280] font-black">2.3كم</span>
+                          <span className="text-[9px] text-[#6B7280] font-black">{store.deliveryTime ? store.deliveryTime.split(' ')[0] : '2.3'}كم</span>
                           <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-[10px]">متجر</Badge>
                           <div className="flex items-center gap-0.5" dir="rtl">
                             {[1, 2, 3, 4, 5].map((star) => (
