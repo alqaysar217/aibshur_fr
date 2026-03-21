@@ -186,8 +186,8 @@ export default function AddressesPage() {
               <Plus className="h-5 w-5" /> إضافة عنوان جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-[10px] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0">
-            <div className="max-h-[85vh] overflow-y-auto">
+          <DialogContent className="rounded-[10px] w-[95%] max-w-md mx-auto p-0 border-none focus-visible:ring-0 overflow-visible" dir="rtl">
+            <div className="max-h-[85vh] overflow-y-auto rounded-[10px]">
               <DialogHeader className="p-5 bg-primary text-white">
                 <DialogTitle className="text-right flex items-center justify-between">
                   <span>أين تريد التوصيل؟</span>
@@ -228,13 +228,13 @@ export default function AddressesPage() {
                   <div className="space-y-2 text-right">
                     <label className="text-xs font-bold text-muted-foreground mr-1">تسمية العنوان</label>
                     <Select onValueChange={(v) => setLabelType(v)} value={labelType}>
-                      <SelectTrigger className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold text-right" dir="rtl">
+                      <SelectTrigger className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold text-right flex-row-reverse" dir="rtl">
                         <SelectValue placeholder="اختر نوع العنوان" />
                       </SelectTrigger>
                       <SelectContent className="rounded-[10px] z-[110]" dir="rtl">
-                        <SelectItem value="المنزل" className="text-right">المنزل</SelectItem>
-                        <SelectItem value="العمل" className="text-right">العمل</SelectItem>
-                        <SelectItem value="آخر" className="text-right">أخرى</SelectItem>
+                        <SelectItem value="المنزل" className="text-right flex-row-reverse">المنزل</SelectItem>
+                        <SelectItem value="العمل" className="text-right flex-row-reverse">العمل</SelectItem>
+                        <SelectItem value="آخر" className="text-right flex-row-reverse">أخرى</SelectItem>
                       </SelectContent>
                     </Select>
                     
@@ -265,7 +265,7 @@ export default function AddressesPage() {
                   disabled={isSaving || !newCity || !newDetails || (labelType === "آخر" && !customLabel)}
                   className="w-full h-14 rounded-[10px] font-black text-lg mt-2 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90"
                 >
-                  {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "حفظ العنوان"}
+                  {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "حفظ العنوان وتأكيده"}
                 </Button>
               </div>
             </div>
