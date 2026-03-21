@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation"
 import { 
   Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, 
   Navigation, LayoutGrid, Zap, Utensils, Soup, Flame, Coffee, Beef, ChefHat, 
-  Pizza, Sandwich, Cookie, CupSoda, CakeSlice, Info
+  Pizza, Sandwich, Cookie, CupSoda, CakeSlice, Info, ShoppingCart
 } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -136,6 +136,27 @@ export default function StoreDetailPage() {
       return matchesSearch && matchesCategory
     })
   }, [products, searchQuery, selectedCategory, userData?.favoritesProductIds])
+
+  // منطق توليد الخيارات للمنتجات
+  const productVariants = useMemo(() => {
+    if (!viewingProduct) return [];
+    const name = viewingProduct.name;
+    if (name.includes('بيتزا')) {
+      return [
+        { id: `${viewingProduct.id}-small`, name: 'بيتزا صغير', price: Math.round(viewingProduct.price * 0.7), imageUrl: viewingProduct.imageUrl },
+        { id: `${viewingProduct.id}-medium`, name: 'بيتزا وسط', price: viewingProduct.price, imageUrl: viewingProduct.imageUrl },
+        { id: `${viewingProduct.id}-large`, name: 'بيتزا كبير', price: Math.round(viewingProduct.price * 1.3), imageUrl: viewingProduct.imageUrl },
+      ];
+    }
+    if (name.includes('مندي') || name.includes('نفر') || name.includes('دجاج') || name.includes('لحم')) {
+      return [
+        { id: `${viewingProduct.id}-quarter`, name: 'ربع نفر', price: Math.round(viewingProduct.price * 0.5), imageUrl: viewingProduct.imageUrl },
+        { id: `${viewingProduct.id}-half`, name: 'نصف نفر', price: viewingProduct.price, imageUrl: viewingProduct.imageUrl },
+        { id: `${viewingProduct.id}-full`, name: 'نفر كامل', price: Math.round(viewingProduct.price * 1.8), imageUrl: viewingProduct.imageUrl },
+      ];
+    }
+    return [];
+  }, [viewingProduct]);
 
   const toggleFavoriteStore = () => {
     if (!user) {
@@ -349,11 +370,7 @@ export default function StoreDetailPage() {
                           ) : (
                             <Button 
                               onClick={(e) => {
-                                if (needsOptions) {
-                                  setViewingProduct(product);
-                                } else {
-                                  addToCart(product, e);
-                                }
+                                setViewingProduct(product);
                               }}
                               className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                             >
@@ -378,13 +395,13 @@ export default function StoreDetailPage() {
       <Dialog open={!!viewingProduct} onOpenChange={(val) => !val && setViewingProduct(null)}>
         <DialogContent className="rounded-[2.5rem] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0" dir="rtl">
           {viewingProduct && (
-            <div className="flex flex-col">
+            <div className="flex flex-col max-h-[90vh] overflow-y-auto">
               <DialogHeader className="sr-only">
                 <DialogTitle>{viewingProduct.name}</DialogTitle>
-                <DialogDescription>تفاصيل المنتج الأساسية</DialogDescription>
+                <DialogDescription>تفاصيل المنتج الأساسية والخيارات المتاحة</DialogDescription>
               </DialogHeader>
               
-              <div className="relative h-64 w-full">
+              <div className="relative h-64 w-full shrink-0">
                 <Image 
                   src={viewingProduct.imageUrl || `https://picsum.photos/seed/${viewingProduct.id}/600/400`} 
                   alt={viewingProduct.name} 
@@ -416,7 +433,7 @@ export default function StoreDetailPage() {
 
                 <div className="flex items-center justify-between">
                   <div className="text-right">
-                    <p className="text-xs text-gray-400">السعر</p>
+                    <p className="text-xs text-gray-400">السعر الأساسي</p>
                     <p className="text-2xl font-black text-primary">{viewingProduct.price} <small className="text-sm font-bold">ر.س</small></p>
                   </div>
                   <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1 rounded-xl">
@@ -425,24 +442,54 @@ export default function StoreDetailPage() {
                   </div>
                 </div>
 
-                <Button 
-                  onClick={() => {
-                    const prod = viewingProduct;
-                    setViewingProduct(null);
-                    const existing = cart.find(item => item.id === prod.id)
-                    let newCart;
-                    if (existing) {
-                      newCart = cart.map(item => item.id === prod.id ? { ...item, quantity: item.quantity + 1 } : item)
-                    } else {
-                      newCart = [...cart, { ...prod, quantity: 1, storeId: id }]
-                    }
-                    saveCart(newCart)
-                    toast({ title: "تمت الإضافة", description: `${prod.name} أضيف إلى السلة` })
-                  }}
-                  className="w-full h-14 rounded-2xl shadow-lg shadow-primary/20 bg-primary font-black text-lg"
-                >
-                  تأكيد الإضافة للسلة
-                </Button>
+                {/* عرض الخيارات (Variants) */}
+                {productVariants.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="font-black text-sm text-primary flex items-center gap-2 px-1">
+                      <Zap className="h-4 w-4" /> الخيارات المتاحة:
+                    </h4>
+                    <div className="space-y-3">
+                      {productVariants.map((v) => (
+                        <Card key={v.id} className="border-none bg-secondary/20 rounded-2xl overflow-hidden transition-all hover:bg-secondary/30">
+                          <CardContent className="p-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-white shadow-sm shrink-0">
+                                <Image src={v.imageUrl} alt={v.name} fill className="object-cover" />
+                              </div>
+                              <div className="text-right">
+                                <p className="font-black text-xs">{v.name}</p>
+                                <p className="text-primary font-black text-sm">{v.price} <small className="text-[9px]">ر.س</small></p>
+                              </div>
+                            </div>
+                            <Button 
+                              size="sm"
+                              onClick={() => {
+                                const variantData = { ...viewingProduct, id: v.id, name: v.name, price: v.price };
+                                addToCart(variantData);
+                                setViewingProduct(null);
+                              }}
+                              className="h-9 rounded-xl font-bold bg-primary shadow-sm active:scale-95"
+                            >
+                              إضافة
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!productVariants.length && (
+                  <Button 
+                    onClick={() => {
+                      addToCart(viewingProduct);
+                      setViewingProduct(null);
+                    }}
+                    className="w-full h-14 rounded-2xl shadow-lg shadow-primary/20 bg-primary font-black text-lg"
+                  >
+                    تأكيد الإضافة للسلة
+                  </Button>
+                )}
               </div>
             </div>
           )}
