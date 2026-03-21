@@ -1,12 +1,14 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Search, StarHalf, ArrowRight, ShoppingBag, Loader2, Filter, Star, Heart, MapPin, Plus, Minus, Zap, Map, Clock, Sparkles, Store } from "lucide-react"
+import { Search, StarHalf, ArrowRight, ShoppingBag, Loader2, Filter, Star, Heart, MapPin, Plus, Minus, Zap, Map, Clock, Sparkles, Store, Package } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BottomNav } from "@/components/layout/bottom-nav"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from "@/firebase"
 import { collection, query, collectionGroup, limit, doc, setDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { useRouter } from "next/navigation"
@@ -116,6 +118,9 @@ export default function SearchPage() {
     });
   }, [queryText, activeFilter, stores, products, userData, mounted])
 
+  const filteredProducts = useMemo(() => filteredResults.filter(i => i.type === 'product'), [filteredResults])
+  const filteredStores = useMemo(() => filteredResults.filter(i => i.type === 'store'), [filteredResults])
+
   const toggleFavorite = (e: React.MouseEvent, type: 'store' | 'product', id: string) => {
     e.preventDefault()
     e.stopPropagation()
@@ -208,13 +213,13 @@ export default function SearchPage() {
       <header className="p-4 glass sticky top-0 z-50 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full h-10 w-10">
-            <ArrowRight className="h-6 w-6" />
+            <ArrowRight className="h-6 w-6 text-primary" />
           </Button>
-          <h1 className="text-xl font-bold text-primary">البحث في أبشر</h1>
+          <h1 className="text-xl font-black text-primary">البحث في أبشر</h1>
         </div>
         <Link href="/cart">
           <Button variant="ghost" size="icon" className="relative h-10 w-10">
-            <ShoppingBag className="h-5 w-5" />
+            <ShoppingBag className="h-5 w-5 text-gray-500" />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white animate-in zoom-in">
                 {cartCount}
@@ -232,7 +237,7 @@ export default function SearchPage() {
           <Input 
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
-            placeholder="ابحث عن مطعم، وجبة، أو متجر..." 
+            placeholder="ابحث عن متجر، أو منتج..." 
             className="pr-12 h-16 rounded-2xl border-none shadow-2xl bg-white text-lg focus-visible:ring-primary text-right"
           />
         </div>
@@ -255,138 +260,173 @@ export default function SearchPage() {
           ))}
         </div>
 
-        <div className="flex flex-col gap-0 pt-2">
-          {loadingStores || loadingProducts ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="h-24 w-full bg-white rounded-2xl animate-pulse mb-4" />)
-          ) : filteredResults.length > 0 ? (
-            filteredResults.map((item: any) => {
-              if (item.type === 'store') {
-                const isOpen = item.status === 'مفتوح' || item.status === 'open'
-                const isFav = userData?.favoritesStoreIds?.includes(item.id)
-                const categoryName = categories?.find(c => item.categoryIds?.includes(c.id))?.name || "متجر"
+        <Tabs defaultValue="products" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/50 backdrop-blur-sm rounded-2xl p-1 shadow-sm h-14" dir="rtl">
+            <TabsTrigger 
+              value="products" 
+              className="rounded-xl font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Package className="h-4 w-4" /> منتجات
+            </TabsTrigger>
+            <TabsTrigger 
+              value="stores" 
+              className="rounded-xl font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Store className="h-4 w-4" /> متاجر
+            </TabsTrigger>
+          </TabsList>
 
-                return (
-                  <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
-                    <Card className="border-none shadow-sm rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-24 mb-4">
-                      <CardContent className="p-2.5 h-full flex flex-row items-center gap-3 justify-between" dir="rtl">
+          <TabsContent value="products">
+            <div className="flex flex-col gap-0">
+              {loadingProducts ? (
+                [1, 2, 3, 4].map(i => <div key={i} className="h-24 w-full bg-white rounded-2xl animate-pulse mb-4" />)
+              ) : filteredProducts.length > 0 ? (
+                filteredProducts.map((item: any) => {
+                  const inCart = cart.find(c => c.id === item.id)
+                  const isFavProd = userData?.favoritesProductIds?.includes(item.id)
+                  const needsOptions = hasOptions(item.name)
+                  const itemStore = stores?.find(s => s.id === item.storeId)
+
+                  return (
+                    <Card key={`product-${item.id}`} className="relative border-none shadow-sm rounded-xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-3" onClick={() => router.push(`/store/${item.storeId}`)}>
+                      <button onClick={(e) => { e.stopPropagation(); toggleFavorite(e, 'product', item.id); }} className="absolute top-2 left-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                        <Heart className={cn("h-3.5 w-3.5", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
+                      </button>
+                      <CardContent className="p-2.5 flex flex-row items-center gap-3" dir="rtl">
                         <div className="flex flex-col items-center gap-1 shrink-0">
-                          <div className="relative w-16 h-16 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
-                            <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                          <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
+                            <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                           </div>
-                          {renderStars(item.averageRating || 4.5)}
+                          {renderStars(item.rating || 4.8)}
                         </div>
 
-                        <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1 text-right">
-                          <h4 className="font-bold text-sm text-[#111827] truncate text-right w-full">{item.name}</h4>
-                          <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
-                            <MapPin className="h-2.5 w-2.5 text-primary/60" />
-                            <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
+                        <div className="flex-1 text-right space-y-0.5 overflow-hidden">
+                          <h3 className="font-bold text-sm text-[#111827] truncate w-full">{item.name}</h3>
+                          <p className="text-[10px] text-gray-400 line-clamp-1 leading-snug">
+                            {item.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
+                          </p>
+                          
+                          <div className="flex items-center gap-1.5 pt-1">
+                            <div className="relative h-4 w-4 rounded-full overflow-hidden bg-secondary/20">
+                              <Image src={itemStore?.logoUrl || `https://picsum.photos/seed/${item.storeId || 'store'}/100`} alt="" fill className="object-cover" />
+                            </div>
+                            <span className="text-[9px] font-bold text-muted-foreground">{itemStore?.name || "المتجر"}</span>
                           </div>
-                          <div className="flex items-center gap-2 pt-0.5 w-full justify-start">
-                            <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
-                              2.3 كم
-                            </span>
-                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md whitespace-nowrap">
-                              {categoryName}
-                            </Badge>
-                          </div>
-                        </div>
 
-                        <div className="flex flex-col justify-between items-end h-full py-1 shrink-0">
-                          <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/20 backdrop-blur-sm rounded-lg active:scale-75 transition-transform">
-                            <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
-                          </button>
-                          <Badge className={cn("text-[9px] h-4 px-1.5 border-none font-bold rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
-                            {isOpen ? 'مفتوح' : 'مغلق'}
-                          </Badge>
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-primary font-black text-sm">{item.price} <small className="text-[9px] font-bold">ر.س</small></span>
+                            <div onClick={(e) => e.stopPropagation()}>
+                              {needsOptions ? (
+                                <Button 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    router.push(`/store/${item.storeId}`);
+                                  }}
+                                  className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
+                                >
+                                  عرض الخيارات
+                                </Button>
+                              ) : (
+                                inCart ? (
+                                  <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
+                                    <Button onClick={(e) => removeFromCart(e, item.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
+                                      <Minus className="h-3.5 w-3.5 text-primary" />
+                                    </Button>
+                                    <span className="font-bold text-xs min-w-[10px] text-center">{inCart.quantity}</span>
+                                    <Button onClick={(e) => addToCart(e, item)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
+                                      <Plus className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <Button 
+                                    onClick={(e) => addToCart(e, item)}
+                                    className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
+                                  >
+                                    إضافة
+                                  </Button>
+                                )
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
-                  </Link>
-                )
-              } else {
-                const inCart = cart.find(c => c.id === item.id)
-                const isFavProd = userData?.favoritesProductIds?.includes(item.id)
-                const needsOptions = hasOptions(item.name)
-                const itemStore = stores?.find(s => s.id === item.storeId)
-
-                return (
-                  <Card key={`product-${item.id}`} className="relative border-none shadow-sm rounded-xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-3" onClick={() => router.push(`/store/${item.storeId}`)}>
-                    <button onClick={(e) => { e.stopPropagation(); toggleFavorite(e, 'product', item.id); }} className="absolute top-2 left-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
-                      <Heart className={cn("h-3.5 w-3.5", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-                    </button>
-                    <CardContent className="p-2.5 flex flex-row items-center gap-3" dir="rtl">
-                      <div className="flex flex-col items-center gap-1 shrink-0">
-                        <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
-                          <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                        </div>
-                        {renderStars(item.rating || 4.8)}
-                      </div>
-
-                      <div className="flex-1 text-right space-y-0.5 overflow-hidden">
-                        <h3 className="font-bold text-sm text-[#111827] truncate w-full">{item.name}</h3>
-                        <p className="text-[10px] text-gray-400 line-clamp-1 leading-snug">
-                          {item.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
-                        </p>
-                        
-                        <div className="flex items-center gap-1.5 pt-1">
-                          <div className="relative h-4 w-4 rounded-full overflow-hidden bg-secondary/20">
-                            <Image src={itemStore?.logoUrl || `https://picsum.photos/seed/${item.storeId || 'store'}/100`} alt="" fill className="object-cover" />
-                          </div>
-                          <span className="text-[9px] font-bold text-muted-foreground">{itemStore?.name || "المتجر"}</span>
-                        </div>
-
-                        <div className="flex items-center justify-between pt-1">
-                          <span className="text-primary font-black text-sm">{item.price} <small className="text-[9px] font-bold">ر.س</small></span>
-                          <div onClick={(e) => e.stopPropagation()}>
-                            {needsOptions ? (
-                              <Button 
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  router.push(`/store/${item.storeId}`);
-                                }}
-                                className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
-                              >
-                                عرض الخيارات
-                              </Button>
-                            ) : (
-                              inCart ? (
-                                <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
-                                  <Button onClick={(e) => removeFromCart(e, item.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
-                                    <Minus className="h-3.5 w-3.5 text-primary" />
-                                  </Button>
-                                  <span className="font-bold text-xs min-w-[10px] text-center">{inCart.quantity}</span>
-                                  <Button onClick={(e) => addToCart(e, item)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
-                                    <Plus className="h-3.5 w-3.5" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <Button 
-                                  onClick={(e) => addToCart(e, item)}
-                                  className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
-                                >
-                                  إضافة
-                                </Button>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              }
-            })
-          ) : (
-            <div className="text-center py-32 flex flex-col items-center opacity-30">
-              <Search className="h-12 w-12 mb-4" />
-              <p className="text-sm font-bold">لم نجد أي نتائج</p>
+                  )
+                })
+              ) : (
+                <EmptyState message="لم نجد أي منتجات" icon={<Package className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />} />
+              )}
             </div>
-          )}
-        </div>
+          </TabsContent>
+
+          <TabsContent value="stores">
+            <div className="flex flex-col gap-0">
+              {loadingStores ? (
+                [1, 2, 3, 4].map(i => <div key={i} className="h-24 w-full bg-white rounded-2xl animate-pulse mb-4" />)
+              ) : filteredStores.length > 0 ? (
+                filteredStores.map((item: any) => {
+                  const isOpen = item.status === 'مفتوح' || item.status === 'open'
+                  const isFav = userData?.favoritesStoreIds?.includes(item.id)
+                  const categoryName = categories?.find(c => item.categoryIds?.includes(c.id))?.name || "متجر"
+
+                  return (
+                    <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
+                      <Card className="border-none shadow-sm rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-24 mb-4">
+                        <CardContent className="p-2.5 h-full flex flex-row items-center gap-3 justify-between" dir="rtl">
+                          <div className="flex flex-col items-center gap-1 shrink-0">
+                            <div className="relative w-16 h-16 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
+                              <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                            </div>
+                            {renderStars(item.averageRating || 4.5)}
+                          </div>
+
+                          <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1 text-right">
+                            <h4 className="font-bold text-sm text-[#111827] truncate text-right w-full">{item.name}</h4>
+                            <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
+                              <MapPin className="h-2.5 w-2.5 text-primary/60" />
+                              <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 pt-0.5 w-full justify-start">
+                              <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
+                                2.3 كم
+                              </span>
+                              <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md whitespace-nowrap">
+                                {categoryName}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col justify-between items-end h-full py-1 shrink-0">
+                            <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/20 backdrop-blur-sm rounded-lg active:scale-75 transition-transform">
+                              <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
+                            </button>
+                            <Badge className={cn("text-[9px] h-4 px-1.5 border-none font-bold rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
+                              {isOpen ? 'مفتوح' : 'مغلق'}
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  )
+                })
+              ) : (
+                <EmptyState message="لم نجد أي متاجر" icon={<Store className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />} />
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
       <BottomNav />
+    </div>
+  )
+}
+
+function EmptyState({ message, icon }: { message: string, icon: React.ReactNode }) {
+  return (
+    <div className="text-center py-24 flex flex-col items-center opacity-30">
+      <div className="mb-4">{icon}</div>
+      <p className="text-sm font-bold">{message}</p>
     </div>
   )
 }
