@@ -245,52 +245,52 @@ export default function CartPage() {
             {!isEditing ? (
               <div className="divide-y divide-secondary/50">
                 <div className="bg-gray-50/50 p-3 flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b">
-                  <span className="flex-1">المنتج</span>
+                  <span className="flex-1 text-right">المنتج</span>
                   <span className="w-16 text-center">السعر</span>
                   <span className="w-12 text-center">الكمية</span>
-                  <span className="w-20 text-left">الإجمالي</span>
+                  <span className="w-20 text-center">الإجمالي</span>
                 </div>
+                {cart.map((item) => (
+                  <div key={item.id} className="p-4 flex items-center gap-3 justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-xs truncate text-right">{item.name}</p>
+                    </div>
+                    <div className="w-16 text-center font-bold text-[11px] text-muted-foreground">{item.price}</div>
+                    <div className="w-12 text-center font-black text-[11px]">{item.quantity}</div>
+                    <div className="w-20 text-center font-black text-primary text-[11px]">{item.price * item.quantity} <small className="text-[8px]">ر.س</small></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-3 space-y-3">
                 {cart.map((item) => {
                   const itemStore = allStores?.find(s => s.id === item.storeId)
                   return (
-                    <div key={item.id} className="p-4 flex items-center gap-3 justify-between">
-                      <div className="flex-1 min-w-0 space-y-1">
+                    <div key={item.id} className="p-3 rounded-xl bg-secondary/10 flex items-center gap-3 animate-in fade-in slide-in-from-right-2">
+                      <div className="relative h-14 w-14 rounded-lg overflow-hidden shrink-0 border bg-white">
+                        <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/100`} alt={item.name} fill className="object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-1 text-right">
                         <p className="font-bold text-xs truncate">{item.name}</p>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 justify-start">
                           <div className="relative h-3 w-3 rounded-full overflow-hidden bg-secondary/20">
                             <Image src={itemStore?.logoUrl || `https://picsum.photos/seed/${item.storeId}/50`} alt="" fill className="object-cover" />
                           </div>
                           <span className="text-[8px] text-muted-foreground font-bold">{itemStore?.name || "المتجر"}</span>
                         </div>
+                        <p className="text-[10px] text-primary font-black">{item.price} ر.س</p>
                       </div>
-                      <div className="w-16 text-center font-bold text-[11px] text-muted-foreground">{item.price}</div>
-                      <div className="w-12 text-center font-black text-[11px]">{item.quantity}</div>
-                      <div className="w-20 text-left font-black text-primary text-[11px]">{item.price * item.quantity} <small className="text-[8px]">ر.س</small></div>
+                      <div className="flex flex-col items-end gap-2">
+                        <button onClick={() => removeItem(item.id)} className="p-1.5 text-destructive bg-white rounded-lg shadow-sm active:scale-90"><Trash2 className="h-3.5 w-3.5" /></button>
+                        <div className="flex items-center gap-2 bg-white p-1 rounded-lg shadow-sm border">
+                          <button onClick={() => updateQuantity(item.id, -1)} className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-secondary active:scale-90"><Minus className="h-3 w-3" /></button>
+                          <span className="text-xs font-black min-w-[15px] text-center">{item.quantity}</span>
+                          <button onClick={() => updateQuantity(item.id, 1)} className="h-6 w-6 rounded-md bg-primary text-white flex items-center justify-center active:scale-90"><Plus className="h-3 w-3" /></button>
+                        </div>
+                      </div>
                     </div>
                   )
                 })}
-              </div>
-            ) : (
-              <div className="p-3 space-y-3">
-                {cart.map((item) => (
-                  <div key={item.id} className="p-3 rounded-xl bg-secondary/10 flex items-center gap-3 animate-in fade-in slide-in-from-right-2">
-                    <div className="relative h-14 w-14 rounded-lg overflow-hidden shrink-0 border bg-white">
-                      <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/100`} alt={item.name} fill className="object-cover" />
-                    </div>
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <p className="font-bold text-xs truncate">{item.name}</p>
-                      <p className="text-[10px] text-primary font-black">{item.price} ر.س</p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <button onClick={() => removeItem(item.id)} className="p-1.5 text-destructive bg-white rounded-lg shadow-sm active:scale-90"><Trash2 className="h-3.5 w-3.5" /></button>
-                      <div className="flex items-center gap-2 bg-white p-1 rounded-lg shadow-sm border">
-                        <button onClick={() => updateQuantity(item.id, -1)} className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-secondary active:scale-90"><Minus className="h-3 w-3" /></button>
-                        <span className="text-xs font-black min-w-[15px] text-center">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, 1)} className="h-6 w-6 rounded-md bg-primary text-white flex items-center justify-center active:scale-90"><Plus className="h-3 w-3" /></button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
           </CardContent>
@@ -302,12 +302,12 @@ export default function CartPage() {
             <Link href="/addresses" className="text-[10px] text-primary font-bold">إضافة عنوان جديد</Link>
           </div>
           <Select value={selectedAddressId} onValueChange={setSelectedAddressId}>
-            <SelectTrigger className="h-14 rounded-2xl bg-white border-none shadow-sm font-bold text-xs">
+            <SelectTrigger className="h-14 rounded-2xl bg-white border-none shadow-sm font-bold text-xs text-right" dir="rtl">
               <SelectValue placeholder="اختر عنوان التوصيل" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl">
+            <SelectContent className="rounded-2xl" dir="rtl">
               {addresses?.map((addr) => (
-                <SelectItem key={addr.id} value={addr.id} className="font-bold text-xs py-3">
+                <SelectItem key={addr.id} value={addr.id} className="font-bold text-xs py-3 text-right">
                   {addr.label} ({addr.city} - {addr.details})
                 </SelectItem>
               ))}
@@ -318,8 +318,8 @@ export default function CartPage() {
           </Select>
         </section>
 
-        <section className="flex gap-4 px-1">
-          <div className="flex-1">
+        <section className="space-y-4 px-1">
+          <div>
             {!showCouponInput ? (
               <button onClick={() => setShowCouponInput(true)} className="flex items-center gap-2 text-primary font-bold text-xs">
                 <Tag className="h-4 w-4" /> هل لديك كوبون خصم؟
@@ -337,7 +337,7 @@ export default function CartPage() {
               </div>
             )}
           </div>
-          <div className="flex-1">
+          <div>
             {!showNoteInput ? (
               <button onClick={() => setShowNoteInput(true)} className="flex items-center gap-2 text-muted-foreground font-bold text-xs">
                 <MessageSquare className="h-4 w-4" /> إضافة ملاحظة؟
@@ -362,26 +362,26 @@ export default function CartPage() {
         <section className="space-y-3">
           <h2 className="font-bold text-sm px-1 flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> طريقة الدفع</h2>
           <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-            <SelectTrigger className="h-14 rounded-2xl bg-white border-none shadow-sm font-bold text-xs">
+            <SelectTrigger className="h-14 rounded-2xl bg-white border-none shadow-sm font-bold text-xs text-right" dir="rtl">
               <SelectValue placeholder="اختر طريقة الدفع" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl">
-              <SelectItem value="cash" className="py-3">
-                <div className="flex items-center gap-2">
-                  <Banknote className="h-4 w-4 text-green-600" />
+            <SelectContent className="rounded-2xl" dir="rtl">
+              <SelectItem value="cash" className="py-3 text-right">
+                <div className="flex items-center gap-2 justify-end">
                   <span>دفع عند الاستلام (نقدي)</span>
+                  <Banknote className="h-4 w-4 text-green-600" />
                 </div>
               </SelectItem>
-              <SelectItem value="wallet" className="py-3">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-blue-600" />
+              <SelectItem value="wallet" className="py-3 text-right">
+                <div className="flex items-center gap-2 justify-end">
                   <span>الدفع من المحفظة (رصيدك: {wallet?.balance || 0} ر.س)</span>
+                  <Wallet className="h-4 w-4 text-blue-600" />
                 </div>
               </SelectItem>
-              <SelectItem value="bank" className="py-3">
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-orange-600" />
+              <SelectItem value="bank" className="py-3 text-right">
+                <div className="flex items-center gap-2 justify-end">
                   <span>تحويل بنكي / صرافة</span>
+                  <CreditCard className="h-4 w-4 text-orange-600" />
                 </div>
               </SelectItem>
             </SelectContent>
@@ -389,7 +389,7 @@ export default function CartPage() {
 
           {paymentMethod === "bank" && (
             <div className="space-y-3 animate-in fade-in slide-in-from-top-4">
-              <p className="text-[10px] font-bold text-muted-foreground mr-1">اختر البنك لنسخ الرقم والتحويل:</p>
+              <p className="text-[10px] font-bold text-muted-foreground text-right mr-1">اختر البنك لنسخ الرقم والتحويل:</p>
               <div className="space-y-2">
                 {BANK_ACCOUNTS.map((bank) => (
                   <div
@@ -449,7 +449,7 @@ export default function CartPage() {
 
         <div className="flex items-start gap-3 p-4 bg-blue-50 text-blue-700 rounded-2xl border border-blue-100">
           <AlertCircle className="h-5 w-5 shrink-0" />
-          <div className="space-y-1">
+          <div className="space-y-1 text-right">
             <p className="text-[10px] font-black">بضغطك على زر التنفيذ، سيتم إرسال طلبك فوراً.</p>
             <p className="text-[9px] font-medium leading-relaxed opacity-80">سيتم التواصل معك عبر الواتساب على رقم خدمة حضرموت (775258830) لتأكيد الفاتورة النهائية.</p>
           </div>
