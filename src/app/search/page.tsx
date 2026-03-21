@@ -216,7 +216,7 @@ export default function SearchPage() {
           <Button variant="ghost" size="icon" className="relative h-10 w-10">
             <ShoppingBag className="h-5 w-5" />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white animate-in zoom-in">
                 {cartCount}
               </span>
             )}
@@ -311,14 +311,14 @@ export default function SearchPage() {
                 const itemStore = stores?.find(s => s.id === item.storeId)
 
                 return (
-                  <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-3" onClick={() => router.push(`/store/${item.storeId}`)}>
+                  <Card key={`product-${item.id}`} className="relative border-none shadow-sm rounded-xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-3" onClick={() => router.push(`/store/${item.storeId}`)}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleFavorite(e, 'product', item.id); }} className="absolute top-2 left-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                      <Heart className={cn("h-3.5 w-3.5", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
+                    </button>
                     <CardContent className="p-2.5 flex flex-row items-center gap-3" dir="rtl">
                       <div className="flex flex-col items-center gap-1 shrink-0">
                         <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
                           <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                          <button onClick={(e) => { e.stopPropagation(); toggleFavorite(e, 'product', item.id); }} className="absolute top-1.5 left-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
-                            <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-                          </button>
                         </div>
                         {renderStars(item.rating || 4.8)}
                       </div>
@@ -339,31 +339,36 @@ export default function SearchPage() {
                         <div className="flex items-center justify-between pt-1">
                           <span className="text-primary font-black text-sm">{item.price} <small className="text-[9px] font-bold">ر.س</small></span>
                           <div onClick={(e) => e.stopPropagation()}>
-                            {inCart && !needsOptions ? (
-                              <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
-                                <Button onClick={(e) => removeFromCart(e, item.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
-                                  <Minus className="h-3.5 w-3.5 text-primary" />
-                                </Button>
-                                <span className="font-bold text-xs min-w-[10px] text-center">{inCart.quantity}</span>
-                                <Button onClick={(e) => addToCart(e, item)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
-                                  <Plus className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
-                            ) : (
+                            {needsOptions ? (
                               <Button 
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  if (needsOptions) {
-                                    router.push(`/store/${item.storeId}`);
-                                  } else {
-                                    addToCart(e, item);
-                                  }
+                                  router.push(`/store/${item.storeId}`);
                                 }}
                                 className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
                               >
-                                {needsOptions ? "عرض الخيارات" : "إضافة"}
+                                عرض الخيارات
                               </Button>
+                            ) : (
+                              inCart ? (
+                                <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
+                                  <Button onClick={(e) => removeFromCart(e, item.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
+                                    <Minus className="h-3.5 w-3.5 text-primary" />
+                                  </Button>
+                                  <span className="font-bold text-xs min-w-[10px] text-center">{inCart.quantity}</span>
+                                  <Button onClick={(e) => addToCart(e, item)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
+                                    <Plus className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button 
+                                  onClick={(e) => addToCart(e, item)}
+                                  className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
+                                >
+                                  إضافة
+                                </Button>
+                              )
                             )}
                           </div>
                         </div>

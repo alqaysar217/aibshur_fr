@@ -315,12 +315,17 @@ export default function StoreDetailPage() {
           const needsOptions = hasOptions(product.name)
           
           return (
-            <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer group" onClick={() => setViewingProduct(product)}>
+            <Card key={product.id} className="relative border-none shadow-sm rounded-2xl overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer group" onClick={() => setViewingProduct(product)}>
+              <button 
+                onClick={(e) => { e.stopPropagation(); toggleFavoriteProduct(e, product.id); }} 
+                className="absolute top-2 left-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform"
+              >
+                <Heart className={cn("h-3.5 w-3.5", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
+              </button>
               <CardContent className="p-2.5 flex flex-row items-center gap-3">
                 <div className="flex flex-col items-center gap-1 shrink-0">
                   <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
                     <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
-                    <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1 left-1 p-1 bg-white/80 rounded-lg shadow-sm z-10 active:scale-90"><Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} /></button>
                   </div>
                   {renderStars(product.rating || 4.8)}
                 </div>

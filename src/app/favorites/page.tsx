@@ -322,14 +322,14 @@ export default function FavoritesPage() {
                 const productStore = allStores?.find(s => s.id === product.storeId)
 
                 return (
-                  <Card key={product.id} className="border-none shadow-sm rounded-xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-3" onClick={() => router.push(`/store/${product.storeId}`)}>
+                  <Card key={product.id} className="relative border-none shadow-sm rounded-xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-3" onClick={() => router.push(`/store/${product.storeId}`)}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleFavoriteProduct(e, product.id); }} className="absolute top-2 left-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                      <Heart className={cn("h-3.5 w-3.5", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
+                    </button>
                     <CardContent className="p-2.5 flex flex-row items-center gap-3" dir="rtl">
                       <div className="flex flex-col items-center gap-1 shrink-0">
                         <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
                           <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                          <button onClick={(e) => { e.stopPropagation(); toggleFavoriteProduct(e, product.id); }} className="absolute top-1.5 left-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
-                            <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-                          </button>
                         </div>
                         {renderStars(product.rating || 4.8)}
                       </div>
@@ -350,31 +350,36 @@ export default function FavoritesPage() {
                         <div className="flex items-center justify-between pt-1">
                           <span className="text-primary font-black text-sm">{product.price} <small className="text-[9px] font-bold">ر.س</small></span>
                           <div onClick={(e) => e.stopPropagation()}>
-                            {inCart && !needsOptions ? (
-                              <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
-                                <Button onClick={(e) => removeFromCart(e, product.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
-                                  <Minus className="h-3 w-3 text-primary" />
-                                </Button>
-                                <span className="font-bold text-xs min-w-[10px] text-center">{inCart.quantity}</span>
-                                <Button onClick={(e) => addToCart(e, product)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
-                                  <Plus className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            ) : (
+                            {needsOptions ? (
                               <Button 
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  if (needsOptions) {
-                                    router.push(`/store/${product.storeId}`);
-                                  } else {
-                                    addToCart(e, product);
-                                  }
+                                  router.push(`/store/${product.storeId}`);
                                 }}
                                 className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
                               >
-                                {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
+                                عرض الخيارات
                               </Button>
+                            ) : (
+                              inCart ? (
+                                <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
+                                  <Button onClick={(e) => removeFromCart(e, product.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
+                                    <Minus className="h-3 w-3 text-primary" />
+                                  </Button>
+                                  <span className="font-bold text-xs min-w-[10px] text-center">{inCart.quantity}</span>
+                                  <Button onClick={(e) => addToCart(e, product)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button 
+                                  onClick={(e) => addToCart(e, product)}
+                                  className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
+                                >
+                                  إضافة للسلة
+                                </Button>
+                              )
                             )}
                           </div>
                         </div>
