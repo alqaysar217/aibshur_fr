@@ -316,7 +316,7 @@ export default function SearchPage() {
                       <div className="flex flex-col items-center gap-1 shrink-0">
                         <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
                           <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                          <button onClick={(e) => { e.stopPropagation(); toggleFavorite(e, 'product', item.id); }} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                          <button onClick={(e) => { e.stopPropagation(); toggleFavorite(e, 'product', item.id); }} className="absolute top-1.5 left-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
                             <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
                         </div>

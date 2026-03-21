@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
@@ -321,7 +320,7 @@ export default function StoreDetailPage() {
                 <div className="flex flex-col items-center gap-1 shrink-0">
                   <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
                     <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
-                    <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1 right-1 p-1 bg-white/80 rounded-lg shadow-sm z-10 active:scale-90"><Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} /></button>
+                    <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1 left-1 p-1 bg-white/80 rounded-lg shadow-sm z-10 active:scale-90"><Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} /></button>
                   </div>
                   {renderStars(product.rating || 4.8)}
                 </div>
