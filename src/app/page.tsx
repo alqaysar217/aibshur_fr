@@ -156,10 +156,8 @@ export default function Home() {
 
   return (
     <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300" dir="rtl">
-      {/* 0. Header (Home Only) */}
       <Header />
 
-      {/* 1. Offers Slider */}
       <section className="px-4 pt-4 pb-2">
         <Carousel 
           opts={{ loop: true, direction: 'rtl' }} 
@@ -188,7 +186,6 @@ export default function Home() {
         </Carousel>
       </section>
 
-      {/* 2. Horizontal Categories Bar */}
       <section className="py-6">
         <div className="flex items-center justify-between px-6 mb-4">
           <h3 className="font-bold text-[#111827]">الأقسام</h3>
@@ -222,7 +219,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. Stores List - Single Column Modern Layout */}
       <section className="px-5 pb-24">
         <div className="flex items-center justify-between px-1 mb-4">
           <h3 className="font-bold text-[#111827]">المتاجر المتاحة</h3>
@@ -241,7 +237,7 @@ export default function Home() {
                 <Link key={store.id} href={`/store/${store.id}`}>
                   <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
                     <CardContent className="p-3 h-full flex flex-row items-center gap-4">
-                      {/* Favorite and Status (Right Side in RTL) */}
+                      {/* Buttons (Right side in RTL) */}
                       <div className="flex flex-col justify-between items-start h-full py-1.5 shrink-0">
                         <button 
                           onClick={(e) => toggleFavorite(e, store.id)}
@@ -249,13 +245,7 @@ export default function Home() {
                         >
                           <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                         </button>
-                        
-                        <Badge 
-                          className={cn(
-                            "text-[8px] h-4 px-1.5 border-none font-black rounded-md shadow-none",
-                            isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]"
-                          )}
-                        >
+                        <Badge className={cn("text-[8px] h-4 px-1.5 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
                           {isOpen ? 'مفتوح' : 'مغلق'}
                         </Badge>
                       </div>
@@ -279,12 +269,7 @@ export default function Home() {
 
                       {/* Store Image (Left Side in RTL) */}
                       <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
-                        <Image 
-                          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
-                          alt={store.name} 
-                          fill 
-                          className="object-cover transition-transform duration-500 group-hover:scale-110" 
-                        />
+                        <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                         <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
                           <Star className="h-2.5 w-2.5 fill-amber-500" />
                           <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
@@ -314,16 +299,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Developer Seed Tool */}
       {user && stores && stores.length > 0 && (
         <div className="fixed bottom-24 right-4 z-50 opacity-10 hover:opacity-100 transition-opacity">
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={seedData} 
-            disabled={isSeeding}
-            className="bg-white shadow-md rounded-full h-10 w-10 border"
-          >
+          <Button size="icon" variant="ghost" onClick={seedData} disabled={isSeeding} className="bg-white shadow-md rounded-full h-10 w-10 border">
             <Database className="h-5 w-5" />
           </Button>
         </div>
