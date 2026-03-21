@@ -89,12 +89,15 @@ export default function StoreDetailPage() {
   };
 
   const categories = useMemo(() => {
+    // Standard filters followed by specific categories from the user order
     const base = ["الكل", "الأكثر طلباً", "المفضلة"]
-    if (!store || !store.categoryIds) return base
+    const userOrder = ["مطاعم", "هدايا", "كافيهات", "صيدليات", "ماركت", "إلكترونيات", "تجميل", "خضروات", "لحوم", "بهارات", "عسل"]
+    
     const dynamicFilters = new Set<string>()
     if (products) products.forEach((p: any) => { if (p.category) dynamicFilters.add(p.category) })
-    return [...base, ...Array.from(dynamicFilters)]
-  }, [store, products])
+    
+    return ["الكل", ...userOrder, ...Array.from(dynamicFilters).filter(c => !userOrder.includes(c) && !base.includes(c))]
+  }, [products])
 
   const filteredProducts = useMemo(() => {
     if (!products) return []

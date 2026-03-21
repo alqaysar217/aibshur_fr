@@ -44,7 +44,7 @@ export default function Home() {
 
   const categoriesQuery = useMemoFirebase(() => {
     if (!db) return null
-    return query(collection(db, "categories"), limit(15))
+    return query(collection(db, "categories"), limit(20))
   }, [db])
   const { data: categories } = useCollection(categoriesQuery)
 
@@ -96,17 +96,17 @@ export default function Home() {
     setIsSeeding(true)
     try {
       const categoriesToSeed = [
-        { id: "restaurants", name: "مطاعم", color: "bg-rose-50", textColor: "text-rose-600", order: 1 },
-        { id: "gifts", name: "هدايا", color: "bg-purple-50", textColor: "text-purple-600", order: 2 },
-        { id: "cafe", name: "كافيهات", color: "bg-amber-50", textColor: "text-amber-800", order: 3 },
-        { id: "pharmacy", name: "صيدليات", color: "bg-blue-50", textColor: "text-blue-600", order: 4 },
-        { id: "grocery", name: "ماركت", color: "bg-green-50", textColor: "text-green-600", order: 5 },
-        { id: "electronics", name: "إلكترونيات", color: "bg-slate-100", textColor: "text-slate-700", order: 6 },
-        { id: "beauty", name: "تجميل", color: "bg-pink-50", textColor: "text-pink-600", order: 7 },
-        { id: "vegetables", name: "خضروات", color: "bg-emerald-50", textColor: "text-emerald-700", order: 8 },
-        { id: "meat", name: "لحوم", color: "bg-red-50", textColor: "text-red-700", order: 9 },
-        { id: "spices", name: "بهارات", color: "bg-orange-50", textColor: "text-orange-700", order: 10 },
-        { id: "honey", name: "عسل", color: "bg-yellow-50", textColor: "text-yellow-800", order: 11 }
+        { id: "restaurants", name: "مطاعم", color: "bg-rose-50", textColor: "text-rose-600", order: 1, icon: "🍔" },
+        { id: "gifts", name: "هدايا", color: "bg-purple-50", textColor: "text-purple-600", order: 2, icon: "🎁" },
+        { id: "cafe", name: "كافيهات", color: "bg-amber-50", textColor: "text-amber-800", order: 3, icon: "☕" },
+        { id: "pharmacy", name: "صيدليات", color: "bg-blue-50", textColor: "text-blue-600", order: 4, icon: "💊" },
+        { id: "grocery", name: "ماركت", color: "bg-green-50", textColor: "text-green-600", order: 5, icon: "🛒" },
+        { id: "electronics", name: "إلكترونيات", color: "bg-slate-100", textColor: "text-slate-700", order: 6, icon: "💻" },
+        { id: "beauty", name: "تجميل", color: "bg-pink-50", textColor: "text-pink-600", order: 7, icon: "✨" },
+        { id: "vegetables", name: "خضروات", color: "bg-emerald-50", textColor: "text-emerald-700", order: 8, icon: "🥦" },
+        { id: "meat", name: "لحوم", color: "bg-red-50", textColor: "text-red-700", order: 9, icon: "🥩" },
+        { id: "spices", name: "بهارات", color: "bg-orange-50", textColor: "text-orange-700", order: 10, icon: "🌶️" },
+        { id: "honey", name: "عسل", color: "bg-yellow-50", textColor: "text-yellow-800", order: 11, icon: "🍯" }
       ]
       for (const cat of categoriesToSeed) {
         await setDoc(doc(db, "categories", cat.id), cat)
@@ -139,45 +139,47 @@ export default function Home() {
     }
   }
 
-  const getCategoryIcon = (id: string) => {
-    switch (id) {
-      case 'restaurants': return <Utensils className="h-5 w-5" />
-      case 'cafe': return <Coffee className="h-5 w-5" />
-      case 'gifts': return <Gift className="h-5 w-5" />
-      case 'beauty': return <Sparkles className="h-5 w-5" />
-      case 'grocery': return <ShoppingBasket className="h-5 w-5" />
-      case 'pharmacy': return <Pill className="h-5 w-5" />
-      case 'electronics': return <Laptop className="h-5 w-5" />
-      case 'meat': return <Beef className="h-5 w-5" />
-      case 'honey': return <Flower2 className="h-5 w-5" />
-      case 'spices': return <Flame className="h-5 w-5" />
-      case 'vegetables': return <Leaf className="h-5 w-5" />
-      default: return <ShoppingBasket className="h-5 w-5" />
+  const getCategoryIcon = (cat: any) => {
+    // Emojis provide a 3D-like, colorful look on mobile
+    if (cat.icon) return <span className="text-2xl">{cat.icon}</span>;
+    
+    switch (cat.id) {
+      case 'restaurants': return <span className="text-2xl">🍔</span>
+      case 'cafe': return <span className="text-2xl">☕</span>
+      case 'gifts': return <span className="text-2xl">🎁</span>
+      case 'beauty': return <span className="text-2xl">✨</span>
+      case 'grocery': return <span className="text-2xl">🛒</span>
+      case 'pharmacy': return <span className="text-2xl">💊</span>
+      case 'electronics': return <span className="text-2xl">💻</span>
+      case 'meat': return <span className="text-2xl">🥩</span>
+      case 'honey': return <span className="text-2xl">🍯</span>
+      case 'spices': return <span className="text-2xl">🌶️</span>
+      case 'vegetables': return <span className="text-2xl">🥦</span>
+      default: return <span className="text-2xl">📦</span>
     }
   }
 
   if (!mounted) return null;
 
-  // Sorting categories by order
   const sortedCategories = categories ? [...categories].sort((a, b) => (a.order || 99) - (b.order || 99)) : null;
 
   return (
     <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300" dir="rtl">
       <Header />
 
-      {/* قسم الأقسام في الأعلى */}
-      <section className="py-4 bg-white border-b border-gray-100">
-        <div className="flex gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide" dir="rtl">
+      {/* قسم الأقسام المحدث */}
+      <section className="py-4 bg-white border-b border-gray-100 shadow-sm overflow-hidden">
+        <div className="flex gap-5 overflow-x-auto px-6 pb-2 scrollbar-hide" dir="rtl">
           {/* الكل */}
           <button 
             onClick={() => setActiveCategory(null)}
             className="flex flex-col items-center gap-2 shrink-0 group"
           >
             <div className={cn(
-              "h-16 w-16 rounded-[10px] flex items-center justify-center transition-all duration-300 shadow-sm border",
-              activeCategory === null ? "bg-primary text-white border-primary scale-105" : "bg-secondary/20 text-gray-500 border-transparent"
+              "h-16 w-16 rounded-[20px] flex items-center justify-center transition-all duration-300 shadow-lg border-2",
+              activeCategory === null ? "bg-primary text-white border-primary scale-105 shadow-primary/30 rotate-3" : "bg-secondary/20 text-gray-500 border-transparent"
             )}>
-              <div className="text-[10px] font-black">الكل</div>
+              <span className="text-sm font-black">الكل</span>
             </div>
             <span className={cn(
               "text-[11px] font-bold transition-colors",
@@ -191,15 +193,15 @@ export default function Home() {
             <button 
               key={cat.id} 
               onClick={() => setActiveCategory(cat.id === activeCategory ? null : cat.id)}
-              className="flex flex-col items-center gap-2 shrink-0 group"
+              className="flex flex-col items-center gap-2 shrink-0 group active:scale-95 transition-all"
             >
               <div className={cn(
-                "h-16 w-16 rounded-[10px] flex items-center justify-center transition-all duration-300 shadow-sm border",
+                "h-16 w-16 rounded-[20px] flex items-center justify-center transition-all duration-300 shadow-lg border-2",
                 cat.color || "bg-white",
-                activeCategory === cat.id ? "ring-2 ring-primary border-transparent scale-105" : "border-transparent bg-white",
+                activeCategory === cat.id ? "ring-4 ring-primary/10 border-primary scale-105 -rotate-3" : "border-transparent bg-white shadow-gray-100",
                 cat.textColor || "text-gray-600"
               )}>
-                {getCategoryIcon(cat.id)}
+                {getCategoryIcon(cat)}
               </div>
               <span className={cn(
                 "text-[11px] font-bold transition-colors",
@@ -209,12 +211,12 @@ export default function Home() {
               </span>
             </button>
           )) : (
-            [1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 w-16 bg-white rounded-[10px] animate-pulse" />)
+            [1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 w-16 bg-white rounded-[20px] animate-pulse" />)
           )}
         </div>
       </section>
 
-      {/* قسم الإعلانات - صور فقط بدون نصوص */}
+      {/* قسم الإعلانات */}
       <section className="px-4 py-4">
         <Carousel 
           opts={{ loop: true, direction: 'rtl' }} 
