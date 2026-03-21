@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -298,7 +297,8 @@ export default function CartPage() {
                 <div className="p-4 text-center text-xs text-muted-foreground">لا توجد عناوين مسجلة</div>
               )}
             </SelectContent>
-          </Select> section
+          </Select>
+        </section>
 
         {/* الكوبون */}
         <section className="space-y-3">
