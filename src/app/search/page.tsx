@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -311,7 +310,7 @@ export default function SearchPage() {
                         {/* معلومات المتجر المصغرة */}
                         <div className="flex items-center gap-1.5 pt-1 border-t border-dashed mt-1">
                           <div className="relative h-4 w-4 rounded-full overflow-hidden bg-secondary/20">
-                            <Image src={itemStore?.logoUrl || `https://picsum.photos/seed/${item.storeId}/100`} alt="" fill className="object-cover" />
+                            <Image src={itemStore?.logoUrl || `https://picsum.photos/seed/${item.storeId || 'store'}/100`} alt="" fill className="object-cover" />
                           </div>
                           <span className="text-[8px] font-bold text-muted-foreground">{itemStore?.name || "المتجر"}</span>
                         </div>

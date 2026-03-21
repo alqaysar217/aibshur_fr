@@ -63,8 +63,16 @@ export function useCollection<T = any>(
       memoizedTargetRefOrQuery,
       (snapshot: QuerySnapshot<DocumentData>) => {
         const results: ResultItemType[] = [];
-        for (const doc of snapshot.docs) {
-          results.push({ ...(doc.data() as T), id: doc.id });
+        for (const snapshotDoc of snapshot.docs) {
+          const docData = snapshotDoc.data() as any;
+          // Extract parent ID for subcollections (like stores/{storeId}/products)
+          // This is essential for collectionGroup queries to know the context
+          const parentId = snapshotDoc.ref.parent.parent?.id;
+          results.push({ 
+            ...(docData as T), 
+            id: snapshotDoc.id,
+            storeId: docData.storeId || parentId 
+          } as ResultItemType);
         }
         setData(results);
         setError(null);
@@ -76,7 +84,6 @@ export function useCollection<T = any>(
           if ('path' in memoizedTargetRefOrQuery) {
             path = (memoizedTargetRefOrQuery as CollectionReference).path;
           } else {
-            // المحاولة لاستخراج المسار البرمجي للاستعلامات المشتركة
             const internal = memoizedTargetRefOrQuery as any;
             const queryPath = internal._query?.path?.canonicalString?.();
             path = queryPath || 'collection-group';
@@ -94,7 +101,6 @@ export function useCollection<T = any>(
         setData(null);
         setIsLoading(false);
 
-        // التنبيه المركزي بالأخطاء
         errorEmitter.emit('permission-error', contextualError);
       }
     );

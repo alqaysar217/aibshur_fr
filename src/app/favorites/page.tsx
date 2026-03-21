@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -85,8 +84,9 @@ export default function FavoritesPage() {
     const filtered = allProducts.filter(p => userData.favoritesProductIds.includes(p.id))
     const seen = new Set();
     return filtered.filter(product => {
-      if (seen.has(product.id)) return false;
-      seen.add(product.id);
+      const key = `${product.id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     });
   }, [allProducts, userData?.favoritesProductIds])
@@ -322,7 +322,7 @@ export default function FavoritesPage() {
                         {/* معلومات المتجر المصغرة */}
                         <div className="flex items-center gap-1.5 pt-1 border-t border-dashed mt-1">
                           <div className="relative h-4 w-4 rounded-full overflow-hidden bg-secondary/20">
-                            <Image src={productStore?.logoUrl || `https://picsum.photos/seed/${product.storeId}/100`} alt="" fill className="object-cover" />
+                            <Image src={productStore?.logoUrl || `https://picsum.photos/seed/${product.storeId || 'store'}/100`} alt="" fill className="object-cover" />
                           </div>
                           <span className="text-[8px] font-bold text-muted-foreground">{productStore?.name || "المتجر"}</span>
                         </div>
