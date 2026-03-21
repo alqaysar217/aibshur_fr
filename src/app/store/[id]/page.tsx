@@ -5,6 +5,7 @@ import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@
 import { useParams, useRouter } from "next/navigation"
 import { Star, Plus, ShoppingBag, ArrowRight, Minus, Heart, MapPin, Map, Timer } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -68,17 +69,20 @@ export default function StoreDetailPage() {
   const productsQuery = useMemoFirebase(() => (!db || !id) ? null : collection(db, "stores", id as string, "products"), [db, id])
   const { data: products, isLoading: isProductsLoading } = useCollection(productsQuery)
 
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+
   const getCategoryDisplayName = (categoryId: string) => {
     const translations: Record<string, string> = {
-      'grocery': 'بقالة',
-      'restaurants': 'مطعم',
+      'grocery': 'ماركت',
+      'restaurants': 'مطاعم',
       'pharmacy': 'صيدلية',
-      'cafe': 'مقهى',
+      'cafe': 'كافيهات',
       'electronics': 'إلكترونيات',
       'sweets': 'حلويات',
       'spices': 'بهارات',
       'perfume': 'عطور',
-      'dates': 'تمور'
+      'dates': 'تمور',
+      'vegetables': 'خضروات'
     };
     return translations[categoryId] || categoryId || 'متجر';
   };
@@ -103,7 +107,8 @@ export default function StoreDetailPage() {
     })
   }, [products, searchQuery, selectedCategory, userData?.favoritesProductIds])
 
-  const toggleFavoriteStore = () => {
+  const toggleFavoriteStore = (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
     if (!user) { router.push('/login'); return; }
     const isFav = userData?.favoritesStoreIds?.includes(id as string)
     const ref = doc(db, "users", user.uid)
@@ -147,14 +152,30 @@ export default function StoreDetailPage() {
           <button onClick={() => router.back()} className="h-10 w-10 bg-secondary/30 rounded-[10px] flex items-center justify-center active:scale-90 transition-all">
             <ArrowRight className="h-6 w-6 text-primary" />
           </button>
-          <button onClick={toggleFavoriteStore} className={cn("h-10 w-10 rounded-[10px] flex items-center justify-center active:scale-90 transition-all border", isFavStore ? "bg-destructive text-white border-destructive shadow-md" : "bg-secondary/30 text-gray-400 border-transparent")}>
-            <Heart className={cn("h-5 w-5", isFavStore && "fill-current")} />
-          </button>
+          <Link href="/cart" className="relative">
+            <button className="h-10 w-10 bg-secondary/30 rounded-[10px] flex items-center justify-center active:scale-90 transition-all">
+              <ShoppingBag className="h-5 w-5 text-primary" />
+            </button>
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
         </div>
 
         <div className="flex gap-4">
           <div className="relative h-24 w-24 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0 shadow-sm border border-gray-100">
             <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200/200`} alt={store.name} fill className="object-cover" priority />
+            <button 
+              onClick={toggleFavoriteStore} 
+              className={cn(
+                "absolute top-1 right-1 h-7 w-7 rounded-md flex items-center justify-center transition-all z-10 shadow-sm",
+                isFavStore ? "bg-destructive text-white" : "bg-white/90 text-gray-400"
+              )}
+            >
+              <Heart className={cn("h-4 w-4", isFavStore && "fill-current")} />
+            </button>
           </div>
           <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
             <h1 className="text-xl font-black text-primary leading-tight truncate">{store.name}</h1>
@@ -224,9 +245,9 @@ export default function StoreDetailPage() {
                     </div>
                     <p className="text-[10px] text-gray-400 line-clamp-1 leading-relaxed">{product.description || 'وصف المنتج متاح هنا'}</p>
                     <div className="flex items-center justify-between mt-auto">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         {renderStars(product.rating || 4.8)}
-                        <span className="text-primary font-black text-xs shrink-0">{product.price} ر.س</span>
+                        <span className="text-primary font-black text-[11px] shrink-0">{product.price} ر.س</span>
                       </div>
                       <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                         {inCart && !needsOptions ? (
@@ -236,8 +257,8 @@ export default function StoreDetailPage() {
                             <button onClick={(e) => addToCart(product, e)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center active:scale-90 transition-all shadow-sm"><Plus className="h-3 w-3" /></button>
                           </div>
                         ) : (
-                          <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[10px] font-black px-4 active:scale-95 transition-all">
-                            {needsOptions ? "التفاصيل" : <span className="flex items-center gap-1">إضافة <ShoppingBag className="h-3 w-3" /></span>}
+                          <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[10px] font-black px-3 active:scale-95 transition-all flex items-center gap-1">
+                            {needsOptions ? "التفاصيل" : <><ShoppingBag className="h-3 w-3" /> إضافة</>}
                           </Button>
                         )}
                       </div>
