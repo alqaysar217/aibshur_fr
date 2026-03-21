@@ -1,7 +1,7 @@
 
 "use client"
 
-import { User, MapPin, CreditCard, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Settings, Bell, ChevronRight, Wallet, BadgeCheck, Phone } from "lucide-react"
+import { User, MapPin, CreditCard, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Settings, Bell, ChevronRight, Wallet, BadgeCheck, Phone, Crown } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
@@ -45,6 +45,32 @@ export default function ProfilePage() {
     router.push("/login")
   }
 
+  const sections = [
+    {
+      title: "إعدادات الحساب",
+      items: [
+        { icon: MapPin, label: "عناوين التوصيل", description: "إدارة مواقع استلام طلباتك", href: "/addresses", color: "text-blue-500", bgColor: "bg-blue-50" },
+        { icon: Settings, label: "تعديل الملف الشخصي", description: "تحديث الاسم والبيانات الشخصية", href: "#", color: "text-gray-500", bgColor: "bg-gray-50" },
+      ]
+    },
+    {
+      title: "الخدمات المالية والمكافآت",
+      items: [
+        { icon: Wallet, label: "المحفظة الرقمية", description: `رصيدك: ${walletData?.balance || 0} ر.س`, href: "/wallet", color: "text-emerald-500", bgColor: "bg-emerald-50" },
+        { icon: Gift, label: "نقاط الولاء", description: `لديك ${userData?.loyaltyPoints || 0} نقطة مكافأة`, href: "/loyalty", color: "text-orange-500", bgColor: "bg-orange-50" },
+        { icon: Crown, label: "عضوية أبشر VIP", description: userData?.subscriptionId ? "عضويتك نشطة" : "مزايا وتوصيل مجاني", href: "/subscriptions", color: "text-amber-500", bgColor: "bg-amber-50" },
+      ]
+    },
+    {
+      title: "الدعم والمساهمة",
+      items: [
+        { icon: HandHeart, label: "بوابة التبرعات", description: "شارك في أعمال الخير", href: "/donations", color: "text-rose-500", bgColor: "bg-rose-50" },
+        { icon: Shield, label: "الخصوصية والأمان", description: "شروط الخدمة والسياسات", href: "#", color: "text-indigo-500", bgColor: "bg-indigo-50" },
+        { icon: HelpCircle, label: "مركز المساعدة", description: "الأسئلة الشائعة والدعم الفني", href: "#", color: "text-slate-500", bgColor: "bg-slate-50" },
+      ]
+    }
+  ]
+
   if (!mounted) return null
 
   if (isUserLoading) {
@@ -76,35 +102,6 @@ export default function ProfilePage() {
       </div>
     )
   }
-
-  const sections = [
-    {
-      title: "إعدادات الحساب",
-      items: [
-        { icon: MapPin, label: "عناوين التوصيل", description: "إدارة مواقع استلام طلباتك", href: "/addresses", color: "text-blue-500", bgColor: "bg-blue-50" },
-        { icon: Settings, label: "تعديل الملف الشخصي", description: "تحديث الاسم والبيانات الشخصية", href: "#", color: "text-gray-500", bgColor: "bg-gray-50" },
-      ]
-    },
-    {
-      title: "الخدمات المالية والمكافآت",
-      items: [
-        { icon: Wallet, label: "المحفظة الرقمية", description: `رصيدك: ${walletData?.balance || 0} ر.س`, href: "/wallet", color: "text-emerald-500", bgColor: "bg-emerald-50" },
-        { icon: Gift, label: "نقاط الولاء", description: `لديك ${userData?.loyaltyPoints || 0} نقطة مكافأة`, href: "/loyalty", color: "text-orange-500", bgColor: "bg-orange-50" },
-        { icon: Crown, label: "عضوية أبشر VIP", description: userData?.subscriptionId ? "عضويتك نشطة" : "مزايا وتوصيل مجاني", href: "/subscriptions", color: "text-amber-500", bgColor: "bg-amber-50" },
-      ]
-    },
-    {
-      title: "الدعم والمساهمة",
-      items: [
-        { icon: HandHeart, label: "بوابة التبرعات", description: "شارك في أعمال الخير", href: "/donations", color: "text-rose-500", bgColor: "bg-rose-50" },
-        { icon: Shield, label: "الخصوصية والأمان", description: "شروط الخدمة والسياسات", href: "#", color: "text-indigo-500", bgColor: "bg-indigo-50" },
-        { icon: HelpCircle, label: "مركز المساعدة", description: "الأسئلة الشائعة والدعم الفني", href: "#", color: "text-slate-500", bgColor: "bg-slate-50" },
-      ]
-    }
-  ]
-
-  // أيقونة التاج في حال لم تكن موجودة في lucide-react المستوردة
-  const Crown = Star; 
 
   return (
     <div className="pb-32 bg-[#F8FAFB] min-h-screen font-body" dir="rtl">
