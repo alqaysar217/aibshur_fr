@@ -54,11 +54,6 @@ export default function StoreDetailPage() {
       e.stopPropagation()
     }
 
-    if (hasOptions(product.name)) {
-      setViewingProduct(product)
-      return
-    }
-
     const existing = cart.find(item => item.id === product.id)
     let newCart;
     if (existing) {
@@ -353,7 +348,13 @@ export default function StoreDetailPage() {
                             </div>
                           ) : (
                             <Button 
-                              onClick={(e) => addToCart(product, e)}
+                              onClick={(e) => {
+                                if (needsOptions) {
+                                  setViewingProduct(product);
+                                } else {
+                                  addToCart(product, e);
+                                }
+                              }}
                               className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                             >
                               {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
@@ -397,6 +398,22 @@ export default function StoreDetailPage() {
               </div>
 
               <div className="p-6 space-y-6">
+                {/* معلومات المتجر */}
+                <div className="flex items-center gap-3 pb-4 border-b border-dashed">
+                  <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-secondary/20 shadow-sm bg-secondary/10">
+                    <Image 
+                      src={store?.logoUrl || `https://picsum.photos/seed/${store?.id}/100`} 
+                      alt="" 
+                      fill 
+                      className="object-cover" 
+                    />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-muted-foreground font-bold">المتجر</p>
+                    <p className="text-xs font-black">{store?.name || "المتجر"}</p>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between">
                   <div className="text-right">
                     <p className="text-xs text-gray-400">السعر</p>
