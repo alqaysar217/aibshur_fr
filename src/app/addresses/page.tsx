@@ -24,7 +24,6 @@ export default function AddressesPage() {
   const [isLocating, setIsLocating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   
-  // حالات العنوان الجديد
   const [labelType, setLabelType] = useState<string>("المنزل")
   const [customLabel, setCustomLabel] = useState("")
   const [newCity, setNewCity] = useState("")
@@ -136,7 +135,7 @@ export default function AddressesPage() {
     <div className="pb-10 bg-secondary/5 min-h-screen font-body" dir="rtl">
       <header className="p-4 glass sticky top-0 z-50 flex items-center gap-4 shadow-sm">
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
-          <ArrowRight className="h-6 w-6" />
+          <ArrowRight className="h-6 w-6 text-primary" />
         </Button>
         <h1 className="text-xl font-bold text-primary">عناوين التوصيل</h1>
       </header>
@@ -176,8 +175,8 @@ export default function AddressesPage() {
           ))
         ) : (
           <div className="text-center py-20 opacity-30">
-            <Map className="h-16 w-16 mx-auto mb-4" />
-            <p className="font-bold">لا توجد عناوين محفوظة</p>
+            <Map className="h-16 w-16 mx-auto mb-4 text-primary" />
+            <p className="font-bold text-primary">لا توجد عناوين محفوظة</p>
           </div>
         )}
 
@@ -228,11 +227,11 @@ export default function AddressesPage() {
                 <div className="space-y-4">
                   <div className="space-y-2 text-right">
                     <label className="text-xs font-bold text-muted-foreground mr-1">تسمية العنوان</label>
-                    <Select onValueChange={(v) => setLabelType(v)} defaultValue={labelType}>
+                    <Select onValueChange={(v) => setLabelType(v)} value={labelType}>
                       <SelectTrigger className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold text-right" dir="rtl">
                         <SelectValue placeholder="اختر نوع العنوان" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-[10px]" dir="rtl">
+                      <SelectContent className="rounded-[10px] z-[110]" dir="rtl">
                         <SelectItem value="المنزل" className="text-right">المنزل</SelectItem>
                         <SelectItem value="العمل" className="text-right">العمل</SelectItem>
                         <SelectItem value="آخر" className="text-right">أخرى</SelectItem>
@@ -252,11 +251,11 @@ export default function AddressesPage() {
                   <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-1 text-right">
                       <label className="text-xs font-bold text-muted-foreground mr-1">المدينة / الحي</label>
-                      <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا - فوه" className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold" />
+                      <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا - فوه" className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold text-right" />
                     </div>
                     <div className="space-y-1 text-right">
                       <label className="text-xs font-bold text-muted-foreground mr-1">تفاصيل الشارع / العمارة</label>
-                      <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: شارع الستين - عمارة الأمل" className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold" />
+                      <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: شارع الستين - عمارة الأمل" className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold text-right" />
                     </div>
                   </div>
                 </div>
