@@ -57,7 +57,7 @@ export default function AddressesPage() {
         }
         setCoordinates(newCoords)
         setIsLocating(false)
-        toast({ title: "تم التحديد", description: "تم التقاط موقعك الحالي بنجاح وتحديث الخريطة" })
+        toast({ title: "تم التحديد", description: "تم التقاط موقعك الحالي بنجاح" })
       },
       (error) => {
         setIsLocating(false)
@@ -143,14 +143,14 @@ export default function AddressesPage() {
 
       <div className="p-4 space-y-4">
         {isLoading ? (
-          [1, 2].map(i => <div key={i} className="h-32 bg-white rounded-3xl animate-pulse" />)
+          [1, 2].map(i => <div key={i} className="h-32 bg-white rounded-[10px] animate-pulse" />)
         ) : addresses && addresses.length > 0 ? (
           addresses.map((addr) => (
-            <Card key={addr.id} className={`border-none shadow-sm rounded-[2rem] overflow-hidden transition-all ${addr.isDefault ? 'ring-2 ring-primary bg-primary/5' : 'bg-white'}`}>
-              <CardContent className="p-5">
+            <Card key={addr.id} className={`border-none shadow-sm rounded-[10px] overflow-hidden transition-all ${addr.isDefault ? 'ring-2 ring-primary bg-primary/5' : 'bg-white'}`}>
+              <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${addr.isDefault ? 'bg-primary text-white' : 'bg-secondary text-muted-foreground'}`}>
+                    <div className={`h-10 w-10 rounded-[10px] flex items-center justify-center ${addr.isDefault ? 'bg-primary text-white' : 'bg-secondary text-muted-foreground'}`}>
                       {addr.label === "المنزل" ? <Home className="h-5 w-5" /> : addr.label === "العمل" ? <Briefcase className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
                     </div>
                     <div>
@@ -158,9 +158,7 @@ export default function AddressesPage() {
                       <p className="text-[10px] text-muted-foreground">{addr.city}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {addr.isDefault && <CheckCircle2 className="h-5 w-5 text-primary" />}
-                  </div>
+                  {addr.isDefault && <CheckCircle2 className="h-5 w-5 text-primary" />}
                 </div>
                 <p className="text-xs text-muted-foreground mb-4 leading-relaxed">{addr.details}</p>
                 <div className="flex items-center justify-between pt-3 border-t border-secondary/50">
@@ -185,76 +183,66 @@ export default function AddressesPage() {
 
         <Dialog open={isAdding} onOpenChange={(val) => { setIsAdding(val); if(!val) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="w-full h-16 rounded-[2rem] gap-2 font-black text-lg shadow-xl shadow-primary/20 mt-4 bg-primary hover:bg-primary/90">
-              <Plus className="h-6 w-6" /> إضافة عنوان جديد
+            <Button className="w-full h-14 rounded-[10px] gap-2 font-black text-lg shadow-xl shadow-primary/20 mt-4 bg-primary hover:bg-primary/90">
+              <Plus className="h-5 w-5" /> إضافة عنوان جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-[2.5rem] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0">
+          <DialogContent className="rounded-[10px] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0">
             <div className="max-h-[85vh] overflow-y-auto">
-              <DialogHeader className="p-6 bg-primary text-white relative">
+              <DialogHeader className="p-5 bg-primary text-white">
                 <DialogTitle className="text-right flex items-center justify-between">
                   <span>أين تريد التوصيل؟</span>
                   <Navigation className="h-5 w-5" />
                 </DialogTitle>
               </DialogHeader>
               
-              <div className="bg-white p-6 space-y-6" dir="rtl">
-                {/* زر تحديد الموقع الحالي */}
-                <div className="text-center space-y-3 pb-4 border-b border-dashed">
+              <div className="bg-white p-5 space-y-5" dir="rtl">
+                <div className="text-center space-y-3 pb-2">
                   <p className="text-xs text-muted-foreground">استخدم الـ GPS لتحديد موقعك الحالي بدقة</p>
                   <Button 
                     onClick={handleDetectLocation} 
                     variant="outline" 
                     disabled={isLocating}
                     className={cn(
-                      "w-full h-14 rounded-2xl border-2 gap-3 font-bold transition-all",
-                      coordinates ? "border-green-500 bg-green-50 text-green-700 shadow-sm" : "border-primary/30 text-primary hover:bg-primary/5"
+                      "w-full h-12 rounded-[10px] border-2 gap-3 font-bold",
+                      coordinates ? "border-green-500 bg-green-50 text-green-700" : "border-primary/30 text-primary"
                     )}
                   >
                     {isLocating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Crosshair className="h-5 w-5" />}
-                    {coordinates ? "تم التقاط موقعك الحالي" : "تحديد موقعي الآن"}
+                    {coordinates ? "تم تحديد موقعك الحالي" : "تحديد موقعي الآن"}
                   </Button>
 
-                  {/* الخريطة التفاعلية تظهر هنا */}
                   {coordinates && (
-                    <div className="w-full h-48 rounded-2xl overflow-hidden border-2 border-primary/20 shadow-inner mt-4 animate-in fade-in zoom-in duration-500">
+                    <div className="w-full h-40 rounded-[10px] overflow-hidden border border-primary/20 shadow-inner mt-2">
                       <iframe
                         width="100%"
                         height="100%"
                         frameBorder="0"
                         scrolling="no"
-                        marginHeight={0}
-                        marginWidth={0}
                         src={`https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng - 0.005}%2C${coordinates.lat - 0.005}%2C${coordinates.lng + 0.005}%2C${coordinates.lat + 0.005}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lng}`}
                       ></iframe>
                     </div>
                   )}
-
-                  {coordinates && (
-                    <p className="text-[9px] text-green-600 font-bold flex items-center justify-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" /> تم بنجاح التقاط الإحداثيات وتحديدها على الخريطة
-                    </p>
-                  )}
                 </div>
 
-                <div className="space-y-4 pt-2">
+                <div className="space-y-4">
                   <div className="space-y-2 text-right">
-                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mr-1">تسمية العنوان</label>
+                    <label className="text-xs font-bold text-muted-foreground mr-1">تسمية العنوان</label>
                     <Select onValueChange={(v) => setLabelType(v)} defaultValue={labelType}>
-                      <SelectTrigger className="h-14 rounded-2xl border-secondary bg-secondary/10 font-bold">
+                      <SelectTrigger className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold text-right" dir="rtl">
                         <SelectValue placeholder="اختر نوع العنوان" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="المنزل">المنزل</SelectItem>
-                        <SelectItem value="العمل">العمل</SelectItem>
-                        <SelectItem value="آخر">أخرى (مثل: بيت الأهل)</SelectItem>
+                      <SelectContent className="rounded-[10px]" dir="rtl">
+                        <SelectItem value="المنزل" className="text-right">المنزل</SelectItem>
+                        <SelectItem value="العمل" className="text-right">العمل</SelectItem>
+                        <SelectItem value="آخر" className="text-right">أخرى</SelectItem>
                       </SelectContent>
                     </Select>
                     
                     {labelType === "آخر" && (
                       <Input 
-                        placeholder="أدخل اسم مخصص (مثل: بيت الأهل)" 
-                        className="h-12 rounded-xl mt-2 border-primary/20 font-bold" 
+                        placeholder="أدخل اسم مخصص" 
+                        className="h-11 rounded-[10px] mt-2 border-primary/20 font-bold" 
                         value={customLabel}
                         onChange={(e) => setCustomLabel(e.target.value)}
                       />
@@ -263,12 +251,12 @@ export default function AddressesPage() {
 
                   <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-1 text-right">
-                      <label className="text-[10px] font-black text-muted-foreground mr-1">المدينة / الحي</label>
-                      <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا - فوه" className="h-14 rounded-2xl border-secondary bg-secondary/5 font-bold" />
+                      <label className="text-xs font-bold text-muted-foreground mr-1">المدينة / الحي</label>
+                      <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="مثال: المكلا - فوه" className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold" />
                     </div>
                     <div className="space-y-1 text-right">
-                      <label className="text-[10px] font-black text-muted-foreground mr-1">تفاصيل الشارع / العمارة</label>
-                      <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: شارع الستين - عمارة الأمل" className="h-14 rounded-2xl border-secondary bg-secondary/5 font-bold" />
+                      <label className="text-xs font-bold text-muted-foreground mr-1">تفاصيل الشارع / العمارة</label>
+                      <Input value={newDetails} onChange={(e) => setNewDetails(e.target.value)} placeholder="مثال: شارع الستين - عمارة الأمل" className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold" />
                     </div>
                   </div>
                 </div>
@@ -276,9 +264,9 @@ export default function AddressesPage() {
                 <Button 
                   onClick={handleAddAddress} 
                   disabled={isSaving || !newCity || !newDetails || (labelType === "آخر" && !customLabel)}
-                  className="w-full h-16 rounded-2xl font-black text-lg mt-2 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 transition-all active:scale-[0.98]"
+                  className="w-full h-14 rounded-[10px] font-black text-lg mt-2 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90"
                 >
-                  {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "حفظ العنوان وتأكيده"}
+                  {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "حفظ العنوان"}
                 </Button>
               </div>
             </div>
