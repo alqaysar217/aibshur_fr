@@ -448,7 +448,7 @@ export default function StoreDetailPage() {
                 </div>
 
                 <div className="text-right">
-                  <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5 tracking-wide">السعر</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5 tracking-wide">السعر الأساسي</p>
                   <p className="text-2xl font-black text-primary">
                     {viewingProduct.price} <small className="text-xs font-bold opacity-80">ر.س</small>
                   </p>
@@ -462,47 +462,76 @@ export default function StoreDetailPage() {
                       <h4 className="font-black text-[11px] text-gray-800 uppercase tracking-widest">اختر الحجم أو النوع:</h4>
                     </div>
                     <div className="space-y-2">
-                      {productVariants.map((v) => (
-                        <div 
-                          key={v.id} 
-                          className="group border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-primary/20 rounded-xl p-3 flex items-center justify-between transition-all"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-white shadow-sm shrink-0">
-                              <Image src={v.imageUrl} alt={v.name} fill className="object-cover" />
+                      {productVariants.map((v) => {
+                        const inCart = cart.find(item => item.id === v.id);
+                        return (
+                          <div 
+                            key={v.id} 
+                            className="group border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-primary/20 rounded-xl p-3 flex items-center justify-between transition-all"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-white shadow-sm shrink-0">
+                                <Image src={v.imageUrl} alt={v.name} fill className="object-cover" />
+                              </div>
+                              <div className="text-right">
+                                <p className="font-black text-xs text-gray-800">{v.name}</p>
+                                <p className="text-primary font-black text-xs mt-0.5">{v.price} <small className="text-[9px]">ر.س</small></p>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <p className="font-black text-xs text-gray-800">{v.name}</p>
-                              <p className="text-primary font-black text-xs mt-0.5">{v.price} <small className="text-[9px]">ر.س</small></p>
+                            
+                            <div onClick={(e) => e.stopPropagation()}>
+                              {inCart ? (
+                                <div className="flex items-center gap-1.5 bg-secondary/30 p-0.5 rounded-lg">
+                                  <Button onClick={(e) => removeFromCart(v.id, e)} variant="ghost" size="icon" className="h-8 w-8 rounded-lg bg-white shadow-sm">
+                                    <Minus className="h-3.5 w-3.5 text-primary" />
+                                  </Button>
+                                  <span className="font-black text-sm min-w-[20px] text-center">{inCart.quantity}</span>
+                                  <Button onClick={(e) => {
+                                    const variantData = { ...viewingProduct, id: v.id, name: v.name, price: v.price };
+                                    addToCart(variantData, e);
+                                  }} variant="ghost" size="icon" className="h-8 w-8 rounded-lg bg-primary text-white">
+                                    <Plus className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button 
+                                  size="sm"
+                                  onClick={(e) => {
+                                    const variantData = { ...viewingProduct, id: v.id, name: v.name, price: v.price };
+                                    addToCart(variantData, e);
+                                  }}
+                                  className="h-9 px-4 rounded-lg font-bold bg-primary text-white shadow-sm active:scale-95 transition-transform text-[10px]"
+                                >
+                                  إضافة
+                                </Button>
+                              )}
                             </div>
                           </div>
-                          <Button 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const variantData = { ...viewingProduct, id: v.id, name: v.name, price: v.price };
-                              addToCart(variantData);
-                              setViewingProduct(null);
-                            }}
-                            className="h-9 px-4 rounded-lg font-bold bg-primary text-white shadow-sm active:scale-95 transition-transform text-[10px]"
-                          >
-                            إضافة
-                          </Button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ) : (
-                  <Button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToCart(viewingProduct);
-                      setViewingProduct(null);
-                    }}
-                    className="w-full h-12 rounded-xl shadow-lg shadow-primary/10 bg-primary hover:bg-primary/90 text-white font-black text-base transition-all active:scale-[0.98]"
-                  >
-                    تأكيد الإضافة للسلة
-                  </Button>
+                  <div className="flex items-center justify-center pt-2">
+                    {cart.find(item => item.id === viewingProduct.id) ? (
+                      <div className="flex items-center gap-4 bg-secondary/30 p-1.5 rounded-2xl w-full justify-between px-6">
+                        <Button onClick={(e) => removeFromCart(viewingProduct.id, e)} className="h-12 w-12 rounded-xl bg-white text-primary shadow-sm">
+                          <Minus className="h-5 w-5" />
+                        </Button>
+                        <span className="font-black text-xl">{cart.find(item => item.id === viewingProduct.id)?.quantity}</span>
+                        <Button onClick={(e) => addToCart(viewingProduct, e)} className="h-12 w-12 rounded-xl bg-primary text-white">
+                          <Plus className="h-5 w-5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button 
+                        onClick={(e) => addToCart(viewingProduct, e)}
+                        className="w-full h-12 rounded-xl shadow-lg shadow-primary/10 bg-primary hover:bg-primary/90 text-white font-black text-base transition-all active:scale-[0.98]"
+                      >
+                        تأكيد الإضافة للسلة
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
