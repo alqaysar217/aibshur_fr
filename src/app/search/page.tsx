@@ -185,7 +185,7 @@ export default function SearchPage() {
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full h-10 w-10">
             <ArrowRight className="h-6 w-6" />
           </Button>
-          <h1 className="text-xl font-black text-primary">البحث في أبشر</h1>
+          <h1 className="text-xl font-bold text-primary">البحث في أبشر</h1>
         </div>
         <Link href="/cart">
           <Button variant="ghost" size="icon" className="relative h-10 w-10">
@@ -208,7 +208,7 @@ export default function SearchPage() {
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
             placeholder="ابحث عن مطعم، وجبة، أو متجر..." 
-            className="pr-12 h-16 rounded-3xl border-none shadow-2xl bg-white text-lg focus-visible:ring-primary text-right"
+            className="pr-12 h-16 rounded-2xl border-none shadow-2xl bg-white text-lg focus-visible:ring-primary text-right"
           />
         </div>
 
@@ -232,7 +232,7 @@ export default function SearchPage() {
 
         <div className="flex flex-col gap-0 pt-2">
           {loadingStores || loadingProducts ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="h-[105px] w-full bg-white rounded-2xl animate-pulse mb-5" />)
+            [1, 2, 3, 4].map(i => <div key={i} className="h-24 w-full bg-white rounded-2xl animate-pulse mb-4" />)
           ) : filteredResults.length > 0 ? (
             filteredResults.map((item: any) => {
               if (item.type === 'store') {
@@ -242,9 +242,9 @@ export default function SearchPage() {
 
                 return (
                   <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
-                    <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px] mb-5">
-                      <CardContent className="p-3 h-full flex flex-row items-center gap-4 justify-between" dir="rtl">
-                        <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
+                    <Card className="border-none shadow-sm rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-24 mb-4">
+                      <CardContent className="p-2.5 h-full flex flex-row items-center gap-3 justify-between" dir="rtl">
+                        <div className="relative w-20 h-20 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                           <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                           <div className="absolute bottom-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
                             <Star className="h-2.5 w-2.5 fill-amber-500" />
@@ -253,12 +253,12 @@ export default function SearchPage() {
                         </div>
 
                         <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
-                          <h4 className="font-black text-sm text-[#111827] truncate leading-tight w-full text-right">{item.name}</h4>
+                          <h4 className="font-bold text-sm text-[#111827] truncate w-full text-right">{item.name}</h4>
                           <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
                             <MapPin className="h-2.5 w-2.5 text-primary/60" />
                             <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
                           </div>
-                          <div className="flex items-center gap-2 pt-1 w-full justify-start">
+                          <div className="flex items-center gap-2 pt-0.5 w-full justify-start">
                             <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
                               2.3 كم
                             </span>
@@ -268,11 +268,11 @@ export default function SearchPage() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
-                          <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
+                        <div className="flex flex-col justify-between items-end h-full py-1 shrink-0">
+                          <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/20 backdrop-blur-sm rounded-lg active:scale-75 transition-transform">
                             <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
-                          <Badge className={cn("text-[8px] h-4 px-1.5 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
+                          <Badge className={cn("text-[9px] h-4 px-1.5 border-none font-bold rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
                             {isOpen ? 'مفتوح' : 'مغلق'}
                           </Badge>
                         </div>
@@ -287,8 +287,8 @@ export default function SearchPage() {
                 const itemStore = stores?.find(s => s.id === item.storeId)
 
                 return (
-                  <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-4" onClick={() => router.push(`/store/${item.storeId}`)}>
-                    <CardContent className="p-3 flex flex-row items-center gap-3" dir="rtl">
+                  <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-3" onClick={() => router.push(`/store/${item.storeId}`)}>
+                    <CardContent className="p-2.5 flex flex-row items-center gap-3" dir="rtl">
                       <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
                         <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                         <button onClick={(e) => { e.stopPropagation(); toggleFavorite(e, 'product', item.id); }} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
@@ -298,33 +298,32 @@ export default function SearchPage() {
 
                       <div className="flex-1 text-right space-y-0.5 overflow-hidden">
                         <div className="flex items-center justify-between">
-                          <h3 className="font-black text-sm text-[#111827] truncate">{item.name}</h3>
+                          <h3 className="font-bold text-sm text-[#111827] truncate">{item.name}</h3>
                           <div className="flex items-center gap-0.5 text-amber-500 text-[9px] font-black">
                             <Star className="h-2.5 w-2.5 fill-amber-500" />
                             <span>{item.rating || '4.8'}</span>
                           </div>
                         </div>
-                        <p className="text-[9px] text-gray-400 line-clamp-1 leading-snug">
+                        <p className="text-[10px] text-gray-400 line-clamp-1 leading-snug">
                           {item.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
                         </p>
                         
-                        {/* معلومات المتجر المصغرة */}
-                        <div className="flex items-center gap-1.5 pt-1 border-t border-dashed mt-1">
+                        <div className="flex items-center gap-1.5 pt-1">
                           <div className="relative h-4 w-4 rounded-full overflow-hidden bg-secondary/20">
                             <Image src={itemStore?.logoUrl || `https://picsum.photos/seed/${item.storeId || 'store'}/100`} alt="" fill className="object-cover" />
                           </div>
-                          <span className="text-[8px] font-bold text-muted-foreground">{itemStore?.name || "المتجر"}</span>
+                          <span className="text-[9px] font-bold text-muted-foreground">{itemStore?.name || "المتجر"}</span>
                         </div>
 
                         <div className="flex items-center justify-between pt-1">
-                          <span className="text-primary font-black text-base">{item.price} <small className="text-[9px] font-bold">ر.س</small></span>
+                          <span className="text-primary font-black text-sm">{item.price} <small className="text-[9px] font-bold">ر.س</small></span>
                           <div onClick={(e) => e.stopPropagation()}>
                             {inCart && !needsOptions ? (
                               <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
                                 <Button onClick={(e) => removeFromCart(e, item.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
                                   <Minus className="h-3 w-3 text-primary" />
                                 </Button>
-                                <span className="font-black text-xs min-w-[10px] text-center">{inCart.quantity}</span>
+                                <span className="font-bold text-xs min-w-[10px] text-center">{inCart.quantity}</span>
                                 <Button onClick={(e) => addToCart(e, item)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
                                   <Plus className="h-3 w-3" />
                                 </Button>
@@ -340,7 +339,7 @@ export default function SearchPage() {
                                     addToCart(e, item);
                                   }
                                 }}
-                                className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
+                                className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
                               >
                                 {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
                               </Button>
