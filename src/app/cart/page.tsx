@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { 
   Trash2, Plus, Minus, ArrowRight, CreditCard, ShoppingBag, 
   Tag, MapPin, ChevronLeft, Loader2, Wallet, Banknote, 
-  MessageSquare, AlertCircle, CheckCircle2, X, Edit2, Check, Store, Copy
+  MessageSquare, AlertCircle, CheckCircle2, X, Edit2, Check, Store, Copy, ChevronDown
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -321,50 +321,82 @@ export default function CartPage() {
           </Select>
         </section>
 
-        <section className="space-y-4 px-1">
-          <div>
-            {!showCouponInput ? (
-              <button onClick={() => setShowCouponInput(true)} className="flex items-center gap-2 text-primary font-bold text-xs">
-                <Tag className="h-4 w-4" /> هل لديك كوبون خصم؟
-              </button>
-            ) : (
-              <div className="relative flex flex-col gap-2 animate-in slide-in-from-top-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black text-muted-foreground">الكوبون</span>
-                  <button onClick={() => {setShowCouponInput(false); setCoupon("");}} className="text-[10px] text-destructive">إلغاء</button>
+        <section className="space-y-3">
+          {/* Coupon Section Card */}
+          <Card className="border-none shadow-sm rounded-2xl bg-white overflow-hidden transition-all">
+            <button 
+              onClick={() => setShowCouponInput(!showCouponInput)} 
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/10 p-2 rounded-xl">
+                  <Tag className="h-5 w-5 text-primary" />
                 </div>
-                <div className="relative flex items-center gap-2">
+                <div className="text-right">
+                  <p className="font-bold text-sm">كوبون الخصم</p>
+                  <p className="text-[10px] text-muted-foreground">هل لديك كود خصم؟ أضفه هنا</p>
+                </div>
+              </div>
+              <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", showCouponInput && "rotate-180")} />
+            </button>
+            
+            {showCouponInput && (
+              <div className="p-4 pt-0 border-t border-secondary/20 animate-in slide-in-from-top-2 duration-300">
+                <div className="mt-4 flex items-center gap-2">
                   <Input 
                     placeholder="أدخل الكود هنا..." 
-                    className="h-10 rounded-xl bg-white border-none shadow-sm text-xs"
+                    className="h-12 rounded-xl bg-secondary/10 border-none text-xs font-bold"
                     value={coupon}
                     onChange={(e) => setCoupon(e.target.value)}
                   />
-                  <Button onClick={applyCoupon} size="sm" className="h-10 rounded-xl px-4 text-xs" disabled={isCouponApplied || !coupon}>تطبيق</Button>
+                  <Button 
+                    onClick={applyCoupon} 
+                    className="h-12 rounded-xl px-6 font-black text-xs" 
+                    disabled={isCouponApplied || !coupon}
+                  >
+                    تطبيق
+                  </Button>
+                </div>
+                {isCouponApplied && (
+                  <p className="text-[10px] text-green-600 font-bold mt-2 flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3" /> تم تطبيق الخصم بنجاح!
+                  </p>
+                )}
+              </div>
+            )}
+          </Card>
+
+          {/* Notes Section Card */}
+          <Card className="border-none shadow-sm rounded-2xl bg-white overflow-hidden transition-all">
+            <button 
+              onClick={() => setShowNoteInput(!showNoteInput)} 
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-orange-50 p-2 rounded-xl">
+                  <MessageSquare className="h-5 w-5 text-orange-600" />
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-sm">ملاحظات الطلب</p>
+                  <p className="text-[10px] text-muted-foreground">تعليمات خاصة للمطعم أو المندوب</p>
+                </div>
+              </div>
+              <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", showNoteInput && "rotate-180")} />
+            </button>
+            
+            {showNoteInput && (
+              <div className="p-4 pt-0 border-t border-secondary/20 animate-in slide-in-from-top-2 duration-300">
+                <div className="mt-4">
+                  <Textarea 
+                    placeholder="اكتب ملاحظاتك هنا (مثلاً: بدون شطة، اترك الطلب عند الباب)..."
+                    className="min-h-[100px] rounded-xl border-none bg-secondary/10 text-xs font-medium focus-visible:ring-primary/20"
+                    value={orderNotes}
+                    onChange={(e) => setOrderNotes(e.target.value)}
+                  />
                 </div>
               </div>
             )}
-          </div>
-          <div>
-            {!showNoteInput ? (
-              <button onClick={() => setShowNoteInput(true)} className="flex items-center gap-2 text-muted-foreground font-bold text-xs">
-                <MessageSquare className="h-4 w-4" /> إضافة ملاحظة؟
-              </button>
-            ) : (
-              <div className="relative flex flex-col gap-2 animate-in slide-in-from-top-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black text-muted-foreground">الملاحظة</span>
-                  <button onClick={() => {setShowNoteInput(false); setOrderNotes("");}} className="text-[10px] text-destructive">إلغاء</button>
-                </div>
-                <Textarea 
-                  placeholder="اكتب ملاحظتك هنا..."
-                  className="min-h-[60px] rounded-xl border-none shadow-sm bg-white text-xs"
-                  value={orderNotes}
-                  onChange={(e) => setOrderNotes(e.target.value)}
-                />
-              </div>
-            )}
-          </div>
+          </Card>
         </section>
 
         <section className="space-y-3">
