@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -59,6 +58,8 @@ export default function CartPage() {
   const saveCart = (newCart: any[]) => {
     setCart(newCart)
     localStorage.setItem('absher_cart', JSON.stringify(newCart))
+    // إطلاق حدث لتحديث السلة العائمة عالمياً
+    window.dispatchEvent(new Event('cart-updated'))
   }
 
   const updateQuantity = (productId: string, delta: number) => {
@@ -134,6 +135,9 @@ export default function CartPage() {
       })
 
       localStorage.removeItem('absher_cart')
+      // إطلاق حدث لتحديث السلة العائمة عالمياً (ستختفي لأن الكمية ستصبح 0)
+      window.dispatchEvent(new Event('cart-updated'))
+      
       toast({ title: "تم إرسال الطلب", description: "شكراً لك! سيصلك الطلب قريباً" })
       router.push('/orders')
     } catch (e) {

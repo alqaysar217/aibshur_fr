@@ -39,8 +39,10 @@ export function FloatingCart() {
     }
   }, [])
 
-  // لا يظهر الزر في صفحة السلة أو إذا كانت السلة فارغة
-  if (!mounted || pathname === '/cart' || cartCount === 0) return null
+  // الصفحات التي لا يظهر فيها الزر (الرئيسية، طلباتي، حسابي، السلة، وغيرها من الصفحات التعريفية)
+  const hiddenRoutes = ['/', '/orders', '/profile', '/cart', '/governorates', '/login']
+  
+  if (!mounted || hiddenRoutes.includes(pathname) || cartCount === 0) return null
 
   return (
     <div className="fixed bottom-24 left-5 right-5 z-[55] animate-in slide-in-from-bottom-10 fade-in duration-300">
