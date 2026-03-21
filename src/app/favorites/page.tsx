@@ -164,11 +164,6 @@ export default function FavoritesPage() {
     saveCart(newCart)
   }
 
-  const hasOptions = (productName: string) => {
-    const keywords = ['بيتزا', 'نفر', 'برجر', 'عصير', 'مشوي', 'برمة', 'مندي', 'حجم', 'نوع']
-    return keywords.some(k => productName.includes(k))
-  }
-
   if (!mounted) return <div className="min-h-screen bg-background" />
 
   if (isUserLoading || isUserDataLoading) {
@@ -230,7 +225,7 @@ export default function FavoritesPage() {
                     <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
                       <CardContent className="p-3 h-full flex flex-row items-center gap-4">
                         {/* Right: Actions */}
-                        <div className="flex flex-col justify-between items-start h-full py-1.5 shrink-0">
+                        <div className="flex flex-col justify-between items-start h-full py-1.5 shrink-0 order-1">
                           <button onClick={(e) => toggleFavoriteStore(e, store.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
                             <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
@@ -239,8 +234,8 @@ export default function FavoritesPage() {
                           </Badge>
                         </div>
 
-                        {/* Center: Info */}
-                        <div className="flex-1 flex flex-col justify-center space-y-1 text-right items-end overflow-hidden">
+                        {/* Center: Info Column (Fixed for Favorites - Aligned to Left) */}
+                        <div className="flex-1 flex flex-col justify-center space-y-1 text-right items-end overflow-hidden order-2 pr-2">
                           <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
                           <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden justify-end">
                             <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
@@ -254,8 +249,8 @@ export default function FavoritesPage() {
                           </div>
                         </div>
 
-                        {/* Left: Store Image */}
-                        <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
+                        {/* Left: Store Image (Favorites specific: Left side) */}
+                        <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10 order-3">
                           <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                           <div className="absolute bottom-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
                             <Star className="h-2.5 w-2.5 fill-amber-500" />
@@ -279,7 +274,6 @@ export default function FavoritesPage() {
               filteredFavoriteProducts.map((product: any) => {
                 const inCart = cart.find(item => item.id === product.id)
                 const isFavProd = userData?.favoritesProductIds?.includes(product.id)
-                const needsOptions = hasOptions(product.name)
 
                 return (
                   <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => router.push(`/store/${product.storeId}`)}>
@@ -299,7 +293,7 @@ export default function FavoritesPage() {
                         <div className="flex items-center justify-between pt-1">
                           <span className="text-primary font-black text-base">{product.price} <small className="text-[9px] font-bold">ر.س</small></span>
                           <div onClick={(e) => e.stopPropagation()}>
-                            {inCart && !needsOptions ? (
+                            {inCart ? (
                               <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
                                 <Button onClick={(e) => removeFromCart(e, product.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
                                   <Minus className="h-3 w-3 text-primary" />
@@ -311,10 +305,10 @@ export default function FavoritesPage() {
                               </div>
                             ) : (
                               <Button 
-                                onClick={(e) => needsOptions ? router.push(`/store/${product.storeId}`) : addToCart(e, product)}
+                                onClick={(e) => addToCart(e, product)}
                                 className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                               >
-                                {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
+                                إضافة للسلة
                               </Button>
                             )}
                           </div>

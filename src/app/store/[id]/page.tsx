@@ -6,9 +6,7 @@ import { useParams, useRouter } from "next/navigation"
 import { 
   Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, 
   Navigation, LayoutGrid, Zap, Utensils, Soup, Flame, Coffee, Beef, ChefHat, 
-  Pizza, Sandwich, Pill, Sparkles, Droplets, Baby, Milk, Package, Eraser, 
-  Candy, Croissant, Smartphone, Watch, Laptop, Home, Gamepad2, User, Wind, 
-  Gift, Leaf, Droplet, Cookie, CupSoda, X, CakeSlice
+  Pizza, Sandwich, Cookie, CupSoda, CakeSlice
 } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -20,7 +18,6 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 
 export default function StoreDetailPage() {
   const { id } = useParams()
@@ -32,7 +29,6 @@ export default function StoreDetailPage() {
   const [cart, setCart] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("الكل")
-  const [selectedProduct, setSelectedProduct] = useState<any>(null)
 
   useEffect(() => {
     const savedCart = localStorage.getItem('absher_cart')
@@ -316,13 +312,13 @@ export default function StoreDetailPage() {
                 <Card 
                   key={product.id} 
                   className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group"
-                  onClick={() => setSelectedProduct(product)}
+                  onClick={() => !needsOptions && addToCart(product)}
                 >
                   <CardContent className="p-3 flex flex-row items-center gap-3">
                     {/* Product Image (Right side) */}
                     <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
                       <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                      <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                      <button onClick={(e) => { e.stopPropagation(); toggleFavoriteProduct(e, product.id); }} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
                         <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
                       </button>
                     </div>
@@ -345,7 +341,7 @@ export default function StoreDetailPage() {
                           {inCart && !needsOptions ? (
                             <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
                               <Button onClick={() => removeFromCart(product.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
-                                <偏Minus className="h-3 w-3 text-primary" />
+                                <Minus className="h-3 w-3 text-primary" />
                               </Button>
                               <span className="font-black text-xs min-w-[10px] text-center">{inCart.quantity}</span>
                               <Button onClick={() => addToCart(product)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
@@ -354,7 +350,7 @@ export default function StoreDetailPage() {
                             </div>
                           ) : (
                             <Button 
-                              onClick={() => needsOptions ? setSelectedProduct(product) : addToCart(product)}
+                              onClick={() => addToCart(product)}
                               className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                             >
                               {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
@@ -377,7 +373,7 @@ export default function StoreDetailPage() {
 
       {cart.length > 0 && (
         <div className="fixed bottom-6 left-5 right-5 z-[70]">
-          <偏Button onClick={() => router.push('/cart')} className="w-full h-14 rounded-2xl shadow-xl text-lg font-black flex justify-between px-6 bg-primary">
+          <Button onClick={() => router.push('/cart')} className="w-full h-14 rounded-2xl shadow-xl text-lg font-black flex justify-between px-6 bg-primary">
             <div className="flex items-center gap-2">
               <div className="bg-white text-primary px-2.5 py-0.5 rounded-lg text-xs font-black">{cartCount}</div>
               <span className="text-base">عرض السلة</span>
@@ -386,7 +382,7 @@ export default function StoreDetailPage() {
               <span>{cartTotal}</span>
               <span className="text-[10px] opacity-80 font-bold">ر.س</span>
             </div>
-          </偏Button>
+          </Button>
         </div>
       )}
     </div>
