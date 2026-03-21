@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId, arrayUnion } from "firebase/firestore"
-import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus, Filter } from "lucide-react"
+import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus, Filter, LayoutGrid } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -238,7 +238,7 @@ export default function FavoritesPage() {
                           </div>
                         </div>
 
-                        {/* Center: Info (Aligned to Right/Image) */}
+                        {/* Center: Info */}
                         <div className="flex-1 flex flex-col justify-center space-y-1 text-right items-start overflow-hidden">
                           <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
                           <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden">
@@ -284,7 +284,15 @@ export default function FavoritesPage() {
                 return (
                   <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => router.push(`/store/${product.storeId}`)}>
                     <CardContent className="p-3 flex flex-row items-center gap-3">
-                      {/* Right: Info */}
+                      {/* Product Image (Right side) */}
+                      <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
+                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                          <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
+                        </button>
+                      </div>
+
+                      {/* Info (Left side) */}
                       <div className="flex-1 text-right space-y-0.5 overflow-hidden">
                         <div className="flex items-center justify-between">
                           <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
@@ -320,14 +328,6 @@ export default function FavoritesPage() {
                           </div>
                         </div>
                       </div>
-
-                      {/* Left: Image */}
-                      <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
-                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
-                          <Heart className={cn("h-3.5 w-3.5", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-                        </button>
-                      </div>
                     </CardContent>
                   </Card>
                 )
@@ -349,5 +349,4 @@ function EmptyState({ message }: { message: string }) {
       <Heart className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />
       <h2 className="font-black text-lg text-gray-400">{message}</h2>
     </div>
-  )
 }
