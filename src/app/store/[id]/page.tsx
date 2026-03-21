@@ -18,7 +18,6 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogDescription,
-  DialogFooter
 } from "@/components/ui/dialog"
 import { collection, doc, setDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { useState, useEffect, useMemo } from "react"
@@ -381,7 +380,7 @@ export default function StoreDetailPage() {
             <div className="flex flex-col">
               <DialogHeader className="sr-only">
                 <DialogTitle>{viewingProduct.name}</DialogTitle>
-                <DialogDescription>تفاصيل المنتج والخيارات المتاحة</DialogDescription>
+                <DialogDescription>تفاصيل المنتج الأساسية</DialogDescription>
               </DialogHeader>
               
               <div className="relative h-64 w-full">
@@ -394,58 +393,39 @@ export default function StoreDetailPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-4 right-4 text-white">
                   <h2 className="text-2xl font-black">{viewingProduct.name}</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-                    <span className="font-bold">{viewingProduct.rating || '4.8'}</span>
-                  </div>
                 </div>
               </div>
 
               <div className="p-6 space-y-6">
-                <div className="space-y-2 text-right">
-                  <h3 className="font-bold text-sm text-gray-500">وصف الوجبة</h3>
-                  <p className="text-sm leading-relaxed text-gray-600">
-                    {viewingProduct.description || "استمتع بأفضل المذاقات مع وجبتنا المحضرة بعناية من أجود المكونات الطازجة."}
-                  </p>
-                </div>
-
-                {hasOptions(viewingProduct.name) && (
-                  <div className="space-y-4 text-right">
-                    <h3 className="font-bold text-sm text-gray-500">اختر الخيارات</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {["حجم صغير", "حجم وسط", "حجم كبير", "إضافة صوص"].map((opt) => (
-                        <button key={opt} className="p-3 rounded-xl border-2 border-secondary hover:border-primary/40 text-xs font-bold transition-all text-center">
-                          {opt}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between pt-4 border-t">
+                <div className="flex items-center justify-between">
                   <div className="text-right">
-                    <p className="text-xs text-gray-400">السعر الإجمالي</p>
+                    <p className="text-xs text-gray-400">السعر</p>
                     <p className="text-2xl font-black text-primary">{viewingProduct.price} <small className="text-sm font-bold">ر.س</small></p>
                   </div>
-                  <Button 
-                    onClick={() => {
-                      const prod = viewingProduct;
-                      setViewingProduct(null);
-                      const existing = cart.find(item => item.id === prod.id)
-                      let newCart;
-                      if (existing) {
-                        newCart = cart.map(item => item.id === prod.id ? { ...item, quantity: item.quantity + 1 } : item)
-                      } else {
-                        newCart = [...cart, { ...prod, quantity: 1, storeId: id }]
-                      }
-                      saveCart(newCart)
-                      toast({ title: "تمت الإضافة", description: `${prod.name} أضيف إلى السلة` })
-                    }}
-                    className="h-14 px-8 rounded-2xl shadow-lg shadow-primary/20 bg-primary font-black text-lg"
-                  >
-                    تأكيد الإضافة
-                  </Button>
+                  <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1 rounded-xl">
+                    <Star className="h-4 w-4 fill-primary text-primary" />
+                    <span className="font-bold text-primary">{viewingProduct.rating || '4.8'}</span>
+                  </div>
                 </div>
+
+                <Button 
+                  onClick={() => {
+                    const prod = viewingProduct;
+                    setViewingProduct(null);
+                    const existing = cart.find(item => item.id === prod.id)
+                    let newCart;
+                    if (existing) {
+                      newCart = cart.map(item => item.id === prod.id ? { ...item, quantity: item.quantity + 1 } : item)
+                    } else {
+                      newCart = [...cart, { ...prod, quantity: 1, storeId: id }]
+                    }
+                    saveCart(newCart)
+                    toast({ title: "تمت الإضافة", description: `${prod.name} أضيف إلى السلة` })
+                  }}
+                  className="w-full h-14 rounded-2xl shadow-lg shadow-primary/20 bg-primary font-black text-lg"
+                >
+                  تأكيد الإضافة للسلة
+                </Button>
               </div>
             </div>
           )}

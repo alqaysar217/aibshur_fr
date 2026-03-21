@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Search, ArrowRight, ShoppingBag, Loader2, Filter, Star, Heart, MapPin, Plus, Minus, Zap, Map, Clock, Sparkles } from "lucide-react"
+import { Search, ArrowRight, ShoppingBag, Loader2, Filter, Star, Heart, MapPin, Plus, Minus, Zap, Map, Clock, Sparkles, Store } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -244,7 +244,6 @@ export default function SearchPage() {
                   <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
                     <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px] mb-5">
                       <CardContent className="p-3 h-full flex flex-row items-center gap-4 justify-between" dir="rtl">
-                        {/* 1. أقصى اليمين: قسم الصورة والتقييم */}
                         <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                           <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                           <div className="absolute bottom-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
@@ -253,7 +252,6 @@ export default function SearchPage() {
                           </div>
                         </div>
 
-                        {/* 2. الوسط: قسم المعلومات محاذى لليمين يلتصق بالصورة */}
                         <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
                           <h4 className="font-black text-sm text-[#111827] truncate leading-tight w-full text-right">{item.name}</h4>
                           <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
@@ -270,7 +268,6 @@ export default function SearchPage() {
                           </div>
                         </div>
 
-                        {/* 3. أقصى اليسار: قسم التحكم والحالة */}
                         <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
                           <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
                             <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
@@ -287,11 +284,11 @@ export default function SearchPage() {
                 const inCart = cart.find(c => c.id === item.id)
                 const isFavProd = userData?.favoritesProductIds?.includes(item.id)
                 const needsOptions = hasOptions(item.name)
+                const itemStore = stores?.find(s => s.id === item.storeId)
 
                 return (
                   <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-4" onClick={() => router.push(`/store/${item.storeId}`)}>
                     <CardContent className="p-3 flex flex-row items-center gap-3" dir="rtl">
-                      {/* Product Image (Right side) */}
                       <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
                         <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                         <button onClick={(e) => { e.stopPropagation(); toggleFavorite(e, 'product', item.id); }} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
@@ -299,7 +296,6 @@ export default function SearchPage() {
                         </button>
                       </div>
 
-                      {/* Info (Left side aligned right) */}
                       <div className="flex-1 text-right space-y-0.5 overflow-hidden">
                         <div className="flex items-center justify-between">
                           <h3 className="font-black text-sm text-[#111827] truncate">{item.name}</h3>
@@ -308,9 +304,18 @@ export default function SearchPage() {
                             <span>{item.rating || '4.8'}</span>
                           </div>
                         </div>
-                        <p className="text-[9px] text-gray-400 line-clamp-2 leading-snug min-h-[2.4rem]">
+                        <p className="text-[9px] text-gray-400 line-clamp-1 leading-snug">
                           {item.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
                         </p>
+                        
+                        {/* معلومات المتجر المصغرة */}
+                        <div className="flex items-center gap-1.5 pt-1 border-t border-dashed mt-1">
+                          <div className="relative h-4 w-4 rounded-full overflow-hidden bg-secondary/20">
+                            <Image src={itemStore?.logoUrl || `https://picsum.photos/seed/${item.storeId}/100`} alt="" fill className="object-cover" />
+                          </div>
+                          <span className="text-[8px] font-bold text-muted-foreground">{itemStore?.name || "المتجر"}</span>
+                        </div>
+
                         <div className="flex items-center justify-between pt-1">
                           <span className="text-primary font-black text-base">{item.price} <small className="text-[9px] font-bold">ر.س</small></span>
                           <div onClick={(e) => e.stopPropagation()}>
