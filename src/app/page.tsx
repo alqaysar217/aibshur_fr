@@ -260,14 +260,14 @@ export default function Home() {
                         </Badge>
                       </div>
 
-                      {/* Middle Side: Information */}
-                      <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
+                      {/* Middle Side: Information (Left aligned next to image) */}
+                      <div className="flex-1 flex flex-col justify-center space-y-1 text-left items-end overflow-hidden">
                         <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
                         <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden">
                           <MapPin className="h-2.5 w-2.5 text-primary/60" />
                           <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                         </div>
-                        <div className="flex items-center flex-wrap gap-2 pt-1">
+                        <div className="flex items-center flex-wrap gap-2 pt-1 justify-end">
                           <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                             {categoryName}
                           </Badge>
