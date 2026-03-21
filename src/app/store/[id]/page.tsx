@@ -137,7 +137,6 @@ export default function StoreDetailPage() {
     })
   }, [products, searchQuery, selectedCategory, userData?.favoritesProductIds])
 
-  // منطق توليد الخيارات للمنتجات
   const productVariants = useMemo(() => {
     if (!viewingProduct) return [];
     const name = viewingProduct.name;
@@ -354,6 +353,15 @@ export default function StoreDetailPage() {
                       <p className="text-[9px] text-gray-400 line-clamp-2 leading-snug min-h-[2.4rem]">
                         {product.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
                       </p>
+                      
+                      {/* معلومات المتجر المصغرة */}
+                      <div className="flex items-center gap-1.5 pt-1 border-t border-dashed mt-1">
+                        <div className="relative h-4 w-4 rounded-full overflow-hidden bg-secondary/20">
+                          <Image src={store?.logoUrl || `https://picsum.photos/seed/${store?.id}/100`} alt="" fill className="object-cover" />
+                        </div>
+                        <span className="text-[8px] font-bold text-muted-foreground">{store?.name || "المتجر"}</span>
+                      </div>
+
                       <div className="flex items-center justify-between pt-1">
                         <span className="text-primary font-black text-base">{product.price} <small className="text-[9px] font-bold">ر.س</small></span>
                         <div onClick={(e) => e.stopPropagation()}>
