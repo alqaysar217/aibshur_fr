@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId, arrayUnion } from "firebase/firestore"
-import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus, LayoutGrid, Map } from "lucide-react"
+import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus, LayoutGrid, Map, Utensils, Store } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -211,9 +211,19 @@ export default function FavoritesPage() {
 
       <div className="p-4">
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/50 backdrop-blur-sm rounded-2xl p-1 shadow-sm" dir="rtl">
-            <TabsTrigger value="products" className="rounded-xl font-black text-xs h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">الوجبات</TabsTrigger>
-            <TabsTrigger value="stores" className="rounded-xl font-black text-xs h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">المتاجر</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 bg-secondary/20 p-1.5 rounded-[2rem] h-14" dir="rtl">
+            <TabsTrigger 
+              value="products" 
+              className="rounded-[1.75rem] font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md"
+            >
+              <Utensils className="h-4 w-4" /> الوجبات
+            </TabsTrigger>
+            <TabsTrigger 
+              value="stores" 
+              className="rounded-[1.75rem] font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md"
+            >
+              <Store className="h-4 w-4" /> المتاجر
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="stores" className="flex flex-col gap-0">
@@ -238,7 +248,7 @@ export default function FavoritesPage() {
                           </div>
                         </div>
 
-                        {/* 2. الوسط: قسم المعلومات محاذى لليمين ملتصق بالصورة */}
+                        {/* 2. الوسط: قسم المعلومات */}
                         <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
                           <h4 className="font-black text-sm text-[#111827] truncate leading-tight w-full text-right">{store.name}</h4>
                           <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
@@ -270,7 +280,7 @@ export default function FavoritesPage() {
                 )
               })
             ) : (
-              <EmptyState message="قائمة المتاجر المفضلة فارغة" />
+              <EmptyState message="قائمة المتاجر المفضلة فارغة" icon={<Store className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />} />
             )}
           </TabsContent>
 
@@ -335,7 +345,7 @@ export default function FavoritesPage() {
                 )
               })
             ) : (
-              <EmptyState message="قائمة الوجبات المفضلة فارغة" />
+              <EmptyState message="قائمة الوجبات المفضلة فارغة" icon={<Utensils className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />} />
             )}
           </TabsContent>
         </Tabs>
@@ -345,10 +355,10 @@ export default function FavoritesPage() {
   )
 }
 
-function EmptyState({ message }: { message: string }) {
+function EmptyState({ message, icon }: { message: string, icon: React.ReactNode }) {
   return (
     <div className="text-center py-24 space-y-4">
-      <Heart className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />
+      {icon}
       <h2 className="font-black text-lg text-gray-400">{message}</h2>
     </div>
   )
