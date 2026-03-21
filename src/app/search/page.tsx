@@ -61,13 +61,11 @@ export default function SearchPage() {
 
   const storesQuery = useMemoFirebase(() => {
     if (!db) return null
-    // Fetching more data to allow comprehensive search
     return query(collection(db, "stores"), limit(100))
   }, [db])
 
   const productsQuery = useMemoFirebase(() => {
     if (!db) return null
-    // Fetching more data to allow comprehensive search
     return query(collectionGroup(db, "products"), limit(200))
   }, [db])
   
@@ -81,7 +79,6 @@ export default function SearchPage() {
     let allStores = (stores || []).map(s => ({ ...s, type: 'store' }))
     let allProducts = (products || []).map(p => ({ ...p, type: 'product' }))
 
-    // Apply Quick Filters
     if (activeFilter === 'favorites' && userData) {
       allStores = allStores.filter(s => userData.favoritesStoreIds?.includes(s.id))
       allProducts = allProducts.filter(p => userData.favoritesProductIds?.includes(p.id))
@@ -89,9 +86,8 @@ export default function SearchPage() {
       allStores = allStores.filter(s => (s.averageRating || 0) >= 4.7)
       allProducts = allProducts.filter(p => (p.rating || 0) >= 4.7)
     } else if (activeFilter === 'nearest') {
-      // Simulation: in a real app, sort by geo-location distance
       allStores = allStores.slice(0, 5) 
-      allProducts = [] // Nearest usually applies to stores
+      allProducts = [] 
     }
 
     const combined = [...allStores, ...allProducts]
@@ -206,7 +202,6 @@ export default function SearchPage() {
       </header>
 
       <div className="p-4 space-y-4">
-        {/* Search Input */}
         <div className="relative group">
           <div className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground group-focus-within:text-primary transition-colors">
             <Search className="h-full w-full" />
@@ -219,7 +214,6 @@ export default function SearchPage() {
           />
         </div>
 
-        {/* Quick Filters */}
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" dir="rtl">
           {QUICK_FILTERS.map((filter) => (
             <button
@@ -238,17 +232,15 @@ export default function SearchPage() {
           ))}
         </div>
 
-        {/* Results Count & Separator */}
         <div className="flex items-center justify-between px-1 pt-2">
           <h2 className="text-sm font-black text-muted-foreground">النتائج المتاحة ({filteredResults.length})</h2>
         </div>
 
-        {/* Results List */}
-        <div className="space-y-5 pt-2">
+        <div className="space-y-6 pt-2">
           {isLoading ? (
             [1, 2, 3, 4].map(i => <div key={i} className="h-[105px] w-full bg-white rounded-3xl animate-pulse" />)
           ) : filteredResults.length > 0 ? (
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-6">
               {filteredResults.map((item: any) => {
                 if (item.type === 'store') {
                   const isOpen = item.status === 'مفتوح' || item.status === 'open'
@@ -259,13 +251,14 @@ export default function SearchPage() {
                     <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
                       <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
                         <CardContent className="p-3 h-full flex flex-row items-center gap-4">
-                          {/* Right Side: Store Image */}
-                          <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
-                            <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
-                              <Star className="h-2.5 w-2.5 fill-amber-500" />
-                              <span className="text-[10px] font-black">{item.averageRating || '4.5'}</span>
-                            </div>
+                          {/* Left Side: Actions (Now Right in array, Right in RTL) */}
+                          <div className="flex flex-col justify-between items-start h-full py-1.5 shrink-0">
+                            <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
+                              <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
+                            </button>
+                            <Badge className={cn("text-[8px] h-4 px-1.5 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
+                              {isOpen ? 'مفتوح' : 'مغلق'}
+                            </Badge>
                           </div>
 
                           {/* Middle Side: Information */}
@@ -285,14 +278,13 @@ export default function SearchPage() {
                             </div>
                           </div>
 
-                          {/* Left Side: Favorite and Status */}
-                          <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
-                            <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
-                              <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
-                            </button>
-                            <Badge className={cn("text-[8px] h-4 px-1.5 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
-                              {isOpen ? 'مفتوح' : 'مغلق'}
-                            </Badge>
+                          {/* Right Side: Image (Now Left in array, Left in RTL) */}
+                          <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
+                            <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
+                              <Star className="h-2.5 w-2.5 fill-amber-500" />
+                              <span className="text-[10px] font-black">{item.averageRating || '4.5'}</span>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
