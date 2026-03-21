@@ -1,7 +1,7 @@
 
 "use client"
 
-import { User, MapPin, CreditCard, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Settings, Bell, ChevronRight, Wallet, BadgeCheck, Phone, Crown } from "lucide-react"
+import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Settings, Bell, ChevronRight, Wallet, BadgeCheck, Phone, Crown, Trash2, ChevronDown } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [selectedCity, setSelectedCity] = useState("")
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -49,24 +50,21 @@ export default function ProfilePage() {
     {
       title: "إعدادات الحساب",
       items: [
-        { icon: MapPin, label: "عناوين التوصيل", description: "إدارة مواقع استلام طلباتك", href: "/addresses", color: "text-blue-500", bgColor: "bg-blue-50" },
-        { icon: Settings, label: "تعديل الملف الشخصي", description: "تحديث الاسم والبيانات الشخصية", href: "#", color: "text-gray-500", bgColor: "bg-gray-50" },
+        { icon: MapPin, label: "عناوين التوصيل", description: "إدارة مواقع استلام طلباتك", href: "/addresses" },
       ]
     },
     {
-      title: "الخدمات المالية والمكافآت",
+      title: "العضوية والمزايا",
       items: [
-        { icon: Wallet, label: "المحفظة الرقمية", description: `رصيدك: ${walletData?.balance || 0} ر.س`, href: "/wallet", color: "text-emerald-500", bgColor: "bg-emerald-50" },
-        { icon: Gift, label: "نقاط الولاء", description: `لديك ${userData?.loyaltyPoints || 0} نقطة مكافأة`, href: "/loyalty", color: "text-orange-500", bgColor: "bg-orange-50" },
-        { icon: Crown, label: "عضوية أبشر VIP", description: userData?.subscriptionId ? "عضويتك نشطة" : "مزايا وتوصيل مجاني", href: "/subscriptions", color: "text-amber-500", bgColor: "bg-amber-50" },
+        { icon: Crown, label: "عضوية أبشر VIP", description: userData?.subscriptionId ? "عضويتك نشطة" : "مزايا وتوصيل مجاني", href: "/subscriptions" },
       ]
     },
     {
       title: "الدعم والمساهمة",
       items: [
-        { icon: HandHeart, label: "بوابة التبرعات", description: "شارك في أعمال الخير", href: "/donations", color: "text-rose-500", bgColor: "bg-rose-50" },
-        { icon: Shield, label: "الخصوصية والأمان", description: "شروط الخدمة والسياسات", href: "#", color: "text-indigo-500", bgColor: "bg-indigo-50" },
-        { icon: HelpCircle, label: "مركز المساعدة", description: "الأسئلة الشائعة والدعم الفني", href: "#", color: "text-slate-500", bgColor: "bg-slate-50" },
+        { icon: HandHeart, label: "بوابة التبرعات", description: "شارك في أعمال الخير", href: "/donations" },
+        { icon: Shield, label: "الخصوصية والأمان", description: "شروط الخدمة والسياسات", href: "#" },
+        { icon: HelpCircle, label: "مركز المساعدة", description: "الأسئلة الشائعة والدعم الفني", href: "#" },
       ]
     }
   ]
@@ -105,10 +103,9 @@ export default function ProfilePage() {
 
   return (
     <div className="pb-32 bg-[#F8FAFB] min-h-screen font-body" dir="rtl">
-      {/* رأس الصفحة البريميوم */}
+      {/* رأس الصفحة */}
       <div className="relative pt-12 pb-16 px-6 bg-gradient-to-b from-primary/15 via-primary/5 to-transparent rounded-b-[3.5rem] shadow-sm">
         <div className="flex flex-col items-center">
-          {/* الصورة الدائرية */}
           <div className="relative mb-6">
             <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse"></div>
             <Avatar className="h-32 w-32 border-[6px] border-white shadow-2xl rounded-full relative z-10 transition-transform hover:scale-105 duration-300">
@@ -120,7 +117,6 @@ export default function ProfilePage() {
             <div className="absolute bottom-1 right-2 bg-green-500 w-7 h-7 rounded-full border-4 border-white shadow-lg z-20"></div>
           </div>
           
-          {/* البيانات الأساسية */}
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-black text-gray-900 leading-tight">
               {userData?.name || "مستـخدم أبـشر"}
@@ -145,31 +141,30 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* المحتوى الرئيسي */}
       <div className="px-5 -mt-6 space-y-6">
-        {/* بطاقة الرصيد السريعة */}
+        {/* بطاقات الرصيد */}
         <div className="grid grid-cols-2 gap-4">
           <Link href="/wallet" className="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition-all">
-            <div className="p-2.5 bg-emerald-50 rounded-2xl">
-              <Wallet className="h-5 w-5 text-emerald-500" />
+            <div className="p-2.5 bg-primary/5 rounded-2xl">
+              <Wallet className="h-5 w-5 text-primary" />
             </div>
             <div className="text-center">
               <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest">المحفظة</p>
-              <p className="text-base font-black text-emerald-600">{walletData?.balance || 0} ر.س</p>
+              <p className="text-base font-black text-primary">{walletData?.balance || 0} ر.س</p>
             </div>
           </Link>
           <Link href="/loyalty" className="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition-all">
-            <div className="p-2.5 bg-amber-50 rounded-2xl">
-              <Star className="h-5 w-5 text-amber-500" />
+            <div className="p-2.5 bg-primary/5 rounded-2xl">
+              <Star className="h-5 w-5 text-primary" />
             </div>
             <div className="text-center">
               <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest">النقاط</p>
-              <p className="text-base font-black text-amber-600">{userData?.loyaltyPoints || 0} نقطة</p>
+              <p className="text-base font-black text-primary">{userData?.loyaltyPoints || 0} نقطة</p>
             </div>
           </Link>
         </div>
 
-        {/* أقسام القائمة */}
+        {/* القوائم */}
         {sections.map((section, idx) => (
           <div key={idx} className="space-y-3">
             <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] px-3">{section.title}</h3>
@@ -178,8 +173,8 @@ export default function ProfilePage() {
                 <Link key={i} href={item.href}>
                   <div className="flex items-center justify-between p-5 active:bg-gray-50 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className={cn("h-12 w-12 rounded-[1.25rem] flex items-center justify-center shrink-0 shadow-sm", item.bgColor)}>
-                        <item.icon className={cn("h-5 w-5", item.color)} />
+                      <div className="h-12 w-12 rounded-[1.25rem] bg-primary/5 flex items-center justify-center shrink-0">
+                        <item.icon className="h-5 w-5 text-primary" />
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-[14px] text-gray-800">{item.label}</p>
@@ -197,10 +192,10 @@ export default function ProfilePage() {
         {/* زر الخروج */}
         <button 
           onClick={handleLogout}
-          className="w-full flex items-center justify-between p-5 bg-rose-50 text-rose-600 rounded-[2.5rem] border border-rose-100 active:scale-[0.98] transition-all mb-6 group"
+          className="w-full flex items-center justify-between p-5 bg-rose-50 text-rose-600 rounded-[2.5rem] border border-rose-100 active:scale-[0.98] transition-all group"
         >
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 bg-white rounded-[1.25rem] flex items-center justify-center shadow-sm group-hover:rotate-12 transition-transform">
+            <div className="h-12 w-12 bg-white rounded-[1.25rem] flex items-center justify-center shadow-sm">
               <LogOut className="h-5 w-5" />
             </div>
             <span className="font-black text-[14px]">تسجيل الخروج</span>
@@ -208,7 +203,30 @@ export default function ProfilePage() {
           <p className="text-[9px] font-black uppercase tracking-widest opacity-60">وداعاً!</p>
         </button>
 
-        {/* التذييل */}
+        {/* إعدادات متقدمة */}
+        <div className="pt-2">
+          <button 
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-center gap-2 text-[11px] font-black text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <span>إعدادات متقدمة</span>
+            <ChevronDown className={cn("h-3 w-3 transition-transform", showAdvanced && "rotate-180")} />
+          </button>
+          
+          {showAdvanced && (
+            <div className="mt-4 animate-in slide-in-from-top-2 duration-300">
+              <button className="w-full flex items-center justify-between p-5 bg-gray-100 text-gray-500 rounded-[2.5rem] border border-gray-200 active:scale-[0.98] transition-all">
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                    <Trash2 className="h-4 w-4 text-rose-500" />
+                  </div>
+                  <span className="font-bold text-[13px] text-rose-500">حذف الحساب نهائياً</span>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="text-center pb-8 space-y-1">
           <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">Absher Delivery</p>
           <p className="text-[9px] font-bold text-gray-400 opacity-60">الإصدار 1.2.5 • صنع بكل حب</p>
