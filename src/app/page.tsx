@@ -241,7 +241,7 @@ export default function Home() {
                 <Link key={store.id} href={`/store/${store.id}`}>
                   <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
                     <CardContent className="p-3 h-full flex flex-row items-center gap-4">
-                      {/* Left Side: Favorite and Status (Now on Right in array, appears on Right in RTL) */}
+                      {/* Favorite and Status (Right Side in RTL) */}
                       <div className="flex flex-col justify-between items-start h-full py-1.5 shrink-0">
                         <button 
                           onClick={(e) => toggleFavorite(e, store.id)}
@@ -268,16 +268,16 @@ export default function Home() {
                           <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                         </div>
                         <div className="flex items-center flex-wrap gap-2 pt-1">
-                          <div className="flex items-center gap-1 text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">
-                            <span className="text-[10px] font-bold">2.3 كم</span>
-                          </div>
                           <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                             {categoryName}
                           </Badge>
+                          <div className="flex items-center gap-1 text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">
+                            <span className="text-[10px] font-bold">2.3 كم</span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Right Side: Store Image (Now on Left in array, appears on Left in RTL) */}
+                      {/* Store Image (Left Side in RTL) */}
                       <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                         <Image 
                           src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} 
