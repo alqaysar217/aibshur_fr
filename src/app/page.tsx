@@ -102,7 +102,7 @@ export default function Home() {
         { id: "dates", name: "تمور", color: "bg-amber-100", textColor: "text-amber-900" },
         { id: "grocery", name: "سوبر ماركت", color: "bg-green-50", textColor: "text-green-600" },
         { id: "pharmacy", name: "صيدليات", color: "bg-blue-50", textColor: "text-blue-600" },
-        { id: "electronics", name: "إلكترونيات", color: "bg-slate-50", textColor: "text-slate-600" },
+        { id: "electronics", name: "إكتونيات", color: "bg-slate-50", textColor: "text-slate-600" },
         { id: "sweets", name: "حلويات", color: "bg-pink-50", textColor: "text-pink-600" },
         { id: "spices", name: "بهارات", color: "bg-yellow-50", textColor: "text-yellow-700" }
       ]
@@ -237,7 +237,7 @@ export default function Home() {
                 <Link key={store.id} href={`/store/${store.id}`}>
                   <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
                     <CardContent className="p-3 h-full flex flex-row items-center gap-4">
-                      {/* Right: Store Image (Standard for Home) */}
+                      {/* Right: Store Image */}
                       <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                         <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                         <div className="absolute bottom-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
@@ -246,7 +246,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* Center: Info (Aligned to Right/Image) */}
+                      {/* Center: Info */}
                       <div className="flex-1 flex flex-col justify-center space-y-1 text-right items-start overflow-hidden">
                         <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{store.name}</h4>
                         <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden">
@@ -254,10 +254,10 @@ export default function Home() {
                           <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                         </div>
                         <div className="flex items-center flex-wrap gap-2 pt-1 justify-start">
-                          <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">2.3 كم</span>
                           <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                             {categoryName}
                           </Badge>
+                          <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">2.3 كم</span>
                         </div>
                       </div>
 
