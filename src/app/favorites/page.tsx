@@ -164,6 +164,11 @@ export default function FavoritesPage() {
     saveCart(newCart)
   }
 
+  const hasOptions = (productName: string) => {
+    const keywords = ['بيتزا', 'نفر', 'برجر', 'عصير', 'مشوي', 'برمة', 'مندي', 'حجم', 'نوع']
+    return keywords.some(k => productName.includes(k))
+  }
+
   if (!mounted) return <div className="min-h-screen bg-background" />
 
   if (isUserLoading || isUserDataLoading) {
@@ -274,11 +279,20 @@ export default function FavoritesPage() {
               filteredFavoriteProducts.map((product: any) => {
                 const inCart = cart.find(item => item.id === product.id)
                 const isFavProd = userData?.favoritesProductIds?.includes(product.id)
+                const needsOptions = hasOptions(product.name)
 
                 return (
                   <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => router.push(`/store/${product.storeId}`)}>
                     <CardContent className="p-3 flex flex-row items-center gap-3">
-                      {/* Info (Right side) */}
+                      {/* Product Image (Right side) - Matching StoreDetail */}
+                      <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
+                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <button onClick={(e) => { e.stopPropagation(); toggleFavoriteProduct(e, product.id); }} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                          <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
+                        </button>
+                      </div>
+
+                      {/* Info (Left side) - Matching StoreDetail */}
                       <div className="flex-1 text-right space-y-0.5 overflow-hidden">
                         <div className="flex items-center justify-between">
                           <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
@@ -293,7 +307,7 @@ export default function FavoritesPage() {
                         <div className="flex items-center justify-between pt-1">
                           <span className="text-primary font-black text-base">{product.price} <small className="text-[9px] font-bold">ر.س</small></span>
                           <div onClick={(e) => e.stopPropagation()}>
-                            {inCart ? (
+                            {inCart && !needsOptions ? (
                               <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
                                 <Button onClick={(e) => removeFromCart(e, product.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
                                   <Minus className="h-3 w-3 text-primary" />
@@ -308,19 +322,11 @@ export default function FavoritesPage() {
                                 onClick={(e) => addToCart(e, product)}
                                 className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                               >
-                                إضافة للسلة
+                                {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
                               </Button>
                             )}
                           </div>
                         </div>
-                      </div>
-
-                      {/* Product Image (Left side) */}
-                      <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
-                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
-                          <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-                        </button>
                       </div>
                     </CardContent>
                   </Card>
