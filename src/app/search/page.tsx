@@ -230,9 +230,9 @@ export default function SearchPage() {
           ))}
         </div>
 
-        <div className="flex flex-col gap-5 pt-2">
+        <div className="flex flex-col gap-0 pt-2">
           {loadingStores || loadingProducts ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="h-[105px] w-full bg-white rounded-3xl animate-pulse" />)
+            [1, 2, 3, 4].map(i => <div key={i} className="h-[105px] w-full bg-white rounded-2xl animate-pulse mb-5" />)
           ) : filteredResults.length > 0 ? (
             filteredResults.map((item: any) => {
               if (item.type === 'store') {
@@ -242,9 +242,9 @@ export default function SearchPage() {
 
                 return (
                   <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
-                    <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
-                      <CardContent className="p-3 h-full flex flex-row items-center gap-4">
-                        {/* Right: Store Image */}
+                    <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px] mb-5">
+                      <CardContent className="p-3 h-full flex flex-row items-center gap-4 justify-between" dir="rtl">
+                        {/* 1. أقصى اليمين: شعار المتجر والتقييم */}
                         <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                           <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                           <div className="absolute bottom-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
@@ -253,22 +253,24 @@ export default function SearchPage() {
                           </div>
                         </div>
 
-                        {/* Center: Info */}
-                        <div className="flex-1 flex flex-col justify-center space-y-1 text-right items-start overflow-hidden">
-                          <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{item.name}</h4>
-                          <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden">
+                        {/* 2. الوسط: قسم المعلومات محاذى لليمين */}
+                        <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
+                          <h4 className="font-black text-sm text-[#111827] truncate leading-tight w-full text-right">{item.name}</h4>
+                          <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
                             <MapPin className="h-2.5 w-2.5 text-primary/60" />
                             <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
                           </div>
-                          <div className="flex items-center flex-wrap gap-2 pt-1 justify-start">
-                            <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">2.3 كم</span>
-                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
+                          <div className="flex items-center gap-2 pt-1 w-full justify-start">
+                            <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
+                              2.3 كم
+                            </span>
+                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md whitespace-nowrap">
                               {categoryName}
                             </Badge>
                           </div>
                         </div>
 
-                        {/* Left: Actions */}
+                        {/* 3. أقصى اليسار: التحكم والحالة */}
                         <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
                           <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
                             <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
@@ -287,9 +289,9 @@ export default function SearchPage() {
                 const needsOptions = hasOptions(item.name)
 
                 return (
-                  <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => router.push(`/store/${item.storeId}`)}>
-                    <CardContent className="p-3 flex flex-row items-center gap-3">
-                      {/* Product Image (Right side) - Matching StoreDetail */}
+                  <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-4" onClick={() => router.push(`/store/${item.storeId}`)}>
+                    <CardContent className="p-3 flex flex-row items-center gap-3" dir="rtl">
+                      {/* Product Image (Right side) */}
                       <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
                         <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                         <button onClick={(e) => { e.stopPropagation(); toggleFavorite(e, 'product', item.id); }} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
@@ -297,7 +299,7 @@ export default function SearchPage() {
                         </button>
                       </div>
 
-                      {/* Info (Left side) - Matching StoreDetail */}
+                      {/* Info (Left side aligned right) */}
                       <div className="flex-1 text-right space-y-0.5 overflow-hidden">
                         <div className="flex items-center justify-between">
                           <h3 className="font-black text-sm text-[#111827] truncate">{item.name}</h3>
