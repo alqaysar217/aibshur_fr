@@ -178,17 +178,17 @@ export default function FavoritesPage() {
 
   const renderStars = (rating: number) => {
     return (
-      <div className="flex items-center gap-0.5 mt-0.5">
+      <div className="flex flex-row-reverse items-center gap-0.5 mt-0.5">
         {[1, 2, 3, 4, 5].map((star) => (
-          <span key={star}>
-            {rating >= star ? (
-              <Star className="h-2 w-2 fill-primary text-primary" />
-            ) : rating >= star - 0.5 ? (
-              <StarHalf className="h-2 w-2 fill-primary text-primary" />
-            ) : (
-              <Star className="h-2 w-2 text-muted/20" />
-            )}
-          </span>
+          <div key={star} className="relative h-2.5 w-2.5">
+            <Star className="absolute inset-0 h-full w-full text-muted-foreground/20 stroke-[2]" />
+            <div 
+              className="absolute inset-0 overflow-hidden" 
+              style={{ width: rating >= star ? '100%' : rating >= star - 0.5 ? '50%' : '0%' }}
+            >
+              <Star className="h-2.5 w-2.5 fill-primary text-primary stroke-primary stroke-[2]" />
+            </div>
+          </div>
         ))}
       </div>
     )
