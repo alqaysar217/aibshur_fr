@@ -1,12 +1,10 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Search, ArrowRight, ShoppingBag, Filter, Star, Heart, MapPin, Plus, Minus, Sparkles, Store, Package } from "lucide-react"
+import { Search, ArrowRight, ShoppingBag, Heart, MapPin, Plus, Minus, Store, Package } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { BottomNav } from "@/components/layout/bottom-nav"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from "@/firebase"
 import { collection, query, collectionGroup, limit, doc, setDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
@@ -70,22 +68,19 @@ export default function SearchPage() {
     let allStores = (stores || []).map(s => ({ ...s, type: 'store' }))
     let allProducts = (products || []).map(p => ({ ...p, type: 'product' }))
 
-    // Deduplicate items by ID and type to avoid key duplication errors
     const uniqueMap = new Map();
     [...allStores, ...allProducts].forEach(item => {
       uniqueMap.set(`${item.type}-${item.id}`, item);
     });
     const combined = Array.from(uniqueMap.values());
 
-    const filtered = !searchVal 
+    return !searchVal 
       ? combined 
       : combined.filter((item: any) => {
           const nameMatch = item.name?.toLowerCase().includes(searchVal)
           const descMatch = item.description?.toLowerCase().includes(searchVal)
           return nameMatch || descMatch
         })
-
-    return filtered
   }, [queryText, stores, products, mounted])
 
   const filteredProducts = useMemo(() => filteredResults.filter(i => i.type === 'product'), [filteredResults])
@@ -153,7 +148,7 @@ export default function SearchPage() {
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
             <ArrowRight className="h-6 w-6 text-primary" />
           </Button>
-          <h1 className="text-xl font-black text-primary">البحث</h1>
+          <h1 className="text-xl font-bold text-primary">البحث</h1>
         </div>
         <Link href="/cart">
           <Button variant="ghost" size="icon" className="relative h-10 w-10">
@@ -175,7 +170,7 @@ export default function SearchPage() {
           className="h-14 rounded-[10px] border-none shadow-sm bg-white text-right"
         />
 
-        <Tabs defaultValue="products" className="w-full">
+        <Tabs defaultValue="products" className="w-full" dir="rtl">
           <TabsList className="grid w-full grid-cols-2 mb-4 bg-white rounded-[10px] p-1 shadow-sm h-12">
             <TabsTrigger value="products" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white">
               <Package className="h-4 w-4" /> المنتجات
@@ -191,10 +186,9 @@ export default function SearchPage() {
             ) : filteredProducts.map((item: any) => {
               const inCart = cart.find(c => c.id === item.id)
               const isFav = userData?.favoritesProductIds?.includes(item.id)
-              // Fixed: using a unique key with type prefix to avoid ID collisions
               return (
                 <Card key={`product-${item.id}`} className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
-                  <button onClick={(e) => toggleFavorite(e, 'product', item.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md">
+                  <button onClick={(e) => toggleFavorite(e, 'product', item.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md shadow-sm">
                     <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                   </button>
                   <CardContent className="p-3 flex items-center gap-3">
@@ -207,12 +201,12 @@ export default function SearchPage() {
                         <span className="text-primary font-black text-sm">{item.price} ر.س</span>
                         {inCart ? (
                           <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-md">
-                            <button onClick={(e) => removeFromCart(e, item.id)} className="h-7 w-7 rounded bg-white flex items-center justify-center"><Minus className="h-3.5 w-3.5 text-primary" /></button>
+                            <button onClick={(e) => removeFromCart(e, item.id)} className="h-7 w-7 rounded-[10px] bg-white flex items-center justify-center"><Minus className="h-3.5 w-3.5 text-primary" /></button>
                             <span className="font-black text-xs">{inCart.quantity}</span>
-                            <button onClick={(e) => addToCart(e, item)} className="h-7 w-7 rounded bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
+                            <button onClick={(e) => addToCart(e, item)} className="h-7 w-7 rounded-[10px] bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
                           </div>
                         ) : (
-                          <Button onClick={(e) => addToCart(e, item)} className="h-8 rounded-md bg-primary text-white text-[10px] font-black">إضافة</Button>
+                          <Button onClick={(e) => addToCart(e, item)} className="h-8 rounded-[10px] bg-primary text-white text-[10px] font-black">إضافة</Button>
                         )}
                       </div>
                     </div>
@@ -230,7 +224,7 @@ export default function SearchPage() {
               return (
                 <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
                   <Card className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
-                    <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md">
+                    <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md shadow-sm">
                       <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                     </button>
                     <CardContent className="p-3 flex items-center gap-3">

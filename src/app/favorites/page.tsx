@@ -3,17 +3,17 @@
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, limit, serverTimestamp, arrayUnion } from "firebase/firestore"
-import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus, Store, ArrowRight, Package } from "lucide-react"
+import { Heart, ShoppingBag, MapPin, Package, Store, ArrowRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { BottomNav } from "@/components/layout/bottom-nav"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function FavoritesPage() {
   const { user, isUserLoading } = useUser()
@@ -72,6 +72,14 @@ export default function FavoritesPage() {
     const isFav = userData?.[field]?.includes(id)
     const updateData = { [field]: isFav ? arrayRemove(id) : arrayUnion(id) }
     setDoc(userRef as any, updateData, { merge: true })
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: userRef?.path || '',
+          operation: 'write',
+          requestResourceData: updateData,
+        })
+        errorEmitter.emit('permission-error', permissionError)
+      })
   }
 
   const addToCart = (e: React.MouseEvent, product: any) => {
@@ -79,12 +87,6 @@ export default function FavoritesPage() {
     const existing = cart.find(i => i.id === product.id)
     const newCart = existing ? cart.map(i => i.id === product.id ? {...i, quantity: i.quantity + 1} : i) : [...cart, {...product, quantity: 1}]
     saveCart(newCart); toast({ title: "تمت الإضافة" })
-  }
-
-  const removeFromCart = (e: React.MouseEvent, productId: string) => {
-    e.preventDefault(); e.stopPropagation()
-    const newCart = cart.map(i => i.id === productId ? {...i, quantity: i.quantity - 1} : i).filter(i => i.quantity > 0)
-    saveCart(newCart)
   }
 
   if (!mounted || isUserLoading || isUserDataLoading) return null
@@ -96,7 +98,7 @@ export default function FavoritesPage() {
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
             <ArrowRight className="h-6 w-6 text-primary" />
           </Button>
-          <h1 className="text-xl font-black text-primary">المفضلة</h1>
+          <h1 className="text-xl font-bold text-primary">المفضلة</h1>
         </div>
         <Link href="/cart">
           <Button variant="ghost" size="icon" className="relative h-10 w-10">
@@ -111,7 +113,7 @@ export default function FavoritesPage() {
       </header>
 
       <div className="p-4">
-        <Tabs defaultValue="products" className="w-full">
+        <Tabs defaultValue="products" className="w-full" dir="rtl">
           <TabsList className="grid w-full grid-cols-2 mb-6 bg-white rounded-[10px] p-1 shadow-sm h-12">
             <TabsTrigger value="products" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white">
               <Package className="h-4 w-4" /> المنتجات
@@ -122,9 +124,9 @@ export default function FavoritesPage() {
           </TabsList>
 
           <TabsContent value="products" className="space-y-3">
-            {favoriteProducts.map((product: any) => (
+            {favoriteProducts.length > 0 ? favoriteProducts.map((product: any) => (
               <Card key={product.id} className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
-                <button onClick={(e) => toggleFavorite(e, 'product', product.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md">
+                <button onClick={(e) => toggleFavorite(e, 'product', product.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md shadow-sm">
                   <Heart className="h-4 w-4 fill-destructive text-destructive" />
                 </button>
                 <CardContent className="p-3 flex items-center gap-3">
@@ -136,20 +138,25 @@ export default function FavoritesPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-primary font-black text-sm">{product.price} ر.س</span>
                       <div className="flex items-center gap-2">
-                        <Button onClick={(e) => addToCart(e, product)} className="h-8 rounded-md bg-primary text-white text-[10px] font-black">إضافة</Button>
+                        <Button onClick={(e) => addToCart(e, product)} className="h-8 rounded-[10px] bg-primary text-white text-[10px] font-black">إضافة</Button>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )) : (
+              <div className="text-center py-20 opacity-30">
+                <Package className="h-16 w-16 mx-auto mb-4 text-primary" />
+                <p className="font-bold">لا توجد منتجات مفضلة</p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="stores" className="space-y-3">
-            {favoriteStores.map((store: any) => (
+            {favoriteStores.length > 0 ? favoriteStores.map((store: any) => (
               <Link key={store.id} href={`/store/${store.id}`}>
                 <Card className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
-                  <button onClick={(e) => toggleFavorite(e, 'store', store.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md">
+                  <button onClick={(e) => toggleFavorite(e, 'store', store.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md shadow-sm">
                     <Heart className="h-4 w-4 fill-destructive text-destructive" />
                   </button>
                   <CardContent className="p-3 flex items-center gap-3">
@@ -163,11 +170,15 @@ export default function FavoritesPage() {
                   </CardContent>
                 </Card>
               </Link>
-            ))}
+            )) : (
+              <div className="text-center py-20 opacity-30">
+                <Store className="h-16 w-16 mx-auto mb-4 text-primary" />
+                <p className="font-bold">لا توجد متاجر مفضلة</p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
-      <BottomNav />
     </div>
   )
 }
