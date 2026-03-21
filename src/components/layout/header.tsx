@@ -48,12 +48,6 @@ export function Header() {
           </div>
           <h1 className="text-xl font-black text-[#111827] tracking-tight">أبشر</h1>
         </Link>
-        <div className="flex items-center gap-1 mt-0.5 text-[#6B7280]">
-          <MapPin className="h-3 w-3 text-primary" />
-          <span className="text-[10px] font-bold truncate max-w-[120px]">
-            {selectedCity}
-          </span>
-        </div>
       </div>
 
       <div className="flex items-center gap-2">
