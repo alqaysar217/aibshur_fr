@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -244,20 +245,22 @@ export default function CartPage() {
           <CardContent className="p-0">
             {!isEditing ? (
               <div className="divide-y divide-secondary/50">
-                <div className="bg-gray-50/50 p-3 flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b">
+                <div className="bg-gray-50/50 p-3 flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b">
                   <span className="flex-1 text-right">المنتج</span>
-                  <span className="w-16 text-center">السعر</span>
-                  <span className="w-12 text-center">الكمية</span>
-                  <span className="w-20 text-center">الإجمالي</span>
+                  <span className="w-16 text-center shrink-0">السعر</span>
+                  <span className="w-12 text-center shrink-0">الكمية</span>
+                  <span className="w-20 text-center shrink-0">الإجمالي</span>
                 </div>
                 {cart.map((item) => (
-                  <div key={item.id} className="p-4 flex items-center gap-3 justify-between">
+                  <div key={item.id} className="p-4 flex items-center gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-xs truncate text-right">{item.name}</p>
                     </div>
-                    <div className="w-16 text-center font-bold text-[11px] text-muted-foreground">{item.price}</div>
-                    <div className="w-12 text-center font-black text-[11px]">{item.quantity}</div>
-                    <div className="w-20 text-center font-black text-primary text-[11px]">{item.price * item.quantity} <small className="text-[8px]">ر.س</small></div>
+                    <div className="w-16 text-center font-bold text-[11px] text-muted-foreground shrink-0">{item.price}</div>
+                    <div className="w-12 text-center font-black text-[11px] shrink-0">{item.quantity}</div>
+                    <div className="w-20 text-center font-black text-primary text-[11px] shrink-0">
+                      {item.price * item.quantity} <small className="text-[8px] font-bold">ر.س</small>
+                    </div>
                   </div>
                 ))}
               </div>
