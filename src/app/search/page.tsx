@@ -201,106 +201,111 @@ export default function SearchPage() {
           {isLoading ? (
             [1, 2, 3].map(i => <div key={i} className="h-[105px] w-full bg-white rounded-3xl animate-pulse" />)
           ) : filteredResults.length > 0 ? (
-            filteredResults.map((item: any) => {
-              if (item.type === 'store') {
-                const isOpen = item.status === 'مفتوح' || item.status === 'open'
-                const isFav = userData?.favoritesStoreIds?.includes(item.id)
-                const categoryName = categories?.find(c => item.categoryIds?.includes(c.id))?.name || "متجر"
+            <div className="flex flex-col gap-5">
+              {filteredResults.map((item: any) => {
+                if (item.type === 'store') {
+                  const isOpen = item.status === 'مفتوح' || item.status === 'open'
+                  const isFav = userData?.favoritesStoreIds?.includes(item.id)
+                  const categoryName = categories?.find(c => item.categoryIds?.includes(c.id))?.name || "متجر"
 
-                return (
-                  <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
-                    <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
-                      <CardContent className="p-3 h-full flex flex-row items-center gap-4">
-                        <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
-                          <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
-                            <Star className="h-2.5 w-2.5 fill-amber-500" />
-                            <span className="text-[10px] font-black">{item.averageRating || '4.5'}</span>
+                  return (
+                    <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
+                      <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
+                        <CardContent className="p-3 h-full flex flex-row items-center gap-4">
+                          <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
+                            <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
+                              <Star className="h-2.5 w-2.5 fill-amber-500" />
+                              <span className="text-[10px] font-black">{item.averageRating || '4.5'}</span>
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
-                          <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{item.name}</h4>
-                          <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden">
-                            <MapPin className="h-2.5 w-2.5 text-primary/60" />
-                            <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
+                          <div className="flex-1 flex flex-col justify-center space-y-1 text-right overflow-hidden">
+                            <h4 className="font-black text-sm text-[#111827] truncate leading-tight">{item.name}</h4>
+                            <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden">
+                              <MapPin className="h-2.5 w-2.5 text-primary/60" />
+                              <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
+                            </div>
+                            <div className="flex items-center flex-wrap gap-2 pt-1">
+                              <div className="flex items-center gap-1 text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">
+                                <span className="text-[10px] font-bold">2.3 كم</span>
+                              </div>
+                              <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
+                                {categoryName}
+                              </Badge>
+                            </div>
                           </div>
-                          <div className="flex items-center flex-wrap gap-2 pt-1">
-                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
-                              {categoryName}
+
+                          <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
+                            <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
+                              <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
+                            </button>
+                            <Badge className={cn("text-[8px] h-4 px-1.5 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
+                              {isOpen ? 'مفتوح' : 'مغلق'}
                             </Badge>
                           </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  )
+                } else {
+                  const inCart = cart.find(c => c.id === item.id)
+                  const isFavProd = userData?.favoritesProductIds?.includes(item.id)
+                  const needsOptions = hasOptions(item.name)
+
+                  return (
+                    <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => router.push(`/store/${item.storeId}`)}>
+                      <CardContent className="p-3 flex flex-row items-center gap-3">
+                        <div className="flex-1 text-right space-y-0.5 overflow-hidden">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-black text-sm text-[#111827] truncate">{item.name}</h3>
+                            <div className="flex items-center gap-0.5 text-amber-500 text-[9px] font-black">
+                              <Star className="h-2.5 w-2.5 fill-amber-500" />
+                              <span>{item.rating || '4.8'}</span>
+                            </div>
+                          </div>
+                          <p className="text-[9px] text-gray-400 line-clamp-2 leading-snug min-h-[2.4rem]">
+                            {item.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
+                          </p>
+                          
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-primary font-black text-base">{item.price} <small className="text-[9px] font-bold">ر.س</small></span>
+                            
+                            <div onClick={(e) => e.stopPropagation()}>
+                              {inCart && !needsOptions ? (
+                                <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
+                                  <Button onClick={(e) => removeFromCart(e, item.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
+                                    <Minus className="h-3 w-3 text-primary" />
+                                  </Button>
+                                  <span className="font-black text-xs min-w-[10px] text-center">{inCart.quantity}</span>
+                                  <Button onClick={(e) => addToCart(e, item)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button 
+                                  onClick={(e) => needsOptions ? router.push(`/store/${item.storeId}`) : addToCart(e, item)}
+                                  className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
+                                >
+                                  {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
+                                </Button>
+                              )}
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
-                          <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
-                            <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
+                        <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
+                          <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform" />
+                          <button onClick={(e) => toggleFavorite(e, 'product', item.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                            <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
-                          <Badge className={cn("text-[8px] h-4 px-1.5 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
-                            {isOpen ? 'مفتوح' : 'مغلق'}
-                          </Badge>
                         </div>
                       </CardContent>
                     </Card>
-                  </Link>
-                )
-              } else {
-                const inCart = cart.find(c => c.id === item.id)
-                const isFavProd = userData?.favoritesProductIds?.includes(item.id)
-                const needsOptions = hasOptions(item.name)
-
-                return (
-                  <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => router.push(`/store/${item.storeId}`)}>
-                    <CardContent className="p-3 flex flex-row items-center gap-3">
-                      <div className="flex-1 text-right space-y-0.5 overflow-hidden">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-black text-sm text-[#111827] truncate">{item.name}</h3>
-                          <div className="flex items-center gap-0.5 text-amber-500 text-[9px] font-black">
-                            <Star className="h-2.5 w-2.5 fill-amber-500" />
-                            <span>{item.rating || '4.8'}</span>
-                          </div>
-                        </div>
-                        <p className="text-[9px] text-gray-400 line-clamp-2 leading-snug min-h-[2.4rem]">
-                          {item.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
-                        </p>
-                        
-                        <div className="flex items-center justify-between pt-1">
-                          <span className="text-primary font-black text-base">{item.price} <small className="text-[9px] font-bold">ر.س</small></span>
-                          
-                          <div onClick={(e) => e.stopPropagation()}>
-                            {inCart && !needsOptions ? (
-                              <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
-                                <Button onClick={(e) => removeFromCart(e, item.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
-                                  <Minus className="h-3 w-3 text-primary" />
-                                </Button>
-                                <span className="font-black text-xs min-w-[10px] text-center">{inCart.quantity}</span>
-                                <Button onClick={(e) => addToCart(e, item)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
-                                  <Plus className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            ) : (
-                              <Button 
-                                onClick={(e) => needsOptions ? router.push(`/store/${item.storeId}`) : addToCart(e, item)}
-                                className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
-                              >
-                                {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
-                        <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform" />
-                        <button onClick={(e) => toggleFavorite(e, 'product', item.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
-                          <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              }
-            })
+                  )
+                }
+              })}
+            </div>
           ) : (
             <div className="text-center py-32 flex flex-col items-center opacity-30">
               <div className="bg-secondary/50 p-8 rounded-full mb-4">

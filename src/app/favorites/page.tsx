@@ -216,7 +216,7 @@ export default function FavoritesPage() {
             <TabsTrigger value="stores" className="rounded-xl font-black text-xs h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">المتاجر</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="stores" className="space-y-5">
+          <TabsContent value="stores" className="flex flex-col gap-5">
             {isLoadingStores ? (
               [1, 2, 3].map(i => <div key={i} className="h-[105px] bg-white rounded-2xl animate-pulse" />)
             ) : favoriteStores && favoriteStores.length > 0 ? (
@@ -244,6 +244,9 @@ export default function FavoritesPage() {
                             <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                           </div>
                           <div className="flex items-center flex-wrap gap-2 pt-1">
+                            <div className="flex items-center gap-1 text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">
+                              <span className="text-[10px] font-bold">2.3 كم</span>
+                            </div>
                             <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                               {categoryName}
                             </Badge>
@@ -268,7 +271,7 @@ export default function FavoritesPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="products" className="space-y-4">
+          <TabsContent value="products" className="flex flex-col gap-4">
             {isLoadingProducts ? (
               [1, 2, 3].map(i => <div key={i} className="h-[105px] bg-white rounded-2xl animate-pulse" />)
             ) : filteredFavoriteProducts.length > 0 ? (
