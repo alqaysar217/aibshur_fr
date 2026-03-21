@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
@@ -403,7 +402,7 @@ export default function StoreDetailPage() {
       <Dialog open={!!viewingProduct} onOpenChange={(val) => !val && setViewingProduct(null)}>
         <DialogContent className="rounded-2xl w-[92%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0 shadow-2xl" dir="rtl">
           {viewingProduct && (
-            <div className="flex flex-col max-h-[85vh] overflow-y-auto">
+            <div className="flex flex-col max-h-[85vh] overflow-y-auto pb-10">
               <DialogHeader className="sr-only">
                 <DialogTitle>{viewingProduct.name}</DialogTitle>
                 <DialogDescription>تفاصيل المنتج الأساسية والخيارات المتاحة</DialogDescription>
@@ -520,4 +519,3 @@ export default function StoreDetailPage() {
     </div>
   )
 }
-
