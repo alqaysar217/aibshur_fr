@@ -260,7 +260,7 @@ export default function SearchPage() {
                             <MapPin className="h-2.5 w-2.5 text-primary/60" />
                             <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
                           </div>
-                          <div className="flex items-center flex-wrap gap-2 pt-1 justify-end">
+                          <div className="flex items-center flex-wrap gap-2 pt-1 justify-start">
                             <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">2.3 كم</span>
                             <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                               {categoryName}
@@ -289,7 +289,7 @@ export default function SearchPage() {
                 return (
                   <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => router.push(`/store/${item.storeId}`)}>
                     <CardContent className="p-3 flex flex-row items-center gap-3">
-                      {/* Product Image (Right side) */}
+                      {/* Product Image (Left side for Search Results) */}
                       <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
                         <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                         <button onClick={(e) => toggleFavorite(e, 'product', item.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
@@ -297,7 +297,7 @@ export default function SearchPage() {
                         </button>
                       </div>
 
-                      {/* Info (Left side) */}
+                      {/* Info (Right side for Search Results) */}
                       <div className="flex-1 text-right space-y-0.5 overflow-hidden">
                         <div className="flex items-center justify-between">
                           <h3 className="font-black text-sm text-[#111827] truncate">{item.name}</h3>
