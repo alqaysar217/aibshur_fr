@@ -325,15 +325,20 @@ export default function CartPage() {
                 <Tag className="h-4 w-4" /> هل لديك كوبون خصم؟
               </button>
             ) : (
-              <div className="relative flex items-center gap-2 animate-in slide-in-from-top-2">
-                <Input 
-                  placeholder="الكود..." 
-                  className="h-10 rounded-xl bg-white border-none shadow-sm text-xs"
-                  value={coupon}
-                  onChange={(e) => setCoupon(e.target.value)}
-                />
-                <Button onClick={applyCoupon} size="sm" className="h-10 rounded-xl px-4 text-xs" disabled={isCouponApplied || !coupon}>تطبيق</Button>
-                <button onClick={() => setShowCouponInput(false)} className="p-1"><X className="h-3 w-3 text-muted-foreground" /></button>
+              <div className="relative flex flex-col gap-2 animate-in slide-in-from-top-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-muted-foreground">الكوبون</span>
+                  <button onClick={() => {setShowCouponInput(false); setCoupon("");}} className="text-[10px] text-destructive">إلغاء</button>
+                </div>
+                <div className="relative flex items-center gap-2">
+                  <Input 
+                    placeholder="أدخل الكود هنا..." 
+                    className="h-10 rounded-xl bg-white border-none shadow-sm text-xs"
+                    value={coupon}
+                    onChange={(e) => setCoupon(e.target.value)}
+                  />
+                  <Button onClick={applyCoupon} size="sm" className="h-10 rounded-xl px-4 text-xs" disabled={isCouponApplied || !coupon}>تطبيق</Button>
+                </div>
               </div>
             )}
           </div>
@@ -349,7 +354,7 @@ export default function CartPage() {
                   <button onClick={() => {setShowNoteInput(false); setOrderNotes("");}} className="text-[10px] text-destructive">إلغاء</button>
                 </div>
                 <Textarea 
-                  placeholder="اكتب ملاحظتك..."
+                  placeholder="اكتب ملاحظتك هنا..."
                   className="min-h-[60px] rounded-xl border-none shadow-sm bg-white text-xs"
                   value={orderNotes}
                   onChange={(e) => setOrderNotes(e.target.value)}
