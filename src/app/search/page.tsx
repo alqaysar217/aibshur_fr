@@ -1,8 +1,7 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Search, StarHalf, ArrowRight, ShoppingBag, Loader2, Filter, Star, Heart, MapPin, Plus, Minus, Zap, Map, Clock, Sparkles, Store, Package } from "lucide-react"
+import { Search, ArrowRight, ShoppingBag, Filter, Star, Heart, MapPin, Plus, Minus, Sparkles, Store, Package } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -21,9 +20,7 @@ import { FirestorePermissionError } from "@/firebase/errors"
 
 const QUICK_FILTERS = [
   { id: "all", name: "الكل", icon: <Filter className="h-3.5 w-3.5" /> },
-  { id: "nearest", name: "الأقرب", icon: <Map className="h-3.5 w-3.5" /> },
-  { id: "favorites", name: "المفضلة", icon: <Heart className="h-3.5 w-3.5" /> },
-  { id: "top_rated", name: "الأكثر تقييماً", icon: <Star className="h-3.5 w-3.5" /> },
+  { id: "top_rated", name: "الأعلى تقييماً", icon: <Star className="h-3.5 w-3.5" /> },
   { id: "new", name: "الجديد", icon: <Sparkles className="h-3.5 w-3.5" /> },
 ]
 
@@ -86,17 +83,6 @@ export default function SearchPage() {
     let allStores = (stores || []).map(s => ({ ...s, type: 'store' }))
     let allProducts = (products || []).map(p => ({ ...p, type: 'product' }))
 
-    if (activeFilter === 'favorites' && userData) {
-      allStores = allStores.filter(s => userData.favoritesStoreIds?.includes(s.id))
-      allProducts = allProducts.filter(p => userData.favoritesProductIds?.includes(p.id))
-    } else if (activeFilter === 'top_rated') {
-      allStores = allStores.filter(s => (s.averageRating || 0) >= 4.7)
-      allProducts = allProducts.filter(p => (p.rating || 0) >= 4.7)
-    } else if (activeFilter === 'nearest') {
-      allStores = allStores.slice(0, 10) 
-      allProducts = [] 
-    }
-
     const combined = [...allStores, ...allProducts]
 
     const filtered = !searchVal 
@@ -104,19 +90,11 @@ export default function SearchPage() {
       : combined.filter((item: any) => {
           const nameMatch = item.name?.toLowerCase().includes(searchVal)
           const descMatch = item.description?.toLowerCase().includes(searchVal)
-          const addressMatch = item.address?.toLowerCase().includes(searchVal)
-          const categoryMatch = item.category?.toLowerCase().includes(searchVal)
-          return nameMatch || descMatch || addressMatch || categoryMatch
+          return nameMatch || descMatch
         })
 
-    const seen = new Set();
-    return filtered.filter(item => {
-      const key = `${item.type}-${item.id}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [queryText, activeFilter, stores, products, userData, mounted])
+    return filtered
+  }, [queryText, stores, products, mounted])
 
   const filteredProducts = useMemo(() => filteredResults.filter(i => i.type === 'product'), [filteredResults])
   const filteredStores = useMemo(() => filteredResults.filter(i => i.type === 'store'), [filteredResults])
@@ -161,7 +139,7 @@ export default function SearchPage() {
       newCart = [...cart, { ...product, quantity: 1, storeId: product.storeId }]
     }
     saveCart(newCart)
-    toast({ title: "تمت الإضافة", description: `${product.name} أضيف إلى السلة` })
+    toast({ title: "تمت الإضافة" })
   }
 
   const removeFromCart = (e: React.MouseEvent, productId: string) => {
@@ -169,59 +147,27 @@ export default function SearchPage() {
     e.stopPropagation()
     const existing = cart.find(item => item.id === productId)
     if (!existing) return
-    
-    let newCart;
-    if (existing.quantity === 1) {
-      newCart = cart.filter(item => item.id !== productId)
-    } else {
-      newCart = cart.map(item => 
-        item.id === productId ? { ...item, quantity: item.quantity - 1 } : item
-      )
-    }
+    let newCart = cart.map(item => item.id === productId ? { ...item, quantity: item.quantity - 1 } : item).filter(i => i.quantity > 0)
     saveCart(newCart)
   }
 
-  const hasOptions = (productName: string) => {
-    const keywords = ['بيتزا', 'نفر', 'برجر', 'عصير', 'مشوي', 'برمة', 'مندي', 'حجم', 'نوع']
-    return keywords.some(k => productName.includes(k))
-  }
-
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex flex-row-reverse items-center gap-0.5 mt-0.5" dir="rtl">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <div key={star} className="relative h-2.5 w-2.5">
-            <Star className="absolute inset-0 h-full w-full text-muted-foreground/20 stroke-[1.5]" />
-            <div 
-              className="absolute inset-y-0 right-0 overflow-hidden" 
-              style={{ width: rating >= star ? '100%' : rating >= star - 0.5 ? '50%' : '0%' }}
-            >
-              <Star className="absolute top-0 right-0 h-2.5 w-2.5 fill-primary text-primary stroke-primary stroke-[1.5]" />
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  }
-
-  if (!mounted) return <div className="min-h-screen bg-background" />
-
+  if (!mounted) return null
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0)
 
   return (
     <div className="pb-24 min-h-screen bg-secondary/5 font-body" dir="rtl">
       <header className="p-4 glass sticky top-0 z-50 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full h-10 w-10">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
             <ArrowRight className="h-6 w-6 text-primary" />
           </Button>
-          <h1 className="text-xl font-black text-primary">البحث في أبشر</h1>
+          <h1 className="text-xl font-black text-primary">البحث</h1>
         </div>
         <Link href="/cart">
           <Button variant="ghost" size="icon" className="relative h-10 w-10">
-            <ShoppingBag className="h-5 w-5 text-gray-500" />
+            <ShoppingBag className="h-5 w-5 text-primary" />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white animate-in zoom-in">
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
                 {cartCount}
               </span>
             )}
@@ -230,203 +176,87 @@ export default function SearchPage() {
       </header>
 
       <div className="p-4 space-y-4">
-        <div className="relative group">
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground group-focus-within:text-primary transition-colors">
-            <Search className="h-full w-full" />
-          </div>
-          <Input 
-            value={queryText}
-            onChange={(e) => setQueryText(e.target.value)}
-            placeholder="ابحث عن متجر، أو منتج..." 
-            className="pr-12 h-16 rounded-2xl border-none shadow-2xl bg-white text-lg focus-visible:ring-primary text-right"
-          />
-        </div>
-
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" dir="rtl">
-          {QUICK_FILTERS.map((filter) => (
-            <button
-              key={filter.id}
-              onClick={() => setActiveFilter(filter.id)}
-              className={cn(
-                "px-4 py-2.5 rounded-full text-[10px] font-black whitespace-nowrap transition-all flex items-center gap-2 border",
-                activeFilter === filter.id 
-                  ? "bg-primary text-white border-primary shadow-md scale-105" 
-                  : "bg-white text-gray-500 border-transparent hover:bg-gray-50 shadow-sm"
-              )}
-            >
-              {filter.icon}
-              {filter.name}
-            </button>
-          ))}
-        </div>
+        <Input 
+          value={queryText}
+          onChange={(e) => setQueryText(e.target.value)}
+          placeholder="ابحث عن متجر أو منتج..." 
+          className="h-14 rounded-[10px] border-none shadow-sm bg-white text-right"
+        />
 
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/50 backdrop-blur-sm rounded-2xl p-1 shadow-sm h-14" dir="rtl">
-            <TabsTrigger 
-              value="products" 
-              className="rounded-xl font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
-            >
-              <Package className="h-4 w-4" /> منتجات
+          <TabsList className="grid w-full grid-cols-2 mb-4 bg-white rounded-[10px] p-1 shadow-sm h-12">
+            <TabsTrigger value="products" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white">
+              <Package className="h-4 w-4" /> المنتجات
             </TabsTrigger>
-            <TabsTrigger 
-              value="stores" 
-              className="rounded-xl font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
-            >
-              <Store className="h-4 w-4" /> متاجر
+            <TabsTrigger value="stores" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white">
+              <Store className="h-4 w-4" /> المتاجر
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="products">
-            <div className="flex flex-col gap-0">
-              {loadingProducts ? (
-                [1, 2, 3, 4].map(i => <div key={i} className="h-24 w-full bg-white rounded-2xl animate-pulse mb-4" />)
-              ) : filteredProducts.length > 0 ? (
-                filteredProducts.map((item: any) => {
-                  const inCart = cart.find(c => c.id === item.id)
-                  const isFavProd = userData?.favoritesProductIds?.includes(item.id)
-                  const needsOptions = hasOptions(item.name)
-                  const itemStore = stores?.find(s => s.id === item.storeId)
-
-                  return (
-                    <Card key={`product-${item.id}`} className="relative border-none shadow-sm rounded-xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group mb-3" onClick={() => router.push(`/store/${item.storeId}`)}>
-                      <button onClick={(e) => { e.stopPropagation(); toggleFavorite(e, 'product', item.id); }} className="absolute top-2 left-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
-                        <Heart className={cn("h-3.5 w-3.5", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-                      </button>
-                      <CardContent className="p-2.5 flex flex-row items-center gap-3" dir="rtl">
-                        <div className="flex flex-col items-center gap-1 shrink-0">
-                          <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
-                            <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+          <TabsContent value="products" className="space-y-3">
+            {loadingProducts ? (
+              [1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-[10px] animate-pulse" />)
+            ) : filteredProducts.map((item: any) => {
+              const inCart = cart.find(c => c.id === item.id)
+              const isFav = userData?.favoritesProductIds?.includes(item.id)
+              return (
+                <Card key={item.id} className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
+                  <button onClick={(e) => toggleFavorite(e, 'product', item.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md">
+                    <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
+                  </button>
+                  <CardContent className="p-3 flex items-center gap-3">
+                    <div className="relative h-16 w-16 rounded-md overflow-hidden bg-secondary/10 shrink-0">
+                      <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
+                    </div>
+                    <div className="flex-1 text-right space-y-1">
+                      <h3 className="font-bold text-sm">{item.name}</h3>
+                      <div className="flex items-center justify-between">
+                        <span className="text-primary font-black text-sm">{item.price} ر.س</span>
+                        {inCart ? (
+                          <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-md">
+                            <button onClick={(e) => removeFromCart(e, item.id)} className="h-7 w-7 rounded bg-white flex items-center justify-center"><Minus className="h-3.5 w-3.5 text-primary" /></button>
+                            <span className="font-black text-xs">{inCart.quantity}</span>
+                            <button onClick={(e) => addToCart(e, item)} className="h-7 w-7 rounded bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
                           </div>
-                          {renderStars(item.rating || 4.8)}
-                        </div>
-
-                        <div className="flex-1 text-right space-y-0.5 overflow-hidden">
-                          <h3 className="font-bold text-sm text-[#111827] truncate w-full">{item.name}</h3>
-                          <p className="text-[10px] text-gray-400 line-clamp-1 leading-snug">
-                            {item.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
-                          </p>
-                          
-                          <div className="flex items-center gap-1.5 pt-1">
-                            <div className="relative h-4 w-4 rounded-full overflow-hidden bg-secondary/20">
-                              <Image src={itemStore?.logoUrl || `https://picsum.photos/seed/${item.storeId || 'store'}/100`} alt="" fill className="object-cover" />
-                            </div>
-                            <span className="text-[9px] font-bold text-muted-foreground">{itemStore?.name || "المتجر"}</span>
-                          </div>
-
-                          <div className="flex items-center justify-between pt-1">
-                            <span className="text-primary font-black text-sm">{item.price} <small className="text-[9px] font-bold">ر.س</small></span>
-                            <div onClick={(e) => e.stopPropagation()}>
-                              {needsOptions ? (
-                                <Button 
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    router.push(`/store/${item.storeId}`);
-                                  }}
-                                  className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
-                                >
-                                  عرض الخيارات
-                                </Button>
-                              ) : (
-                                inCart ? (
-                                  <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
-                                    <Button onClick={(e) => removeFromCart(e, item.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
-                                      <Minus className="h-3.5 w-3.5 text-primary" />
-                                    </Button>
-                                    <span className="font-bold text-xs min-w-[10px] text-center">{inCart.quantity}</span>
-                                    <Button onClick={(e) => addToCart(e, item)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
-                                      <Plus className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <Button 
-                                    onClick={(e) => addToCart(e, item)}
-                                    className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-bold"
-                                  >
-                                    إضافة
-                                  </Button>
-                                )
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })
-              ) : (
-                <EmptyState message="لم نجد أي منتجات" icon={<Package className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />} />
-              )}
-            </div>
+                        ) : (
+                          <Button onClick={(e) => addToCart(e, item)} className="h-8 rounded-md bg-primary text-white text-[10px] font-black">إضافة</Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </TabsContent>
 
-          <TabsContent value="stores">
-            <div className="flex flex-col gap-0">
-              {loadingStores ? (
-                [1, 2, 3, 4].map(i => <div key={i} className="h-24 w-full bg-white rounded-2xl animate-pulse mb-4" />)
-              ) : filteredStores.length > 0 ? (
-                filteredStores.map((item: any) => {
-                  const isOpen = item.status === 'مفتوح' || item.status === 'open'
-                  const isFav = userData?.favoritesStoreIds?.includes(item.id)
-                  const categoryName = categories?.find(c => item.categoryIds?.includes(c.id))?.name || "متجر"
-
-                  return (
-                    <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
-                      <Card className="border-none shadow-sm rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-24 mb-4">
-                        <CardContent className="p-2.5 h-full flex flex-row items-center gap-3 justify-between" dir="rtl">
-                          <div className="flex flex-col items-center gap-1 shrink-0">
-                            <div className="relative w-16 h-16 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
-                              <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                            </div>
-                            {renderStars(item.averageRating || 4.5)}
-                          </div>
-
-                          <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1 text-right">
-                            <h4 className="font-bold text-sm text-[#111827] truncate text-right w-full">{item.name}</h4>
-                            <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
-                              <MapPin className="h-2.5 w-2.5 text-primary/60" />
-                              <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
-                            </div>
-                            <div className="flex items-center gap-2 pt-0.5 w-full justify-start">
-                              <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
-                                2.3 كم
-                              </span>
-                              <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md whitespace-nowrap">
-                                {categoryName}
-                              </Badge>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col justify-between items-end h-full py-1 shrink-0">
-                            <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/20 backdrop-blur-sm rounded-lg active:scale-75 transition-transform">
-                              <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
-                            </button>
-                            <Badge className={cn("text-[9px] h-4 px-1.5 border-none font-bold rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
-                              {isOpen ? 'مفتوح' : 'مغلق'}
-                            </Badge>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  )
-                })
-              ) : (
-                <EmptyState message="لم نجد أي متاجر" icon={<Store className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />} />
-              )}
-            </div>
+          <TabsContent value="stores" className="space-y-3">
+            {loadingStores ? (
+              [1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-[10px] animate-pulse" />)
+            ) : filteredStores.map((item: any) => {
+              const isFav = userData?.favoritesStoreIds?.includes(item.id)
+              return (
+                <Link key={item.id} href={`/store/${item.id}`}>
+                  <Card className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
+                    <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md">
+                      <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
+                    </button>
+                    <CardContent className="p-3 flex items-center gap-3">
+                      <div className="relative h-16 w-16 rounded-md overflow-hidden bg-secondary/10 shrink-0">
+                        <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
+                      </div>
+                      <div className="flex-1 text-right space-y-1">
+                        <h3 className="font-bold text-sm">{item.name}</h3>
+                        <p className="text-[10px] text-muted-foreground flex items-center gap-1 justify-start"><MapPin className="h-3 w-3" /> {item.address}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
           </TabsContent>
         </Tabs>
       </div>
       <BottomNav />
-    </div>
-  )
-}
-
-function EmptyState({ message, icon }: { message: string, icon: React.ReactNode }) {
-  return (
-    <div className="text-center py-24 flex flex-col items-center opacity-30">
-      <div className="mb-4">{icon}</div>
-      <p className="text-sm font-bold">{message}</p>
     </div>
   )
 }

@@ -90,8 +90,7 @@ export default function OrdersPage() {
       <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-4">
         <ShoppingBag className="h-16 w-16 text-muted-foreground opacity-20" />
         <h1 className="text-xl font-bold text-primary">يرجى تسجيل الدخول</h1>
-        <p className="text-muted-foreground text-center">يجب تسجيل الدخول لمشاهدة طلباتك</p>
-        <Button onClick={() => router.push('/login')} className="w-full max-w-xs h-12 rounded-xl">تسجيل الدخول</Button>
+        <Button onClick={() => router.push('/login')} className="w-full max-w-xs h-12 rounded-[10px]">تسجيل الدخول</Button>
         <BottomNav />
       </div>
     )
@@ -102,13 +101,13 @@ export default function OrdersPage() {
       <header className="p-4 glass sticky top-0 z-40 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
-            <ArrowRight className="h-6 w-6" />
+            <ArrowRight className="h-6 w-6 text-primary" />
           </Button>
           <h1 className="text-xl font-bold text-primary">طلباتي</h1>
         </div>
         <Link href="/cart">
           <Button variant="ghost" size="icon" className="relative h-10 w-10">
-            <ShoppingBag className="h-5 w-5" />
+            <ShoppingBag className="h-5 w-5 text-primary" />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
                 {cartCount}
@@ -118,34 +117,34 @@ export default function OrdersPage() {
         </Link>
       </header>
 
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-4">
         {isCollectionLoading ? (
-          [1, 2].map(i => <div key={i} className="h-48 bg-white rounded-2xl animate-pulse" />)
+          [1, 2].map(i => <div key={i} className="h-48 bg-white rounded-[10px] animate-pulse" />)
         ) : orders && orders.length > 0 ? (
           orders.map((order: any) => (
-            <Card key={order.id} className="border-none shadow-sm overflow-hidden rounded-[2rem]">
+            <Card key={order.id} className="border-none shadow-sm overflow-hidden rounded-[10px]">
               <CardContent className="p-0">
-                <div className="p-5 flex items-center justify-between border-b border-secondary/50">
+                <div className="p-4 flex items-center justify-between border-b border-secondary/50">
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <Utensils className="h-6 w-6 text-primary" />
+                    <div className="h-10 w-10 bg-primary/10 rounded-md flex items-center justify-center">
+                      <Utensils className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-bold">طلب من المتجر</h3>
-                      <p className="text-[10px] text-muted-foreground">توقيت الطلب: {formatOrderDate(order.createdAt)}</p>
+                      <h3 className="font-bold text-sm">طلب من المتجر</h3>
+                      <p className="text-[10px] text-muted-foreground">{formatOrderDate(order.createdAt)}</p>
                     </div>
                   </div>
                   <Badge 
                     variant={order.status === 'delivered' ? 'outline' : 'default'}
-                    className={order.status === 'delivered' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-accent text-accent-foreground border-none'}
+                    className={order.status === 'delivered' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-primary text-white border-none'}
                   >
                     {getStatusLabel(order.status)}
                   </Badge>
                 </div>
 
-                <div className="p-5 space-y-5">
+                <div className="p-4 space-y-4">
                   {order.status !== 'delivered' && (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="flex items-center gap-1 text-primary"><Clock className="h-3 w-3" /> حالة الطلب</span>
                         <span className="text-muted-foreground">{getStatusProgress(order.status)}%</span>
@@ -160,7 +159,7 @@ export default function OrdersPage() {
                       <span className="font-black text-primary text-lg">{order.totalAmount} ر.س</span>
                     </div>
                     <Link href={`/orders/${order.id}`}>
-                      <button className="text-xs font-bold text-primary flex items-center gap-1 bg-primary/5 px-3 py-1.5 rounded-lg">
+                      <button className="text-xs font-bold text-primary flex items-center gap-1 bg-primary/5 px-3 py-1.5 rounded-md">
                         التفاصيل <ChevronLeft className="h-3 w-3" />
                       </button>
                     </Link>
@@ -171,11 +170,8 @@ export default function OrdersPage() {
           ))
         ) : (
           <div className="text-center py-20 space-y-4">
-            <div className="bg-secondary/20 p-8 rounded-full w-fit mx-auto">
-              <ShoppingBag className="h-12 w-12 text-muted-foreground opacity-20" />
-            </div>
             <p className="text-muted-foreground font-bold">لا توجد طلبات سابقة</p>
-            <Button onClick={() => router.push('/')} variant="outline" className="rounded-xl">ابدأ التسوق الآن</Button>
+            <Button onClick={() => router.push('/')} variant="outline" className="rounded-[10px]">ابدأ التسوق الآن</Button>
           </div>
         )}
       </div>

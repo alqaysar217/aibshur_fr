@@ -1,7 +1,6 @@
-
 "use client"
 
-import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Settings, Bell, ChevronRight, Wallet, BadgeCheck, Phone, Crown, Trash2, ChevronDown } from "lucide-react"
+import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Crown, Trash2, ChevronDown, BadgeCheck, Phone } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
@@ -85,17 +84,16 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-8 space-y-8 bg-white" dir="rtl">
-        <div className="bg-primary/5 p-10 rounded-[3rem] relative">
+        <div className="bg-primary/5 p-10 rounded-[10px] relative">
           <User className="h-20 w-20 text-primary/20" />
-          <div className="absolute -bottom-2 -right-2 bg-primary p-3 rounded-2xl shadow-xl">
+          <div className="absolute -bottom-2 -right-2 bg-primary p-3 rounded-md shadow-xl">
             <Shield className="h-6 w-6 text-white" />
           </div>
         </div>
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-black text-gray-900">سجل دخولك الآن</h1>
+          <h1 className="text-2xl font-black text-primary">سجل دخولك الآن</h1>
           <p className="text-muted-foreground text-sm max-w-[250px] mx-auto leading-relaxed">انضم لعالم أبشر لإدارة طلباتك، محفظتك، والحصول على عروض حصرية!</p>
         </div>
-        <Button onClick={() => router.push('/login')} className="w-full h-16 rounded-[2rem] text-lg font-black bg-primary shadow-xl shadow-primary/20 transition-all active:scale-95">تسجيل الدخول</Button>
         <BottomNav />
       </div>
     )
@@ -103,82 +101,80 @@ export default function ProfilePage() {
 
   return (
     <div className="pb-32 bg-[#F8FAFB] min-h-screen font-body" dir="rtl">
-      {/* رأس الصفحة */}
-      <div className="relative pt-12 pb-16 px-6 bg-gradient-to-b from-primary/15 via-primary/5 to-transparent rounded-b-[3.5rem] shadow-sm">
+      {/* رأس الصفحة المطور بنقرة مصمم */}
+      <div className="relative pt-12 pb-10 px-6 bg-gradient-to-b from-primary/10 to-transparent rounded-b-[10px]">
         <div className="flex flex-col items-center">
           <div className="relative mb-6">
-            <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse"></div>
-            <Avatar className="h-32 w-32 border-[6px] border-white shadow-2xl rounded-full relative z-10 transition-transform hover:scale-105 duration-300">
+            <Avatar className="h-28 w-28 border-[4px] border-white shadow-xl rounded-full relative z-10">
               <AvatarImage src={`https://picsum.photos/seed/${user.uid}/300`} />
               <AvatarFallback className="bg-primary text-white text-3xl font-black">
                 {user.phoneNumber?.substring(user.phoneNumber.length - 2)}
               </AvatarFallback>
             </Avatar>
-            <div className="absolute bottom-1 right-2 bg-green-500 w-7 h-7 rounded-full border-4 border-white shadow-lg z-20"></div>
           </div>
           
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-black text-gray-900 leading-tight">
+            <h1 className="text-2xl font-black text-primary">
               {userData?.name || "مستـخدم أبـشر"}
             </h1>
             
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary text-[10px] font-black rounded-full border border-primary/10">
+            <div className="flex items-center justify-center gap-2">
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-[10px] font-black rounded-full">
                 <BadgeCheck className="h-3 w-3" />
                 {userData?.type || "مستـخدم"}
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-600 text-[10px] font-black rounded-full border border-gray-200">
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-600 text-[10px] font-black rounded-full">
                 <MapPin className="h-3 w-3" />
-                {selectedCity || "المحافظة"}
+                {selectedCity || "حضرموت"}
               </span>
             </div>
             
             <div className="flex items-center justify-center gap-1.5 text-gray-500 pt-1" dir="ltr">
               <Phone className="h-3 w-3 text-primary/60" />
-              <span className="text-[11px] font-bold tracking-widest">{user.phoneNumber}</span>
+              <span className="text-[11px] font-bold">{user.phoneNumber}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-5 -mt-6 space-y-6">
-        {/* بطاقات الرصيد */}
+      <div className="px-5 space-y-6">
+        {/* بطاقات الرصيد السريعة - بدون تكرار */}
         <div className="grid grid-cols-2 gap-4">
-          <Link href="/wallet" className="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition-all">
-            <div className="p-2.5 bg-primary/5 rounded-2xl">
-              <Wallet className="h-5 w-5 text-primary" />
+          <Link href="/wallet" className="bg-white p-5 rounded-[10px] shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition-all">
+            <div className="p-2.5 bg-primary/5 rounded-md">
+              <User className="h-5 w-5 text-primary" />
             </div>
             <div className="text-center">
-              <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest">المحفظة</p>
-              <p className="text-base font-black text-primary">{walletData?.balance || 0} ر.س</p>
+              <p className="text-[9px] text-gray-400 font-black uppercase">المحفظة</p>
+              <p className="text-sm font-black text-primary">{walletData?.balance || 0} ر.س</p>
             </div>
           </Link>
-          <Link href="/loyalty" className="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition-all">
-            <div className="p-2.5 bg-primary/5 rounded-2xl">
+          <Link href="/loyalty" className="bg-white p-5 rounded-[10px] shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition-all">
+            <div className="p-2.5 bg-primary/5 rounded-md">
               <Star className="h-5 w-5 text-primary" />
             </div>
             <div className="text-center">
-              <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest">النقاط</p>
-              <p className="text-base font-black text-primary">{userData?.loyaltyPoints || 0} نقطة</p>
+              <p className="text-[9px] text-gray-400 font-black uppercase">النقاط</p>
+              <p className="text-sm font-black text-primary">{userData?.loyaltyPoints || 0} نقطة</p>
             </div>
           </Link>
         </div>
 
-        {/* القوائم */}
+        {/* القوائم المرتبة */}
         {sections.map((section, idx) => (
-          <div key={idx} className="space-y-3">
-            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] px-3">{section.title}</h3>
-            <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
+          <div key={idx} className="space-y-2">
+            <h3 className="text-[10px] font-black text-gray-400 uppercase px-3">{section.title}</h3>
+            <div className="bg-white rounded-[10px] shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
               {section.items.map((item, i) => (
                 <Link key={i} href={item.href}>
-                  <div className="flex items-center justify-between p-5 active:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between p-4 active:bg-gray-50 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-[1.25rem] bg-primary/5 flex items-center justify-center shrink-0">
+                      <div className="h-10 w-10 rounded-md bg-primary/5 flex items-center justify-center">
                         <item.icon className="h-5 w-5 text-primary" />
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-[14px] text-gray-800">{item.label}</p>
-                        <p className="text-[10px] text-gray-400 font-medium">{item.description}</p>
+                        <p className="font-bold text-[13px] text-gray-800">{item.label}</p>
+                        <p className="text-[10px] text-gray-400">{item.description}</p>
                       </div>
                     </div>
                     <ChevronLeft className="h-4 w-4 text-gray-300" />
@@ -192,15 +188,14 @@ export default function ProfilePage() {
         {/* زر الخروج */}
         <button 
           onClick={handleLogout}
-          className="w-full flex items-center justify-between p-5 bg-rose-50 text-rose-600 rounded-[2.5rem] border border-rose-100 active:scale-[0.98] transition-all group"
+          className="w-full flex items-center justify-between p-4 bg-rose-50 text-rose-600 rounded-[10px] border border-rose-100 active:scale-[0.98] transition-all"
         >
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 bg-white rounded-[1.25rem] flex items-center justify-center shadow-sm">
+            <div className="h-10 w-10 bg-white rounded-md flex items-center justify-center shadow-sm">
               <LogOut className="h-5 w-5" />
             </div>
-            <span className="font-black text-[14px]">تسجيل الخروج</span>
+            <span className="font-black text-[13px]">تسجيل الخروج</span>
           </div>
-          <p className="text-[9px] font-black uppercase tracking-widest opacity-60">وداعاً!</p>
         </button>
 
         {/* إعدادات متقدمة */}
@@ -215,21 +210,20 @@ export default function ProfilePage() {
           
           {showAdvanced && (
             <div className="mt-4 animate-in slide-in-from-top-2 duration-300">
-              <button className="w-full flex items-center justify-between p-5 bg-gray-100 text-gray-500 rounded-[2.5rem] border border-gray-200 active:scale-[0.98] transition-all">
+              <button className="w-full flex items-center justify-between p-5 bg-gray-100 text-rose-500 rounded-[10px] border border-gray-200 active:scale-[0.98] transition-all">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                  <div className="h-10 w-10 bg-white rounded-md flex items-center justify-center shadow-sm">
                     <Trash2 className="h-4 w-4 text-rose-500" />
                   </div>
-                  <span className="font-bold text-[13px] text-rose-500">حذف الحساب نهائياً</span>
+                  <span className="font-bold text-[13px]">حذف الحساب نهائياً</span>
                 </div>
               </button>
             </div>
           )}
         </div>
 
-        <div className="text-center pb-8 space-y-1">
-          <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">Absher Delivery</p>
-          <p className="text-[9px] font-bold text-gray-400 opacity-60">الإصدار 1.2.5 • صنع بكل حب</p>
+        <div className="text-center pb-8 opacity-20">
+          <p className="text-[10px] font-black text-primary uppercase">Absher Delivery</p>
         </div>
       </div>
       <BottomNav />

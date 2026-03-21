@@ -29,7 +29,6 @@ export function FloatingCart() {
     setMounted(true)
     updateCartData()
 
-    // الاستماع لتحديثات السلة من أي مكان في التطبيق
     window.addEventListener('cart-updated', updateCartData)
     window.addEventListener('storage', updateCartData)
 
@@ -39,19 +38,19 @@ export function FloatingCart() {
     }
   }, [])
 
-  // الصفحات التي لا يظهر فيها الزر (الرئيسية، طلباتي، حسابي، السلة، وغيرها من الصفحات التعريفية)
-  const hiddenRoutes = ['/', '/orders', '/profile', '/cart', '/governorates', '/login']
+  // السلة تظهر فقط في البحث، المفضلة، وداخل المتجر
+  const isAllowedPath = pathname === '/search' || pathname === '/favorites' || pathname.startsWith('/store/')
   
-  if (!mounted || hiddenRoutes.includes(pathname) || cartCount === 0) return null
+  if (!mounted || !isAllowedPath || cartCount === 0) return null
 
   return (
     <div className="fixed bottom-24 left-5 right-5 z-[55] animate-in slide-in-from-bottom-10 fade-in duration-300">
       <Button 
         onClick={() => router.push('/cart')} 
-        className="w-full h-14 rounded-2xl shadow-2xl text-lg font-black flex justify-between px-6 bg-primary hover:bg-primary/95 transition-all active:scale-[0.98] border-2 border-white/20"
+        className="w-full h-14 rounded-[10px] shadow-2xl text-lg font-black flex justify-between px-6 bg-primary hover:bg-primary/95 transition-all active:scale-[0.98] border-2 border-white/20"
       >
         <div className="flex items-center gap-3">
-          <div className="bg-white text-primary px-2.5 py-0.5 rounded-lg text-xs font-black shadow-inner">
+          <div className="bg-white text-primary px-2.5 py-0.5 rounded-md text-xs font-black shadow-inner">
             {cartCount}
           </div>
           <span className="text-base">عرض السلة</span>
