@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
@@ -216,17 +217,9 @@ export default function StoreDetailPage() {
 
   const renderStars = (rating: number) => {
     return (
-      <div className="flex items-center gap-0.5 mt-0.5" dir="rtl">
+      <div className="flex items-center gap-0.5 mt-1" dir="rtl">
         {[1, 2, 3, 4, 5].map((star) => (
-          <div key={star} className="relative h-2.5 w-2.5">
-            <Star className="absolute inset-0 h-full w-full text-muted-foreground/20 stroke-[1.5]" />
-            <div 
-              className="absolute inset-y-0 right-0 overflow-hidden" 
-              style={{ width: rating >= star ? '100%' : rating >= star - 0.5 ? '50%' : '0%' }}
-            >
-              <Star className="absolute top-0 right-0 h-2.5 w-2.5 fill-primary text-primary stroke-primary stroke-[1.5]" />
-            </div>
-          </div>
+          <Star key={star} className={cn("h-2.5 w-2.5", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
         ))}
       </div>
     )
@@ -278,11 +271,11 @@ export default function StoreDetailPage() {
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto mt-4 pb-1 scrollbar-hide">
-          <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
+          <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-[10px] shrink-0">
             <MapPin className="h-3 w-3 text-primary" />
             <span className="text-[9px] font-black text-gray-700">{store.address || 'المكلا'}</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
+          <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-[10px] shrink-0">
             <Clock className="h-3 w-3 text-primary" />
             <span className="text-[9px] font-black text-gray-700">{store.deliveryTime || '30-45 دقيقة'}</span>
           </div>
@@ -306,47 +299,49 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-4">
         {isProductsLoading ? (
-          [1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-xl animate-pulse" />)
+          [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-[10px] animate-pulse" />)
         ) : filteredProducts.map((product: any) => {
           const inCart = cart.find(item => item.id === product.id)
           const isFavProd = userData?.favoritesProductIds?.includes(product.id)
           const needsOptions = hasOptions(product.name)
           
           return (
-            <Card key={product.id} className="relative border-none shadow-sm rounded-2xl overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer group" onClick={() => setViewingProduct(product)}>
-              <button 
-                onClick={(e) => { e.stopPropagation(); toggleFavoriteProduct(e, product.id); }} 
-                className="absolute top-2 left-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform"
-              >
-                <Heart className={cn("h-3.5 w-3.5", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-              </button>
-              <CardContent className="p-2.5 flex flex-row items-center gap-3">
+            <Card key={product.id} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer" onClick={() => setViewingProduct(product)}>
+              <CardContent className="p-3 flex items-start gap-4" dir="rtl">
+                {/* Right: Image and Rating */}
                 <div className="flex flex-col items-center gap-1 shrink-0">
-                  <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
+                  <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">
                     <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                   </div>
                   {renderStars(product.rating || 4.8)}
                 </div>
-                <div className="flex-1 text-right space-y-0.5 overflow-hidden">
-                  <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
+                {/* Left: Details */}
+                <div className="flex-1 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-sm text-[#111827] truncate">{product.name}</h3>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); toggleFavoriteProduct(e, product.id); }} 
+                      className="p-1.5 active:scale-75 transition-transform"
+                    >
+                      <Heart className={cn("h-3.5 w-3.5", isFavProd ? "fill-destructive text-destructive" : "text-gray-300")} />
+                    </button>
+                  </div>
                   <p className="text-[10px] text-gray-400 line-clamp-1">{product.description || 'وصف الوجبة المميز'}</p>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-primary font-black text-base">{product.price} <small className="text-[9px] font-bold">ر.س</small></span>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      {inCart && !needsOptions ? (
-                        <div className="flex items-center gap-1.5 bg-secondary/30 p-0.5 rounded-lg">
-                          <button onClick={(e) => removeFromCart(product.id, e)} className="h-7 w-7 rounded-lg bg-white shadow-sm flex items-center justify-center"><Minus className="h-3.5 w-3.5 text-primary" /></button>
-                          <span className="font-black text-xs min-w-[15px] text-center">{inCart.quantity}</span>
-                          <button onClick={(e) => addToCart(product, e)} className="h-7 w-7 rounded-lg bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
-                        </div>
-                      ) : (
-                        <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-8 px-4 rounded-lg shadow-sm bg-primary text-white text-[10px] font-black">
-                          {needsOptions ? "عرض الخيارات" : "إضافة"}
-                        </Button>
-                      )}
-                    </div>
+                  <div className="text-primary font-black text-sm">{product.price} ر.س</div>
+                  <div className="pt-2" onClick={(e) => e.stopPropagation()}>
+                    {inCart && !needsOptions ? (
+                      <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px] w-fit">
+                        <button onClick={(e) => removeFromCart(product.id, e)} className="h-8 w-8 rounded-[8px] bg-white shadow-sm flex items-center justify-center"><Minus className="h-4 w-4 text-primary" /></button>
+                        <span className="font-black text-xs min-w-[15px] text-center">{inCart.quantity}</span>
+                        <button onClick={(e) => addToCart(product, e)} className="h-8 w-8 rounded-[8px] bg-primary text-white flex items-center justify-center"><Plus className="h-4 w-4" /></button>
+                      </div>
+                    ) : (
+                      <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-9 rounded-[10px] shadow-sm bg-primary text-white text-[10px] font-black w-full px-4">
+                        {needsOptions ? "عرض التفاصيل" : "إضافة للسلة"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -356,7 +351,7 @@ export default function StoreDetailPage() {
       </div>
 
       <Dialog open={!!viewingProduct} onOpenChange={(val) => !val && setViewingProduct(null)}>
-        <DialogContent className="rounded-2xl w-[92%] max-w-md mx-auto p-0 overflow-hidden border-none shadow-2xl z-[100]" dir="rtl">
+        <DialogContent className="rounded-[10px] w-[92%] max-w-md mx-auto p-0 overflow-hidden border-none shadow-2xl z-[100]" dir="rtl">
           {viewingProduct && (
             <div className="flex flex-col max-h-[85vh] overflow-y-auto pb-10">
               <DialogHeader className="sr-only">
@@ -384,20 +379,20 @@ export default function StoreDetailPage() {
                       {productVariants.map((v) => {
                         const inCart = cart.find(item => item.id === v.id);
                         return (
-                          <div key={v.id} className="border border-gray-100 bg-gray-50/30 rounded-xl p-2.5 flex items-center justify-between">
+                          <div key={v.id} className="border border-gray-100 bg-gray-50/30 rounded-[10px] p-2.5 flex items-center justify-between">
                             <div className="flex items-center gap-3 text-right">
-                              <div className="relative h-10 w-10 rounded-lg overflow-hidden border bg-white shrink-0"><Image src={v.imageUrl} alt={v.name} fill className="object-cover" /></div>
+                              <div className="relative h-10 w-10 rounded-[10px] overflow-hidden border bg-white shrink-0"><Image src={v.imageUrl} alt={v.name} fill className="object-cover" /></div>
                               <div><p className="font-black text-[11px] text-gray-800">{v.name}</p><p className="text-primary font-black text-[11px]">{v.price} ر.س</p></div>
                             </div>
                             <div onClick={(e) => e.stopPropagation()}>
                               {inCart ? (
-                                <div className="flex items-center gap-2 bg-secondary/40 p-0.5 rounded-lg">
-                                  <button onClick={(e) => removeFromCart(v.id, e)} className="h-8 w-8 rounded-lg bg-white shadow-sm flex items-center justify-center"><Minus className="h-3.5 w-3.5 text-primary" /></button>
+                                <div className="flex items-center gap-2 bg-secondary/40 p-0.5 rounded-[10px]">
+                                  <button onClick={(e) => removeFromCart(v.id, e)} className="h-8 w-8 rounded-[8px] bg-white shadow-sm flex items-center justify-center"><Minus className="h-3.5 w-3.5 text-primary" /></button>
                                   <span className="font-black text-sm min-w-[20px] text-center">{inCart.quantity}</span>
-                                  <button onClick={(e) => { const vd = { ...viewingProduct, id: v.id, name: v.name, price: v.price }; addToCart(vd, e); }} className="h-8 w-8 rounded-lg bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
+                                  <button onClick={(e) => { const vd = { ...viewingProduct, id: v.id, name: v.name, price: v.price }; addToCart(vd, e); }} className="h-8 w-8 rounded-[8px] bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
                                 </div>
                               ) : (
-                                <Button size="sm" onClick={(e) => { const vd = { ...viewingProduct, id: v.id, name: v.name, price: v.price }; addToCart(vd, e); }} className="h-9 px-4 rounded-lg font-black bg-primary text-white text-[10px]">إضافة</Button>
+                                <Button size="sm" onClick={(e) => { const vd = { ...viewingProduct, id: v.id, name: v.name, price: v.price }; addToCart(vd, e); }} className="h-9 px-4 rounded-[10px] font-black bg-primary text-white text-[10px]">إضافة</Button>
                               )}
                             </div>
                           </div>
@@ -408,13 +403,13 @@ export default function StoreDetailPage() {
                 ) : (
                   <div className="flex items-center justify-center pt-2">
                     {cart.find(item => item.id === viewingProduct.id) ? (
-                      <div className="flex items-center gap-4 bg-secondary/30 p-1.5 rounded-2xl w-full justify-between px-6">
-                        <button onClick={(e) => removeFromCart(viewingProduct.id, e)} className="h-11 w-11 rounded-xl bg-white text-primary flex items-center justify-center"><Minus className="h-5 w-5" /></button>
+                      <div className="flex items-center gap-4 bg-secondary/30 p-1.5 rounded-[10px] w-full justify-between px-6">
+                        <button onClick={(e) => removeFromCart(viewingProduct.id, e)} className="h-11 w-11 rounded-[8px] bg-white text-primary flex items-center justify-center"><Minus className="h-5 w-5" /></button>
                         <span className="font-black text-xl">{cart.find(item => item.id === viewingProduct.id)?.quantity}</span>
-                        <button onClick={(e) => addToCart(viewingProduct, e)} className="h-11 w-11 rounded-xl bg-primary text-white flex items-center justify-center"><Plus className="h-5 w-5" /></button>
+                        <button onClick={(e) => addToCart(viewingProduct, e)} className="h-11 w-11 rounded-[8px] bg-primary text-white flex items-center justify-center"><Plus className="h-5 w-5" /></button>
                       </div>
                     ) : (
-                      <Button onClick={(e) => addToCart(viewingProduct, e)} className="w-full h-12 rounded-xl bg-primary text-white font-black">إضافة للسلة</Button>
+                      <Button onClick={(e) => addToCart(viewingProduct, e)} className="w-full h-12 rounded-[10px] bg-primary text-white font-black">إضافة للسلة</Button>
                     )}
                   </div>
                 )}

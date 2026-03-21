@@ -1,9 +1,10 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, limit, serverTimestamp, arrayUnion } from "firebase/firestore"
-import { Heart, ShoppingBag, MapPin, Package, Store, ArrowRight, Plus, Minus } from "lucide-react"
+import { Heart, ShoppingBag, MapPin, Package, Store, ArrowRight, Plus, Minus, Star } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -103,6 +104,16 @@ export default function FavoritesPage() {
     saveCart(newCart)
   }
 
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-0.5 mt-1" dir="rtl">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star key={star} className={cn("h-2.5 w-2.5", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
+        ))}
+      </div>
+    )
+  }
+
   if (!mounted || isUserLoading || isUserDataLoading) return null
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0)
 
@@ -138,33 +149,41 @@ export default function FavoritesPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="products" className="space-y-3">
+          <TabsContent value="products" className="space-y-4">
             {favoriteProducts.length > 0 ? favoriteProducts.map((product: any) => {
               const inCart = cart.find(c => c.id === product.id)
               return (
-                <Card key={`product-${product.id}`} className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
-                  <button 
-                    onClick={(e) => toggleFavorite(e, 'product', product.id)} 
-                    className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 backdrop-blur-sm rounded-md shadow-sm active:scale-90 transition-transform"
-                  >
-                    <Heart className="h-4 w-4 fill-destructive text-destructive" />
-                  </button>
-                  <CardContent className="p-3 flex items-center gap-4">
-                    <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0">
-                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
+                <Card key={`product-${product.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
+                  <CardContent className="p-3 flex items-start gap-4" dir="rtl">
+                    {/* Right: Image and Rating */}
+                    <div className="flex flex-col items-center gap-1 shrink-0">
+                      <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">
+                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
+                      </div>
+                      {renderStars(product.rating || 4.8)}
                     </div>
-                    <div className="flex-1 text-right space-y-1">
-                      <h3 className="font-bold text-sm text-[#111827] truncate">{product.name}</h3>
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-primary font-black text-sm">{product.price} ر.س</span>
+                    {/* Left: Details */}
+                    <div className="flex-1 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-bold text-sm text-[#111827] truncate">{product.name}</h3>
+                        <button 
+                          onClick={(e) => toggleFavorite(e, 'product', product.id)} 
+                          className="p-1.5 active:scale-75 transition-transform"
+                        >
+                          <Heart className="h-4 w-4 fill-destructive text-destructive" />
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-gray-400 line-clamp-1">{product.description || 'وصف المنتج متاح هنا'}</p>
+                      <div className="text-primary font-black text-sm">{product.price} ر.س</div>
+                      <div className="pt-2">
                         {inCart ? (
-                          <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
+                          <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px] w-fit">
                             <button onClick={(e) => removeFromCart(e, product.id)} className="h-8 w-8 rounded-[8px] bg-white flex items-center justify-center shadow-sm"><Minus className="h-4 w-4 text-primary" /></button>
                             <span className="font-black text-xs min-w-[15px] text-center">{inCart.quantity}</span>
                             <button onClick={(e) => addToCart(e, product)} className="h-8 w-8 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-4 w-4" /></button>
                           </div>
                         ) : (
-                          <Button onClick={(e) => addToCart(e, product)} className="h-9 rounded-[10px] bg-primary text-white text-[11px] font-black px-4 shadow-sm">إضافة</Button>
+                          <Button onClick={(e) => addToCart(e, product)} className="h-9 rounded-[10px] bg-primary text-white text-[11px] font-black px-4 shadow-sm w-full">إضافة للسلة</Button>
                         )}
                       </div>
                     </div>
@@ -174,36 +193,58 @@ export default function FavoritesPage() {
             }) : (
               <div className="text-center py-20 opacity-30">
                 <Package className="h-16 w-16 mx-auto mb-4 text-primary" />
-                <p className="font-bold">لا توجد منتجات مفضلة</p>
+                <p className="font-bold text-primary">لا توجد منتجات مفضلة</p>
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="stores" className="space-y-3">
-            {favoriteStores.length > 0 ? favoriteStores.map((store: any) => (
-              <Link key={`store-${store.id}`} href={`/store/${store.id}`}>
-                <Card className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all">
-                  <button 
-                    onClick={(e) => toggleFavorite(e, 'store', store.id)} 
-                    className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 backdrop-blur-sm rounded-md shadow-sm active:scale-90 transition-transform"
-                  >
-                    <Heart className="h-4 w-4 fill-destructive text-destructive" />
-                  </button>
-                  <CardContent className="p-3 flex items-center gap-4">
-                    <div className="relative h-16 w-16 rounded-full overflow-hidden bg-secondary/10 shrink-0 border border-gray-100 shadow-sm">
-                      <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover" />
-                    </div>
-                    <div className="flex-1 text-right space-y-1">
-                      <h4 className="font-bold text-sm text-[#111827]">{store.name}</h4>
-                      <p className="text-[10px] text-muted-foreground flex items-center gap-1 justify-start"><MapPin className="h-3 w-3 text-primary/60" /> {store.address}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            )) : (
+          <TabsContent value="stores" className="space-y-4">
+            {favoriteStores.length > 0 ? favoriteStores.map((store: any) => {
+               const isOpen = store.status === 'مفتوح' || store.status === 'open'
+               return (
+                <Link key={`store-${store.id}`} href={`/store/${store.id}`}>
+                  <Card className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all">
+                    <CardContent className="p-3 flex items-start gap-4" dir="rtl">
+                      {/* Right: Image and Rating */}
+                      <div className="flex flex-col items-center gap-1 shrink-0">
+                        <div className="relative w-20 h-20 shadow-sm overflow-hidden rounded-[10px] bg-secondary/10">
+                          <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover" />
+                        </div>
+                        {renderStars(store.averageRating || 4.5)}
+                      </div>
+                      {/* Left: Details */}
+                      <div className="flex-1 space-y-1">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-bold text-sm text-[#111827] truncate">{store.name}</h3>
+                          <button 
+                            onClick={(e) => toggleFavorite(e, 'store', store.id)} 
+                            className="p-1.5 active:scale-75 transition-transform"
+                          >
+                            <Heart className="h-4 w-4 fill-destructive text-destructive" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1 text-[#6B7280]">
+                          <MapPin className="h-3 w-3 text-primary/60" />
+                          <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
+                        </div>
+                        <div className="text-[10px] text-[#6B7280] font-medium">تبعد 2.3 كم</div>
+                        <div className="pt-1">
+                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">متجر</Badge>
+                        </div>
+                        <div className="pt-1">
+                          <Badge className={cn("text-[9px] h-4 px-2 border-none font-bold rounded-md shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
+                            {isOpen ? 'مفتوح' : 'مغلق'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+               )
+            }) : (
               <div className="text-center py-20 opacity-30">
                 <Store className="h-16 w-16 mx-auto mb-4 text-primary" />
-                <p className="font-bold">لا توجد متاجر مفضلة</p>
+                <p className="font-bold text-primary">لا توجد متاجر مفضلة</p>
               </div>
             )}
           </TabsContent>

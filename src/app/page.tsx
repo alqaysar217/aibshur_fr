@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Star, StarHalf, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Flower2 } from "lucide-react"
+import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Flower2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -154,17 +154,9 @@ export default function Home() {
 
   const renderStars = (rating: number) => {
     return (
-      <div className="flex items-center gap-0.5 mt-0.5" dir="rtl">
+      <div className="flex items-center gap-0.5 mt-1" dir="rtl">
         {[1, 2, 3, 4, 5].map((star) => (
-          <div key={star} className="relative h-2.5 w-2.5">
-            <Star className="absolute inset-0 h-full w-full text-muted-foreground/20 stroke-[1.5]" />
-            <div 
-              className="absolute inset-y-0 right-0 overflow-hidden" 
-              style={{ width: rating >= star ? '100%' : rating >= star - 0.5 ? '50%' : '0%' }}
-            >
-              <Star className="absolute top-0 right-0 h-2.5 w-2.5 fill-primary text-primary stroke-primary stroke-[1.5]" />
-            </div>
-          </div>
+          <Star key={star} className={cn("h-2.5 w-2.5", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
         ))}
       </div>
     )
@@ -186,7 +178,7 @@ export default function Home() {
             {ads && ads.length > 0 ? ads.map((ad: any) => (
               <CarouselItem key={ad.id}>
                 <Link href={`/search?q=${ad.code}`}>
-                  <Card className="border-none shadow-sm rounded-2xl overflow-hidden relative h-40 bg-primary/90 transition-all active:scale-[0.98]">
+                  <Card className="border-none shadow-sm rounded-[10px] overflow-hidden relative h-40 bg-primary/90 transition-all active:scale-[0.98]">
                     <Image src={ad.imageUrl} alt={ad.title} fill className="object-cover opacity-50" />
                     <div className="absolute inset-0 p-6 flex flex-col justify-center text-white text-right">
                       <h2 className="text-2xl font-black mb-1">{ad.title}</h2>
@@ -197,7 +189,7 @@ export default function Home() {
               </CarouselItem>
             )) : (
               <CarouselItem>
-                <div className="h-40 bg-white rounded-2xl animate-pulse" />
+                <div className="h-40 bg-white rounded-[10px] animate-pulse" />
               </CarouselItem>
             )}
           </CarouselContent>
@@ -206,7 +198,7 @@ export default function Home() {
 
       <section className="py-6">
         <div className="flex items-center justify-between px-6 mb-4">
-          <h3 className="font-bold text-[#111827]">الأقسام</h3>
+          <h3 className="font-bold text-primary">الأقسام</h3>
           <Button variant="link" className="text-primary text-xs font-bold p-0">عرض الكل</Button>
         </div>
         <div className="flex gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide" dir="rtl">
@@ -217,7 +209,7 @@ export default function Home() {
               className="flex flex-col items-center gap-2 shrink-0 group"
             >
               <div className={cn(
-                "h-16 w-16 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm border",
+                "h-16 w-16 rounded-[10px] flex items-center justify-center transition-all duration-300 shadow-sm border",
                 cat.color || "bg-white",
                 activeCategory === cat.id ? "ring-2 ring-primary border-transparent scale-105" : "border-transparent bg-white",
                 cat.textColor || "text-gray-600"
@@ -232,19 +224,19 @@ export default function Home() {
               </span>
             </button>
           )) : (
-            [1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 w-16 bg-white rounded-2xl animate-pulse" />)
+            [1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 w-16 bg-white rounded-[10px] animate-pulse" />)
           )}
         </div>
       </section>
 
       <section className="px-5 pb-24">
         <div className="flex items-center justify-between px-1 mb-4">
-          <h3 className="font-bold text-[#111827]">المتاجر المتاحة</h3>
+          <h3 className="font-bold text-primary">المتاجر المتاحة</h3>
         </div>
 
-        <div className="flex flex-col gap-0">
+        <div className="flex flex-col gap-4">
           {isStoresLoading ? (
-            [1, 2, 3].map(i => <div key={i} className="h-24 w-full bg-white rounded-2xl animate-pulse mb-4" />)
+            [1, 2, 3].map(i => <div key={i} className="h-32 w-full bg-white rounded-[10px] animate-pulse" />)
           ) : stores && stores.length > 0 ? (
             stores.map((store: any) => {
               const isOpen = store.status === 'مفتوح' || store.status === 'open'
@@ -253,44 +245,44 @@ export default function Home() {
 
               return (
                 <Link key={store.id} href={`/store/${store.id}`}>
-                  <Card className="border-none shadow-sm rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-24 mb-4">
-                    <CardContent className="p-2.5 h-full flex flex-row items-center gap-3 justify-between" dir="rtl">
-                      {/* 1. أقصى اليمين: الصورة والتقييم */}
+                  <Card className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all">
+                    <CardContent className="p-3 flex items-start gap-4" dir="rtl">
+                      {/* Right: Image and Rating */}
                       <div className="flex flex-col items-center gap-1 shrink-0">
-                        <div className="relative w-16 h-16 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
-                          <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                        <div className="relative w-20 h-20 shadow-sm overflow-hidden rounded-[10px] bg-secondary/10">
+                          <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover" />
                         </div>
                         {renderStars(store.averageRating || 4.5)}
                       </div>
 
-                      {/* 2. الوسط: المعلومات */}
-                      <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
-                        <h4 className="font-bold text-sm text-[#111827] truncate text-right w-full">{store.name}</h4>
-                        <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
-                          <MapPin className="h-2.5 w-2.5 text-primary/60" />
+                      {/* Left: Details */}
+                      <div className="flex-1 space-y-1">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-bold text-sm text-[#111827] truncate">{store.name}</h3>
+                          <button 
+                            onClick={(e) => toggleFavorite(e, store.id)}
+                            className="p-1.5 active:scale-75 transition-transform"
+                          >
+                            <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1 text-[#6B7280]">
+                          <MapPin className="h-3 w-3 text-primary/60" />
                           <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                         </div>
-                        <div className="flex items-center gap-2 pt-0.5 w-full justify-start">
-                          <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
-                            2.3 كم
-                          </span>
-                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md whitespace-nowrap">
+                        <div className="text-[10px] text-[#6B7280] font-medium">
+                          تبعد 2.3 كم
+                        </div>
+                        <div className="pt-1">
+                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                             {categoryName}
                           </Badge>
                         </div>
-                      </div>
-
-                      {/* 3. أقصى اليسار: التحكم والحالة */}
-                      <div className="flex flex-col justify-between items-end h-full py-1 shrink-0">
-                        <button 
-                          onClick={(e) => toggleFavorite(e, store.id)}
-                          className="p-1.5 bg-secondary/20 backdrop-blur-sm rounded-lg active:scale-75 transition-transform"
-                        >
-                          <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
-                        </button>
-                        <Badge className={cn("text-[9px] h-4 px-1.5 border-none font-bold rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
-                          {isOpen ? 'مفتوح' : 'مغلق'}
-                        </Badge>
+                        <div className="pt-1">
+                          <Badge className={cn("text-[9px] h-4 px-2 border-none font-bold rounded-md shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
+                            {isOpen ? 'مفتوح' : 'مغلق'}
+                          </Badge>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -298,15 +290,14 @@ export default function Home() {
               )
             })
           ) : (
-            <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-200">
-              <Database className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+            <div className="text-center py-10 bg-white rounded-[10px] border border-dashed border-gray-200">
               <p className="text-xs text-gray-400">لا توجد بيانات متاحة</p>
               {user && (
                 <Button 
                   onClick={seedData} 
                   disabled={isSeeding} 
                   variant="outline" 
-                  className="mt-4 rounded-xl h-10 text-xs border-primary text-primary font-bold"
+                  className="mt-4 rounded-[10px] h-10 text-xs border-primary text-primary font-bold"
                 >
                   {isSeeding ? "جاري البناء..." : "تجهيز تطبيق أبشر"}
                 </Button>

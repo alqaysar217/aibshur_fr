@@ -1,7 +1,8 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Search, ArrowRight, ShoppingBag, Heart, MapPin, Plus, Minus, Store, Package } from "lucide-react"
+import { Search, ArrowRight, ShoppingBag, Heart, MapPin, Plus, Minus, Store, Package, Star } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -139,6 +140,16 @@ export default function SearchPage() {
     saveCart(newCart)
   }
 
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-0.5 mt-1" dir="rtl">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star key={star} className={cn("h-2.5 w-2.5", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
+        ))}
+      </div>
+    )
+  }
+
   if (!mounted) return null
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0)
 
@@ -181,37 +192,44 @@ export default function SearchPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="products" className="space-y-3">
+          <TabsContent value="products" className="space-y-4">
             {loadingProducts ? (
-              [1, 2, 3].map(i => <div key={i} className="h-28 bg-white rounded-[10px] animate-pulse" />)
+              [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-[10px] animate-pulse" />)
             ) : filteredProducts.map((item: any) => {
               const inCart = cart.find(c => c.id === item.id)
               const isFav = userData?.favoritesProductIds?.includes(item.id)
               return (
-                <Card key={`product-${item.id}`} className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
-                  <button 
-                    onClick={(e) => toggleFavorite(e, 'product', item.id)} 
-                    className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 backdrop-blur-sm rounded-md shadow-sm active:scale-90 transition-transform"
-                  >
-                    <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
-                  </button>
-                  <CardContent className="p-3 flex items-center gap-4">
-                    <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0">
-                      <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
+                <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
+                  <CardContent className="p-3 flex items-start gap-4" dir="rtl">
+                    {/* Right: Image and Rating */}
+                    <div className="flex flex-col items-center gap-1 shrink-0">
+                      <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">
+                        <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
+                      </div>
+                      {renderStars(item.rating || 4.8)}
                     </div>
-                    <div className="flex-1 text-right space-y-1 overflow-hidden">
-                      <h3 className="font-bold text-sm text-[#111827] truncate">{item.name}</h3>
+                    {/* Left: Details */}
+                    <div className="flex-1 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-bold text-sm text-[#111827] truncate">{item.name}</h3>
+                        <button 
+                          onClick={(e) => toggleFavorite(e, 'product', item.id)}
+                          className="p-1.5 active:scale-75 transition-transform"
+                        >
+                          <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
+                        </button>
+                      </div>
                       <p className="text-[10px] text-gray-400 line-clamp-1">{item.description || 'وصف المنتج متاح هنا'}</p>
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-primary font-black text-sm">{item.price} ر.س</span>
+                      <div className="text-primary font-black text-sm">{item.price} ر.س</div>
+                      <div className="pt-2">
                         {inCart ? (
-                          <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
+                          <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px] w-fit">
                             <button onClick={(e) => removeFromCart(e, item.id)} className="h-8 w-8 rounded-[8px] bg-white flex items-center justify-center shadow-sm"><Minus className="h-4 w-4 text-primary" /></button>
                             <span className="font-black text-xs min-w-[15px] text-center">{inCart.quantity}</span>
                             <button onClick={(e) => addToCart(e, item)} className="h-8 w-8 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-4 w-4" /></button>
                           </div>
                         ) : (
-                          <Button onClick={(e) => addToCart(e, item)} className="h-9 rounded-[10px] bg-primary text-white text-[11px] font-black px-4 shadow-sm">إضافة</Button>
+                          <Button onClick={(e) => addToCart(e, item)} className="h-9 rounded-[10px] bg-primary text-white text-[11px] font-black px-4 shadow-sm w-full">إضافة للسلة</Button>
                         )}
                       </div>
                     </div>
@@ -221,29 +239,47 @@ export default function SearchPage() {
             })}
           </TabsContent>
 
-          <TabsContent value="stores" className="space-y-3">
+          <TabsContent value="stores" className="space-y-4">
             {loadingStores ? (
-              [1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-[10px] animate-pulse" />)
+              [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-[10px] animate-pulse" />)
             ) : filteredStores.map((item: any) => {
+              const isOpen = item.status === 'مفتوح' || item.status === 'open'
               const isFav = userData?.favoritesStoreIds?.includes(item.id)
               return (
                 <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
-                  <Card className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all">
-                    <button 
-                      onClick={(e) => toggleFavorite(e, 'store', item.id)} 
-                      className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 backdrop-blur-sm rounded-md shadow-sm active:scale-90 transition-transform"
-                    >
-                      <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
-                    </button>
-                    <CardContent className="p-3 flex items-center gap-4">
-                      <div className="relative h-16 w-16 rounded-full overflow-hidden bg-secondary/10 shrink-0 border border-gray-100 shadow-sm">
-                        <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
+                  <Card className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all">
+                    <CardContent className="p-3 flex items-start gap-4" dir="rtl">
+                      {/* Right: Image and Rating */}
+                      <div className="flex flex-col items-center gap-1 shrink-0">
+                        <div className="relative h-20 w-20 shadow-sm overflow-hidden rounded-[10px] bg-secondary/10">
+                          <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
+                        </div>
+                        {renderStars(item.averageRating || 4.5)}
                       </div>
-                      <div className="flex-1 text-right space-y-1">
-                        <h3 className="font-bold text-sm text-[#111827]">{item.name}</h3>
-                        <p className="text-[10px] text-gray-400 flex items-center gap-1 justify-start">
-                          <MapPin className="h-3 w-3 text-primary/60" /> {item.address}
-                        </p>
+                      {/* Left: Details */}
+                      <div className="flex-1 space-y-1">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-bold text-sm text-[#111827] truncate">{item.name}</h3>
+                          <button 
+                            onClick={(e) => toggleFavorite(e, 'store', item.id)}
+                            className="p-1.5 active:scale-75 transition-transform"
+                          >
+                            <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1 text-[#6B7280]">
+                          <MapPin className="h-3 w-3 text-primary/60" />
+                          <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
+                        </div>
+                        <div className="text-[10px] text-[#6B7280] font-medium">تبعد 2.3 كم</div>
+                        <div className="pt-1">
+                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">متجر</Badge>
+                        </div>
+                        <div className="pt-1">
+                          <Badge className={cn("text-[9px] h-4 px-2 border-none font-bold rounded-md shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
+                            {isOpen ? 'مفتوح' : 'مغلق'}
+                          </Badge>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
