@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+import { BottomNav } from "@/components/layout/bottom-nav"
 
 export default function SearchPage() {
   const [queryText, setQueryText] = useState("")
@@ -142,7 +143,7 @@ export default function SearchPage() {
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0)
 
   return (
-    <div className="pb-24 min-h-screen bg-secondary/5 font-body" dir="rtl">
+    <div className="pb-32 min-h-screen bg-secondary/5 font-body" dir="rtl">
       <header className="p-4 glass sticky top-0 z-50 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
@@ -150,15 +151,15 @@ export default function SearchPage() {
           </Button>
           <h1 className="text-xl font-bold text-primary">البحث</h1>
         </div>
-        <Link href="/cart">
-          <Button variant="ghost" size="icon" className="relative h-10 w-10">
-            <ShoppingBag className="h-5 w-5 text-primary" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
-                {cartCount}
-              </span>
-            )}
+        <Link href="/cart" className="relative">
+          <Button variant="ghost" size="icon" className="h-10 w-10 text-primary">
+            <ShoppingBag className="h-5 w-5" />
           </Button>
+          {cartCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+              {cartCount}
+            </span>
+          )}
         </Link>
       </header>
 
@@ -167,46 +168,50 @@ export default function SearchPage() {
           value={queryText}
           onChange={(e) => setQueryText(e.target.value)}
           placeholder="ابحث عن متجر أو منتج..." 
-          className="h-14 rounded-[10px] border-none shadow-sm bg-white text-right"
+          className="h-14 rounded-[10px] border-none shadow-sm bg-white text-right focus-visible:ring-primary/20"
         />
 
         <Tabs defaultValue="products" className="w-full" dir="rtl">
-          <TabsList className="grid w-full grid-cols-2 mb-4 bg-white rounded-[10px] p-1 shadow-sm h-12">
-            <TabsTrigger value="products" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white">
+          <TabsList className="grid w-full grid-cols-2 mb-6 bg-white rounded-[10px] p-1 shadow-sm h-14" dir="rtl">
+            <TabsTrigger value="products" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white shadow-none data-[state=active]:shadow-md">
               <Package className="h-4 w-4" /> المنتجات
             </TabsTrigger>
-            <TabsTrigger value="stores" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white">
+            <TabsTrigger value="stores" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white shadow-none data-[state=active]:shadow-md">
               <Store className="h-4 w-4" /> المتاجر
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="products" className="space-y-3">
             {loadingProducts ? (
-              [1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-[10px] animate-pulse" />)
+              [1, 2, 3].map(i => <div key={i} className="h-28 bg-white rounded-[10px] animate-pulse" />)
             ) : filteredProducts.map((item: any) => {
               const inCart = cart.find(c => c.id === item.id)
               const isFav = userData?.favoritesProductIds?.includes(item.id)
               return (
                 <Card key={`product-${item.id}`} className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
-                  <button onClick={(e) => toggleFavorite(e, 'product', item.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md shadow-sm">
+                  <button 
+                    onClick={(e) => toggleFavorite(e, 'product', item.id)} 
+                    className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 backdrop-blur-sm rounded-md shadow-sm active:scale-90 transition-transform"
+                  >
                     <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                   </button>
-                  <CardContent className="p-3 flex items-center gap-3">
-                    <div className="relative h-16 w-16 rounded-md overflow-hidden bg-secondary/10 shrink-0">
+                  <CardContent className="p-3 flex items-center gap-4">
+                    <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0">
                       <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
                     </div>
-                    <div className="flex-1 text-right space-y-1">
-                      <h3 className="font-bold text-sm">{item.name}</h3>
-                      <div className="flex items-center justify-between">
+                    <div className="flex-1 text-right space-y-1 overflow-hidden">
+                      <h3 className="font-bold text-sm text-[#111827] truncate">{item.name}</h3>
+                      <p className="text-[10px] text-gray-400 line-clamp-1">{item.description || 'وصف المنتج متاح هنا'}</p>
+                      <div className="flex items-center justify-between pt-1">
                         <span className="text-primary font-black text-sm">{item.price} ر.س</span>
                         {inCart ? (
-                          <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-md">
-                            <button onClick={(e) => removeFromCart(e, item.id)} className="h-7 w-7 rounded-[10px] bg-white flex items-center justify-center"><Minus className="h-3.5 w-3.5 text-primary" /></button>
-                            <span className="font-black text-xs">{inCart.quantity}</span>
-                            <button onClick={(e) => addToCart(e, item)} className="h-7 w-7 rounded-[10px] bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
+                          <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
+                            <button onClick={(e) => removeFromCart(e, item.id)} className="h-8 w-8 rounded-[8px] bg-white flex items-center justify-center shadow-sm"><Minus className="h-4 w-4 text-primary" /></button>
+                            <span className="font-black text-xs min-w-[15px] text-center">{inCart.quantity}</span>
+                            <button onClick={(e) => addToCart(e, item)} className="h-8 w-8 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-4 w-4" /></button>
                           </div>
                         ) : (
-                          <Button onClick={(e) => addToCart(e, item)} className="h-8 rounded-[10px] bg-primary text-white text-[10px] font-black">إضافة</Button>
+                          <Button onClick={(e) => addToCart(e, item)} className="h-9 rounded-[10px] bg-primary text-white text-[11px] font-black px-4 shadow-sm">إضافة</Button>
                         )}
                       </div>
                     </div>
@@ -223,17 +228,22 @@ export default function SearchPage() {
               const isFav = userData?.favoritesStoreIds?.includes(item.id)
               return (
                 <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
-                  <Card className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
-                    <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md shadow-sm">
+                  <Card className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all">
+                    <button 
+                      onClick={(e) => toggleFavorite(e, 'store', item.id)} 
+                      className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 backdrop-blur-sm rounded-md shadow-sm active:scale-90 transition-transform"
+                    >
                       <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                     </button>
-                    <CardContent className="p-3 flex items-center gap-3">
-                      <div className="relative h-16 w-16 rounded-md overflow-hidden bg-secondary/10 shrink-0">
+                    <CardContent className="p-3 flex items-center gap-4">
+                      <div className="relative h-16 w-16 rounded-full overflow-hidden bg-secondary/10 shrink-0 border border-gray-100 shadow-sm">
                         <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1 text-right space-y-1">
-                        <h3 className="font-bold text-sm">{item.name}</h3>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1 justify-start"><MapPin className="h-3 w-3" /> {item.address}</p>
+                        <h3 className="font-bold text-sm text-[#111827]">{item.name}</h3>
+                        <p className="text-[10px] text-gray-400 flex items-center gap-1 justify-start">
+                          <MapPin className="h-3 w-3 text-primary/60" /> {item.address}
+                        </p>
                       </div>
                     </CardContent>
                   </Card>

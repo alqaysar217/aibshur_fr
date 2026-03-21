@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, limit, serverTimestamp, arrayUnion } from "firebase/firestore"
-import { Heart, ShoppingBag, MapPin, Package, Store, ArrowRight } from "lucide-react"
+import { Heart, ShoppingBag, MapPin, Package, Store, ArrowRight, Plus, Minus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+import { BottomNav } from "@/components/layout/bottom-nav"
 
 export default function FavoritesPage() {
   const { user, isUserLoading } = useUser()
@@ -25,8 +26,13 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     setMounted(true)
-    const savedCart = localStorage.getItem('absher_cart')
-    if (savedCart) setCart(JSON.parse(savedCart))
+    const updateCart = () => {
+      const savedCart = localStorage.getItem('absher_cart')
+      if (savedCart) setCart(JSON.parse(savedCart))
+    }
+    updateCart()
+    window.addEventListener('cart-updated', updateCart)
+    return () => window.removeEventListener('cart-updated', updateCart)
   }, [])
 
   const saveCart = (newCart: any[]) => {
@@ -89,10 +95,19 @@ export default function FavoritesPage() {
     saveCart(newCart); toast({ title: "تمت الإضافة" })
   }
 
+  const removeFromCart = (e: React.MouseEvent, productId: string) => {
+    e.preventDefault(); e.stopPropagation()
+    const existing = cart.find(i => i.id === productId)
+    if (!existing) return
+    const newCart = cart.map(i => i.id === productId ? {...i, quantity: i.quantity - 1} : i).filter(i => i.quantity > 0)
+    saveCart(newCart)
+  }
+
   if (!mounted || isUserLoading || isUserDataLoading) return null
+  const cartCount = cart.reduce((s, i) => s + i.quantity, 0)
 
   return (
-    <div className="pb-24 bg-secondary/5 min-h-screen" dir="rtl">
+    <div className="pb-32 bg-secondary/5 min-h-screen" dir="rtl">
       <header className="p-4 glass sticky top-0 z-40 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
@@ -100,51 +115,63 @@ export default function FavoritesPage() {
           </Button>
           <h1 className="text-xl font-bold text-primary">المفضلة</h1>
         </div>
-        <Link href="/cart">
-          <Button variant="ghost" size="icon" className="relative h-10 w-10">
-            <ShoppingBag className="h-5 w-5 text-primary" />
-            {cart.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
-                {cart.reduce((s, i) => s + i.quantity, 0)}
-              </span>
-            )}
+        <Link href="/cart" className="relative">
+          <Button variant="ghost" size="icon" className="h-10 w-10 text-primary">
+            <ShoppingBag className="h-5 w-5" />
           </Button>
+          {cartCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+              {cartCount}
+            </span>
+          )}
         </Link>
       </header>
 
       <div className="p-4">
         <Tabs defaultValue="products" className="w-full" dir="rtl">
-          <TabsList className="grid w-full grid-cols-2 mb-6 bg-white rounded-[10px] p-1 shadow-sm h-12">
-            <TabsTrigger value="products" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white">
+          <TabsList className="grid w-full grid-cols-2 mb-6 bg-white rounded-[10px] p-1 shadow-sm h-14" dir="rtl">
+            <TabsTrigger value="products" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white shadow-none data-[state=active]:shadow-md">
               <Package className="h-4 w-4" /> المنتجات
             </TabsTrigger>
-            <TabsTrigger value="stores" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white">
+            <TabsTrigger value="stores" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white shadow-none data-[state=active]:shadow-md">
               <Store className="h-4 w-4" /> المتاجر
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="products" className="space-y-3">
-            {favoriteProducts.length > 0 ? favoriteProducts.map((product: any) => (
-              <Card key={product.id} className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
-                <button onClick={(e) => toggleFavorite(e, 'product', product.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md shadow-sm">
-                  <Heart className="h-4 w-4 fill-destructive text-destructive" />
-                </button>
-                <CardContent className="p-3 flex items-center gap-3">
-                  <div className="relative h-16 w-16 rounded-md overflow-hidden bg-secondary/10 shrink-0">
-                    <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
-                  </div>
-                  <div className="flex-1 text-right space-y-1">
-                    <h3 className="font-bold text-sm">{product.name}</h3>
-                    <div className="flex items-center justify-between">
-                      <span className="text-primary font-black text-sm">{product.price} ر.س</span>
-                      <div className="flex items-center gap-2">
-                        <Button onClick={(e) => addToCart(e, product)} className="h-8 rounded-[10px] bg-primary text-white text-[10px] font-black">إضافة</Button>
+            {favoriteProducts.length > 0 ? favoriteProducts.map((product: any) => {
+              const inCart = cart.find(c => c.id === product.id)
+              return (
+                <Card key={`product-${product.id}`} className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
+                  <button 
+                    onClick={(e) => toggleFavorite(e, 'product', product.id)} 
+                    className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 backdrop-blur-sm rounded-md shadow-sm active:scale-90 transition-transform"
+                  >
+                    <Heart className="h-4 w-4 fill-destructive text-destructive" />
+                  </button>
+                  <CardContent className="p-3 flex items-center gap-4">
+                    <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0">
+                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
+                    </div>
+                    <div className="flex-1 text-right space-y-1">
+                      <h3 className="font-bold text-sm text-[#111827] truncate">{product.name}</h3>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-primary font-black text-sm">{product.price} ر.س</span>
+                        {inCart ? (
+                          <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
+                            <button onClick={(e) => removeFromCart(e, product.id)} className="h-8 w-8 rounded-[8px] bg-white flex items-center justify-center shadow-sm"><Minus className="h-4 w-4 text-primary" /></button>
+                            <span className="font-black text-xs min-w-[15px] text-center">{inCart.quantity}</span>
+                            <button onClick={(e) => addToCart(e, product)} className="h-8 w-8 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-4 w-4" /></button>
+                          </div>
+                        ) : (
+                          <Button onClick={(e) => addToCart(e, product)} className="h-9 rounded-[10px] bg-primary text-white text-[11px] font-black px-4 shadow-sm">إضافة</Button>
+                        )}
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )) : (
+                  </CardContent>
+                </Card>
+              )
+            }) : (
               <div className="text-center py-20 opacity-30">
                 <Package className="h-16 w-16 mx-auto mb-4 text-primary" />
                 <p className="font-bold">لا توجد منتجات مفضلة</p>
@@ -154,18 +181,21 @@ export default function FavoritesPage() {
 
           <TabsContent value="stores" className="space-y-3">
             {favoriteStores.length > 0 ? favoriteStores.map((store: any) => (
-              <Link key={store.id} href={`/store/${store.id}`}>
-                <Card className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
-                  <button onClick={(e) => toggleFavorite(e, 'store', store.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md shadow-sm">
+              <Link key={`store-${store.id}`} href={`/store/${store.id}`}>
+                <Card className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all">
+                  <button 
+                    onClick={(e) => toggleFavorite(e, 'store', store.id)} 
+                    className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 backdrop-blur-sm rounded-md shadow-sm active:scale-90 transition-transform"
+                  >
                     <Heart className="h-4 w-4 fill-destructive text-destructive" />
                   </button>
-                  <CardContent className="p-3 flex items-center gap-3">
-                    <div className="relative h-16 w-16 rounded-md overflow-hidden bg-secondary/10 shrink-0">
+                  <CardContent className="p-3 flex items-center gap-4">
+                    <div className="relative h-16 w-16 rounded-full overflow-hidden bg-secondary/10 shrink-0 border border-gray-100 shadow-sm">
                       <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover" />
                     </div>
                     <div className="flex-1 text-right space-y-1">
-                      <h4 className="font-bold text-sm">{store.name}</h4>
-                      <p className="text-[10px] text-muted-foreground flex items-center gap-1 justify-start"><MapPin className="h-3 w-3" /> {store.address}</p>
+                      <h4 className="font-bold text-sm text-[#111827]">{store.name}</h4>
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1 justify-start"><MapPin className="h-3 w-3 text-primary/60" /> {store.address}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -179,6 +209,7 @@ export default function FavoritesPage() {
           </TabsContent>
         </Tabs>
       </div>
+      <BottomNav />
     </div>
   )
 }
