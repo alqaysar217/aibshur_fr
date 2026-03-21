@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -245,37 +246,37 @@ export default function FavoritesPage() {
                   <Link key={store.id} href={`/store/${store.id}`}>
                     <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px] mb-5">
                       <CardContent className="p-3 h-full flex flex-row items-center gap-4 justify-between" dir="rtl">
-                        <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
-                          <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                          <div className="absolute bottom-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
-                            <Star className="h-2.5 w-2.5 fill-amber-500" />
-                            <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
-                          <h4 className="font-black text-sm text-[#111827] truncate leading-tight w-full text-right">{store.name}</h4>
-                          <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
-                            <MapPin className="h-2.5 w-2.5 text-primary/60" />
-                            <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
-                          </div>
-                          <div className="flex items-center gap-2 pt-1 w-full justify-start">
-                            <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
-                              2.3 كم
-                            </span>
-                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md whitespace-nowrap">
-                              {categoryName}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
+                        <div className="flex flex-col justify-between items-start h-full py-1.5 shrink-0">
                           <button onClick={(e) => toggleFavoriteStore(e, store.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
                             <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
                           <Badge className={cn("text-[8px] h-4 px-1.5 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-50 text-[#22C55E]" : "bg-red-50 text-[#EF4444]")}>
                             {isOpen ? 'مفتوح' : 'مغلق'}
                           </Badge>
+                        </div>
+
+                        <div className="flex-1 flex flex-col justify-center space-y-1 items-end overflow-hidden px-1 text-left">
+                          <h4 className="font-black text-sm text-[#111827] truncate leading-tight w-full text-left">{store.name}</h4>
+                          <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-end">
+                            <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
+                            <MapPin className="h-2.5 w-2.5 text-primary/60" />
+                          </div>
+                          <div className="flex items-center gap-2 pt-1 w-full justify-end">
+                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md whitespace-nowrap">
+                              {categoryName}
+                            </Badge>
+                            <span className="text-[10px] font-bold text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
+                              2.3 كم
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
+                          <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                          <div className="absolute bottom-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
+                            <Star className="h-2.5 w-2.5 fill-amber-500" />
+                            <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -345,7 +346,11 @@ export default function FavoritesPage() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  router.push(`/store/${product.storeId}`);
+                                  if (needsOptions) {
+                                    router.push(`/store/${product.storeId}`);
+                                  } else {
+                                    addToCart(e, product);
+                                  }
                                 }}
                                 className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                               >

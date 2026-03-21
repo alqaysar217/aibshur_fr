@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -333,7 +334,11 @@ export default function SearchPage() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  router.push(`/store/${item.storeId}`);
+                                  if (needsOptions) {
+                                    router.push(`/store/${item.storeId}`);
+                                  } else {
+                                    addToCart(e, item);
+                                  }
                                 }}
                                 className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                               >

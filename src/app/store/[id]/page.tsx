@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
@@ -377,7 +378,12 @@ export default function StoreDetailPage() {
                           ) : (
                             <Button 
                               onClick={(e) => {
-                                setViewingProduct(product);
+                                e.stopPropagation();
+                                if (needsOptions) {
+                                  setViewingProduct(product);
+                                } else {
+                                  addToCart(product, e);
+                                }
                               }}
                               className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                             >
@@ -400,7 +406,7 @@ export default function StoreDetailPage() {
       </div>
 
       <Dialog open={!!viewingProduct} onOpenChange={(val) => !val && setViewingProduct(null)}>
-        <DialogContent className="rounded-2xl w-[92%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0 shadow-2xl" dir="rtl">
+        <DialogContent className="rounded-2xl w-[92%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0 shadow-2xl z-[100]" dir="rtl">
           {viewingProduct && (
             <div className="flex flex-col max-h-[85vh] overflow-y-auto pb-10">
               <DialogHeader className="sr-only">
@@ -472,7 +478,8 @@ export default function StoreDetailPage() {
                           </div>
                           <Button 
                             size="sm"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               const variantData = { ...viewingProduct, id: v.id, name: v.name, price: v.price };
                               addToCart(variantData);
                               setViewingProduct(null);
@@ -487,7 +494,8 @@ export default function StoreDetailPage() {
                   </div>
                 ) : (
                   <Button 
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       addToCart(viewingProduct);
                       setViewingProduct(null);
                     }}
