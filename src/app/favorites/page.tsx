@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId, arrayUnion } from "firebase/firestore"
-import { Heart, Star, StarHalf, ShoppingBag, Loader2, MapPin, Plus, Minus, LayoutGrid, Map, Utensils, Store } from "lucide-react"
+import { Heart, Star, StarHalf, ShoppingBag, Loader2, MapPin, Plus, Minus, LayoutGrid, Map, Utensils, Store, ArrowRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -179,7 +179,7 @@ export default function FavoritesPage() {
 
   const renderStars = (rating: number) => {
     return (
-      <div className="flex items-center gap-0.5 mt-0.5" dir="rtl">
+      <div className="flex flex-row-reverse items-center gap-0.5 mt-0.5" dir="rtl">
         {[1, 2, 3, 4, 5].map((star) => (
           <div key={star} className="relative h-2.5 w-2.5">
             <Star className="absolute inset-0 h-full w-full text-muted-foreground/20 stroke-[1.5]" />
@@ -222,7 +222,12 @@ export default function FavoritesPage() {
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen" dir="rtl">
       <header className="p-4 glass sticky top-0 z-40 flex items-center justify-between shadow-sm">
-        <h1 className="text-xl font-black text-primary">المفضلة</h1>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
+            <ArrowRight className="h-6 w-6" />
+          </Button>
+          <h1 className="text-xl font-black text-primary">المفضلة</h1>
+        </div>
         <Link href="/cart">
           <Button variant="ghost" size="icon" className="relative h-10 w-10">
             <ShoppingBag className="h-5 w-5" />

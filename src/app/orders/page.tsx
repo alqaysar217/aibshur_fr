@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Clock, ChevronLeft, Utensils, ShoppingBag } from "lucide-react"
+import { Clock, ChevronLeft, Utensils, ShoppingBag, ArrowRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { BottomNav } from "@/components/layout/bottom-nav"
@@ -86,7 +86,10 @@ export default function OrdersPage() {
 
   return (
     <div className="pb-24 bg-secondary/5 min-h-screen">
-      <header className="p-4 glass sticky top-0 z-40 flex items-center gap-4">
+      <header className="p-4 glass sticky top-0 z-40 flex items-center gap-4 shadow-sm">
+        <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
+          <ArrowRight className="h-6 w-6" />
+        </Button>
         <h1 className="text-xl font-bold">طلباتي</h1>
       </header>
 
