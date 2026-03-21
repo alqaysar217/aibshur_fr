@@ -159,7 +159,19 @@ export default function Home() {
 
   if (!mounted) return null;
 
-  const sortedCategories = categories ? [...categories].sort((a, b) => (a.order || 99) - (b.order || 99)) : null;
+  const sortedCategories = categories ? [...categories].sort((a, b) => (a.order || 99) - (b.order || 99)) : [
+    { id: "restaurants", name: "مطاعم", icon: "🍔", color: "bg-rose-50", textColor: "text-rose-600" },
+    { id: "gifts", name: "هدايا", icon: "🎁", color: "bg-purple-50", textColor: "text-purple-600" },
+    { id: "cafe", name: "كافيهات", icon: "☕", color: "bg-amber-50", textColor: "text-amber-800" },
+    { id: "pharmacy", name: "صيدليات", icon: "💊", color: "bg-blue-50", textColor: "text-blue-600" },
+    { id: "grocery", name: "ماركت", icon: "🛒", color: "bg-green-50", textColor: "text-green-600" },
+    { id: "electronics", name: "إلكترونيات", icon: "💻", color: "bg-slate-100", textColor: "text-slate-700" },
+    { id: "beauty", name: "تجميل", icon: "✨", color: "bg-pink-50", textColor: "text-pink-600" },
+    { id: "vegetables", name: "خضروات", icon: "🥦", color: "bg-emerald-50", textColor: "text-emerald-700" },
+    { id: "meat", name: "لحوم", icon: "🥩", color: "bg-red-50", textColor: "text-red-700" },
+    { id: "spices", name: "بهارات", icon: "🌶️", color: "bg-orange-50", textColor: "text-orange-700" },
+    { id: "honey", name: "عسل", icon: "🍯", color: "bg-yellow-50", textColor: "text-yellow-800" }
+  ];
 
   return (
     <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300" dir="rtl">
@@ -185,7 +197,7 @@ export default function Home() {
             </span>
           </button>
 
-          {sortedCategories ? sortedCategories.map((cat: any) => (
+          {sortedCategories.map((cat: any) => (
             <button 
               key={cat.id} 
               onClick={() => setActiveCategory(cat.id === activeCategory ? null : cat.id)}
@@ -206,9 +218,7 @@ export default function Home() {
                 {cat.name}
               </span>
             </button>
-          )) : (
-            [1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 w-16 bg-white rounded-[20px] animate-pulse" />)
-          )}
+          ))}
         </div>
       </section>
 
@@ -270,7 +280,10 @@ export default function Home() {
                             <MapPin className="h-3 w-3 text-primary/60" />
                             <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                           </div>
-                          <span className="text-[10px] font-bold shrink-0">📍 2.3كم</span>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <MapPin className="h-3 w-3 text-primary/60" />
+                            <span className="text-[10px] font-bold">2.3كم</span>
+                          </div>
                         </div>
                         
                         <div className="flex items-center gap-2 pt-1">

@@ -73,7 +73,7 @@ export default function StoreDetailPage() {
 
   const getCategoryDisplayName = (categoryId: string) => {
     const translations: Record<string, string> = {
-      'grocery': 'ماركت',
+      'grocery': 'بقالة',
       'restaurants': 'مطاعم',
       'pharmacy': 'صيدليات',
       'cafe': 'كافيهات',
@@ -89,14 +89,10 @@ export default function StoreDetailPage() {
   };
 
   const categories = useMemo(() => {
-    // Standard filters followed by specific categories from the user order
-    const base = ["الكل", "الأكثر طلباً", "المفضلة"]
-    const userOrder = ["مطاعم", "هدايا", "كافيهات", "صيدليات", "ماركت", "إلكترونيات", "تجميل", "خضروات", "لحوم", "بهارات", "عسل"]
-    
+    const base = ["الكل", "مطاعم", "هدايا", "كافيهات", "صيدليات", "ماركت", "إلكترونيات", "تجميل", "خضروات", "لحوم", "بهارات", "عسل"]
     const dynamicFilters = new Set<string>()
     if (products) products.forEach((p: any) => { if (p.category) dynamicFilters.add(p.category) })
-    
-    return ["الكل", ...userOrder, ...Array.from(dynamicFilters).filter(c => !userOrder.includes(c) && !base.includes(c))]
+    return ["الكل", ...base.slice(1), ...Array.from(dynamicFilters).filter(c => !base.includes(c))]
   }, [products])
 
   const filteredProducts = useMemo(() => {
@@ -151,7 +147,6 @@ export default function StoreDetailPage() {
 
   return (
     <div className="pb-40 bg-[#F8FAFB] min-h-screen font-body" dir="rtl">
-      {/* قسم الهيدر المحسن والمضغوط */}
       <div className="bg-white px-5 pt-4 pb-5 shadow-sm border-b border-gray-100">
         <div className="flex justify-between items-center mb-5">
           <button onClick={() => router.back()} className="h-10 w-10 bg-secondary/30 rounded-[10px] flex items-center justify-center active:scale-90 transition-all">
@@ -169,41 +164,46 @@ export default function StoreDetailPage() {
           </Link>
         </div>
 
-        <div className="flex gap-4">
-          <div className="relative h-24 w-24 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0 shadow-sm border border-gray-100">
-            <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200/200`} alt={store.name} fill className="object-cover" priority />
-            <button 
-              onClick={toggleFavoriteStore} 
-              className={cn(
-                "absolute top-1 right-1 h-7 w-7 rounded-md flex items-center justify-center transition-all z-10 shadow-sm",
-                isFavStore ? "bg-destructive text-white" : "bg-white/90 text-gray-400"
-              )}
-            >
-              <Heart className={cn("h-4 w-4", isFavStore && "fill-current")} />
-            </button>
-          </div>
-          <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-            <h1 className="text-xl font-black text-primary leading-tight truncate">{store.name}</h1>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md">
-                <Star className="h-3 w-3 fill-primary text-primary" />
-                <span className="text-[10px] font-black text-primary">{store.averageRating || '4.5'}</span>
-                <span className="text-[8px] text-gray-400 font-bold">(100+)</span>
-              </div>
-              <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-black text-[9px] h-4.5 px-2 rounded-md">
-                {getCategoryDisplayName(store.categoryIds?.[0] || 'متجر')}
-              </Badge>
-              <Badge className={cn("text-[9px] font-black h-4.5 px-2 rounded-md border-none shadow-none", isOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
-                {isOpen ? 'مفتوح' : 'مغلق'}
-              </Badge>
+        <div className="bg-white rounded-[10px] p-4 shadow-xl border border-gray-50 space-y-3">
+          <div className="flex gap-4">
+            <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0 shadow-sm border border-gray-100">
+              <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200/200`} alt={store.name} fill className="object-cover" priority />
+              <button 
+                onClick={toggleFavoriteStore} 
+                className={cn(
+                  "absolute top-1 right-1 h-7 w-7 rounded-md flex items-center justify-center transition-all z-10 shadow-sm",
+                  isFavStore ? "bg-destructive text-white" : "bg-white/90 text-gray-400"
+                )}
+              >
+                <Heart className={cn("h-4 w-4", isFavStore && "fill-current")} />
+              </button>
             </div>
-            <div className="flex items-center gap-3 text-gray-500 mt-1">
+            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
+              <h1 className="text-lg font-black text-primary leading-tight truncate">{store.name}</h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md">
+                  <Star className="h-3 w-3 fill-primary text-primary" />
+                  <span className="text-[10px] font-black text-primary">{store.averageRating || '4.5'}</span>
+                  <span className="text-[8px] text-gray-400 font-bold">(100+)</span>
+                </div>
+                <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-black text-[9px] h-4.5 px-2 rounded-md">
+                  {getCategoryDisplayName(store.categoryIds?.[0] || 'متجر')}
+                </Badge>
+                <Badge className={cn("text-[9px] font-black h-4.5 px-2 rounded-md border-none shadow-none", isOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
+                  {isOpen ? 'مفتوح' : 'مغلق'}
+                </Badge>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between text-gray-500 pt-1 border-t border-gray-50">
+            <div className="flex items-center gap-1 min-w-0">
+              <MapPin className="h-3 w-3 text-primary/60" />
+              <span className="text-[10px] font-bold truncate">{store.address || 'المكلا'}</span>
+            </div>
+            <div className="flex items-center gap-4">
               <div className="flex items-center gap-1 shrink-0">
                 <MapPin className="h-3 w-3 text-primary/60" />
-                <span className="text-[10px] font-bold">{store.address || 'المكلا'}</span>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <Map className="h-3 w-3 text-primary/60" />
                 <span className="text-[10px] font-bold">2.3كم</span>
               </div>
               <div className="flex items-center gap-1 shrink-0">

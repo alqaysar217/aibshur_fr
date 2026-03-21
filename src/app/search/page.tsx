@@ -218,8 +218,11 @@ export default function SearchPage() {
                       <p className="text-[10px] text-gray-400 line-clamp-1 leading-relaxed">{item.description || 'وصف المنتج متاح هنا'}</p>
                       
                       <div className="flex items-center justify-between mt-auto">
-                        <div className="text-primary font-black text-xs shrink-0">{item.price} ر.س</div>
-                        <div className="shrink-0">
+                        <div className="flex items-center gap-2">
+                          {renderStars(item.rating || 4.8)}
+                          <div className="text-primary font-black text-[11px] shrink-0">{item.price} ر.س</div>
+                        </div>
+                        <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                           {inCart ? (
                             <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
                               <button onClick={(e) => removeFromCart(e, item.id)} className="h-7 w-7 rounded-[8px] bg-white flex items-center justify-center shadow-sm"><Minus className="h-3.5 w-3.5 text-primary" /></button>
@@ -227,7 +230,7 @@ export default function SearchPage() {
                               <button onClick={(e) => addToCart(e, item)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-3.5 w-3.5" /></button>
                             </div>
                           ) : (
-                            <Button onClick={(e) => addToCart(e, item)} className="h-8 rounded-[8px] bg-primary text-white text-[9px] font-black px-4 shadow-sm flex items-center gap-1">
+                            <Button onClick={(e) => addToCart(e, item)} className="h-8 rounded-[8px] bg-primary text-white text-[10px] font-black px-4 shadow-sm flex items-center gap-1">
                               <span>إضافة</span>
                               <ShoppingBag className="h-3 w-3" />
                             </Button>
@@ -266,7 +269,10 @@ export default function SearchPage() {
                             <MapPin className="h-3 w-3 text-primary/60" />
                             <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
                           </div>
-                          <span className="text-[10px] font-bold shrink-0">📍 2.3كم</span>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <MapPin className="h-3 w-3 text-primary/60" />
+                            <span className="text-[10px] font-bold">2.3كم</span>
+                          </div>
                         </div>
                         
                         <div className="flex items-center gap-2 pt-1">
