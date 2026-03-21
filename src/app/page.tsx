@@ -154,7 +154,7 @@ export default function Home() {
 
   const renderStars = (rating: number) => {
     return (
-      <div className="flex items-center gap-0.5 mt-1" dir="rtl">
+      <div className="flex items-center gap-0.5" dir="rtl">
         {[1, 2, 3, 4, 5].map((star) => (
           <Star key={star} className={cn("h-2.5 w-2.5", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
         ))}
@@ -247,11 +247,8 @@ export default function Home() {
                 <Link key={store.id} href={`/store/${store.id}`}>
                   <Card className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all">
                     <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                      <div className="flex flex-col items-center gap-1 shrink-0">
-                        <div className="relative w-20 h-20 shadow-sm overflow-hidden rounded-[10px] bg-secondary/10">
-                          <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover" />
-                        </div>
-                        {renderStars(store.averageRating || 4.5)}
+                      <div className="relative w-20 h-20 shadow-sm overflow-hidden rounded-[10px] bg-secondary/10 shrink-0">
+                        <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1 space-y-1">
                         <div className="flex justify-between items-center">
@@ -265,9 +262,12 @@ export default function Home() {
                           <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                         </div>
                         
-                        <div className="flex items-center gap-2 flex-wrap pt-1">
-                          <span className="text-[9px] text-[#6B7280] font-black">تبعد 2.3 كم</span>
-                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-md">{categoryName}</Badge>
+                        <div className="flex items-center justify-between pt-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9px] text-[#6B7280] font-black">2.3كم</span>
+                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-md">{categoryName}</Badge>
+                            {renderStars(store.averageRating || 4.5)}
+                          </div>
                           <Badge className={cn("text-[8px] h-4 px-2 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
                             {isOpen ? 'مفتوح' : 'مغلق'}
                           </Badge>
