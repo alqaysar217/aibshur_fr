@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
@@ -45,7 +46,6 @@ export default function StoreDetailPage() {
   const saveCart = (newCart: any[]) => {
     setCart(newCart)
     localStorage.setItem('absher_cart', JSON.stringify(newCart))
-    // إطلاق حدث لتحديث السلة العائمة عالمياً
     window.dispatchEvent(new Event('cart-updated'))
   }
 
@@ -62,7 +62,7 @@ export default function StoreDetailPage() {
         item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
       )
     } else {
-      newCart = [...cart, { ...product, quantity: 1, storeId: id }]
+      newCart = [...cart, { ...product, quantity: 1, storeId: id, storeName: store?.name }]
     }
     saveCart(newCart)
     toast({
@@ -205,13 +205,10 @@ export default function StoreDetailPage() {
       case "الكل": return <LayoutGrid className="h-3.5 w-3.5" />
       case "المفضلة": return <Heart className="h-3.5 w-3.5" />
       case "الأكثر طلباً": return <Zap className="h-3.5 w-3.5" />
-      case "مقبلات": return <Soup className="h-3.5 w-3.5" />
-      case "مشويات": return <Flame className="h-3.5 w-3.5" />
       case "غداء": return <Utensils className="h-3.5 w-3.5" />
       case "لحم": return <Beef className="h-3.5 w-3.5" />
       case "بيتزا": return <Pizza className="h-3.5 w-3.5" />
       case "شاورما": return <Sandwich className="h-3.5 w-3.5" />
-      case "وجبات خفيفة": return <Cookie className="h-3.5 w-3.5" />
       case "مشروبات": return <CupSoda className="h-3.5 w-3.5" />
       case "حلى": return <CakeSlice className="h-3.5 w-3.5" />
       default: return <ChefHat className="h-3.5 w-3.5" />
@@ -237,7 +234,6 @@ export default function StoreDetailPage() {
   }
 
   if (isStoreLoading) return <div className="flex items-center justify-center min-h-screen">جاري التحميل...</div>
-
   if (!store) return <div className="p-10 text-center">المتجر غير موجود</div>
 
   const isFavoriteStore = userData?.favoritesStoreIds?.includes(id as string)
@@ -249,7 +245,7 @@ export default function StoreDetailPage() {
   }
 
   return (
-    <div className="pb-32 bg-[#F5F7F6] min-h-screen font-body" dir="rtl">
+    <div className="pb-40 bg-[#F5F7F6] min-h-screen font-body" dir="rtl">
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md px-5 py-3 flex items-center justify-between border-b shadow-sm">
         <button onClick={() => router.back()} className="h-9 w-9 bg-secondary/50 rounded-full flex items-center justify-center text-gray-700 active:scale-90 transition-transform">
           <ArrowRight className="h-5 w-5" />
@@ -264,16 +260,11 @@ export default function StoreDetailPage() {
       <div className="bg-white p-5 border-b">
         <div className="flex items-center gap-4">
           <div className="relative h-16 w-16 rounded-full border-2 border-secondary overflow-hidden shrink-0 shadow-sm bg-secondary/10">
-            <Image 
-              src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`}
-              alt={store.name}
-              fill
-              className="object-cover"
-            />
+            <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover" />
           </div>
           <div className="flex-1 space-y-1">
             <div className="flex items-center justify-between">
-              <h1 className="text-lg font-black text-[#111827] leading-tight truncate text-right">{store.name}</h1>
+              <h1 className="text-lg font-black text-[#111827] truncate text-right w-full">{store.name}</h1>
               <button onClick={toggleFavoriteStore} className={cn("p-2 rounded-xl active:scale-90 transition-transform", isFavoriteStore ? "text-destructive" : "text-gray-300")}>
                 <Heart className={cn("h-4 w-4", isFavoriteStore && "fill-current")} />
               </button>
@@ -293,10 +284,6 @@ export default function StoreDetailPage() {
             <span className="text-[9px] font-black text-gray-700">{store.address || 'المكلا'}</span>
           </div>
           <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
-            <Navigation className="h-3 w-3 text-primary" />
-            <span className="text-[9px] font-black text-gray-700">يبعد 2.3 كم</span>
-          </div>
-          <div className="flex items-center gap-1.5 bg-[#F5F7F6] py-1 px-2.5 rounded-lg shrink-0">
             <Clock className="h-3 w-3 text-primary" />
             <span className="text-[9px] font-black text-gray-700">{store.deliveryTime || '30-45 دقيقة'}</span>
           </div>
@@ -311,195 +298,102 @@ export default function StoreDetailPage() {
               onClick={() => setSelectedCategory(cat)}
               className={cn(
                 "px-5 py-2 rounded-full text-[10px] font-black whitespace-nowrap transition-all flex items-center gap-2 border",
-                selectedCategory === cat 
-                  ? "bg-primary text-white border-primary shadow-md scale-105" 
-                  : "bg-[#F3F4F6] text-gray-500 border-transparent hover:bg-gray-200"
+                selectedCategory === cat ? "bg-primary text-white border-primary shadow-md scale-105" : "bg-[#F3F4F6] text-gray-500 border-transparent hover:bg-gray-200"
               )}
             >
-              {getCategoryIcon(cat)}
-              {cat}
+              {getCategoryIcon(cat)} {cat}
             </button>
           ))}
         </div>
       </div>
 
       <div className="p-4 space-y-3">
-        <div className="flex flex-col gap-3">
-          {isProductsLoading ? (
-            [1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-xl animate-pulse" />)
-          ) : filteredProducts.length > 0 ? (
-            filteredProducts.map((product: any) => {
-              const inCart = cart.find(item => item.id === product.id)
-              const isFavProd = userData?.favoritesProductIds?.includes(product.id)
-              const needsOptions = hasOptions(product.name)
-              
-              return (
-                <Card 
-                  key={product.id} 
-                  className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group"
-                  onClick={() => setViewingProduct(product)}
-                >
-                  <CardContent className="p-2.5 flex flex-row items-center gap-3">
-                    <div className="flex flex-col items-center gap-1 shrink-0">
-                      <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
-                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
-                          <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-                        </button>
-                      </div>
-                      {renderStars(product.rating || 4.8)}
-                    </div>
-
-                    <div className="flex-1 text-right space-y-0.5 overflow-hidden">
-                      <h3 className="font-black text-sm text-[#111827] truncate w-full">{product.name}</h3>
-                      <p className="text-[10px] text-gray-400 line-clamp-1 leading-snug">
-                        {product.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
-                      </p>
-                      
-                      <div className="flex items-center gap-1.5 pt-1">
-                        <div className="relative h-4 w-4 rounded-full overflow-hidden bg-secondary/20">
-                          <Image src={store?.logoUrl || `https://picsum.photos/seed/${store?.id}/100`} alt="" fill className="object-cover" />
+        {isProductsLoading ? (
+          [1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-xl animate-pulse" />)
+        ) : filteredProducts.map((product: any) => {
+          const inCart = cart.find(item => item.id === product.id)
+          const isFavProd = userData?.favoritesProductIds?.includes(product.id)
+          const needsOptions = hasOptions(product.name)
+          
+          return (
+            <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer group" onClick={() => setViewingProduct(product)}>
+              <CardContent className="p-2.5 flex flex-row items-center gap-3">
+                <div className="flex flex-col items-center gap-1 shrink-0">
+                  <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
+                    <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
+                    <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1 right-1 p-1 bg-white/80 rounded-lg shadow-sm z-10 active:scale-90"><Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} /></button>
+                  </div>
+                  {renderStars(product.rating || 4.8)}
+                </div>
+                <div className="flex-1 text-right space-y-0.5 overflow-hidden">
+                  <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
+                  <p className="text-[10px] text-gray-400 line-clamp-1">{product.description || 'وصف الوجبة المميز'}</p>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-primary font-black text-base">{product.price} <small className="text-[9px] font-bold">ر.س</small></span>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      {inCart && !needsOptions ? (
+                        <div className="flex items-center gap-1.5 bg-secondary/30 p-0.5 rounded-lg">
+                          <button onClick={(e) => removeFromCart(product.id, e)} className="h-7 w-7 rounded-lg bg-white shadow-sm flex items-center justify-center"><Minus className="h-3.5 w-3.5 text-primary" /></button>
+                          <span className="font-black text-xs min-w-[15px] text-center">{inCart.quantity}</span>
+                          <button onClick={(e) => addToCart(product, e)} className="h-7 w-7 rounded-lg bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
                         </div>
-                        <span className="text-[8px] font-bold text-muted-foreground">{store?.name || "المتجر"}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-primary font-black text-base">{product.price} <small className="text-[9px] font-bold">ر.س</small></span>
-                        <div onClick={(e) => e.stopPropagation()}>
-                          {inCart && !needsOptions ? (
-                            <div className="flex items-center gap-1.5 bg-secondary/30 p-0.5 rounded-lg">
-                              <button onClick={(e) => removeFromCart(product.id, e)} className="h-7 w-7 rounded-lg bg-white shadow-sm flex items-center justify-center">
-                                <Minus className="h-3.5 w-3.5 text-primary" />
-                              </button>
-                              <span className="font-black text-xs min-w-[15px] text-center">{inCart.quantity}</span>
-                              <button onClick={(e) => addToCart(product, e)} className="h-7 w-7 rounded-lg bg-primary text-white flex items-center justify-center">
-                                <Plus className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          ) : (
-                            <Button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (needsOptions) {
-                                  setViewingProduct(product);
-                                } else {
-                                  addToCart(product, e);
-                                }
-                              }}
-                              className="h-8 px-4 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[10px] font-black"
-                            >
-                              {needsOptions ? "عرض الخيارات" : "إضافة"}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
+                      ) : (
+                        <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-8 px-4 rounded-lg shadow-sm bg-primary text-white text-[10px] font-black">
+                          {needsOptions ? "عرض الخيارات" : "إضافة"}
+                        </Button>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              )
-            })
-          ) : (
-            <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-100">
-              <p className="text-xs text-gray-400 font-bold">لا توجد منتجات حالياً</p>
-            </div>
-          )}
-        </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
 
       <Dialog open={!!viewingProduct} onOpenChange={(val) => !val && setViewingProduct(null)}>
-        <DialogContent className="rounded-2xl w-[92%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0 shadow-2xl z-[100]" dir="rtl">
+        <DialogContent className="rounded-2xl w-[92%] max-w-md mx-auto p-0 overflow-hidden border-none shadow-2xl z-[100]" dir="rtl">
           {viewingProduct && (
             <div className="flex flex-col max-h-[85vh] overflow-y-auto pb-10">
               <DialogHeader className="sr-only">
                 <DialogTitle>{viewingProduct.name}</DialogTitle>
-                <DialogDescription>تفاصيل المنتج الأساسية والخيارات المتاحة</DialogDescription>
+                <DialogDescription>تفاصيل المنتج والخيارات</DialogDescription>
               </DialogHeader>
-              
-              <div className="relative h-52 w-full shrink-0">
-                <Image 
-                  src={viewingProduct.imageUrl || `https://picsum.photos/seed/${viewingProduct.id}/600/400`} 
-                  alt={viewingProduct.name} 
-                  fill 
-                  className="object-cover"
-                />
+              <div className="relative h-52 w-full">
+                <Image src={viewingProduct.imageUrl || `https://picsum.photos/seed/${viewingProduct.id}/600/400`} alt={viewingProduct.name} fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <div className="absolute bottom-4 right-4 text-white left-4">
-                  <h2 className="text-base font-black drop-shadow-md">{viewingProduct.name}</h2>
-                </div>
+                <div className="absolute bottom-4 right-4 text-white"><h2 className="text-base font-black">{viewingProduct.name}</h2></div>
               </div>
-
               <div className="bg-white p-5 space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-gray-50">
-                  <div className="flex items-center gap-2">
-                    <div className="relative h-7 w-7 rounded-full overflow-hidden border border-primary/10 shadow-sm bg-secondary/10">
-                      <Image 
-                        src={store?.logoUrl || `https://picsum.photos/seed/${store?.id}/100`} 
-                        alt="" 
-                        fill 
-                        className="object-cover" 
-                      />
-                    </div>
-                    <p className="text-[10px] font-black text-gray-700">{store?.name || "المتجر"}</p>
-                  </div>
+                  <p className="text-[10px] font-black text-gray-700">{store?.name}</p>
                   {renderStars(viewingProduct.rating || 4.8)}
                 </div>
-
                 <div className="text-right">
-                  <p className="text-[8px] text-gray-400 font-bold uppercase mb-0.5 tracking-wide">السعر</p>
-                  <p className="text-lg font-black text-primary">
-                    {viewingProduct.price} <small className="text-[10px] font-bold opacity-80">ر.س</small>
-                  </p>
+                  <p className="text-[8px] text-gray-400 font-bold uppercase mb-0.5">السعر الأساسي</p>
+                  <p className="text-lg font-black text-primary">{viewingProduct.price} <small className="text-[10px]">ر.س</small></p>
                 </div>
-
                 {productVariants.length > 0 ? (
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2 px-1">
-                      <div className="h-3 w-1 bg-primary rounded-full"></div>
-                      <h4 className="font-black text-[10px] text-gray-800 uppercase tracking-widest">اختر الحجم أو النوع:</h4>
-                    </div>
+                    <p className="font-black text-[10px] text-gray-800 uppercase px-1">اختر الحجم أو النوع:</p>
                     <div className="space-y-2">
                       {productVariants.map((v) => {
                         const inCart = cart.find(item => item.id === v.id);
                         return (
-                          <div 
-                            key={v.id} 
-                            className="group border border-gray-100 bg-gray-50/30 rounded-xl p-2.5 flex items-center justify-between transition-all"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-white shadow-sm shrink-0">
-                                <Image src={v.imageUrl} alt={v.name} fill className="object-cover" />
-                              </div>
-                              <div className="text-right">
-                                <p className="font-black text-[11px] text-gray-800">{v.name}</p>
-                                <p className="text-primary font-black text-[11px] mt-0.5">{v.price} <small className="text-[9px]">ر.س</small></p>
-                              </div>
+                          <div key={v.id} className="border border-gray-100 bg-gray-50/30 rounded-xl p-2.5 flex items-center justify-between">
+                            <div className="flex items-center gap-3 text-right">
+                              <div className="relative h-10 w-10 rounded-lg overflow-hidden border bg-white shrink-0"><Image src={v.imageUrl} alt={v.name} fill className="object-cover" /></div>
+                              <div><p className="font-black text-[11px] text-gray-800">{v.name}</p><p className="text-primary font-black text-[11px]">{v.price} ر.س</p></div>
                             </div>
-                            
                             <div onClick={(e) => e.stopPropagation()}>
                               {inCart ? (
                                 <div className="flex items-center gap-2 bg-secondary/40 p-0.5 rounded-lg">
-                                  <button onClick={(e) => removeFromCart(v.id, e)} className="h-8 w-8 rounded-lg bg-white shadow-sm flex items-center justify-center">
-                                    <Minus className="h-3.5 w-3.5 text-primary" />
-                                  </button>
+                                  <button onClick={(e) => removeFromCart(v.id, e)} className="h-8 w-8 rounded-lg bg-white shadow-sm flex items-center justify-center"><Minus className="h-3.5 w-3.5 text-primary" /></button>
                                   <span className="font-black text-sm min-w-[20px] text-center">{inCart.quantity}</span>
-                                  <button onClick={(e) => {
-                                    const variantData = { ...viewingProduct, id: v.id, name: v.name, price: v.price };
-                                    addToCart(variantData, e);
-                                  }} className="h-8 w-8 rounded-lg bg-primary text-white flex items-center justify-center">
-                                    <Plus className="h-3.5 w-3.5" />
-                                  </button>
+                                  <button onClick={(e) => { const vd = { ...viewingProduct, id: v.id, name: v.name, price: v.price }; addToCart(vd, e); }} className="h-8 w-8 rounded-lg bg-primary text-white flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></button>
                                 </div>
                               ) : (
-                                <Button 
-                                  size="sm"
-                                  onClick={(e) => {
-                                    const variantData = { ...viewingProduct, id: v.id, name: v.name, price: v.price };
-                                    addToCart(variantData, e);
-                                  }}
-                                  className="h-9 px-4 rounded-lg font-black bg-primary text-white shadow-sm active:scale-95 transition-transform text-[10px]"
-                                >
-                                  إضافة
-                                </Button>
+                                <Button size="sm" onClick={(e) => { const vd = { ...viewingProduct, id: v.id, name: v.name, price: v.price }; addToCart(vd, e); }} className="h-9 px-4 rounded-lg font-black bg-primary text-white text-[10px]">إضافة</Button>
                               )}
                             </div>
                           </div>
@@ -511,21 +405,12 @@ export default function StoreDetailPage() {
                   <div className="flex items-center justify-center pt-2">
                     {cart.find(item => item.id === viewingProduct.id) ? (
                       <div className="flex items-center gap-4 bg-secondary/30 p-1.5 rounded-2xl w-full justify-between px-6">
-                        <button onClick={(e) => removeFromCart(viewingProduct.id, e)} className="h-11 w-11 rounded-xl bg-white text-primary shadow-sm flex items-center justify-center">
-                          <Minus className="h-5 w-5" />
-                        </button>
+                        <button onClick={(e) => removeFromCart(viewingProduct.id, e)} className="h-11 w-11 rounded-xl bg-white text-primary flex items-center justify-center"><Minus className="h-5 w-5" /></button>
                         <span className="font-black text-xl">{cart.find(item => item.id === viewingProduct.id)?.quantity}</span>
-                        <button onClick={(e) => addToCart(viewingProduct, e)} className="h-11 w-11 rounded-xl bg-primary text-white flex items-center justify-center">
-                          <Plus className="h-5 w-5" />
-                        </button>
+                        <button onClick={(e) => addToCart(viewingProduct, e)} className="h-11 w-11 rounded-xl bg-primary text-white flex items-center justify-center"><Plus className="h-5 w-5" /></button>
                       </div>
                     ) : (
-                      <Button 
-                        onClick={(e) => addToCart(viewingProduct, e)}
-                        className="w-full h-12 rounded-xl shadow-lg shadow-primary/10 bg-primary hover:bg-primary/90 text-white font-black text-base transition-all active:scale-[0.98]"
-                      >
-                        تأكيد الإضافة للسلة
-                      </Button>
+                      <Button onClick={(e) => addToCart(viewingProduct, e)} className="w-full h-12 rounded-xl bg-primary text-white font-black">إضافة للسلة</Button>
                     )}
                   </div>
                 )}
