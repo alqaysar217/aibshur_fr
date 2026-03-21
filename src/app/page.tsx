@@ -237,20 +237,20 @@ export default function Home() {
                 <Link key={store.id} href={`/store/${store.id}`}>
                   <Card className="border-none shadow-sm rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-24 mb-4">
                     <CardContent className="p-2.5 h-full flex flex-row items-center gap-3 justify-between" dir="rtl">
-                      {/* 1. أقصى اليمين: الصورة */}
-                      <div className="relative w-20 h-20 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
-                        <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                      {/* 1. أقصى اليمين: الصورة والتقييم */}
+                      <div className="flex flex-col items-center gap-1 shrink-0">
+                        <div className="relative w-16 h-16 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
+                          <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                        </div>
+                        <div className="flex items-center gap-0.5 text-primary text-[10px] font-black">
+                          <Star className="h-2.5 w-2.5 fill-primary" />
+                          <span>{store.averageRating || '4.5'}</span>
+                        </div>
                       </div>
 
                       {/* 2. الوسط: المعلومات */}
                       <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
-                        <div className="flex items-center justify-between w-full">
-                          <h4 className="font-bold text-sm text-[#111827] truncate text-right">{store.name}</h4>
-                          <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-black shrink-0">
-                            <Star className="h-3 w-3 fill-amber-500" />
-                            <span>{store.averageRating || '4.5'}</span>
-                          </div>
-                        </div>
+                        <h4 className="font-bold text-sm text-[#111827] truncate text-right w-full">{store.name}</h4>
                         <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
                           <MapPin className="h-2.5 w-2.5 text-primary/60" />
                           <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>

@@ -271,8 +271,8 @@ export default function StoreDetailPage() {
               </button>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-black">
-                <Star className="h-3 w-3 fill-amber-500" />
+              <div className="flex items-center gap-0.5 text-primary text-[10px] font-black">
+                <Star className="h-3 w-3 fill-primary" />
                 <span>{store.averageRating || '4.5'}</span>
               </div>
               <Badge className={cn("text-[8px] font-black border-none px-2 h-4", isStoreOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
@@ -335,21 +335,21 @@ export default function StoreDetailPage() {
                   onClick={() => setViewingProduct(product)}
                 >
                   <CardContent className="p-2.5 flex flex-row items-center gap-3">
-                    <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
-                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                      <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
-                        <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-                      </button>
+                    <div className="flex flex-col items-center gap-1 shrink-0">
+                      <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-secondary/10">
+                        <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                          <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-0.5 text-primary text-[10px] font-black">
+                        <Star className="h-2.5 w-2.5 fill-primary" />
+                        <span>{product.rating || '4.8'}</span>
+                      </div>
                     </div>
 
                     <div className="flex-1 text-right space-y-0.5 overflow-hidden">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
-                        <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-black shrink-0">
-                          <Star className="h-3 w-3 fill-amber-500" />
-                          <span>{product.rating || '4.8'}</span>
-                        </div>
-                      </div>
+                      <h3 className="font-black text-sm text-[#111827] truncate w-full">{product.name}</h3>
                       <p className="text-[10px] text-gray-400 line-clamp-1 leading-snug">
                         {product.description || 'وصف المنتج الرائع من مطبخنا المميز.'}
                       </p>
@@ -439,9 +439,9 @@ export default function StoreDetailPage() {
                     </div>
                     <p className="text-[11px] font-black text-gray-700">{store?.name || "المتجر"}</p>
                   </div>
-                  <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-lg">
-                    <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
-                    <span className="font-black text-[10px] text-amber-700">{viewingProduct.rating || '4.8'}</span>
+                  <div className="flex items-center gap-1 bg-primary/5 px-2 py-1 rounded-lg">
+                    <Star className="h-3 w-3 fill-primary text-primary" />
+                    <span className="font-black text-[10px] text-primary">{viewingProduct.rating || '4.8'}</span>
                   </div>
                 </div>
 
