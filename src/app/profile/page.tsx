@@ -1,6 +1,6 @@
 "use client"
 
-import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Crown, Trash2, ChevronDown, BadgeCheck, Phone } from "lucide-react"
+import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Crown, Trash2, ChevronDown, BadgeCheck, Phone, Wallet } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
@@ -101,7 +101,6 @@ export default function ProfilePage() {
 
   return (
     <div className="pb-32 bg-[#F8FAFB] min-h-screen font-body" dir="rtl">
-      {/* رأس الصفحة المطور بنقرة مصمم */}
       <div className="relative pt-12 pb-10 px-6 bg-gradient-to-b from-primary/10 to-transparent rounded-b-[10px]">
         <div className="flex flex-col items-center">
           <div className="relative mb-6">
@@ -138,11 +137,10 @@ export default function ProfilePage() {
       </div>
 
       <div className="px-5 space-y-6">
-        {/* بطاقات الرصيد السريعة - بدون تكرار */}
         <div className="grid grid-cols-2 gap-4">
           <Link href="/wallet" className="bg-white p-5 rounded-[10px] shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition-all">
             <div className="p-2.5 bg-primary/5 rounded-md">
-              <User className="h-5 w-5 text-primary" />
+              <Wallet className="h-5 w-5 text-primary" />
             </div>
             <div className="text-center">
               <p className="text-[9px] text-gray-400 font-black uppercase">المحفظة</p>
@@ -160,7 +158,6 @@ export default function ProfilePage() {
           </Link>
         </div>
 
-        {/* القوائم المرتبة */}
         {sections.map((section, idx) => (
           <div key={idx} className="space-y-2">
             <h3 className="text-[10px] font-black text-gray-400 uppercase px-3">{section.title}</h3>
@@ -185,7 +182,6 @@ export default function ProfilePage() {
           </div>
         ))}
 
-        {/* زر الخروج */}
         <button 
           onClick={handleLogout}
           className="w-full flex items-center justify-between p-4 bg-rose-50 text-rose-600 rounded-[10px] border border-rose-100 active:scale-[0.98] transition-all"
@@ -198,7 +194,6 @@ export default function ProfilePage() {
           </div>
         </button>
 
-        {/* إعدادات متقدمة */}
         <div className="pt-2">
           <button 
             onClick={() => setShowAdvanced(!showAdvanced)}
@@ -220,10 +215,6 @@ export default function ProfilePage() {
               </button>
             </div>
           )}
-        </div>
-
-        <div className="text-center pb-8 opacity-20">
-          <p className="text-[10px] font-black text-primary uppercase">Absher Delivery</p>
         </div>
       </div>
       <BottomNav />

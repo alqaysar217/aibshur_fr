@@ -18,15 +18,8 @@ import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
-const QUICK_FILTERS = [
-  { id: "all", name: "الكل", icon: <Filter className="h-3.5 w-3.5" /> },
-  { id: "top_rated", name: "الأعلى تقييماً", icon: <Star className="h-3.5 w-3.5" /> },
-  { id: "new", name: "الجديد", icon: <Sparkles className="h-3.5 w-3.5" /> },
-]
-
 export default function SearchPage() {
   const [queryText, setQueryText] = useState("")
-  const [activeFilter, setActiveFilter] = useState("all")
   const [mounted, setMounted] = useState(false)
   const db = useFirestore()
   const { user } = useUser()
@@ -57,12 +50,6 @@ export default function SearchPage() {
   }, [db, user])
   const { data: userData } = useDoc(userRef)
 
-  const categoriesQuery = useMemoFirebase(() => {
-    if (!db) return null
-    return query(collection(db, "categories"))
-  }, [db])
-  const { data: categories } = useCollection(categoriesQuery)
-
   const storesQuery = useMemoFirebase(() => {
     if (!db) return null
     return query(collection(db, "stores"), limit(100))
@@ -83,7 +70,12 @@ export default function SearchPage() {
     let allStores = (stores || []).map(s => ({ ...s, type: 'store' }))
     let allProducts = (products || []).map(p => ({ ...p, type: 'product' }))
 
-    const combined = [...allStores, ...allProducts]
+    // Deduplicate items by ID and type to avoid key duplication errors
+    const uniqueMap = new Map();
+    [...allStores, ...allProducts].forEach(item => {
+      uniqueMap.set(`${item.type}-${item.id}`, item);
+    });
+    const combined = Array.from(uniqueMap.values());
 
     const filtered = !searchVal 
       ? combined 
@@ -199,8 +191,9 @@ export default function SearchPage() {
             ) : filteredProducts.map((item: any) => {
               const inCart = cart.find(c => c.id === item.id)
               const isFav = userData?.favoritesProductIds?.includes(item.id)
+              // Fixed: using a unique key with type prefix to avoid ID collisions
               return (
-                <Card key={item.id} className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
+                <Card key={`product-${item.id}`} className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
                   <button onClick={(e) => toggleFavorite(e, 'product', item.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md">
                     <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                   </button>
@@ -235,7 +228,7 @@ export default function SearchPage() {
             ) : filteredStores.map((item: any) => {
               const isFav = userData?.favoritesStoreIds?.includes(item.id)
               return (
-                <Link key={item.id} href={`/store/${item.id}`}>
+                <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
                   <Card className="relative border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
                     <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="absolute top-2 left-2 z-10 p-1.5 bg-white/80 rounded-md">
                       <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
