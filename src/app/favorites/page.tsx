@@ -206,7 +206,7 @@ export default function FavoritesPage() {
 
       <div className="p-4">
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/50 backdrop-blur-sm rounded-2xl p-1 shadow-sm">
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/50 backdrop-blur-sm rounded-2xl p-1 shadow-sm" dir="rtl">
             <TabsTrigger value="products" className="rounded-xl font-black text-xs h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">الوجبات</TabsTrigger>
             <TabsTrigger value="stores" className="rounded-xl font-black text-xs h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">المتاجر</TabsTrigger>
           </TabsList>
@@ -224,7 +224,7 @@ export default function FavoritesPage() {
                   <Link key={store.id} href={`/store/${store.id}`}>
                     <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px]">
                       <CardContent className="p-3 h-full flex flex-row items-center gap-4">
-                        {/* Right Side: Store Image */}
+                        {/* Right Side: Store Image (Homepage Style) */}
                         <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                           <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
@@ -281,14 +281,15 @@ export default function FavoritesPage() {
                 return (
                   <Card key={product.id} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => router.push(`/store/${product.storeId}`)}>
                     <CardContent className="p-3 flex flex-row items-center gap-3">
-                      <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
+                      {/* Flipped Content: Image on Left, Info on Right */}
+                      <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10 order-first">
                         <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform" />
                         <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
                           <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
                         </button>
                       </div>
 
-                      <div className="flex-1 text-right space-y-0.5 overflow-hidden">
+                      <div className="flex-1 text-right space-y-0.5 overflow-hidden order-last">
                         <div className="flex items-center justify-between">
                           <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
                           <div className="flex items-center gap-0.5 text-amber-500 text-[9px] font-black">
