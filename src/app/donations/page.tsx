@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -85,7 +84,7 @@ export default function DonationsPage() {
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
           <ArrowRight className="h-6 w-6" />
         </Button>
-        <h1 className="text-xl font-bold">بوابة التبرعات</h1>
+        <h1 className="text-xl font-bold text-primary">بوابة التبرعات</h1>
       </header>
 
       <div className="p-6 space-y-8">
@@ -93,7 +92,7 @@ export default function DonationsPage() {
           <div className="bg-primary/10 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-inner">
             <HandHeart className="h-10 w-10 text-primary" />
           </div>
-          <h2 className="text-2xl font-black">ساهم في الخير</h2>
+          <h2 className="text-2xl font-black text-primary">ساهم في الخير</h2>
           <p className="text-muted-foreground text-sm">اجعل لطلبك أثراً في حياة الآخرين</p>
         </div>
 

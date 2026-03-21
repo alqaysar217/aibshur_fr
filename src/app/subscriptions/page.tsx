@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -104,7 +103,7 @@ export default function SubscriptionsPage() {
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
           <ArrowRight className="h-6 w-6" />
         </Button>
-        <h1 className="text-xl font-bold">عضوية أبشر VIP</h1>
+        <h1 className="text-xl font-bold text-primary">عضوية أبشر VIP</h1>
       </header>
 
       <div className="p-6 space-y-8">
@@ -112,7 +111,7 @@ export default function SubscriptionsPage() {
           <div className="bg-accent/20 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-xl animate-pulse">
             <Zap className="h-10 w-10 text-accent" />
           </div>
-          <h2 className="text-2xl font-black">وفر أكثر مع VIP</h2>
+          <h2 className="text-2xl font-black text-primary">وفر أكثر مع VIP</h2>
           <p className="text-muted-foreground text-sm">استمتع بالتوصيل المجاني وخصومات حصرية يومياً</p>
         </div>
 

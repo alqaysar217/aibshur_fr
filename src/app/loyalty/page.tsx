@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -46,7 +45,7 @@ export default function LoyaltyPage() {
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
           <ArrowRight className="h-6 w-6" />
         </Button>
-        <h1 className="text-xl font-bold">نقاط الولاء</h1>
+        <h1 className="text-xl font-bold text-primary">نقاط الولاء</h1>
       </header>
 
       <div className="p-6 space-y-6">

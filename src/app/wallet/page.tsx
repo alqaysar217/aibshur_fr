@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
@@ -38,7 +37,7 @@ export default function WalletPage() {
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
           <ArrowRight className="h-6 w-6" />
         </Button>
-        <h1 className="text-xl font-bold">محفظتي</h1>
+        <h1 className="text-xl font-bold text-primary">محفظتي</h1>
       </header>
 
       <div className="p-4 space-y-6">

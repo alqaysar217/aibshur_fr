@@ -89,7 +89,7 @@ export default function OrdersPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-4">
         <ShoppingBag className="h-16 w-16 text-muted-foreground opacity-20" />
-        <h1 className="text-xl font-bold">يرجى تسجيل الدخول</h1>
+        <h1 className="text-xl font-bold text-primary">يرجى تسجيل الدخول</h1>
         <p className="text-muted-foreground text-center">يجب تسجيل الدخول لمشاهدة طلباتك</p>
         <Button onClick={() => router.push('/login')} className="w-full max-w-xs h-12 rounded-xl">تسجيل الدخول</Button>
         <BottomNav />
@@ -104,7 +104,7 @@ export default function OrdersPage() {
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
             <ArrowRight className="h-6 w-6" />
           </Button>
-          <h1 className="text-xl font-bold">طلباتي</h1>
+          <h1 className="text-xl font-bold text-primary">طلباتي</h1>
         </div>
         <Link href="/cart">
           <Button variant="ghost" size="icon" className="relative h-10 w-10">

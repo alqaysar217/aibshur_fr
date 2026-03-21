@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -207,7 +206,7 @@ export default function CartPage() {
       <div className="bg-secondary/20 p-10 rounded-full mb-6">
         <ShoppingBag className="h-20 w-20 text-muted-foreground opacity-30" />
       </div>
-      <h1 className="text-xl font-black mb-2">سلة التسوق فارغة</h1>
+      <h1 className="text-xl font-black text-primary mb-2">سلة التسوق فارغة</h1>
       <p className="text-muted-foreground text-sm mb-8">ابدأ بإضافة منتجاتك المفضلة الآن</p>
       <Button onClick={() => router.push('/')} className="rounded-2xl h-14 px-10 font-bold text-lg">تصفح المتاجر</Button>
     </div>
@@ -220,7 +219,7 @@ export default function CartPage() {
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
             <ArrowRight className="h-6 w-6" />
           </Button>
-          <h1 className="text-xl font-black">سلة التسوق</h1>
+          <h1 className="text-xl font-black text-primary">سلة التسوق</h1>
         </div>
         <Button variant="ghost" size="sm" onClick={clearCart} className="text-destructive text-xs font-bold gap-1">
           <Trash2 className="h-4 w-4" /> تفريغ السلة
