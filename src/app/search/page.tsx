@@ -212,7 +212,7 @@ export default function SearchPage() {
                       <div className="flex justify-between items-center">
                         <h3 className="font-bold text-sm text-primary truncate">{item.name}</h3>
                         <button onClick={(e) => toggleFavorite(e, 'product', item.id)} className="p-1.5 active:scale-75 transition-transform">
-                          <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
+                          <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                         </button>
                       </div>
                       <p className="text-[10px] text-gray-400 line-clamp-1">{item.description || 'وصف المنتج متاح هنا'}</p>
@@ -255,19 +255,18 @@ export default function SearchPage() {
                         <div className="flex justify-between items-center">
                           <h3 className="font-bold text-sm text-primary truncate">{item.name}</h3>
                           <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 active:scale-75 transition-transform">
-                            <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
+                            <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
                         </div>
                         <div className="flex items-center gap-1 text-[#6B7280]">
                           <MapPin className="h-3 w-3 text-primary/60" />
                           <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
                         </div>
-                        <div className="text-[10px] text-[#6B7280] font-medium">تبعد 2.3 كم</div>
-                        <div className="pt-1">
-                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">متجر</Badge>
-                        </div>
-                        <div className="pt-1">
-                          <Badge className={cn("text-[9px] h-4 px-2 border-none font-bold rounded-md shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
+                        
+                        <div className="flex items-center gap-2 flex-wrap pt-1">
+                          <span className="text-[9px] text-[#6B7280] font-black">تبعد 2.3 كم</span>
+                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-md">متجر</Badge>
+                          <Badge className={cn("text-[9px] h-4 px-2 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
                             {isOpen ? 'مفتوح' : 'مغلق'}
                           </Badge>
                         </div>
