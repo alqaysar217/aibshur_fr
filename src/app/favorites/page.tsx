@@ -77,10 +77,20 @@ export default function FavoritesPage() {
   const { data: favoriteStores, isLoading: isLoadingStores } = useCollection(favoritesStoresQuery)
   const { data: allProducts, isLoading: isLoadingProducts } = useCollection(favoritesProductsQuery)
 
-  // تصفية المنتجات برمجياً لضمان التوافق
+  // تصفية المنتجات برمجياً لضمان التوافق وإزالة التكرار
   const filteredFavoriteProducts = useMemo(() => {
     if (!allProducts || !userData?.favoritesProductIds) return []
-    return allProducts.filter(p => userData.favoritesProductIds.includes(p.id))
+    
+    // أولاً: تصفية المنتجات التي توجد معرفاتها في قائمة المفضلات
+    const filtered = allProducts.filter(p => userData.favoritesProductIds.includes(p.id))
+    
+    // ثانياً: إزالة التكرار بناءً على المعرف (ID) لمنع خطأ React keys
+    const seen = new Set();
+    return filtered.filter(product => {
+      if (seen.has(product.id)) return false;
+      seen.add(product.id);
+      return true;
+    });
   }, [allProducts, userData?.favoritesProductIds])
 
   const toggleFavoriteStore = (e: React.MouseEvent, storeId: string) => {
