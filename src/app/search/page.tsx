@@ -11,6 +11,7 @@ import { BottomNav } from "@/components/layout/bottom-nav"
 import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from "@/firebase"
 import { collection, query, collectionGroup, limit, doc, setDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -125,7 +126,7 @@ export default function SearchPage() {
         item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
       )
     } else {
-      newCart = [...cart, { ...product, quantity: 1 }]
+      newCart = [...cart, { ...product, quantity: 1, storeId: product.storeId }]
     }
     saveCart(newCart)
     toast({ title: "تمت الإضافة", description: `${product.name} أضيف إلى السلة` })
@@ -225,9 +226,6 @@ export default function SearchPage() {
                             <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
                           </div>
                           <div className="flex items-center flex-wrap gap-2 pt-1">
-                            <div className="flex items-center gap-1 text-[#6B7280] bg-secondary/30 px-1.5 py-0.5 rounded-md">
-                              <span className="text-[10px] font-bold">2.3 كم</span>
-                            </div>
                             <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
                               {categoryName}
                             </Badge>
@@ -282,7 +280,7 @@ export default function SearchPage() {
                               </div>
                             ) : (
                               <Button 
-                                onClick={(e) => router.push(`/store/${item.storeId}`)}
+                                onClick={(e) => needsOptions ? router.push(`/store/${item.storeId}`) : addToCart(e, item)}
                                 className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                               >
                                 {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}
