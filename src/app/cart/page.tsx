@@ -392,11 +392,11 @@ export default function CartPage() {
               <p className="text-[10px] font-bold text-muted-foreground mr-1">اختر البنك لنسخ الرقم والتحويل:</p>
               <div className="space-y-2">
                 {BANK_ACCOUNTS.map((bank) => (
-                  <button
+                  <div
                     key={bank.id}
                     onClick={() => setSelectedBankId(bank.id)}
                     className={cn(
-                      "w-full p-4 rounded-2xl border-2 flex items-center gap-4 text-right transition-all",
+                      "w-full p-4 rounded-2xl border-2 flex items-center gap-4 text-right transition-all cursor-pointer",
                       selectedBankId === bank.id ? "border-primary bg-primary/5 shadow-sm" : "border-white bg-white"
                     )}
                   >
@@ -417,7 +417,7 @@ export default function CartPage() {
                       <p className="text-[8px] text-primary/70 font-bold leading-relaxed">{bank.holder}</p>
                     </div>
                     {selectedBankId === bank.id && <CheckCircle2 className="h-5 w-5 text-primary" />}
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
