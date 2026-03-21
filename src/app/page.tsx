@@ -247,22 +247,16 @@ export default function Home() {
                 <Link key={store.id} href={`/store/${store.id}`}>
                   <Card className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all">
                     <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                      {/* Right: Image and Rating */}
                       <div className="flex flex-col items-center gap-1 shrink-0">
                         <div className="relative w-20 h-20 shadow-sm overflow-hidden rounded-[10px] bg-secondary/10">
                           <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover" />
                         </div>
                         {renderStars(store.averageRating || 4.5)}
                       </div>
-
-                      {/* Left: Details */}
                       <div className="flex-1 space-y-1">
                         <div className="flex justify-between items-center">
-                          <h3 className="font-bold text-sm text-[#111827] truncate">{store.name}</h3>
-                          <button 
-                            onClick={(e) => toggleFavorite(e, store.id)}
-                            className="p-1.5 active:scale-75 transition-transform"
-                          >
+                          <h3 className="font-bold text-sm text-primary truncate">{store.name}</h3>
+                          <button onClick={(e) => toggleFavorite(e, store.id)} className="p-1.5 active:scale-75 transition-transform">
                             <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
                           </button>
                         </div>
@@ -270,13 +264,9 @@ export default function Home() {
                           <MapPin className="h-3 w-3 text-primary/60" />
                           <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                         </div>
-                        <div className="text-[10px] text-[#6B7280] font-medium">
-                          تبعد 2.3 كم
-                        </div>
+                        <div className="text-[10px] text-[#6B7280] font-medium">تبعد 2.3 كم</div>
                         <div className="pt-1">
-                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">
-                            {categoryName}
-                          </Badge>
+                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4 px-1.5 border-none font-bold rounded-md">{categoryName}</Badge>
                         </div>
                         <div className="pt-1">
                           <Badge className={cn("text-[9px] h-4 px-2 border-none font-bold rounded-md shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
@@ -293,12 +283,7 @@ export default function Home() {
             <div className="text-center py-10 bg-white rounded-[10px] border border-dashed border-gray-200">
               <p className="text-xs text-gray-400">لا توجد بيانات متاحة</p>
               {user && (
-                <Button 
-                  onClick={seedData} 
-                  disabled={isSeeding} 
-                  variant="outline" 
-                  className="mt-4 rounded-[10px] h-10 text-xs border-primary text-primary font-bold"
-                >
+                <Button onClick={seedData} disabled={isSeeding} variant="outline" className="mt-4 rounded-[10px] h-10 text-xs border-primary text-primary font-bold">
                   {isSeeding ? "جاري البناء..." : "تجهيز تطبيق أبشر"}
                 </Button>
               )}

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from "@/firebase"
 import { collection, query, collectionGroup, limit, doc, setDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { useRouter } from "next/navigation"
@@ -201,21 +202,16 @@ export default function SearchPage() {
               return (
                 <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
                   <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                    {/* Right: Image and Rating */}
                     <div className="flex flex-col items-center gap-1 shrink-0">
                       <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">
                         <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
                       </div>
                       {renderStars(item.rating || 4.8)}
                     </div>
-                    {/* Left: Details */}
                     <div className="flex-1 space-y-1">
                       <div className="flex justify-between items-center">
-                        <h3 className="font-bold text-sm text-[#111827] truncate">{item.name}</h3>
-                        <button 
-                          onClick={(e) => toggleFavorite(e, 'product', item.id)}
-                          className="p-1.5 active:scale-75 transition-transform"
-                        >
+                        <h3 className="font-bold text-sm text-primary truncate">{item.name}</h3>
+                        <button onClick={(e) => toggleFavorite(e, 'product', item.id)} className="p-1.5 active:scale-75 transition-transform">
                           <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
                         </button>
                       </div>
@@ -249,21 +245,16 @@ export default function SearchPage() {
                 <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
                   <Card className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all">
                     <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                      {/* Right: Image and Rating */}
                       <div className="flex flex-col items-center gap-1 shrink-0">
                         <div className="relative h-20 w-20 shadow-sm overflow-hidden rounded-[10px] bg-secondary/10">
                           <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
                         </div>
                         {renderStars(item.averageRating || 4.5)}
                       </div>
-                      {/* Left: Details */}
                       <div className="flex-1 space-y-1">
                         <div className="flex justify-between items-center">
-                          <h3 className="font-bold text-sm text-[#111827] truncate">{item.name}</h3>
-                          <button 
-                            onClick={(e) => toggleFavorite(e, 'store', item.id)}
-                            className="p-1.5 active:scale-75 transition-transform"
-                          >
+                          <h3 className="font-bold text-sm text-primary truncate">{item.name}</h3>
+                          <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 active:scale-75 transition-transform">
                             <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-300")} />
                           </button>
                         </div>
