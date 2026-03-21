@@ -401,32 +401,32 @@ export default function StoreDetailPage() {
       </div>
 
       <Dialog open={!!viewingProduct} onOpenChange={(val) => !val && setViewingProduct(null)}>
-        <DialogContent className="rounded-3xl w-[94%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0 shadow-2xl" dir="rtl">
+        <DialogContent className="rounded-2xl w-[92%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0 shadow-2xl" dir="rtl">
           {viewingProduct && (
-            <div className="flex flex-col max-h-[90vh] overflow-y-auto">
+            <div className="flex flex-col max-h-[85vh] overflow-y-auto">
               <DialogHeader className="sr-only">
                 <DialogTitle>{viewingProduct.name}</DialogTitle>
                 <DialogDescription>تفاصيل المنتج الأساسية والخيارات المتاحة</DialogDescription>
               </DialogHeader>
               
-              <div className="relative h-72 w-full shrink-0">
+              <div className="relative h-60 w-full shrink-0">
                 <Image 
                   src={viewingProduct.imageUrl || `https://picsum.photos/seed/${viewingProduct.id}/600/400`} 
                   alt={viewingProduct.name} 
                   fill 
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-6 right-6 text-white left-6">
-                  <h2 className="text-2xl font-black drop-shadow-md">{viewingProduct.name}</h2>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute bottom-4 right-4 text-white left-4">
+                  <h2 className="text-xl font-black drop-shadow-md">{viewingProduct.name}</h2>
                 </div>
               </div>
 
-              <div className="bg-white p-6 space-y-6">
-                {/* معلومات المتجر - محسنة بصرياً */}
-                <div className="flex items-center justify-between pb-5 border-b border-gray-50">
-                  <div className="flex items-center gap-3">
-                    <div className="relative h-11 w-11 rounded-full overflow-hidden border-2 border-primary/5 shadow-sm bg-secondary/10">
+              <div className="bg-white p-5 space-y-5">
+                {/* معلومات المتجر - تصميم رشيق */}
+                <div className="flex items-center justify-between pb-3 border-b border-gray-50">
+                  <div className="flex items-center gap-2">
+                    <div className="relative h-9 w-9 rounded-full overflow-hidden border border-primary/10 shadow-sm bg-secondary/10">
                       <Image 
                         src={store?.logoUrl || `https://picsum.photos/seed/${store?.id}/100`} 
                         alt="" 
@@ -434,46 +434,41 @@ export default function StoreDetailPage() {
                         className="object-cover" 
                       />
                     </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">المتجر</p>
-                      <p className="text-sm font-black text-gray-800">{store?.name || "المتجر"}</p>
-                    </div>
+                    <p className="text-xs font-black text-gray-700">{store?.name || "المتجر"}</p>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-full">
-                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-                    <span className="font-black text-xs text-amber-700">{viewingProduct.rating || '4.8'}</span>
+                  <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-lg">
+                    <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                    <span className="font-black text-[10px] text-amber-700">{viewingProduct.rating || '4.8'}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="text-right">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">السعر الحالي</p>
-                    <p className="text-3xl font-black text-primary leading-none">
-                      {viewingProduct.price} <small className="text-sm font-bold opacity-80">ر.س</small>
-                    </p>
-                  </div>
+                <div className="text-right">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5 tracking-wide">السعر</p>
+                  <p className="text-2xl font-black text-primary">
+                    {viewingProduct.price} <small className="text-xs font-bold opacity-80">ر.س</small>
+                  </p>
                 </div>
 
-                {/* عرض الخيارات (Variants) - تصميم عصري ومريح */}
-                {productVariants.length > 0 && (
-                  <div className="space-y-4 pt-2">
+                {/* عرض الخيارات (Variants) - تصميم Minimalist */}
+                {productVariants.length > 0 ? (
+                  <div className="space-y-3 pt-1">
                     <div className="flex items-center gap-2 px-1">
-                      <div className="h-5 w-1 bg-primary rounded-full"></div>
-                      <h4 className="font-black text-sm text-gray-800">الأحجام والخيارات:</h4>
+                      <div className="h-4 w-1 bg-primary rounded-full"></div>
+                      <h4 className="font-black text-[11px] text-gray-800 uppercase tracking-widest">اختر الحجم أو النوع:</h4>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {productVariants.map((v) => (
                         <div 
                           key={v.id} 
-                          className="group border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-primary/20 hover:shadow-md rounded-2xl p-3 flex items-center justify-between transition-all duration-300"
+                          className="group border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-primary/20 rounded-xl p-3 flex items-center justify-between transition-all"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-white shadow-sm shrink-0">
+                            <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-white shadow-sm shrink-0">
                               <Image src={v.imageUrl} alt={v.name} fill className="object-cover" />
                             </div>
                             <div className="text-right">
-                              <p className="font-black text-sm text-gray-800">{v.name}</p>
-                              <p className="text-primary font-black text-sm mt-0.5">{v.price} <small className="text-[10px]">ر.س</small></p>
+                              <p className="font-black text-xs text-gray-800">{v.name}</p>
+                              <p className="text-primary font-black text-xs mt-0.5">{v.price} <small className="text-[9px]">ر.س</small></p>
                             </div>
                           </div>
                           <Button 
@@ -483,7 +478,7 @@ export default function StoreDetailPage() {
                               addToCart(variantData);
                               setViewingProduct(null);
                             }}
-                            className="h-10 px-5 rounded-xl font-bold bg-primary text-white shadow-sm active:scale-95 transition-transform"
+                            className="h-9 px-4 rounded-lg font-bold bg-primary text-white shadow-sm active:scale-95 transition-transform text-[10px]"
                           >
                             إضافة
                           </Button>
@@ -491,15 +486,13 @@ export default function StoreDetailPage() {
                       ))}
                     </div>
                   </div>
-                )}
-
-                {!productVariants.length && (
+                ) : (
                   <Button 
                     onClick={() => {
                       addToCart(viewingProduct);
                       setViewingProduct(null);
                     }}
-                    className="w-full h-15 rounded-2xl shadow-xl shadow-primary/10 bg-primary hover:bg-primary/90 text-white font-black text-lg transition-all active:scale-[0.98]"
+                    className="w-full h-12 rounded-xl shadow-lg shadow-primary/10 bg-primary hover:bg-primary/90 text-white font-black text-base transition-all active:scale-[0.98]"
                   >
                     تأكيد الإضافة للسلة
                   </Button>
@@ -527,3 +520,4 @@ export default function StoreDetailPage() {
     </div>
   )
 }
+
