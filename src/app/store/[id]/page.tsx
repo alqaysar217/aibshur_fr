@@ -4,7 +4,7 @@
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
 import { 
-  Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, 
+  Star, StarHalf, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, 
   Navigation, LayoutGrid, Zap, Utensils, Soup, Flame, Coffee, Beef, ChefHat, 
   Pizza, Sandwich, Cookie, CupSoda, CakeSlice, Info, ShoppingCart
 } from "lucide-react"
@@ -220,6 +220,24 @@ export default function StoreDetailPage() {
     }
   }
 
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-0.5 mt-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span key={star}>
+            {rating >= star ? (
+              <Star className="h-2 w-2 fill-primary text-primary" />
+            ) : rating >= star - 0.5 ? (
+              <StarHalf className="h-2 w-2 fill-primary text-primary" />
+            ) : (
+              <Star className="h-2 w-2 text-muted/20" />
+            )}
+          </span>
+        ))}
+      </div>
+    )
+  }
+
   if (isStoreLoading) return <div className="flex items-center justify-center min-h-screen">جاري التحميل...</div>
 
   if (!store) return <div className="p-10 text-center">المتجر غير موجود</div>
@@ -271,10 +289,7 @@ export default function StoreDetailPage() {
               </button>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-0.5 text-primary text-[10px] font-black">
-                <Star className="h-3 w-3 fill-primary" />
-                <span>{store.averageRating || '4.5'}</span>
-              </div>
+              {renderStars(store.averageRating || 4.5)}
               <Badge className={cn("text-[8px] font-black border-none px-2 h-4", isStoreOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
                 {isStoreOpen ? 'مفتوح الآن' : 'مغلق'}
               </Badge>
@@ -342,10 +357,7 @@ export default function StoreDetailPage() {
                           <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
                         </button>
                       </div>
-                      <div className="flex items-center gap-0.5 text-primary text-[10px] font-black">
-                        <Star className="h-2.5 w-2.5 fill-primary" />
-                        <span>{product.rating || '4.8'}</span>
-                      </div>
+                      {renderStars(product.rating || 4.8)}
                     </div>
 
                     <div className="flex-1 text-right space-y-0.5 overflow-hidden">
@@ -439,10 +451,7 @@ export default function StoreDetailPage() {
                     </div>
                     <p className="text-[11px] font-black text-gray-700">{store?.name || "المتجر"}</p>
                   </div>
-                  <div className="flex items-center gap-1 bg-primary/5 px-2 py-1 rounded-lg">
-                    <Star className="h-3 w-3 fill-primary text-primary" />
-                    <span className="font-black text-[10px] text-primary">{viewingProduct.rating || '4.8'}</span>
-                  </div>
+                  {renderStars(viewingProduct.rating || 4.8)}
                 </div>
 
                 <div className="text-right">

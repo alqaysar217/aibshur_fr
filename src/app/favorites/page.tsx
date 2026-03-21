@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId, arrayUnion } from "firebase/firestore"
-import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus, LayoutGrid, Map, Utensils, Store } from "lucide-react"
+import { Heart, Star, StarHalf, ShoppingBag, Loader2, MapPin, Plus, Minus, LayoutGrid, Map, Utensils, Store } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -176,6 +176,24 @@ export default function FavoritesPage() {
     return keywords.some(k => productName.includes(k))
   }
 
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-0.5 mt-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span key={star}>
+            {rating >= star ? (
+              <Star className="h-2 w-2 fill-primary text-primary" />
+            ) : rating >= star - 0.5 ? (
+              <StarHalf className="h-2 w-2 fill-primary text-primary" />
+            ) : (
+              <Star className="h-2 w-2 text-muted/20" />
+            )}
+          </span>
+        ))}
+      </div>
+    )
+  }
+
   if (!mounted) return <div className="min-h-screen bg-background" />
 
   if (isUserLoading || isUserDataLoading) {
@@ -251,10 +269,7 @@ export default function FavoritesPage() {
                           <div className="relative w-16 h-16 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                             <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                           </div>
-                          <div className="flex items-center gap-0.5 text-primary text-[10px] font-black">
-                            <Star className="h-2.5 w-2.5 fill-primary" />
-                            <span>{store.averageRating || '4.5'}</span>
-                          </div>
+                          {renderStars(store.averageRating || 4.5)}
                         </div>
 
                         {/* 2. الوسط: المعلومات */}
@@ -313,10 +328,7 @@ export default function FavoritesPage() {
                             <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
                         </div>
-                        <div className="flex items-center gap-0.5 text-primary text-[10px] font-black">
-                          <Star className="h-2.5 w-2.5 fill-primary" />
-                          <span>{product.rating || '4.8'}</span>
-                        </div>
+                        {renderStars(product.rating || 4.8)}
                       </div>
 
                       <div className="flex-1 text-right space-y-0.5 overflow-hidden">

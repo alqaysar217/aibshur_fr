@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Search, ArrowRight, ShoppingBag, Loader2, Filter, Star, Heart, MapPin, Plus, Minus, Zap, Map, Clock, Sparkles, Store } from "lucide-react"
+import { Search, StarHalf, ArrowRight, ShoppingBag, Loader2, Filter, Star, Heart, MapPin, Plus, Minus, Zap, Map, Clock, Sparkles, Store } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -176,6 +176,24 @@ export default function SearchPage() {
     return keywords.some(k => productName.includes(k))
   }
 
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-0.5 mt-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span key={star}>
+            {rating >= star ? (
+              <Star className="h-2 w-2 fill-primary text-primary" />
+            ) : rating >= star - 0.5 ? (
+              <StarHalf className="h-2 w-2 fill-primary text-primary" />
+            ) : (
+              <Star className="h-2 w-2 text-muted/20" />
+            )}
+          </span>
+        ))}
+      </div>
+    )
+  }
+
   if (!mounted) return <div className="min-h-screen bg-background" />
 
   return (
@@ -248,10 +266,7 @@ export default function SearchPage() {
                           <div className="relative w-16 h-16 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                             <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                           </div>
-                          <div className="flex items-center gap-0.5 text-primary text-[10px] font-black">
-                            <Star className="h-2.5 w-2.5 fill-primary" />
-                            <span>{item.averageRating || '4.5'}</span>
-                          </div>
+                          {renderStars(item.averageRating || 4.5)}
                         </div>
 
                         <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
@@ -298,10 +313,7 @@ export default function SearchPage() {
                             <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
                         </div>
-                        <div className="flex items-center gap-0.5 text-primary text-[10px] font-black">
-                          <Star className="h-2.5 w-2.5 fill-primary" />
-                          <span>{item.rating || '4.8'}</span>
-                        </div>
+                        {renderStars(item.rating || 4.8)}
                       </div>
 
                       <div className="flex-1 text-right space-y-0.5 overflow-hidden">
@@ -323,11 +335,11 @@ export default function SearchPage() {
                             {inCart && !needsOptions ? (
                               <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
                                 <Button onClick={(e) => removeFromCart(e, item.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
-                                  <Minus className="h-3 w-3 text-primary" />
+                                  <Minus className="h-3.5 w-3.5 text-primary" />
                                 </Button>
                                 <span className="font-bold text-xs min-w-[10px] text-center">{inCart.quantity}</span>
                                 <Button onClick={(e) => addToCart(e, item)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
-                                  <Plus className="h-3 w-3" />
+                                  <Plus className="h-3.5 w-3.5" />
                                 </Button>
                               </div>
                             ) : (

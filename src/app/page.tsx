@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Flower2 } from "lucide-react"
+import { Search, MapPin, Star, StarHalf, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Flower2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -152,6 +152,24 @@ export default function Home() {
     }
   }
 
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-0.5 mt-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span key={star}>
+            {rating >= star ? (
+              <Star className="h-2 w-2 fill-primary text-primary" />
+            ) : rating >= star - 0.5 ? (
+              <StarHalf className="h-2 w-2 fill-primary text-primary" />
+            ) : (
+              <Star className="h-2 w-2 text-muted/20" />
+            )}
+          </span>
+        ))}
+      </div>
+    )
+  }
+
   if (!mounted) return null;
 
   return (
@@ -242,10 +260,7 @@ export default function Home() {
                         <div className="relative w-16 h-16 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                           <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                         </div>
-                        <div className="flex items-center gap-0.5 text-primary text-[10px] font-black">
-                          <Star className="h-2.5 w-2.5 fill-primary" />
-                          <span>{store.averageRating || '4.5'}</span>
-                        </div>
+                        {renderStars(store.averageRating || 4.5)}
                       </div>
 
                       {/* 2. الوسط: المعلومات */}
