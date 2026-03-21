@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Flower2 } from "lucide-react"
+import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, CakeSlice, Coffee, Laptop, Flame, Flower2, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -96,15 +96,16 @@ export default function Home() {
     setIsSeeding(true)
     try {
       const categoriesToSeed = [
-        { id: "restaurants", name: "طعام", color: "bg-emerald-50", textColor: "text-emerald-600" },
-        { id: "cafe", name: "كافيه", color: "bg-amber-50", textColor: "text-amber-800" },
+        { id: "restaurants", name: "مطاعم", color: "bg-emerald-50", textColor: "text-emerald-600" },
+        { id: "cafe", name: "كافيهات", color: "bg-amber-50", textColor: "text-amber-800" },
+        { id: "pharmacy", name: "صيدليات", color: "bg-blue-50", textColor: "text-blue-600" },
+        { id: "grocery", name: "ماركت", color: "bg-green-50", textColor: "text-green-600" },
+        { id: "electronics", name: "إلكترونيات", color: "bg-slate-50", textColor: "text-slate-600" },
         { id: "perfume", name: "عطور", color: "bg-purple-50", textColor: "text-purple-600" },
         { id: "dates", name: "تمور", color: "bg-amber-100", textColor: "text-amber-900" },
-        { id: "grocery", name: "بقالة", color: "bg-green-50", textColor: "text-green-600" },
-        { id: "pharmacy", name: "صيدليات", color: "bg-blue-50", textColor: "text-blue-600" },
-        { id: "electronics", name: "إلكترونيات", color: "bg-slate-50", textColor: "text-slate-600" },
-        { id: "sweets", name: "حلويات", color: "bg-pink-50", textColor: "text-pink-600" },
-        { id: "spices", name: "بهارات", color: "bg-yellow-50", textColor: "text-yellow-700" }
+        { id: "vegetables", name: "خضروات", color: "bg-green-100", textColor: "text-green-800" },
+        { id: "spices", name: "بهارات", color: "bg-yellow-50", textColor: "text-yellow-700" },
+        { id: "sweets", name: "حلويات", color: "bg-pink-50", textColor: "text-pink-600" }
       ]
       for (const cat of categoriesToSeed) {
         await setDoc(doc(db, "categories", cat.id), cat)
@@ -148,18 +149,9 @@ export default function Home() {
       case 'electronics': return <Laptop className="h-5 w-5" />
       case 'sweets': return <CakeSlice className="h-5 w-5" />
       case 'spices': return <Flame className="h-5 w-5" />
+      case 'vegetables': return <ShoppingBasket className="h-5 w-5" />
       default: return <ShoppingBasket className="h-5 w-5" />
     }
-  }
-
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex items-center gap-0.5" dir="rtl">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star key={star} className={cn("h-2 w-2", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
-        ))}
-      </div>
-    )
   }
 
   if (!mounted) return null;
@@ -168,35 +160,8 @@ export default function Home() {
     <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300" dir="rtl">
       <Header />
 
-      <section className="px-4 pt-4 pb-2">
-        <Carousel 
-          opts={{ loop: true, direction: 'rtl' }} 
-          plugins={[Autoplay({ delay: 5000 })]}
-          className="w-full"
-        >
-          <CarouselContent>
-            {ads && ads.length > 0 ? ads.map((ad: any) => (
-              <CarouselItem key={ad.id}>
-                <Link href={ad.storeId ? `/store/${ad.storeId}` : '#'}>
-                  <Card className="border-none shadow-sm rounded-[10px] overflow-hidden relative h-40 transition-all active:scale-[0.98]">
-                    <Image src={ad.imageUrl} alt="banner" fill className="object-cover" />
-                  </Card>
-                </Link>
-              </CarouselItem>
-            )) : (
-              <CarouselItem>
-                <div className="h-40 bg-white rounded-[10px] animate-pulse" />
-              </CarouselItem>
-            )}
-          </CarouselContent>
-        </Carousel>
-      </section>
-
-      <section className="py-6">
-        <div className="flex items-center justify-between px-6 mb-4">
-          <h3 className="font-bold text-primary">الأقسام</h3>
-          <Button variant="link" className="text-primary text-xs font-bold p-0">عرض الكل</Button>
-        </div>
+      {/* قسم الأقسام - الآن في الأعلى */}
+      <section className="py-4">
         <div className="flex gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide" dir="rtl">
           {categories ? categories.map((cat: any) => (
             <button 
@@ -225,6 +190,32 @@ export default function Home() {
         </div>
       </section>
 
+      {/* قسم الإعلانات */}
+      <section className="px-4 pb-2">
+        <Carousel 
+          opts={{ loop: true, direction: 'rtl' }} 
+          plugins={[Autoplay({ delay: 5000 })]}
+          className="w-full"
+        >
+          <CarouselContent>
+            {ads && ads.length > 0 ? ads.map((ad: any) => (
+              <CarouselItem key={ad.id}>
+                <Link href={ad.storeId ? `/store/${ad.storeId}` : '#'}>
+                  <Card className="border-none shadow-sm rounded-[10px] overflow-hidden relative h-40 transition-all active:scale-[0.98]">
+                    <Image src={ad.imageUrl} alt="banner" fill className="object-cover" />
+                  </Card>
+                </Link>
+              </CarouselItem>
+            )) : (
+              <CarouselItem>
+                <div className="h-40 bg-white rounded-[10px] animate-pulse" />
+              </CarouselItem>
+            )}
+          </CarouselContent>
+        </Carousel>
+      </section>
+
+      {/* قسم المتاجر */}
       <section className="px-5 pb-24">
         <div className="flex items-center justify-between px-1 mb-4">
           <h3 className="font-bold text-primary">المتاجر المتاحة</h3>
@@ -237,12 +228,7 @@ export default function Home() {
             stores.map((store: any) => {
               const isOpen = store.status === 'مفتوح' || store.status === 'open'
               const isFav = userData?.favoritesStoreIds?.includes(store.id)
-              const categoryName = categories?.find(c => catIdMatch(store.categoryIds, c.id))?.name || "متجر";
-
-              function catIdMatch(ids: string[] | undefined, target: string) {
-                 if(!ids) return false;
-                 return ids.includes(target);
-              }
+              const categoryName = categories?.find(c => (store.categoryIds || []).includes(c.id))?.name || "متجر";
 
               return (
                 <Link key={store.id} href={`/store/${store.id}`}>
@@ -264,11 +250,13 @@ export default function Home() {
                         </div>
                         
                         <div className="flex items-center gap-2 pt-1">
-                          <span className="text-[10px] text-gray-400 font-bold">2.3كم</span>
-                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4.5 px-2 rounded-md border-none font-bold">{categoryName}</Badge>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3 fill-primary text-primary" />
-                            <span className="text-[10px] font-bold text-gray-500">{store.averageRating || 4.5}</span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[10px] text-gray-400 font-bold">2.3كم</span>
+                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4.5 px-2 rounded-md border-none font-bold">{categoryName}</Badge>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-primary text-primary" />
+                              <span className="text-[10px] font-bold text-gray-500">{store.averageRating || 4.5}</span>
+                            </div>
                           </div>
                           <div className="flex-1" />
                           <Badge className={cn("text-[9px] h-4.5 px-2 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
