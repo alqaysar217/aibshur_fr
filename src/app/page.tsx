@@ -140,9 +140,7 @@ export default function Home() {
   }
 
   const getCategoryIcon = (cat: any) => {
-    // Emojis provide a 3D-like, colorful look on mobile
     if (cat.icon) return <span className="text-2xl">{cat.icon}</span>;
-    
     switch (cat.id) {
       case 'restaurants': return <span className="text-2xl">🍔</span>
       case 'cafe': return <span className="text-2xl">☕</span>
@@ -167,10 +165,8 @@ export default function Home() {
     <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300" dir="rtl">
       <Header />
 
-      {/* قسم الأقسام المحدث */}
       <section className="py-4 bg-white border-b border-gray-100 shadow-sm overflow-hidden">
         <div className="flex gap-5 overflow-x-auto px-6 pb-2 scrollbar-hide" dir="rtl">
-          {/* الكل */}
           <button 
             onClick={() => setActiveCategory(null)}
             className="flex flex-col items-center gap-2 shrink-0 group"
@@ -216,7 +212,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* قسم الإعلانات */}
       <section className="px-4 py-4">
         <Carousel 
           opts={{ loop: true, direction: 'rtl' }} 
@@ -241,7 +236,6 @@ export default function Home() {
         </Carousel>
       </section>
 
-      {/* قسم المتاجر */}
       <section className="px-5 pb-24">
         <div className="flex items-center justify-between px-1 mb-4">
           <h3 className="font-bold text-primary">المتاجر المتاحة</h3>
@@ -264,21 +258,23 @@ export default function Home() {
                       <div className="relative w-20 h-20 shadow-sm overflow-hidden rounded-[10px] bg-secondary/10 shrink-0">
                         <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover" />
                       </div>
-                      <div className="flex-1 space-y-1">
+                      <div className="flex-1 space-y-1 min-w-0">
                         <div className="flex justify-between items-center">
                           <h3 className="font-bold text-sm text-primary truncate">{store.name}</h3>
                           <button onClick={(e) => toggleFavorite(e, store.id)} className="p-1.5 active:scale-75 transition-transform">
                             <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
                         </div>
-                        <div className="flex items-center gap-1 text-[#6B7280]">
-                          <MapPin className="h-3 w-3 text-primary/60" />
-                          <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
+                        <div className="flex items-center justify-between text-[#6B7280]">
+                          <div className="flex items-center gap-1 min-w-0">
+                            <MapPin className="h-3 w-3 text-primary/60" />
+                            <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
+                          </div>
+                          <span className="text-[10px] font-bold shrink-0">📍 2.3كم</span>
                         </div>
                         
                         <div className="flex items-center gap-2 pt-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[10px] text-gray-400 font-bold">2.3كم</span>
                             <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4.5 px-2 rounded-md border-none font-bold">{categoryName}</Badge>
                             <div className="flex items-center gap-1">
                               <Star className="h-3 w-3 fill-primary text-primary" />

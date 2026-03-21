@@ -202,8 +202,11 @@ export default function SearchPage() {
               return (
                 <Card key={`product-${item.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
                   <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                    <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0">
-                      <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
+                    <div className="flex flex-col items-center gap-1 shrink-0">
+                      <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">
+                        <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
+                      </div>
+                      {renderStars(item.rating || 4.8)}
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
                       <div className="flex justify-between items-start">
@@ -215,11 +218,8 @@ export default function SearchPage() {
                       <p className="text-[10px] text-gray-400 line-clamp-1 leading-relaxed">{item.description || 'وصف المنتج متاح هنا'}</p>
                       
                       <div className="flex items-center justify-between mt-auto">
-                        <div className="flex items-center gap-3">
-                          {renderStars(item.rating || 4.8)}
-                          <div className="text-primary font-black text-xs shrink-0">{item.price} ر.س</div>
-                        </div>
-                        <div className="shrink-0 flex-1 flex justify-end">
+                        <div className="text-primary font-black text-xs shrink-0">{item.price} ر.س</div>
+                        <div className="shrink-0">
                           {inCart ? (
                             <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
                               <button onClick={(e) => removeFromCart(e, item.id)} className="h-7 w-7 rounded-[8px] bg-white flex items-center justify-center shadow-sm"><Minus className="h-3.5 w-3.5 text-primary" /></button>
@@ -227,8 +227,9 @@ export default function SearchPage() {
                               <button onClick={(e) => addToCart(e, item)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-3.5 w-3.5" /></button>
                             </div>
                           ) : (
-                            <Button onClick={(e) => addToCart(e, item)} className="h-8 rounded-[8px] bg-primary text-white text-[9px] font-black px-4 shadow-sm">
-                              <span className="flex items-center gap-1">إضافة <ShoppingBag className="h-3 w-3" /></span>
+                            <Button onClick={(e) => addToCart(e, item)} className="h-8 rounded-[8px] bg-primary text-white text-[9px] font-black px-4 shadow-sm flex items-center gap-1">
+                              <span>إضافة</span>
+                              <ShoppingBag className="h-3 w-3" />
                             </Button>
                           )}
                         </div>
@@ -253,25 +254,29 @@ export default function SearchPage() {
                       <div className="relative w-20 h-20 shadow-sm overflow-hidden rounded-[10px] bg-secondary/10 shrink-0">
                         <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
                       </div>
-                      <div className="flex-1 space-y-1">
+                      <div className="flex-1 space-y-1 min-w-0">
                         <div className="flex justify-between items-center">
                           <h3 className="font-bold text-sm text-primary truncate">{item.name}</h3>
                           <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 active:scale-75 transition-transform">
                             <Heart className={cn("h-4 w-4", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
                           </button>
                         </div>
-                        <div className="flex items-center gap-1 text-[#6B7280]">
-                          <MapPin className="h-3 w-3 text-primary/60" />
-                          <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
+                        <div className="flex items-center justify-between text-[#6B7280]">
+                          <div className="flex items-center gap-1 min-w-0">
+                            <MapPin className="h-3 w-3 text-primary/60" />
+                            <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
+                          </div>
+                          <span className="text-[10px] font-bold shrink-0">📍 2.3كم</span>
                         </div>
                         
                         <div className="flex items-center gap-2 pt-1">
-                          <span className="text-[9px] text-[#6B7280] font-black">2.3كم</span>
-                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-[10px]">متجر</Badge>
-                          <div className="flex items-center gap-0.5" dir="rtl">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star key={star} className={cn("h-2.5 w-2.5", (item.averageRating || 4.5) >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
-                            ))}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-[10px]">متجر</Badge>
+                            <div className="flex items-center gap-0.5" dir="rtl">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star key={star} className={cn("h-2.5 w-2.5", (item.averageRating || 4.5) >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
+                              ))}
+                            </div>
                           </div>
                           <div className="flex-1" />
                           <Badge className={cn("text-[8px] h-4 px-2 border-none font-black rounded-[10px] shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
