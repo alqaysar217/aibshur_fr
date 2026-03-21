@@ -401,7 +401,7 @@ export default function StoreDetailPage() {
       </div>
 
       <Dialog open={!!viewingProduct} onOpenChange={(val) => !val && setViewingProduct(null)}>
-        <DialogContent className="rounded-[2.5rem] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0" dir="rtl">
+        <DialogContent className="rounded-3xl w-[94%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0 shadow-2xl" dir="rtl">
           {viewingProduct && (
             <div className="flex flex-col max-h-[90vh] overflow-y-auto">
               <DialogHeader className="sr-only">
@@ -409,79 +409,85 @@ export default function StoreDetailPage() {
                 <DialogDescription>تفاصيل المنتج الأساسية والخيارات المتاحة</DialogDescription>
               </DialogHeader>
               
-              <div className="relative h-64 w-full shrink-0">
+              <div className="relative h-72 w-full shrink-0">
                 <Image 
                   src={viewingProduct.imageUrl || `https://picsum.photos/seed/${viewingProduct.id}/600/400`} 
                   alt={viewingProduct.name} 
                   fill 
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-4 right-4 text-white">
-                  <h2 className="text-2xl font-black">{viewingProduct.name}</h2>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute bottom-6 right-6 text-white left-6">
+                  <h2 className="text-2xl font-black drop-shadow-md">{viewingProduct.name}</h2>
                 </div>
               </div>
 
-              <div className="p-6 space-y-6">
-                {/* معلومات المتجر */}
-                <div className="flex items-center gap-3 pb-4 border-b border-dashed">
-                  <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-secondary/20 shadow-sm bg-secondary/10">
-                    <Image 
-                      src={store?.logoUrl || `https://picsum.photos/seed/${store?.id}/100`} 
-                      alt="" 
-                      fill 
-                      className="object-cover" 
-                    />
+              <div className="bg-white p-6 space-y-6">
+                {/* معلومات المتجر - محسنة بصرياً */}
+                <div className="flex items-center justify-between pb-5 border-b border-gray-50">
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-11 w-11 rounded-full overflow-hidden border-2 border-primary/5 shadow-sm bg-secondary/10">
+                      <Image 
+                        src={store?.logoUrl || `https://picsum.photos/seed/${store?.id}/100`} 
+                        alt="" 
+                        fill 
+                        className="object-cover" 
+                      />
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">المتجر</p>
+                      <p className="text-sm font-black text-gray-800">{store?.name || "المتجر"}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-muted-foreground font-bold">المتجر</p>
-                    <p className="text-xs font-black">{store?.name || "المتجر"}</p>
+                  <div className="flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-full">
+                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                    <span className="font-black text-xs text-amber-700">{viewingProduct.rating || '4.8'}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div className="text-right">
-                    <p className="text-xs text-gray-400">السعر الأساسي</p>
-                    <p className="text-2xl font-black text-primary">{viewingProduct.price} <small className="text-sm font-bold">ر.س</small></p>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1 rounded-xl">
-                    <Star className="h-4 w-4 fill-primary text-primary" />
-                    <span className="font-bold text-primary">{viewingProduct.rating || '4.8'}</span>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">السعر الحالي</p>
+                    <p className="text-3xl font-black text-primary leading-none">
+                      {viewingProduct.price} <small className="text-sm font-bold opacity-80">ر.س</small>
+                    </p>
                   </div>
                 </div>
 
-                {/* عرض الخيارات (Variants) */}
+                {/* عرض الخيارات (Variants) - تصميم عصري ومريح */}
                 {productVariants.length > 0 && (
-                  <div className="space-y-4">
-                    <h4 className="font-black text-sm text-primary flex items-center gap-2 px-1">
-                      <Zap className="h-4 w-4" /> الخيارات المتاحة:
-                    </h4>
+                  <div className="space-y-4 pt-2">
+                    <div className="flex items-center gap-2 px-1">
+                      <div className="h-5 w-1 bg-primary rounded-full"></div>
+                      <h4 className="font-black text-sm text-gray-800">الأحجام والخيارات:</h4>
+                    </div>
                     <div className="space-y-3">
                       {productVariants.map((v) => (
-                        <Card key={v.id} className="border-none bg-secondary/20 rounded-2xl overflow-hidden transition-all hover:bg-secondary/30">
-                          <CardContent className="p-3 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-white shadow-sm shrink-0">
-                                <Image src={v.imageUrl} alt={v.name} fill className="object-cover" />
-                              </div>
-                              <div className="text-right">
-                                <p className="font-black text-xs">{v.name}</p>
-                                <p className="text-primary font-black text-sm">{v.price} <small className="text-[9px]">ر.س</small></p>
-                              </div>
+                        <div 
+                          key={v.id} 
+                          className="group border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-primary/20 hover:shadow-md rounded-2xl p-3 flex items-center justify-between transition-all duration-300"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-white shadow-sm shrink-0">
+                              <Image src={v.imageUrl} alt={v.name} fill className="object-cover" />
                             </div>
-                            <Button 
-                              size="sm"
-                              onClick={() => {
-                                const variantData = { ...viewingProduct, id: v.id, name: v.name, price: v.price };
-                                addToCart(variantData);
-                                setViewingProduct(null);
-                              }}
-                              className="h-9 rounded-xl font-bold bg-primary shadow-sm active:scale-95"
-                            >
-                              إضافة
-                            </Button>
-                          </CardContent>
-                        </Card>
+                            <div className="text-right">
+                              <p className="font-black text-sm text-gray-800">{v.name}</p>
+                              <p className="text-primary font-black text-sm mt-0.5">{v.price} <small className="text-[10px]">ر.س</small></p>
+                            </div>
+                          </div>
+                          <Button 
+                            size="sm"
+                            onClick={() => {
+                              const variantData = { ...viewingProduct, id: v.id, name: v.name, price: v.price };
+                              addToCart(variantData);
+                              setViewingProduct(null);
+                            }}
+                            className="h-10 px-5 rounded-xl font-bold bg-primary text-white shadow-sm active:scale-95 transition-transform"
+                          >
+                            إضافة
+                          </Button>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -493,7 +499,7 @@ export default function StoreDetailPage() {
                       addToCart(viewingProduct);
                       setViewingProduct(null);
                     }}
-                    className="w-full h-14 rounded-2xl shadow-lg shadow-primary/20 bg-primary font-black text-lg"
+                    className="w-full h-15 rounded-2xl shadow-xl shadow-primary/10 bg-primary hover:bg-primary/90 text-white font-black text-lg transition-all active:scale-[0.98]"
                   >
                     تأكيد الإضافة للسلة
                   </Button>
