@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId, arrayUnion } from "firebase/firestore"
-import { Heart, Star, StarHalf, ShoppingBag, Loader2, MapPin, Plus, Minus, LayoutGrid, Map, Utensils, Store, ArrowRight } from "lucide-react"
+import { Heart, Star, StarHalf, ShoppingBag, Loader2, MapPin, Plus, Minus, LayoutGrid, Map, Utensils, Store, ArrowRight, Package } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -247,7 +247,7 @@ export default function FavoritesPage() {
               value="products" 
               className="rounded-xl font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
-              <Utensils className="h-4 w-4" /> الوجبات
+              <Package className="h-4 w-4" /> المنتجات
             </TabsTrigger>
             <TabsTrigger 
               value="stores" 
@@ -384,7 +384,7 @@ export default function FavoritesPage() {
                 )
               })
             ) : (
-              <EmptyState message="قائمة الوجبات المفضلة فارغة" icon={<Utensils className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />} />
+              <EmptyState message="قائمة المنتجات المفضلة فارغة" icon={<Package className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />} />
             )}
           </TabsContent>
         </Tabs>
