@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -45,6 +44,8 @@ export default function SearchPage() {
   const saveCart = (newCart: any[]) => {
     setCart(newCart)
     localStorage.setItem('absher_cart', JSON.stringify(newCart))
+    // إطلاق حدث لتحديث السلة العائمة عالمياً
+    window.dispatchEvent(new Event('cart-updated'))
   }
 
   const userRef = useMemoFirebase(() => {
@@ -205,16 +206,6 @@ export default function SearchPage() {
           </Button>
           <h1 className="text-xl font-bold text-primary">البحث في أبشر</h1>
         </div>
-        <Link href="/cart">
-          <Button variant="ghost" size="icon" className="relative h-10 w-10">
-            <ShoppingBag className="h-5 w-5" />
-            {cart.reduce((s, i) => s + i.quantity, 0) > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
-                {cart.reduce((s, i) => s + i.quantity, 0)}
-              </span>
-            )}
-          </Button>
-        </Link>
       </header>
 
       <div className="p-4 space-y-4">

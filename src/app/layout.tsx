@@ -1,8 +1,8 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { BottomNav } from '@/components/layout/bottom-nav';
+import { FloatingCart } from '@/components/layout/floating-cart';
 
 export const metadata: Metadata = {
   title: 'أبشر | Absher Delivery',
@@ -27,6 +27,7 @@ export default function RootLayout({
             <main className="flex-1 overflow-y-auto pb-24 scrollbar-hide bg-[#F5F7F6]">
               {children}
             </main>
+            <FloatingCart />
             <BottomNav />
           </div>
         </FirebaseClientProvider>

@@ -1,10 +1,9 @@
-
 "use client"
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
 import { 
-  Star, StarHalf, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, 
+  Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, 
   Navigation, LayoutGrid, Zap, Utensils, Soup, Flame, Coffee, Beef, ChefHat, 
   Pizza, Sandwich, Cookie, CupSoda, CakeSlice, Info, ShoppingCart
 } from "lucide-react"
@@ -46,6 +45,8 @@ export default function StoreDetailPage() {
   const saveCart = (newCart: any[]) => {
     setCart(newCart)
     localStorage.setItem('absher_cart', JSON.stringify(newCart))
+    // إطلاق حدث لتحديث السلة العائمة عالمياً
+    window.dispatchEvent(new Event('cart-updated'))
   }
 
   const addToCart = (product: any, e?: React.MouseEvent) => {
@@ -89,9 +90,6 @@ export default function StoreDetailPage() {
     }
     saveCart(newCart)
   }
-
-  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
   const storeRef = useMemoFirebase(() => {
     if (!db || !id) return null
@@ -260,14 +258,6 @@ export default function StoreDetailPage() {
           <button onClick={() => router.push('/search')} className="h-9 w-9 bg-secondary/50 rounded-full flex items-center justify-center text-gray-700 active:scale-90 transition-transform">
             <Search className="h-4 w-4" />
           </button>
-          <button onClick={() => router.push('/cart')} className="h-9 w-9 bg-secondary/50 rounded-full flex items-center justify-center text-gray-700 active:scale-90 transition-transform relative">
-            <ShoppingBag className="h-4 w-4" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-destructive text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
-                {cartCount}
-              </span>
-            )}
-          </button>
         </div>
       </header>
 
@@ -425,7 +415,7 @@ export default function StoreDetailPage() {
                 <DialogDescription>تفاصيل المنتج الأساسية والخيارات المتاحة</DialogDescription>
               </DialogHeader>
               
-              <div className="relative h-56 w-full shrink-0">
+              <div className="relative h-52 w-full shrink-0">
                 <Image 
                   src={viewingProduct.imageUrl || `https://picsum.photos/seed/${viewingProduct.id}/600/400`} 
                   alt={viewingProduct.name} 
@@ -434,14 +424,14 @@ export default function StoreDetailPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute bottom-4 right-4 text-white left-4">
-                  <h2 className="text-lg font-black drop-shadow-md">{viewingProduct.name}</h2>
+                  <h2 className="text-base font-black drop-shadow-md">{viewingProduct.name}</h2>
                 </div>
               </div>
 
               <div className="bg-white p-5 space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-gray-50">
                   <div className="flex items-center gap-2">
-                    <div className="relative h-8 w-8 rounded-full overflow-hidden border border-primary/10 shadow-sm bg-secondary/10">
+                    <div className="relative h-7 w-7 rounded-full overflow-hidden border border-primary/10 shadow-sm bg-secondary/10">
                       <Image 
                         src={store?.logoUrl || `https://picsum.photos/seed/${store?.id}/100`} 
                         alt="" 
@@ -449,15 +439,15 @@ export default function StoreDetailPage() {
                         className="object-cover" 
                       />
                     </div>
-                    <p className="text-[11px] font-black text-gray-700">{store?.name || "المتجر"}</p>
+                    <p className="text-[10px] font-black text-gray-700">{store?.name || "المتجر"}</p>
                   </div>
                   {renderStars(viewingProduct.rating || 4.8)}
                 </div>
 
                 <div className="text-right">
-                  <p className="text-[9px] text-gray-400 font-bold uppercase mb-0.5 tracking-wide">السعر الأساسي</p>
-                  <p className="text-xl font-black text-primary">
-                    {viewingProduct.price} <small className="text-xs font-bold opacity-80">ر.س</small>
+                  <p className="text-[8px] text-gray-400 font-bold uppercase mb-0.5 tracking-wide">السعر</p>
+                  <p className="text-lg font-black text-primary">
+                    {viewingProduct.price} <small className="text-[10px] font-bold opacity-80">ر.س</small>
                   </p>
                 </div>
 
@@ -473,15 +463,15 @@ export default function StoreDetailPage() {
                         return (
                           <div 
                             key={v.id} 
-                            className="group border border-gray-50 bg-gray-50/30 hover:bg-white hover:border-primary/20 rounded-xl p-2.5 flex items-center justify-between transition-all"
+                            className="group border border-gray-100 bg-gray-50/30 rounded-xl p-2.5 flex items-center justify-between transition-all"
                           >
                             <div className="flex items-center gap-3">
-                              <div className="relative h-11 w-11 rounded-lg overflow-hidden border border-white shadow-sm shrink-0">
+                              <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-white shadow-sm shrink-0">
                                 <Image src={v.imageUrl} alt={v.name} fill className="object-cover" />
                               </div>
                               <div className="text-right">
-                                <p className="font-black text-xs text-gray-800">{v.name}</p>
-                                <p className="text-primary font-black text-xs mt-0.5">{v.price} <small className="text-[9px]">ر.س</small></p>
+                                <p className="font-black text-[11px] text-gray-800">{v.name}</p>
+                                <p className="text-primary font-black text-[11px] mt-0.5">{v.price} <small className="text-[9px]">ر.س</small></p>
                               </div>
                             </div>
                             
@@ -544,21 +534,6 @@ export default function StoreDetailPage() {
           )}
         </DialogContent>
       </Dialog>
-
-      {cart.length > 0 && (
-        <div className="fixed bottom-6 left-5 right-5 z-[70]">
-          <Button onClick={() => router.push('/cart')} className="w-full h-14 rounded-2xl shadow-xl text-lg font-black flex justify-between px-6 bg-primary">
-            <div className="flex items-center gap-2">
-              <div className="bg-white text-primary px-2.5 py-0.5 rounded-lg text-xs font-black">{cartCount}</div>
-              <span className="text-base">عرض السلة</span>
-            </div>
-            <div className="flex items-center gap-1 border-r border-white/20 pr-4">
-              <span>{cartTotal}</span>
-              <span className="text-[10px] opacity-80 font-bold">ر.س</span>
-            </div>
-          </Button>
-        </div>
-      )}
     </div>
   )
 }
