@@ -319,6 +319,15 @@ export default function StoreDetailPage() {
                   onClick={() => setSelectedProduct(product)}
                 >
                   <CardContent className="p-3 flex flex-row items-center gap-3">
+                    {/* Product Image (Right side) */}
+                    <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
+                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                        <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
+                      </button>
+                    </div>
+
+                    {/* Info (Left side) */}
                     <div className="flex-1 text-right space-y-0.5 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
@@ -336,7 +345,7 @@ export default function StoreDetailPage() {
                           {inCart && !needsOptions ? (
                             <div className="flex items-center gap-1.5 bg-secondary/20 p-0.5 rounded-lg">
                               <Button onClick={() => removeFromCart(product.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-white shadow-sm">
-                                <Minus className="h-3 w-3 text-primary" />
+                                <偏Minus className="h-3 w-3 text-primary" />
                               </Button>
                               <span className="font-black text-xs min-w-[10px] text-center">{inCart.quantity}</span>
                               <Button onClick={() => addToCart(product)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg bg-primary text-white">
@@ -354,12 +363,6 @@ export default function StoreDetailPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
-                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                      <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
-                        <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
-                      </button>
-                    </div>
                   </CardContent>
                 </Card>
               )
@@ -374,7 +377,7 @@ export default function StoreDetailPage() {
 
       {cart.length > 0 && (
         <div className="fixed bottom-6 left-5 right-5 z-[70]">
-          <Button onClick={() => router.push('/cart')} className="w-full h-14 rounded-2xl shadow-xl text-lg font-black flex justify-between px-6 bg-primary">
+          <偏Button onClick={() => router.push('/cart')} className="w-full h-14 rounded-2xl shadow-xl text-lg font-black flex justify-between px-6 bg-primary">
             <div className="flex items-center gap-2">
               <div className="bg-white text-primary px-2.5 py-0.5 rounded-lg text-xs font-black">{cartCount}</div>
               <span className="text-base">عرض السلة</span>
@@ -383,7 +386,7 @@ export default function StoreDetailPage() {
               <span>{cartTotal}</span>
               <span className="text-[10px] opacity-80 font-bold">ر.س</span>
             </div>
-          </Button>
+          </偏Button>
         </div>
       )}
     </div>
