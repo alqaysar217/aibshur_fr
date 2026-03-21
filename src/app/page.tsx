@@ -226,7 +226,7 @@ export default function Home() {
 
         <div className="flex flex-col gap-0">
           {isStoresLoading ? (
-            [1, 2, 3].map(i => <div key={i} className="h-28 w-full bg-white rounded-2xl animate-pulse mb-5" />)
+            [1, 2, 3].map(i => <div key={i} className="h-[105px] w-full bg-white rounded-2xl animate-pulse mb-5" />)
           ) : stores && stores.length > 0 ? (
             stores.map((store: any) => {
               const isOpen = store.status === 'مفتوح' || store.status === 'open'
@@ -246,7 +246,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* 2. الوسط: قسم المعلومات محاذى لليمين ملتصق بالصورة */}
+                      {/* 2. الوسط: قسم المعلومات محاذى لليمين يلتصق بالصورة */}
                       <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
                         <h4 className="font-black text-sm text-[#111827] truncate leading-tight w-full text-right">{store.name}</h4>
                         <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">

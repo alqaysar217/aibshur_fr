@@ -244,7 +244,7 @@ export default function SearchPage() {
                   <Link key={`store-${item.id}`} href={`/store/${item.id}`}>
                     <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px] mb-5">
                       <CardContent className="p-3 h-full flex flex-row items-center gap-4 justify-between" dir="rtl">
-                        {/* 1. أقصى اليمين: شعار المتجر والتقييم */}
+                        {/* 1. أقصى اليمين: قسم الصورة والتقييم */}
                         <div className="relative w-24 h-24 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                           <Image src={item.logoUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                           <div className="absolute bottom-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
@@ -253,7 +253,7 @@ export default function SearchPage() {
                           </div>
                         </div>
 
-                        {/* 2. الوسط: قسم المعلومات محاذى لليمين */}
+                        {/* 2. الوسط: قسم المعلومات محاذى لليمين يلتصق بالصورة */}
                         <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
                           <h4 className="font-black text-sm text-[#111827] truncate leading-tight w-full text-right">{item.name}</h4>
                           <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
@@ -270,7 +270,7 @@ export default function SearchPage() {
                           </div>
                         </div>
 
-                        {/* 3. أقصى اليسار: التحكم والحالة */}
+                        {/* 3. أقصى اليسار: قسم التحكم والحالة */}
                         <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
                           <button onClick={(e) => toggleFavorite(e, 'store', item.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
                             <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
@@ -326,7 +326,15 @@ export default function SearchPage() {
                               </div>
                             ) : (
                               <Button 
-                                onClick={(e) => needsOptions ? router.push(`/store/${item.storeId}`) : addToCart(e, item)}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (needsOptions) {
+                                    router.push(`/store/${item.storeId}`);
+                                  } else {
+                                    addToCart(e, item);
+                                  }
+                                }}
                                 className="h-8 px-3 rounded-lg shadow-sm bg-primary text-white active:scale-95 transition-transform text-[9px] font-black"
                               >
                                 {needsOptions ? "عرض الخيارات" : "إضافة للسلة"}

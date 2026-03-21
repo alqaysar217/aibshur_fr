@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, where, limit, serverTimestamp, documentId, arrayUnion } from "firebase/firestore"
-import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus, LayoutGrid, Map, Utensils, Store, ChefHat } from "lucide-react"
+import { Heart, Star, ShoppingBag, Loader2, MapPin, Plus, Minus, Utensils, Store, LayoutGrid } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -208,7 +208,7 @@ export default function FavoritesPage() {
 
       <div className="p-4">
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/50 backdrop-blur-sm rounded-2xl p-1 shadow-sm h-12" dir="rtl">
+          <TabsList className="h-12 items-center justify-center text-muted-foreground grid w-full grid-cols-2 mb-8 bg-white/50 backdrop-blur-sm rounded-2xl p-1 shadow-sm" dir="rtl">
             <TabsTrigger value="products" className="rounded-xl font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white">
               <Utensils className="h-4 w-4" /> الوجبات
             </TabsTrigger>
@@ -230,7 +230,7 @@ export default function FavoritesPage() {
                   <Link key={store.id} href={`/store/${store.id}`}>
                     <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white transition-all active:scale-[0.98] group relative h-[105px] mb-5">
                       <CardContent className="p-3 h-full flex flex-row items-center gap-4 justify-between" dir="rtl">
-                        {/* 1. أقصى اليمين: أدوات التحكم */}
+                        {/* 1. أقصى اليمين (في المفضلة): أدوات التحكم */}
                         <div className="flex flex-col justify-between items-end h-full py-1.5 shrink-0">
                           <button onClick={(e) => toggleFavoriteStore(e, store.id)} className="p-1.5 bg-secondary/30 backdrop-blur-sm rounded-full active:scale-75 transition-transform">
                             <Heart className={cn("h-3.5 w-3.5", isFav ? "fill-destructive text-destructive" : "text-gray-400")} />
