@@ -100,9 +100,9 @@ export default function Home() {
         { id: "cafe", name: "كافيه", color: "bg-amber-50", textColor: "text-amber-800" },
         { id: "perfume", name: "عطور", color: "bg-purple-50", textColor: "text-purple-600" },
         { id: "dates", name: "تمور", color: "bg-amber-100", textColor: "text-amber-900" },
-        { id: "grocery", name: "سوبر ماركت", color: "bg-green-50", textColor: "text-green-600" },
+        { id: "grocery", name: "بقالة", color: "bg-green-50", textColor: "text-green-600" },
         { id: "pharmacy", name: "صيدليات", color: "bg-blue-50", textColor: "text-blue-600" },
-        { id: "electronics", name: "إكتونيات", color: "bg-slate-50", textColor: "text-slate-600" },
+        { id: "electronics", name: "إلكترونيات", color: "bg-slate-50", textColor: "text-slate-600" },
         { id: "sweets", name: "حلويات", color: "bg-pink-50", textColor: "text-pink-600" },
         { id: "spices", name: "بهارات", color: "bg-yellow-50", textColor: "text-yellow-700" }
       ]
@@ -111,9 +111,9 @@ export default function Home() {
       }
 
       const adsToSeed = [
-        { id: "ad1", title: "توصيل مجاني 🚚", subtitle: "لأول طلب لك بالكامل!", code: "ABSHER24", imageUrl: "https://picsum.photos/seed/ad1/800/400" },
-        { id: "ad2", title: "وجبات عائلية 🥘", subtitle: "خصم 20% على المشويات", code: "FAMILY", imageUrl: "https://picsum.photos/seed/ad2/800/400" },
-        { id: "ad3", title: "صيدلية أبشر 💊", subtitle: "دواؤك يصلك لباب بيتك", code: "HEALTH", imageUrl: "https://picsum.photos/seed/ad3/800/400" }
+        { id: "ad1", imageUrl: "https://picsum.photos/seed/ad1/800/400", storeId: "mathaqi_rest" },
+        { id: "ad2", imageUrl: "https://picsum.photos/seed/ad2/800/400", storeId: "al_khaleej_market" },
+        { id: "ad3", imageUrl: "https://picsum.photos/seed/ad3/800/400", storeId: "sweet_home" }
       ]
       for (const ad of adsToSeed) {
         await setDoc(doc(db, "ads", ad.id), ad)
@@ -177,13 +177,9 @@ export default function Home() {
           <CarouselContent>
             {ads && ads.length > 0 ? ads.map((ad: any) => (
               <CarouselItem key={ad.id}>
-                <Link href={`/search?q=${ad.code}`}>
-                  <Card className="border-none shadow-sm rounded-[10px] overflow-hidden relative h-40 bg-primary/90 transition-all active:scale-[0.98]">
-                    <Image src={ad.imageUrl} alt={ad.title} fill className="object-cover opacity-50" />
-                    <div className="absolute inset-0 p-6 flex flex-col justify-center text-white text-right">
-                      <h2 className="text-2xl font-black mb-1">{ad.title}</h2>
-                      <p className="text-sm opacity-90">{ad.subtitle}</p>
-                    </div>
+                <Link href={ad.storeId ? `/store/${ad.storeId}` : '#'}>
+                  <Card className="border-none shadow-sm rounded-[10px] overflow-hidden relative h-40 transition-all active:scale-[0.98]">
+                    <Image src={ad.imageUrl} alt="banner" fill className="object-cover" />
                   </Card>
                 </Link>
               </CarouselItem>
@@ -241,7 +237,12 @@ export default function Home() {
             stores.map((store: any) => {
               const isOpen = store.status === 'مفتوح' || store.status === 'open'
               const isFav = userData?.favoritesStoreIds?.includes(store.id)
-              const categoryName = categories?.find(c => store.categoryIds?.includes(c.id))?.name || "متجر";
+              const categoryName = categories?.find(c => catIdMatch(store.categoryIds, c.id))?.name || "متجر";
+
+              function catIdMatch(ids: string[] | undefined, target: string) {
+                 if(!ids) return false;
+                 return ids.includes(target);
+              }
 
               return (
                 <Link key={store.id} href={`/store/${store.id}`}>
@@ -263,11 +264,14 @@ export default function Home() {
                         </div>
                         
                         <div className="flex items-center gap-2 pt-1">
-                          <span className="text-[9px] text-[#6B7280] font-black">2.3كم</span>
-                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-[10px]">{categoryName}</Badge>
-                          {renderStars(store.averageRating || 4.5)}
+                          <span className="text-[10px] text-gray-400 font-bold">2.3كم</span>
+                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[9px] h-4.5 px-2 rounded-md border-none font-bold">{categoryName}</Badge>
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-primary text-primary" />
+                            <span className="text-[10px] font-bold text-gray-500">{store.averageRating || 4.5}</span>
+                          </div>
                           <div className="flex-1" />
-                          <Badge className={cn("text-[8px] h-4 px-2 border-none font-black rounded-[10px] shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
+                          <Badge className={cn("text-[9px] h-4.5 px-2 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
                             {isOpen ? 'مفتوح' : 'مغلق'}
                           </Badge>
                         </div>
