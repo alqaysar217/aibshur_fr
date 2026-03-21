@@ -5,12 +5,13 @@ import { useState, useEffect } from "react"
 import { 
   Trash2, Plus, Minus, ArrowRight, CreditCard, ShoppingBag, 
   Tag, MapPin, ChevronLeft, Loader2, Wallet, Banknote, 
-  MessageSquare, AlertCircle, CheckCircle2, X, Edit2, Check 
+  MessageSquare, AlertCircle, CheckCircle2, X, Edit2, Check, Store
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
@@ -20,9 +21,11 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 const BANK_ACCOUNTS = [
-  { id: "kuraimi", name: "بنك الكريمي", holder: "مؤسسة أبشر للتجارة", account: "123456789", logo: "https://picsum.photos/seed/kuraimi/100" },
-  { id: "tadhamon", name: "بنك التضامن", holder: "مؤسسة أبشر للتجارة", account: "987654321", logo: "https://picsum.photos/seed/tadhamon/100" },
-  { id: "yemen_kuwait", name: "بنك اليمن والكويت", holder: "مؤسسة أبشر للتجارة", account: "456789123", logo: "https://picsum.photos/seed/ykb/100" }
+  { id: "kuraimi", name: "بنك الكريمي", holder: "عمر احمد مبارك دعكيك", account: "123456789", logo: "https://picsum.photos/seed/kuraimi/100" },
+  { id: "bindool", name: "بنك بن دول", holder: "عمر احمد مبارك دعكيك", account: "223344556", logo: "https://picsum.photos/seed/bindool/100" },
+  { id: "omqi", name: "شركة العمقي", holder: "عمر احمد مبارك دعكيك", account: "998877665", logo: "https://picsum.photos/seed/omqi/100" },
+  { id: "busairi", name: "شركة البسيري", holder: "عمر احمد مبارك دعكيك", account: "554433221", logo: "https://picsum.photos/seed/busairi/100" },
+  { id: "tadhamon", name: "بنك التضامن", holder: "عمر احمد مبارك دعكيك", account: "112233445", logo: "https://picsum.photos/seed/tadhamon/100" }
 ]
 
 export default function CartPage() {
@@ -31,8 +34,9 @@ export default function CartPage() {
   const [coupon, setCoupon] = useState("")
   const [showCouponInput, setShowCouponInput] = useState(false)
   const [isCouponApplied, setIsCouponApplied] = useState(false)
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "wallet" | "bank">("cash")
+  const [showNoteInput, setShowNoteInput] = useState(false)
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("")
+  const [paymentMethod, setPaymentMethod] = useState<string>("cash")
   const [selectedBankId, setSelectedBankId] = useState<string | null>(null)
   const [orderNotes, setOrderNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -96,8 +100,8 @@ export default function CartPage() {
   }
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  const deliveryFee = 10
-  const discount = isCouponApplied ? 15 : 0
+  const deliveryFee = 1000 // رسوم توصيل افتراضية
+  const discount = isCouponApplied ? 500 : 0
   const total = Math.max(0, cartTotal + deliveryFee - discount)
 
   const handleCheckout = async () => {
@@ -139,6 +143,8 @@ export default function CartPage() {
       deliveryAddress: `${selectedAddress?.city} - ${selectedAddress?.details}`,
       notes: orderNotes,
       createdAt: serverTimestamp(),
+      region: "حضرموت",
+      contactNumber: "775258830"
     }
 
     try {
@@ -157,7 +163,7 @@ export default function CartPage() {
 
       await addDoc(collection(db, "users", user.uid, "notifications"), {
         title: "تم استلام طلبك!",
-        body: `طلبك #${docRef.id.substring(0,6)} قيد التجهيز. سنتواصل معك عبر الواتساب لتأكيد الطلب وإرسال الفاتورة التفصيلية.`,
+        body: `طلبك #${docRef.id.substring(0,6)} قيد التجهيز. سنتواصل معك عبر الواتساب على الرقم 775258830 لتأكيد الطلب.`,
         type: "order_status",
         isRead: false,
         createdAt: serverTimestamp()
@@ -211,89 +217,88 @@ export default function CartPage() {
       </header>
 
       <div className="p-4 space-y-6">
-        {/* ملخص المنتجات (الجدول) */}
+        {/* قائمة المنتجات */}
         <Card className="border-none shadow-sm rounded-2xl overflow-hidden bg-white">
           <div className="p-4 border-b flex justify-between items-center bg-secondary/10">
             <h2 className="font-bold text-sm flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4 text-primary" /> قائمة المنتجات
+              <ShoppingBag className="h-4 w-4 text-primary" /> قائمة الطلبات
             </h2>
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={() => setIsEditing(!isEditing)}
-              className="text-xs font-bold text-primary gap-1 h-8"
+              className="text-xs font-bold text-primary gap-1 h-8 px-3 rounded-lg border border-primary/20"
             >
               {isEditing ? <><Check className="h-3.5 w-3.5" /> تم</> : <><Edit2 className="h-3.5 w-3.5" /> تعديل</>}
             </Button>
           </div>
           <CardContent className="p-0">
-            <div className="bg-gray-50/50 p-3 flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b">
-              <span className="flex-1">المنتج</span>
-              <span className="w-16 text-center">السعر</span>
-              <span className="w-16 text-center">الكمية</span>
-              <span className="w-16 text-left">الإجمالي</span>
-            </div>
-            <div className="divide-y divide-secondary/50">
-              {cart.map((item) => (
-                <div key={item.id} className="p-4 flex items-center gap-3 justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-xs truncate">{item.name}</p>
-                    {isEditing && (
-                      <button 
-                        onClick={() => removeItem(item.id)} 
-                        className="text-[9px] text-destructive font-bold flex items-center gap-0.5 mt-1"
-                      >
-                        <Trash2 className="h-3 w-3" /> حذف
-                      </button>
-                    )}
-                  </div>
-                  <div className="w-16 text-center font-bold text-[11px]">{item.price}</div>
-                  <div className="w-16 flex items-center justify-center">
-                    {isEditing ? (
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => updateQuantity(item.id, -1)} className="h-5 w-5 rounded-full border flex items-center justify-center bg-white active:scale-90"><Minus className="h-3 w-3" /></button>
-                        <span className="text-xs font-black">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, 1)} className="h-5 w-5 rounded-full bg-primary text-white flex items-center justify-center active:scale-90"><Plus className="h-3 w-3" /></button>
-                      </div>
-                    ) : (
-                      <span className="text-xs font-black">{item.quantity}</span>
-                    )}
-                  </div>
-                  <div className="w-16 text-left font-black text-primary text-[11px]">{item.price * item.quantity}</div>
+            {!isEditing ? (
+              <div className="divide-y divide-secondary/50">
+                <div className="bg-gray-50/50 p-3 flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b">
+                  <span className="flex-1">المنتج</span>
+                  <span className="w-16 text-center">السعر</span>
+                  <span className="w-12 text-center">الكمية</span>
+                  <span className="w-20 text-left">الإجمالي</span>
                 </div>
-              ))}
-            </div>
+                {cart.map((item) => (
+                  <div key={item.id} className="p-4 flex items-center gap-3 justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-xs truncate">{item.name}</p>
+                    </div>
+                    <div className="w-16 text-center font-bold text-[11px] text-muted-foreground">{item.price}</div>
+                    <div className="w-12 text-center font-black text-xs">{item.quantity}</div>
+                    <div className="w-20 text-left font-black text-primary text-[11px]">{item.price * item.quantity} <small className="text-[8px]">ر.س</small></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-3 space-y-3">
+                {cart.map((item) => (
+                  <div key={item.id} className="p-3 rounded-xl bg-secondary/10 flex items-center gap-3 animate-in fade-in slide-in-from-right-2">
+                    <div className="relative h-14 w-14 rounded-lg overflow-hidden shrink-0 border bg-white">
+                      <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/100`} alt={item.name} fill className="object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <p className="font-bold text-xs truncate">{item.name}</p>
+                      <p className="text-[10px] text-primary font-black">{item.price} ر.س</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <button onClick={() => removeItem(item.id)} className="p-1.5 text-destructive bg-white rounded-lg shadow-sm active:scale-90"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <div className="flex items-center gap-2 bg-white p-1 rounded-lg shadow-sm border">
+                        <button onClick={() => updateQuantity(item.id, -1)} className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-secondary active:scale-90"><Minus className="h-3 w-3" /></button>
+                        <span className="text-xs font-black min-w-[15px] text-center">{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, 1)} className="h-6 w-6 rounded-md bg-primary text-white flex items-center justify-center active:scale-90"><Plus className="h-3 w-3" /></button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* العناوين */}
+        {/* عنوان التوصيل */}
         <section className="space-y-3">
           <div className="flex justify-between items-center px-1">
             <h2 className="font-bold text-sm flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> عنوان التوصيل</h2>
-            <Link href="/addresses" className="text-[10px] text-primary font-bold">إضافة/تعديل</Link>
+            <Link href="/addresses" className="text-[10px] text-primary font-bold">إضافة عنوان جديد</Link>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {addresses && addresses.length > 0 ? (
-              addresses.map((addr) => (
-                <button
-                  key={addr.id}
-                  onClick={() => setSelectedAddressId(addr.id)}
-                  className={cn(
-                    "min-w-[150px] p-4 rounded-2xl border-2 text-right transition-all",
-                    selectedAddressId === addr.id ? "border-primary bg-primary/5 shadow-sm" : "border-white bg-white opacity-70"
-                  )}
-                >
-                  <p className="font-black text-xs mb-1">{addr.label}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{addr.city} - {addr.details}</p>
-                </button>
-              ))
-            ) : (
-              <Link href="/addresses" className="w-full">
-                <Button variant="outline" className="w-full h-14 rounded-2xl border-dashed">إضافة عنوان للتوصيل</Button>
-              </Link>
-            )}
-          </div>
-        </section>
+          <Select value={selectedAddressId} onValueChange={setSelectedAddressId}>
+            <SelectTrigger className="h-14 rounded-2xl bg-white border-none shadow-sm font-bold text-xs">
+              <SelectValue placeholder="اختر عنوان التوصيل" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl">
+              {addresses?.map((addr) => (
+                <SelectItem key={addr.id} value={addr.id} className="font-bold text-xs py-3">
+                  {addr.label} ({addr.city} - {addr.details})
+                </SelectItem>
+              ))}
+              {(!addresses || addresses.length === 0) && (
+                <div className="p-4 text-center text-xs text-muted-foreground">لا توجد عناوين مسجلة</div>
+              )}
+            </SelectContent>
+          </Select> section
 
         {/* الكوبون */}
         <section className="space-y-3">
@@ -315,33 +320,39 @@ export default function CartPage() {
           )}
         </section>
 
-        {/* طرق الدفع */}
-        <section className="space-y-4">
+        {/* طريقة الدفع */}
+        <section className="space-y-3">
           <h2 className="font-bold text-sm px-1 flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> طريقة الدفع</h2>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { id: "cash", label: "نقدي", icon: Banknote },
-              { id: "wallet", label: "محفظة", icon: Wallet },
-              { id: "bank", label: "تحويل", icon: CreditCard },
-            ].map((method) => (
-              <button
-                key={method.id}
-                onClick={() => setPaymentMethod(method.id as any)}
-                className={cn(
-                  "p-3 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all",
-                  paymentMethod === method.id ? "border-primary bg-primary/5 shadow-md" : "border-white bg-white"
-                )}
-              >
-                <method.icon className={cn("h-5 w-5", paymentMethod === method.id ? "text-primary" : "text-muted-foreground")} />
-                <span className="text-[10px] font-black">{method.label}</span>
-              </button>
-            ))}
-          </div>
+          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+            <SelectTrigger className="h-14 rounded-2xl bg-white border-none shadow-sm font-bold text-xs">
+              <SelectValue placeholder="اختر طريقة الدفع" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl">
+              <SelectItem value="cash" className="py-3">
+                <div className="flex items-center gap-2">
+                  <Banknote className="h-4 w-4 text-green-600" />
+                  <span>دفع عند الاستلام (نقدي)</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="wallet" className="py-3">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-blue-600" />
+                  <span>الدفع من المحفظة (رصيدك: {wallet?.balance || 0} ر.س)</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="bank" className="py-3">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-orange-600" />
+                  <span>تحويل بنكي / صرافة</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* تفاصيل التحويل البنكي */}
           {paymentMethod === "bank" && (
             <div className="space-y-3 animate-in fade-in slide-in-from-top-4">
-              <p className="text-[10px] font-bold text-muted-foreground mr-1">اختر البنك لتحويل المبلغ وإرفاق السند لاحقاً:</p>
+              <p className="text-[10px] font-bold text-muted-foreground mr-1">اختر البنك لتحويل المبلغ وإرسال السند لاحقاً:</p>
               <div className="space-y-2">
                 {BANK_ACCOUNTS.map((bank) => (
                   <button
@@ -358,7 +369,7 @@ export default function CartPage() {
                     <div className="flex-1">
                       <p className="font-black text-xs">{bank.name}</p>
                       <p className="text-[10px] text-muted-foreground tracking-widest">{bank.account}</p>
-                      <p className="text-[8px] text-primary/70 font-bold">{bank.holder}</p>
+                      <p className="text-[8px] text-primary/70 font-bold leading-relaxed">{bank.holder}</p>
                     </div>
                     {selectedBankId === bank.id && <CheckCircle2 className="h-5 w-5 text-primary" />}
                   </button>
@@ -369,16 +380,25 @@ export default function CartPage() {
         </section>
 
         {/* ملاحظات الطلب */}
-        <section className="space-y-2">
-          <label className="text-xs font-black text-muted-foreground flex items-center gap-2 mr-1">
-            <MessageSquare className="h-3.5 w-3.5" /> ملاحظات إضافية (اختياري)
-          </label>
-          <Textarea 
-            placeholder="مثال: يرجى جعل الطعام حاراً، أو الاتصال عند الوصول..."
-            className="min-h-[100px] rounded-2xl border-none shadow-sm bg-white resize-none text-xs leading-relaxed"
-            value={orderNotes}
-            onChange={(e) => setOrderNotes(e.target.value)}
-          />
+        <section className="space-y-3">
+          {!showNoteInput ? (
+            <button onClick={() => setShowNoteInput(true)} className="flex items-center gap-2 text-muted-foreground font-bold text-xs px-1">
+              <MessageSquare className="h-4 w-4" /> هل ترغب في إضافة ملاحظة؟
+            </button>
+          ) : (
+            <div className="space-y-2 animate-in slide-in-from-top-2">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-xs font-black text-muted-foreground">ملاحظات إضافية</label>
+                <button onClick={() => {setShowNoteInput(false); setOrderNotes("");}} className="text-[10px] text-destructive font-bold">إلغاء</button>
+              </div>
+              <Textarea 
+                placeholder="مثال: يرجى جعل الطعام حاراً، أو الاتصال عند الوصول..."
+                className="min-h-[100px] rounded-2xl border-none shadow-sm bg-white resize-none text-xs leading-relaxed"
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+              />
+            </div>
+          )}
         </section>
 
         {/* الفاتورة النهائية */}
@@ -405,10 +425,13 @@ export default function CartPage() {
           </CardContent>
         </Card>
 
-        {/* تنبيه الأمان */}
+        {/* تنبيه الأمان والواتساب */}
         <div className="flex items-start gap-3 p-4 bg-blue-50 text-blue-700 rounded-2xl border border-blue-100">
           <AlertCircle className="h-5 w-5 shrink-0" />
-          <p className="text-[10px] font-medium leading-relaxed">بضغطك على زر التنفيذ، سيتم إرسال طلبك فوراً. سيقوم فريقنا بمراجعته والتواصل معك عبر الواتساب لتأكيد التفاصيل النهائية وموعد التوصيل.</p>
+          <div className="space-y-1">
+            <p className="text-[10px] font-black">بضغطك على زر التنفيذ، سيتم إرسال طلبك فوراً.</p>
+            <p className="text-[9px] font-medium leading-relaxed opacity-80">سيتم التواصل معك عبر الواتساب على رقم خدمة حضرموت (775258830) لتأكيد الفاتورة النهائية وموعد التوصيل.</p>
+          </div>
         </div>
       </div>
 
