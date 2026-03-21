@@ -41,6 +41,14 @@ export default function StoreDetailPage() {
   }
 
   const addToCart = (product: any) => {
+    if (hasOptions(product.name)) {
+      toast({
+        title: "خيارات المنتج",
+        description: `يرجى اختيار الخيارات المفضلة لـ ${product.name} قبل الإضافة`,
+      })
+      return
+    }
+
     const existing = cart.find(item => item.id === product.id)
     let newCart;
     if (existing) {
@@ -312,7 +320,7 @@ export default function StoreDetailPage() {
                 <Card 
                   key={product.id} 
                   className="border-none shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all cursor-pointer group"
-                  onClick={() => !needsOptions && addToCart(product)}
+                  onClick={() => addToCart(product)}
                 >
                   <CardContent className="p-3 flex flex-row items-center gap-3">
                     {/* Product Image (Right side) */}
