@@ -249,15 +249,17 @@ export default function FavoritesPage() {
                         {/* 1. أقصى اليمين: الصورة */}
                         <div className="relative w-20 h-20 shrink-0 shadow-sm overflow-hidden rounded-xl bg-secondary/10">
                           <Image src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200`} alt={store.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                          <div className="absolute bottom-1 right-1 flex items-center gap-0.5 text-amber-500 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm z-10 whitespace-nowrap">
-                            <Star className="h-2.5 w-2.5 fill-amber-500" />
-                            <span className="text-[10px] font-black">{store.averageRating || '4.5'}</span>
-                          </div>
                         </div>
 
                         {/* 2. الوسط: المعلومات */}
                         <div className="flex-1 flex flex-col justify-center space-y-1 items-start overflow-hidden px-1">
-                          <h4 className="font-bold text-sm text-[#111827] truncate w-full text-right">{store.name}</h4>
+                          <div className="flex items-center justify-between w-full">
+                            <h4 className="font-bold text-sm text-[#111827] truncate text-right">{store.name}</h4>
+                            <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-black shrink-0">
+                              <Star className="h-3 w-3 fill-amber-500" />
+                              <span>{store.averageRating || '4.5'}</span>
+                            </div>
+                          </div>
                           <div className="flex items-center gap-1 text-[#6B7280] overflow-hidden w-full justify-start">
                             <MapPin className="h-2.5 w-2.5 text-primary/60" />
                             <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
@@ -314,8 +316,8 @@ export default function FavoritesPage() {
                       <div className="flex-1 text-right space-y-0.5 overflow-hidden">
                         <div className="flex items-center justify-between">
                           <h3 className="font-bold text-sm text-[#111827] truncate">{product.name}</h3>
-                          <div className="flex items-center gap-0.5 text-amber-500 text-[9px] font-black">
-                            <Star className="h-2.5 w-2.5 fill-amber-500" />
+                          <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-black shrink-0">
+                            <Star className="h-3 w-3 fill-amber-500" />
                             <span>{product.rating || '4.8'}</span>
                           </div>
                         </div>

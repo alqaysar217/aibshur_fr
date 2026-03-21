@@ -345,8 +345,8 @@ export default function StoreDetailPage() {
                     <div className="flex-1 text-right space-y-0.5 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
-                        <div className="flex items-center gap-0.5 text-amber-500 text-[9px] font-black">
-                          <Star className="h-2.5 w-2.5 fill-amber-500" />
+                        <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-black shrink-0">
+                          <Star className="h-3 w-3 fill-amber-500" />
                           <span>{product.rating || '4.8'}</span>
                         </div>
                       </div>
@@ -440,8 +440,8 @@ export default function StoreDetailPage() {
                     <p className="text-[11px] font-black text-gray-700">{store?.name || "المتجر"}</p>
                   </div>
                   <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-lg">
-                    <Star className="h-2.5 w-2.5 fill-amber-500 text-amber-500" />
-                    <span className="font-black text-[9px] text-amber-700">{viewingProduct.rating || '4.8'}</span>
+                    <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                    <span className="font-black text-[10px] text-amber-700">{viewingProduct.rating || '4.8'}</span>
                   </div>
                 </div>
 
