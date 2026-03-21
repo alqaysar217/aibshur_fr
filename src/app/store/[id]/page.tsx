@@ -3,7 +3,7 @@
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { Star, Clock, Plus, ShoppingBag, ArrowRight, Minus, Heart, Search, MapPin, Map, BadgeCheck, Timer } from "lucide-react"
+import { Star, Plus, ShoppingBag, ArrowRight, Minus, Heart, MapPin, Map, Timer } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -127,97 +127,90 @@ export default function StoreDetailPage() {
 
   return (
     <div className="pb-40 bg-[#F8FAFB] min-h-screen font-body" dir="rtl">
-      {/* 1. صورة المتجر (Banner) - Compact Height */}
-      <div className="relative h-36 w-full">
-        <Image 
-          src={store.logoUrl || `https://picsum.photos/seed/${store.id}/800/400`} 
-          alt={store.name} 
-          fill 
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-        
-        {/* العناصر فوق الصورة: زر رجوع وزر المفضلة */}
-        <div className="absolute top-4 inset-x-4 flex justify-between items-center z-10">
+      {/* رأس الصفحة - مضغوط وموفر للمساحة */}
+      <div className="bg-white px-5 pt-4 pb-5 shadow-sm border-b border-gray-50">
+        <div className="flex justify-between items-center mb-5">
           <button 
             onClick={() => router.back()} 
-            className="h-8 w-8 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center active:scale-90 transition-all"
+            className="h-10 w-10 bg-secondary/30 rounded-[10px] flex items-center justify-center active:scale-90 transition-all"
           >
-            <ArrowRight className="h-5 w-5 text-white" />
+            <ArrowRight className="h-6 w-6 text-primary" />
           </button>
           
           <button 
             onClick={toggleFavoriteStore} 
             className={cn(
-              "h-8 w-8 backdrop-blur-md border rounded-full flex items-center justify-center active:scale-90 transition-all",
-              isFavStore ? "bg-destructive text-white border-destructive" : "bg-white/20 text-white border-white/30"
+              "h-10 w-10 rounded-[10px] flex items-center justify-center active:scale-90 transition-all border",
+              isFavStore ? "bg-destructive text-white border-destructive shadow-md" : "bg-secondary/30 text-gray-400 border-transparent"
             )}
           >
-            <Heart className={cn("h-4 w-4", isFavStore && "fill-current")} />
+            <Heart className={cn("h-5 w-5", isFavStore && "fill-current")} />
           </button>
         </div>
-      </div>
 
-      {/* بطاقة معلومات المتجر - Compact + Clean */}
-      <div className="px-5 -mt-6 relative z-20">
-        <div className="bg-white rounded-[10px] p-4 shadow-xl border border-gray-50 space-y-3">
-          {/* 2. اسم المتجر */}
-          <h1 className="text-xl font-black text-primary leading-tight">{store.name}</h1>
-
-          {/* معلومات السطر الأول: التقييم، النوع، الحالة */}
-          <div className="flex flex-wrap items-center gap-3">
-            {/* 3. التقييم + عدد التقييمات */}
-            <div className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md">
-              <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-              <span className="text-xs font-black text-primary">{store.averageRating || '4.5'}</span>
-              <span className="text-[9px] text-gray-400 font-bold">(100+)</span>
-            </div>
-
-            {/* 4. نوع المتجر */}
-            <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-none font-black text-[9px] h-5 px-2.5 rounded-md">
-              صيدليات
-            </Badge>
-
-            {/* 5. الحالة */}
-            <Badge className={cn(
-              "text-[9px] font-black h-5 px-2.5 rounded-md border-none shadow-none",
-              isOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"
-            )}>
-              {isOpen ? 'مفتوح' : 'مغلق'}
-            </Badge>
+        {/* بطاقة معلومات المتجر - مدمج فيها الشعار */}
+        <div className="flex gap-4">
+          {/* شعار المتجر - مربع بحواف 10px */}
+          <div className="relative h-24 w-24 rounded-[10px] overflow-hidden bg-secondary/10 shrink-0 shadow-sm border border-gray-100">
+            <Image 
+              src={store.logoUrl || `https://picsum.photos/seed/${store.id}/200/200`} 
+              alt={store.name} 
+              fill 
+              className="object-cover"
+              priority
+            />
           </div>
 
-          {/* معلومات السطر الثاني: الموقع، المسافة، الوقت - دمج احترافي */}
-          <div className="flex items-center gap-4 text-gray-500 py-0.5 border-t border-gray-50 pt-2">
-            {/* 6. الموقع */}
-            <div className="flex items-center gap-1 shrink-0">
-              <MapPin className="h-3 w-3 text-primary/60" />
-              <span className="text-[10px] font-bold">{store.address || 'المكلا'}</span>
+          {/* تفاصيل المتجر بجانب الشعار */}
+          <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+            <h1 className="text-xl font-black text-primary leading-tight truncate">{store.name}</h1>
+            
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md">
+                <Star className="h-3 w-3 fill-primary text-primary" />
+                <span className="text-[10px] font-black text-primary">{store.averageRating || '4.5'}</span>
+                <span className="text-[8px] text-gray-400 font-bold">(100+)</span>
+              </div>
+
+              <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-none font-black text-[9px] h-4.5 px-2 rounded-md">
+                {store.categoryIds?.[0] || 'متجر'}
+              </Badge>
+
+              <Badge className={cn(
+                "text-[9px] font-black h-4.5 px-2 rounded-md border-none shadow-none",
+                isOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"
+              )}>
+                {isOpen ? 'مفتوح' : 'مغلق'}
+              </Badge>
             </div>
-            {/* 7. المسافة */}
-            <div className="flex items-center gap-1 shrink-0">
-              <Map className="h-3 w-3 text-primary/60" />
-              <span className="text-[10px] font-bold">2.3كم</span>
-            </div>
-            {/* 8. وقت التوصيل */}
-            <div className="flex items-center gap-1 shrink-0">
-              <Timer className="h-3 w-3 text-primary/60" />
-              <span className="text-[10px] font-bold">30-45د</span>
+
+            <div className="flex items-center gap-3 text-gray-500 mt-1">
+              <div className="flex items-center gap-1 shrink-0">
+                <MapPin className="h-3 w-3 text-primary/60" />
+                <span className="text-[10px] font-bold">{store.address || 'المكلا'}</span>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <Map className="h-3 w-3 text-primary/60" />
+                <span className="text-[10px] font-bold">2.3كم</span>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <Timer className="h-3 w-3 text-primary/60" />
+                <span className="text-[10px] font-bold">30-45د</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* تصنيفات المنتجات */}
-      <div className="sticky top-0 z-40 bg-[#F8FAFB]/95 backdrop-blur-md py-3 mt-1">
+      <div className="sticky top-0 z-40 bg-[#F8FAFB]/95 backdrop-blur-md py-3 border-b border-gray-100/50">
         <div className="flex gap-2 overflow-x-auto px-5 scrollbar-hide" dir="rtl">
           {categories.map((cat) => (
             <button 
               key={cat} 
               onClick={() => setSelectedCategory(cat)} 
               className={cn(
-                "px-4 py-2 rounded-full text-[9px] font-black whitespace-nowrap transition-all border",
+                "px-4 py-2 rounded-full text-[10px] font-black whitespace-nowrap transition-all border",
                 selectedCategory === cat 
                   ? "bg-primary text-white border-primary shadow-md scale-105" 
                   : "bg-white text-gray-500 border-gray-100 shadow-sm"
@@ -229,8 +222,8 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      {/* قائمة المنتجات - الالتزام بالتصميم الموحد */}
-      <div className="px-5 py-2 flex flex-col gap-4">
+      {/* قائمة المنتجات - التصميم الموحد */}
+      <div className="px-5 py-4 flex flex-col gap-4">
         {isProductsLoading ? (
           [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-[10px] animate-pulse" />)
         ) : filteredProducts.length > 0 ? (
@@ -246,14 +239,12 @@ export default function StoreDetailPage() {
                 onClick={() => setViewingProduct(product)}
               >
                 <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                  {/* الصورة والتقييم تحتها */}
                   <div className="flex flex-col items-center gap-1 shrink-0">
                     <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shadow-sm">
                       <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                     </div>
                   </div>
 
-                  {/* تفاصيل المنتج */}
                   <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
                     <div className="flex justify-between items-start">
                       <h3 className="font-bold text-sm text-primary truncate leading-tight">{product.name}</h3>
@@ -265,11 +256,10 @@ export default function StoreDetailPage() {
                       </button>
                     </div>
 
-                    <p className="text-[10px] text-gray-400 line-clamp-2 leading-relaxed h-7">
+                    <p className="text-[10px] text-gray-400 line-clamp-1 leading-relaxed">
                       {product.description || 'وصف المنتج متاح هنا'}
                     </p>
                     
-                    {/* السطر الأخير: التقييم، السعر، والزر في صف واحد */}
                     <div className="flex items-center justify-between mt-auto">
                       <div className="flex items-center gap-2">
                         {renderStars(product.rating || 4.8)}
@@ -294,7 +284,7 @@ export default function StoreDetailPage() {
                               if (needsOptions) setViewingProduct(product); 
                               else addToCart(product, e); 
                             }} 
-                            className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[9px] font-black px-4 active:scale-95 transition-all"
+                            className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[10px] font-black px-4 active:scale-95 transition-all"
                           >
                             {needsOptions ? "التفاصيل" : "إضافة للسلة"}
                           </Button>
@@ -314,7 +304,6 @@ export default function StoreDetailPage() {
         )}
       </div>
 
-      {/* مودال تفاصيل المنتج */}
       <Dialog open={!!viewingProduct} onOpenChange={(val) => !val && setViewingProduct(null)}>
         <DialogContent className="rounded-[10px] w-[92%] max-w-md mx-auto p-0 overflow-hidden border-none shadow-2xl z-[100]" dir="rtl">
           {viewingProduct && (
