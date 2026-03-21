@@ -64,12 +64,18 @@ export default function FavoritesPage() {
 
   const favoriteStores = useMemo(() => {
     if (!allStores || !userData?.favoritesStoreIds) return []
-    return allStores.filter(s => userData.favoritesStoreIds.includes(s.id))
+    const filtered = allStores.filter(s => userData.favoritesStoreIds.includes(s.id))
+    const unique = new Map();
+    filtered.forEach(s => unique.set(s.id, s));
+    return Array.from(unique.values());
   }, [allStores, userData?.favoritesStoreIds])
 
   const favoriteProducts = useMemo(() => {
     if (!allProducts || !userData?.favoritesProductIds) return []
-    return allProducts.filter(p => userData.favoritesProductIds.includes(p.id))
+    const filtered = allProducts.filter(p => userData.favoritesProductIds.includes(p.id))
+    const unique = new Map();
+    filtered.forEach(p => unique.set(p.id, p));
+    return Array.from(unique.values());
   }, [allProducts, userData?.favoritesProductIds])
 
   const toggleFavorite = (e: React.MouseEvent, type: 'store' | 'product', id: string) => {
@@ -109,7 +115,7 @@ export default function FavoritesPage() {
     return (
       <div className="flex items-center gap-0.5" dir="rtl">
         {[1, 2, 3, 4, 5].map((star) => (
-          <Star key={star} className={cn("h-2.5 w-2.5", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
+          <Star key={star} className={cn("h-2 w-2", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
         ))}
       </div>
     )
@@ -218,13 +224,12 @@ export default function FavoritesPage() {
                           <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                         </div>
                         
-                        <div className="flex items-center justify-between pt-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[9px] text-[#6B7280] font-black">2.3كم</span>
-                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-md">متجر</Badge>
-                            {renderStars(store.averageRating || 4.5)}
-                          </div>
-                          <Badge className={cn("text-[8px] h-4 px-2 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
+                        <div className="flex items-center gap-2 pt-1">
+                          <span className="text-[9px] text-[#6B7280] font-black">2.3كم</span>
+                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-[10px]">متجر</Badge>
+                          {renderStars(store.averageRating || 4.5)}
+                          <div className="flex-1" />
+                          <Badge className={cn("text-[8px] h-4 px-2 border-none font-black rounded-[10px] shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
                             {isOpen ? 'مفتوح' : 'مغلق'}
                           </Badge>
                         </div>

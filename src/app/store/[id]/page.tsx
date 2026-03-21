@@ -112,7 +112,7 @@ export default function StoreDetailPage() {
   const renderStars = (rating: number) => (
     <div className="flex items-center gap-0.5 mt-1" dir="rtl">
       {[1, 2, 3, 4, 5].map((star) => (
-        <Star key={star} className={cn("h-2.5 w-2.5", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
+        <Star key={star} className={cn("h-2 w-2", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
       ))}
     </div>
   )
@@ -143,7 +143,7 @@ export default function StoreDetailPage() {
             </div>
             <div className="flex items-center gap-2 flex-wrap justify-start">
               {renderStars(store.averageRating || 4.5)}
-              <Badge className={cn("text-[8px] font-black border-none px-2 h-4", (store.status === 'open' || store.status === 'مفتوح') ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
+              <Badge className={cn("text-[8px] font-black border-none px-2 h-4 rounded-[10px]", (store.status === 'open' || store.status === 'مفتوح') ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
                 {(store.status === 'open' || store.status === 'مفتوح') ? 'مفتوح الآن' : 'مغلق'}
               </Badge>
             </div>
@@ -167,7 +167,7 @@ export default function StoreDetailPage() {
           const isFavProd = userData?.favoritesProductIds?.includes(product.id)
           const needsOptions = hasOptions(product.name)
           return (
-            <Card key={product.id} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer" onClick={() => setViewingProduct(product)}>
+            <Card key={`product-${product.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer" onClick={() => setViewingProduct(product)}>
               <CardContent className="p-3 flex items-start gap-4" dir="rtl">
                 <div className="flex flex-col items-center gap-1 shrink-0">
                   <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">

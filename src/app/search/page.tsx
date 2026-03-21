@@ -145,7 +145,7 @@ export default function SearchPage() {
     return (
       <div className="flex items-center gap-0.5" dir="rtl">
         {[1, 2, 3, 4, 5].map((star) => (
-          <Star key={star} className={cn("h-2.5 w-2.5", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
+          <Star key={star} className={cn("h-2 w-2", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
         ))}
       </div>
     )
@@ -260,13 +260,12 @@ export default function SearchPage() {
                           <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
                         </div>
                         
-                        <div className="flex items-center justify-between pt-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[9px] text-[#6B7280] font-black">2.3كم</span>
-                            <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-md">متجر</Badge>
-                            {renderStars(item.averageRating || 4.5)}
-                          </div>
-                          <Badge className={cn("text-[8px] h-4 px-2 border-none font-black rounded-md shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
+                        <div className="flex items-center gap-2 pt-1">
+                          <span className="text-[9px] text-[#6B7280] font-black">2.3كم</span>
+                          <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-[10px]">متجر</Badge>
+                          {renderStars(item.averageRating || 4.5)}
+                          <div className="flex-1" />
+                          <Badge className={cn("text-[8px] h-4 px-2 border-none font-black rounded-[10px] shadow-none", isOpen ? "bg-green-500/10 text-[#22C55E]" : "bg-red-500/10 text-[#EF4444]")}>
                             {isOpen ? 'مفتوح' : 'مغلق'}
                           </Badge>
                         </div>
