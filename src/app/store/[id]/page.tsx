@@ -121,25 +121,7 @@ export default function StoreDetailPage() {
     const base = ["الكل", "الأكثر طلباً", "المفضلة"]
     if (!store || !store.categoryIds) return base
     
-    const categoryFilters: Record<string, string[]> = {
-      'restaurants': ["مقبلات", "غداء", "مشويات", "فتة", "شاورما", "وجبات خفيفة", "لحم", "مشروبات", "حلى"],
-      'cafe': ["مقبلات", "غداء", "مشويات", "فتة", "شاورما", "وجبات خفيفة", "لحم", "مشروبات", "حلى"],
-      'pharmacy': ["أدوية", "مستحضرات تجميل", "عناية بالبشرة", "مكملات غذائية", "رعاية أطفال"],
-      'grocery': ["ألبان وأجبان", "معلبات", "منظفات", "حلويات ومسليات", "مخبوزات"],
-      'electronics': ["هواتف", "إكسسوارات", "كمبيوتر", "أجهزة منزلية", "ألعاب"],
-      'perfume': ["عطور رجالية", "عطور نسائية", "بخور", "أطقم هدايا"],
-      'dates': ["تمور فاخرة", "بهارات مشكلة", "عسل سدر", "مكسرات"],
-      'spices': ["تمور فاخرة", "بهارات مشكلة", "عسل سدر", "مكسرات"],
-      'sweets': ["حلويات شرقية", "حلويات غربية", "كيك", "موالح"] 
-    }
-
     const dynamicFilters = new Set<string>()
-    store.categoryIds.forEach((catId: string) => {
-      if (categoryFilters[catId]) {
-        categoryFilters[catId].forEach(f => dynamicFilters.add(f))
-      }
-    })
-
     if (products) {
       products.forEach((p: any) => {
         if (p.category) dynamicFilters.add(p.category)
@@ -155,7 +137,7 @@ export default function StoreDetailPage() {
       const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = selectedCategory === "الكل" || 
                              (selectedCategory === "المفضلة" && userData?.favoritesProductIds?.includes(p.id)) ||
-                             (selectedCategory === "الأكثر طلباً" && p.rating >= 4.8) ||
+                             (selectedCategory === "الأكثر طلباً" && (p.rating || 0) >= 4.8) ||
                              p.category === selectedCategory
       return matchesSearch && matchesCategory
     })
@@ -339,15 +321,13 @@ export default function StoreDetailPage() {
                   onClick={() => setViewingProduct(product)}
                 >
                   <CardContent className="p-3 flex flex-row items-center gap-3">
-                    {/* Product Image (Right side) */}
                     <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-secondary/10">
                       <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                      <button onClick={(e) => { e.stopPropagation(); toggleFavoriteProduct(e, product.id); }} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
+                      <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm z-10 active:scale-90 transition-transform">
                         <Heart className={cn("h-3 w-3", isFavProd ? "fill-destructive text-destructive" : "text-gray-400")} />
                       </button>
                     </div>
 
-                    {/* Info (Left side) */}
                     <div className="flex-1 text-right space-y-0.5 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <h3 className="font-black text-sm text-[#111827] truncate">{product.name}</h3>
@@ -395,11 +375,15 @@ export default function StoreDetailPage() {
         </div>
       </div>
 
-      {/* حوار تفاصيل المنتج واختيار الخيارات */}
       <Dialog open={!!viewingProduct} onOpenChange={(val) => !val && setViewingProduct(null)}>
-        <DialogContent className="rounded-[2.5rem] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none" dir="rtl">
+        <DialogContent className="rounded-[2.5rem] w-[95%] max-w-md mx-auto p-0 overflow-hidden border-none focus-visible:ring-0" dir="rtl">
           {viewingProduct && (
             <div className="flex flex-col">
+              <DialogHeader className="sr-only">
+                <DialogTitle>{viewingProduct.name}</DialogTitle>
+                <DialogDescription>تفاصيل المنتج والخيارات المتاحة</DialogDescription>
+              </DialogHeader>
+              
               <div className="relative h-64 w-full">
                 <Image 
                   src={viewingProduct.imageUrl || `https://picsum.photos/seed/${viewingProduct.id}/600/400`} 
@@ -418,7 +402,7 @@ export default function StoreDetailPage() {
               </div>
 
               <div className="p-6 space-y-6">
-                <div className="space-y-2">
+                <div className="space-y-2 text-right">
                   <h3 className="font-bold text-sm text-gray-500">وصف الوجبة</h3>
                   <p className="text-sm leading-relaxed text-gray-600">
                     {viewingProduct.description || "استمتع بأفضل المذاقات مع وجبتنا المحضرة بعناية من أجود المكونات الطازجة."}
@@ -426,7 +410,7 @@ export default function StoreDetailPage() {
                 </div>
 
                 {hasOptions(viewingProduct.name) && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-right">
                     <h3 className="font-bold text-sm text-gray-500">اختر الخيارات</h3>
                     <div className="grid grid-cols-2 gap-3">
                       {["حجم صغير", "حجم وسط", "حجم كبير", "إضافة صوص"].map((opt) => (
@@ -447,7 +431,6 @@ export default function StoreDetailPage() {
                     onClick={() => {
                       const prod = viewingProduct;
                       setViewingProduct(null);
-                      // تجاوز فحص الخيارات هنا للإضافة
                       const existing = cart.find(item => item.id === prod.id)
                       let newCart;
                       if (existing) {
