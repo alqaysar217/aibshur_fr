@@ -93,7 +93,8 @@ export default function OrdersPage() {
 
   const { data: realOrders, isLoading: isCollectionLoading } = useCollection(ordersQuery)
 
-  // دمج الطلبات الحقيقية مع الطلبات التجريبية للعرض فقط في مرحلة التطوير/الفهم
+  // دمج الطلبات الحقيقية مع الطلبات التجريبية للعرض فقط في مرحلة التطوير
+  // سنعرض الطلبات التجريبية إذا لم يكن هناك طلبات حقيقية، حتى للزوار
   const displayOrders = (realOrders && realOrders.length > 0) ? realOrders : MOCK_ORDERS
 
   const getStatusLabel = (status: string) => {
@@ -134,18 +135,6 @@ export default function OrdersPage() {
     )
   }
 
-  if (!user && realOrders?.length === 0) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-4 bg-white" dir="rtl">
-        <ShoppingBag className="h-16 w-16 text-muted-foreground opacity-20" />
-        <h1 className="text-xl font-bold text-primary">يرجى تسجيل الدخول</h1>
-        <p className="text-sm text-gray-400 text-center">سجل دخولك لتتمكن من مشاهدة طلباتك ومتابعتها</p>
-        <Button onClick={() => router.push('/login')} className="w-full max-w-xs h-14 rounded-[15px] font-black text-lg shadow-xl shadow-primary/20">تسجيل الدخول</Button>
-        <BottomNav />
-      </div>
-    )
-  }
-
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen font-body" dir="rtl">
       <header className="p-4 glass sticky top-0 z-40 flex items-center justify-between shadow-sm">
@@ -168,6 +157,17 @@ export default function OrdersPage() {
       </header>
 
       <div className="p-5 space-y-5">
+        {/* تنبيه في حال كان المستخدم يتصفح كزائر */}
+        {!user && (
+          <div className="bg-blue-50 border border-blue-100 p-4 rounded-[15px] flex items-center justify-between mb-2">
+            <div className="text-right">
+              <p className="text-[11px] font-black text-blue-900 leading-none">أنت تظهر طلبات تجريبية</p>
+              <p className="text-[9px] font-bold text-blue-700 mt-1">سجل دخولك لمتابعة طلباتك الحقيقية</p>
+            </div>
+            <Button onClick={() => router.push('/login')} size="sm" className="h-8 rounded-md bg-blue-600 text-[10px] font-black">دخول</Button>
+          </div>
+        )}
+
         {isCollectionLoading && !realOrders ? (
           [1, 2, 3].map(i => <div key={i} className="h-48 bg-white rounded-[20px] animate-pulse" />)
         ) : displayOrders.map((order: any) => (
