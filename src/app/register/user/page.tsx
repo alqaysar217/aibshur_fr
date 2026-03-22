@@ -24,6 +24,7 @@ export default function UserRegisterPage() {
       return
     }
     setLoading(true)
+    // Simulate API call
     setTimeout(() => {
       setLoading(false)
       toast({ title: "تم الإرسال", description: "سيصلك رمز التفعيل عبر SMS" })

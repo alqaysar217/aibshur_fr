@@ -26,6 +26,7 @@ export default function DriverRegisterPage() {
       return
     }
     setLoading(true)
+    // Simulate application submission
     setTimeout(() => {
       setLoading(false)
       toast({ title: "تم استلام طلبك", description: "سنقوم بمراجعة بياناتك والتواصل معك قريباً." })
