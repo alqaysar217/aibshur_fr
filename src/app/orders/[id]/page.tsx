@@ -44,6 +44,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const db = useFirestore()
   const { toast } = useToast()
   
+  const [mounted, setMounted] = useState(false)
   const [rating, setRating] = useState(0)
   const [isRatingSubmitted, setIsRatingSubmitted] = useState(false)
   const [canCancel, setCanCancel] = useState(false)
@@ -51,9 +52,11 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [isTipOpen, setIsTipOpen] = useState(false)
   const [tipAmount, setTipAmount] = useState("")
   const [tipMethod, setTipMethod] = useState<"wallet" | "bank">("wallet")
-  
-  // تتبع المندوب بشكل حي (محاكاة)
   const [driverHeading, setDriverHeading] = useState(45)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const orderRef = useMemoFirebase(() => (!db || !user || !id || id.startsWith('mock-')) ? null : doc(db, "users", user.uid, "orders", id as string), [db, user, id])
   const { data: realOrder, isLoading: isRealOrderLoading } = useDoc(orderRef)
@@ -80,7 +83,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     }
   }, [order])
 
-  // محاكاة تغيير الاتجاه عند التتبع
   useEffect(() => {
     if (order?.status === 'on_the_way') {
       const interval = setInterval(() => {
@@ -138,7 +140,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     router.push('/cart')
   }
 
-  if (isRealOrderLoading) return <div className="flex flex-col items-center justify-center min-h-screen gap-4 font-black text-primary"><RefreshCw className="animate-spin h-10 w-10" /> جاري التحميل...</div>
+  if (!mounted || isRealOrderLoading) return <div className="flex flex-col items-center justify-center min-h-screen gap-4 font-black text-primary"><RefreshCw className="animate-spin h-10 w-10" /> جاري التحميل...</div>
   if (!order) return <div className="min-h-screen flex flex-col items-center justify-center p-10 text-center gap-6" dir="rtl"><ShoppingBag className="h-16 w-16 text-muted-foreground opacity-30" /><h2 className="text-xl font-black text-primary">الطلب غير موجود</h2><Button onClick={() => router.push('/orders')}>العودة لطلباتي</Button></div>
 
   return (
@@ -152,7 +154,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       </header>
 
       <div className="p-5 space-y-6">
-        {/* معلومات أساسية */}
         <div className="flex justify-between items-start">
           <div className="text-right space-y-1">
             <h2 className="text-xl font-black text-gray-900">{order.storeName}</h2>
@@ -166,7 +167,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </Badge>
         </div>
 
-        {/* شريط التقدم بالأيقونات */}
         {order.status !== 'cancelled' && (
           <Card className="border-none shadow-sm rounded-[25px] bg-white overflow-hidden">
             <CardContent className="p-6">
@@ -191,7 +191,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </Card>
         )}
 
-        {/* تتبع المندوب - تحسين الخريطة والحركة */}
         {order.status === 'on_the_way' && (
           <Card className="border-none shadow-sm rounded-[25px] overflow-hidden bg-white animate-in zoom-in duration-500">
             <div className="p-4 bg-primary/5 border-b border-secondary/30 flex justify-between items-center">
@@ -199,26 +198,19 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               <Badge className="bg-green-500 text-white border-none text-[8px] font-black">نشط الآن</Badge>
             </div>
             <div className="h-64 w-full bg-[#e5e7eb] relative overflow-hidden">
-              {/* الخريطة بالألوان الطبيعية */}
               <iframe 
                 className="w-full h-full border-none" 
                 src="https://www.openstreetmap.org/export/embed.html?bbox=49.12,14.53,49.14,14.55&layer=mapnik" 
               />
-              
-              {/* طبقة تتبع واقعية (SVG Line) */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
                 <line x1="20%" y1="80%" x2="50%" y2="50%" stroke="var(--primary)" strokeWidth="4" strokeDasharray="8,8" />
               </svg>
-
-              {/* موقع العميل (Home Marker) */}
               <div className="absolute top-[20%] left-[20%] -translate-x-1/2 -translate-y-1/2">
                 <div className="bg-white p-2 rounded-full shadow-lg border-2 border-primary">
                   <Home className="h-5 w-5 text-primary" />
                 </div>
                 <div className="bg-primary text-white text-[8px] font-black px-2 py-0.5 rounded-full mt-1 whitespace-nowrap shadow-sm">موقعك</div>
               </div>
-
-              {/* موقع المندوب (Smooth Arrow Indicator) */}
               <div 
                 className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 transition-all duration-1000 ease-in-out"
                 style={{ transform: `translate(-50%, -50%) rotate(${driverHeading}deg)` }}
@@ -230,7 +222,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   </div>
                 </div>
               </div>
-              
               <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md p-2 rounded-xl border shadow-sm flex items-center gap-2">
                 <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
                 <span className="text-[10px] font-black text-gray-700">المندوب يتحرك باتجاهك</span>
@@ -239,7 +230,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </Card>
         )}
 
-        {/* جدول الوجبات */}
         <div className="space-y-3">
           <h3 className="font-black text-sm px-2 text-right">الوجبات المطلوبة</h3>
           <Card className="border-none shadow-sm rounded-[25px] bg-white overflow-hidden">
@@ -264,7 +254,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </Card>
         </div>
 
-        {/* العنوان والدفع */}
         <div className="grid grid-cols-1 gap-4">
           <div className="flex gap-4 p-5 bg-white rounded-[25px] shadow-sm">
             <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0"><MapPin className="h-5 w-5 text-orange-600" /></div>
@@ -282,7 +271,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
 
-        {/* ملخص الفاتورة */}
         <Card className="border-none shadow-sm rounded-[25px] bg-white overflow-hidden">
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between text-xs font-bold text-gray-500"><span>المجموع الفرعي</span><span>{order.subtotal} ر.س</span></div>
@@ -291,7 +279,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </CardContent>
         </Card>
 
-        {/* منطق الإلغاء أو التواصل */}
         {canCancel && order.status === 'pending' ? (
           <Button onClick={handleCancelOrder} className="w-full h-14 rounded-2xl bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 font-black text-sm gap-3">
             <XCircle className="h-5 w-5" /> إلغاء الطلب (متاح خلال {timeLeft} ث)
@@ -303,7 +290,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         ) : null}
 
-        {/* بعد التوصيل: تقييم وإعادة طلب وبخشيش */}
         {order.status === 'delivered' && (
           <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-700">
             {!isRatingSubmitted ? (
@@ -328,7 +314,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         )}
 
-        {/* في حال الإلغاء: زر إعادة الطلب فقط */}
         {order.status === 'cancelled' && (
           <Button onClick={handleReorder} className="w-full h-14 rounded-2xl bg-primary text-white font-black text-sm gap-2">
             <RefreshCw className="h-5 w-5" /> إعادة المحاولة (إضافة للسلة)
@@ -336,7 +321,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         )}
       </div>
 
-      {/* حوار البخشيش */}
       <Dialog open={isTipOpen} onOpenChange={setIsTipOpen}>
         <DialogContent className="rounded-[25px] w-[92%] max-w-md mx-auto p-0 border-none overflow-hidden" dir="rtl">
           <div className="bg-gray-900 p-8 text-white text-center space-y-2">
@@ -360,7 +344,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               <div className="space-y-3 animate-in fade-in duration-300">
                 {BANK_ACCOUNTS.map(b => (
                   <div key={b.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3"><img src={b.logo} className="h-8 w-8 rounded-lg" /><span className="text-[10px] font-bold text-gray-700">{b.name}</span></div>
+                    <div className="flex items-center gap-3"><img src={b.logo} className="h-8 w-8 rounded-lg" alt={b.name} /><span className="text-[10px] font-bold text-gray-700">{b.name}</span></div>
                     <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(b.account); toast({ title: "تم النسخ" }) }} className="h-8 w-8 p-0 text-primary"><Copy className="h-3.5 w-3.5" /></Button>
                   </div>
                 ))}
