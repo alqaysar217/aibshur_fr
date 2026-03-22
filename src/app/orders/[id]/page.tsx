@@ -1,6 +1,7 @@
 
 "use client"
 
+import * as React from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { doc, updateDoc, collection, addDoc, serverTimestamp } from "firebase/firestore"
@@ -14,8 +15,9 @@ import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 import { ar } from "date-fns/locale"
 
-export default function OrderDetailPage() {
-  const { id } = useParams()
+export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = React.use(params)
+  const id = resolvedParams.id
   const router = useRouter()
   const { user } = useUser()
   const db = useFirestore()

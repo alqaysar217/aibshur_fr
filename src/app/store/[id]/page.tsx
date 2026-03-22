@@ -1,6 +1,7 @@
 
 "use client"
 
+import * as React from "react"
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
 import { Star, Plus, ShoppingBag, ArrowRight, Minus, Heart, MapPin, Map, Timer, Navigation } from "lucide-react"
@@ -17,8 +18,9 @@ import { cn } from "@/lib/utils"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
-export default function StoreDetailPage() {
-  const { id } = useParams()
+export default function StoreDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = React.use(params)
+  const id = resolvedParams.id
   const router = useRouter()
   const db = useFirestore()
   const { user } = useUser()
