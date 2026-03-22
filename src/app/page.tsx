@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, Coffee, Laptop, Flame, Flower2, ShoppingBag, Gift, Sparkles, Leaf, Beef } from "lucide-react"
+import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, Coffee, Laptop, Flame, Flower2, ShoppingBag, Gift, Sparkles, Leaf, Beef, Navigation } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -281,7 +281,7 @@ export default function Home() {
                             <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
-                            <MapPin className="h-3 w-3 text-primary/60" />
+                            <Navigation className="h-3 w-3 text-primary/60" />
                             <span className="text-[10px] font-bold">2.3كم</span>
                           </div>
                         </div>

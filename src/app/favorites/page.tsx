@@ -4,8 +4,8 @@
 import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, limit, serverTimestamp, arrayUnion } from "firebase/firestore"
-import { Heart, ShoppingBag, MapPin, Package, Store, ArrowRight, Plus, Minus, Star } from "lucide-react"
-import Image from "next/image"
+import { Heart, ShoppingBag, MapPin, Package, Store, ArrowRight, Plus, Minus, Star, Navigation } from "lucide-react"
+import Image from "image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
@@ -234,7 +234,7 @@ export default function FavoritesPage() {
                             <span className="text-[10px] truncate font-medium">{store.address || 'المكلا'}</span>
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
-                            <MapPin className="h-3 w-3 text-primary/60" />
+                            <Navigation className="h-3 w-3 text-primary/60" />
                             <span className="text-[10px] font-bold">2.3كم</span>
                           </div>
                         </div>

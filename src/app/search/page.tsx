@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Search, ArrowRight, ShoppingBag, Heart, MapPin, Plus, Minus, Store, Package, Star } from "lucide-react"
+import { Search, ArrowRight, ShoppingBag, Heart, MapPin, Plus, Minus, Store, Package, Star, Navigation } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -270,7 +270,7 @@ export default function SearchPage() {
                             <span className="text-[10px] truncate font-medium">{item.address || 'المكلا'}</span>
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
-                            <MapPin className="h-3 w-3 text-primary/60" />
+                            <Navigation className="h-3 w-3 text-primary/60" />
                             <span className="text-[10px] font-bold">2.3كم</span>
                           </div>
                         </div>

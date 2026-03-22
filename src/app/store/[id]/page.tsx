@@ -3,7 +3,7 @@
 
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { Star, Plus, ShoppingBag, ArrowRight, Minus, Heart, MapPin, Map, Timer } from "lucide-react"
+import { Star, Plus, ShoppingBag, ArrowRight, Minus, Heart, MapPin, Map, Timer, Navigation } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -203,7 +203,7 @@ export default function StoreDetailPage() {
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1 shrink-0">
-                <MapPin className="h-3 w-3 text-primary/60" />
+                <Navigation className="h-3 w-3 text-primary/60" />
                 <span className="text-[10px] font-bold">2.3كم</span>
               </div>
               <div className="flex items-center gap-1 shrink-0">
