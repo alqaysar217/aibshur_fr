@@ -4,7 +4,13 @@
 import * as React from "react"
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { Star, Plus, ShoppingBag, ArrowRight, Minus, Heart, MapPin, Map, Timer, Navigation, LogIn } from "lucide-react"
+import { 
+  Star, Plus, ShoppingBag, ArrowRight, Minus, Heart, MapPin, Map, Timer, Navigation, LogIn,
+  LayoutGrid, Flame, Utensils, Drumstick, Pizza, Sandwich, CupSoda, Beef, Coffee, Candy, 
+  Gift, Flower2, SprayCan, Package, ShoppingBasket, Milk, Apple, Carrot, Box, 
+  Smartphone, Laptop, Headphones, Plug, Monitor, Gamepad2, Sparkles, Droplets, 
+  Fish, Leaf, Palmtree, Scissors, IceCream, Cookie 
+} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -32,6 +38,51 @@ const CATEGORY_FILTERS: Record<string, string[]> = {
   perfume: ["عطور رجالية", "عطور نسائية", "بخور", "عود", "زيوت عطرية"],
   sweets: ["كيك", "تشيز كيك", "شوكولاتة", "بقلاوة", "حلويات شرقية", "حلويات غربية", "آيسكريم"]
 }
+
+const getFilterIcon = (filter: string) => {
+  const s = "h-3.5 w-3.5";
+  if (filter === "الكل") return <LayoutGrid className={s} />;
+  if (filter === "الأكثر طلباً") return <Flame className={s} />;
+  if (filter === "المفضلة") return <Heart className={s} />;
+  
+  const f = filter.toLowerCase();
+  if (f.includes("لحوم") || f.includes("مشويات") || f.includes("كبدة") || f.includes("لحم")) return <Beef className={s} />;
+  if (f.includes("دجاج") || f.includes("بروست")) return <Drumstick className={s} />;
+  if (f.includes("أسماك")) return <Fish className={s} />;
+  if (f.includes("أرز") || f.includes("بقوليات") || f.includes("فتة") || f.includes("إفطار")) return <Utensils className={s} />;
+  if (f.includes("بيتزا")) return <Pizza className={s} />;
+  if (f.includes("سندويتشات") || f.includes("برجر")) return <Sandwich className={s} />;
+  if (f.includes("معجنات") || f.includes("فطائر") || f.includes("خبز")) return <Cookie className={s} />;
+  if (f.includes("حلويات") || f.includes("كيك") || f.includes("شوكولاتة") || f.includes("بقلاوة") || f.includes("تشيز كيك") || f.includes("كوكيز")) return <Candy className={s} />;
+  if (f.includes("آيسكريم")) return <IceCream className={s} />;
+  if (f.includes("مشروبات") || f.includes("عصائر") || f.includes("سموذي")) return <CupSoda className={s} />;
+  if (f.includes("قهوة") || f.includes("اسبريسو") || f.includes("لاتيه") || f.includes("كابتشينو") || f.includes("شاي")) return <Coffee className={s} />;
+  if (f.includes("هدايا") || f.includes("مناسبات") || f.includes("تذكارات")) return <Gift className={s} />;
+  if (f.includes("ورد")) return <Flower2 className={s} />;
+  if (f.includes("عطر") || f.includes("بخور") || f.includes("عود") || f.includes("زيوت")) return <SprayCan className={s} />;
+  if (f.includes("إكسسوارات") || f.includes("تغليف")) return <Package className={s} />;
+  if (f.includes("مواد غذائية") || f.includes("ماركت") || f.includes("معلبات") || f.includes("منظفات") || f.includes("ألبان")) {
+    if (f.includes("ألبان")) return <Milk className={s} />;
+    if (f.includes("منظفات")) return <Droplets className={s} />;
+    return <ShoppingBasket className={s} />;
+  }
+  if (f.includes("خضروات") || f.includes("فواكه") || f.includes("عضوي")) {
+    if (f.includes("خضروات")) return <Carrot className={s} />;
+    return <Apple className={s} />;
+  }
+  if (f.includes("جوال") || f.includes("لابتوب") || f.includes("إلكترونيات") || f.includes("سماعات") || f.includes("شاشة") || f.includes("شواحن")) {
+    if (f.includes("لابتوب")) return <Laptop className={s} />;
+    if (f.includes("سماعات")) return <Headphones className={s} />;
+    if (f.includes("ألعاب")) return <Gamepad2 className={s} />;
+    return <Smartphone className={s} />;
+  }
+  if (f.includes("مكياج") || f.includes("تجميل") || f.includes("عناية") || f.includes("بشرة")) return <Sparkles className={s} />;
+  if (f.includes("عسل")) return <Droplets className={s} />;
+  if (f.includes("تمور") || f.includes("تمر")) return <Palmtree className={s} />;
+  if (f.includes("مقطع")) return <Scissors className={s} />;
+  
+  return <LayoutGrid className={s} />;
+};
 
 export default function StoreDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = React.use(params)
@@ -226,13 +277,14 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
               key={filter}
               onClick={() => setSelectedCategory(filter)}
               className={cn(
-                "px-4 py-2 rounded-full whitespace-nowrap text-[10px] font-black transition-all",
+                "px-4 py-2 rounded-full whitespace-nowrap text-[10px] font-black transition-all flex items-center gap-2",
                 selectedCategory === filter 
                   ? "bg-[#10B981] text-white shadow-md shadow-[#10B981]/20" 
                   : "bg-white text-gray-400 border border-gray-100"
               )}
             >
-              {filter}
+              {getFilterIcon(filter)}
+              <span>{filter}</span>
             </button>
           ))}
         </div>
