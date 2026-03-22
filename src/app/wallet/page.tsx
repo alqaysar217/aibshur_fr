@@ -25,6 +25,13 @@ const BANK_ACCOUNTS = [
   { id: "tadhamon", name: "بنك التضامن", holder: "عمر احمد مبارك دعكيك", account: "112233445", logo: "https://picsum.photos/seed/tadhamon/100" }
 ]
 
+const MOCK_TRANSACTIONS = [
+  { id: "m1", description: "شحن رصيد - بنك الكريمي", amount: 5000, type: "deposit", date: "منذ ساعتين" },
+  { id: "m2", description: "دفع طلب #8821 - مطعم مذاقي", amount: 1500, type: "debit", date: "اليوم، 12:30 م" },
+  { id: "m3", description: "استعادة رصيد - طلب ملغي", amount: 1200, type: "deposit", date: "أمس، 09:15 م" },
+  { id: "m4", description: "دفع طلب #7732 - سوبر ماركت الخليج", amount: 2300, type: "debit", date: "أمس، 02:45 م" }
+]
+
 export default function WalletPage() {
   const { user } = useUser()
   const db = useFirestore()
@@ -189,47 +196,34 @@ export default function WalletPage() {
                 </Card>
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[10px] border border-dashed border-gray-200">
-                <div className="bg-secondary/20 p-6 rounded-full mb-4">
-                  <History className="h-10 w-10 text-gray-300" />
-                </div>
-                <p className="text-sm font-bold text-gray-400">لا توجد عمليات سابقة حتى الآن</p>
-                <p className="text-[10px] text-gray-300 mt-1">اشحن رصيدك لتبدأ رحلتك مع أبشر</p>
-              </div>
-            )}
-
-            {/* بيانات تجريبية للتوضيح إذا كان السجل فارغاً */}
-            {!isLoading && (!transactions || transactions.length === 0) && (
-              <div className="opacity-40 grayscale pointer-events-none">
-                <Card className="border-none shadow-sm rounded-[10px] bg-white mb-3">
+              // إظهار عمليات افتراضية في حالة عدم وجود عمليات حقيقية
+              MOCK_TRANSACTIONS.map((tx) => (
+                <Card key={tx.id} className="border-none shadow-sm rounded-[10px] bg-white overflow-hidden active:scale-[0.98] transition-all">
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-[10px] bg-green-50 text-green-600">
-                        <TrendingUp className="h-5 w-5" />
+                      <div className={cn(
+                        "p-3 rounded-[10px]",
+                        tx.type === 'deposit' ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'
+                      )}>
+                        {tx.type === 'deposit' ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-black text-gray-800">شحن رصيد - بنك الكريمي</p>
-                        <p className="text-[10px] text-gray-400 font-bold mt-0.5">مثال توضيحي</p>
+                        <p className="text-sm font-black text-gray-800">{tx.description}</p>
+                        <p className="text-[10px] text-gray-400 font-bold mt-0.5">{tx.date}</p>
                       </div>
                     </div>
-                    <span className="font-black text-lg text-green-600">+5,000</span>
-                  </CardContent>
-                </Card>
-                <Card className="border-none shadow-sm rounded-[10px] bg-white">
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-[10px] bg-rose-50 text-rose-600">
-                        <TrendingDown className="h-5 w-5" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-black text-gray-800">دفع طلب #12345</p>
-                        <p className="text-[10px] text-gray-400 font-bold mt-0.5">مثال توضيحي</p>
-                      </div>
+                    <div className="text-left">
+                      <span className={cn(
+                        "font-black text-lg tabular-nums",
+                        tx.type === 'deposit' ? 'text-green-600' : 'text-rose-600'
+                      )}>
+                        {tx.type === 'deposit' ? '+' : '-'}{tx.amount}
+                      </span>
+                      <p className="text-[8px] font-bold text-gray-400 uppercase">ر.س</p>
                     </div>
-                    <span className="font-black text-lg text-rose-600">-1,200</span>
                   </CardContent>
                 </Card>
-              </div>
+              ))
             )}
           </div>
         </div>
