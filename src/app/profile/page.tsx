@@ -1,7 +1,7 @@
 
 "use client"
 
-import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Crown, Trash2, ChevronDown, BadgeCheck, Phone, Wallet } from "lucide-react"
+import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Crown, Trash2, ChevronDown, BadgeCheck, Phone, Wallet, FileText } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
@@ -63,7 +63,8 @@ export default function ProfilePage() {
       title: "الدعم والمساهمة",
       items: [
         { icon: HandHeart, label: "بوابة التبرعات", description: "شارك في أعمال الخير", href: "/donations" },
-        { icon: Shield, label: "الخصوصية والأمان", description: "شروط الخدمة والسياسات", href: "/privacy" },
+        { icon: Shield, label: "الخصوصية والأمان", description: "سياسة حماية بياناتك", href: "/privacy" },
+        { icon: FileText, label: "الشروط والأحكام", description: "حقوقك والتزاماتك القانونية", href: "/terms" },
         { icon: HelpCircle, label: "مركز المساعدة", description: "الأسئلة الشائعة والدعم الفني", href: "#" },
       ]
     }
