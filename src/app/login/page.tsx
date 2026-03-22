@@ -75,6 +75,7 @@ export default function LoginPage() {
                   fill 
                   className="object-contain"
                   priority
+                  unoptimized
                   data-ai-hint="login illustration"
                 />
               </div>
@@ -143,6 +144,7 @@ export default function LoginPage() {
                   alt="OTP Illustration" 
                   fill 
                   className="object-contain"
+                  unoptimized
                   data-ai-hint="message illustration"
                 />
               </div>

@@ -52,6 +52,7 @@ export default function DriverRegisterPage() {
               fill 
               className="object-contain"
               priority
+              unoptimized
               data-ai-hint="driver illustration"
             />
           </div>

@@ -49,6 +49,7 @@ export default function UserRegisterPage() {
               alt="Welcome Illustration" 
               fill 
               className="object-contain"
+              unoptimized
               data-ai-hint="welcome illustration"
             />
           </div>
