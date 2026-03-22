@@ -8,7 +8,8 @@ import { doc, updateDoc, collection, addDoc, serverTimestamp, increment } from "
 import { 
   ArrowRight, Clock, MapPin, CreditCard, ShoppingBag, Star, 
   Phone, MessageCircle, ChevronRight, Truck, CheckCircle2, 
-  Utensils, XCircle, RefreshCw, Wallet, Landmark, Copy, Heart
+  Utensils, XCircle, RefreshCw, Wallet, Landmark, Copy, Heart,
+  Navigation, Home
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -50,6 +51,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [isTipOpen, setIsTipOpen] = useState(false)
   const [tipAmount, setTipAmount] = useState("")
   const [tipMethod, setTipMethod] = useState<"wallet" | "bank">("wallet")
+  
+  // تتبع المندوب بشكل حي (محاكاة)
+  const [driverHeading, setDriverHeading] = useState(45)
 
   const orderRef = useMemoFirebase(() => (!db || !user || !id || id.startsWith('mock-')) ? null : doc(db, "users", user.uid, "orders", id as string), [db, user, id])
   const { data: realOrder, isLoading: isRealOrderLoading } = useDoc(orderRef)
@@ -75,6 +79,16 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       }
     }
   }, [order])
+
+  // محاكاة تغيير الاتجاه عند التتبع
+  useEffect(() => {
+    if (order?.status === 'on_the_way') {
+      const interval = setInterval(() => {
+        setDriverHeading(prev => (prev + (Math.random() * 10 - 5)) % 360)
+      }, 3000)
+      return () => clearInterval(interval)
+    }
+  }, [order?.status])
 
   const steps = [
     { id: 'pending', label: 'قيد الانتظار', icon: Clock },
@@ -177,19 +191,49 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </Card>
         )}
 
-        {/* تتبع المندوب - يظهر فقط في الطريق */}
+        {/* تتبع المندوب - تحسين الخريطة والحركة */}
         {order.status === 'on_the_way' && (
           <Card className="border-none shadow-sm rounded-[25px] overflow-hidden bg-white animate-in zoom-in duration-500">
             <div className="p-4 bg-primary/5 border-b border-secondary/30 flex justify-between items-center">
               <h3 className="font-black text-xs text-primary flex items-center gap-2"><Truck className="h-4 w-4" /> تتبع المندوب مباشر</h3>
               <Badge className="bg-green-500 text-white border-none text-[8px] font-black">نشط الآن</Badge>
             </div>
-            <div className="h-48 w-full bg-gray-100 relative">
-              <iframe className="w-full h-full grayscale opacity-80" src="https://www.openstreetmap.org/export/embed.html?bbox=49.12,14.53,49.14,14.55&layer=mapnik&marker=14.54,49.13" />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="bg-white p-3 rounded-2xl shadow-xl border-2 border-primary animate-bounce">
-                  <Truck className="h-6 w-6 text-primary" />
+            <div className="h-64 w-full bg-[#e5e7eb] relative overflow-hidden">
+              {/* الخريطة بالألوان الطبيعية */}
+              <iframe 
+                className="w-full h-full border-none" 
+                src="https://www.openstreetmap.org/export/embed.html?bbox=49.12,14.53,49.14,14.55&layer=mapnik" 
+              />
+              
+              {/* طبقة تتبع واقعية (SVG Line) */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
+                <line x1="20%" y1="80%" x2="50%" y2="50%" stroke="var(--primary)" strokeWidth="4" strokeDasharray="8,8" />
+              </svg>
+
+              {/* موقع العميل (Home Marker) */}
+              <div className="absolute top-[20%] left-[20%] -translate-x-1/2 -translate-y-1/2">
+                <div className="bg-white p-2 rounded-full shadow-lg border-2 border-primary">
+                  <Home className="h-5 w-5 text-primary" />
                 </div>
+                <div className="bg-primary text-white text-[8px] font-black px-2 py-0.5 rounded-full mt-1 whitespace-nowrap shadow-sm">موقعك</div>
+              </div>
+
+              {/* موقع المندوب (Smooth Arrow Indicator) */}
+              <div 
+                className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 transition-all duration-1000 ease-in-out"
+                style={{ transform: `translate(-50%, -50%) rotate(${driverHeading}deg)` }}
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
+                  <div className="bg-primary p-2.5 rounded-full shadow-2xl border-2 border-white relative z-10">
+                    <Navigation className="h-6 w-6 text-white fill-white" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md p-2 rounded-xl border shadow-sm flex items-center gap-2">
+                <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-black text-gray-700">المندوب يتحرك باتجاهك</span>
               </div>
             </div>
           </Card>
