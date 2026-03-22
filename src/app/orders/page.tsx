@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { ar } from "date-fns/locale"
+import { cn } from "@/lib/utils"
 
 // بيانات تجريبية لتوضيح حالات الطلب المختلفة
 const MOCK_ORDERS = [
