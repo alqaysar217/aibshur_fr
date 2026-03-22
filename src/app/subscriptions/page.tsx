@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -83,7 +82,7 @@ export default function SubscriptionsPage() {
                   <h3 className="font-black text-xl">{plan.name}</h3>
                   <div className="flex items-baseline gap-1">
                     <span className="text-2xl font-black">{plan.price}</span>
-                    <span className="text-[10px] font-bold opacity-80">ر.س / شهر</span>
+                    <span className="text-[10px] font-bold opacity-80">ريال / شهر</span>
                   </div>
                 </div>
                 <div className="h-12 w-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">

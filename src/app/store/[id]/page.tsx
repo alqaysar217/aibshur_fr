@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -313,7 +312,7 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
                       <div className="flex items-center justify-between mt-auto">
                         <div className="flex items-center gap-2">
                           {renderStars(product.rating || 4.8)}
-                          <span className="text-primary font-black text-[11px] shrink-0">{product.price} ر.س</span>
+                          <span className="text-primary font-black text-[11px] shrink-0">{product.price} ريال</span>
                         </div>
                         <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                           {inCart ? (
@@ -359,7 +358,7 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
                   <p className="text-[10px] font-black text-primary uppercase">{store?.name}</p>
                   {renderStars(viewingProduct.rating || 4.8)}
                 </div>
-                <p className="text-2xl font-black text-primary">{viewingProduct.price} <small className="text-xs">ر.س</small></p>
+                <p className="text-2xl font-black text-primary">{viewingProduct.price} <small className="text-xs">ريال</small></p>
                 <p className="text-[11px] text-gray-500 leading-relaxed font-medium">{viewingProduct.description || 'وصف المنتج متاح هنا'}</p>
                 
                 {!user ? (

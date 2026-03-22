@@ -1,4 +1,3 @@
-
 "use client"
 
 import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Crown, Trash2, ChevronDown, BadgeCheck, Phone, Wallet, FileText, LogIn, ArrowRight } from "lucide-react"
@@ -175,7 +174,7 @@ export default function ProfilePage() {
             </div>
             <div className="text-center">
               <p className="text-[9px] text-gray-400 font-black uppercase">المحفظة</p>
-              <p className="text-sm font-black text-primary">{walletData?.balance || 0} ر.س</p>
+              <p className="text-sm font-black text-primary">{walletData?.balance || 0} ريال</p>
             </div>
           </Link>
           <Link href="/loyalty" className="bg-white p-5 rounded-[10px] shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition-all">

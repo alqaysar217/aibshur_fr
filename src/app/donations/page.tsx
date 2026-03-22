@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -108,7 +107,7 @@ export default function DonationsPage() {
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2">مبلغ المساهمة</label>
             <div className="relative">
               <Input type="number" placeholder="0.00" className="h-16 rounded-[12px] bg-gray-50 border-none text-2xl font-black text-center focus-visible:ring-primary/20" value={amount} onChange={(e) => setAmount(e.target.value)} />
-              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-sm font-black text-gray-300">ر.س</span>
+              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-sm font-black text-gray-300">ريال</span>
             </div>
           </div>
           <div className="grid grid-cols-4 gap-3">
@@ -123,7 +122,7 @@ export default function DonationsPage() {
           <div className="grid grid-cols-2 gap-4">
             <button onClick={() => setPaymentMethod("wallet")} className={cn("p-5 rounded-[20px] border-2 flex flex-col items-center gap-3 transition-all", paymentMethod === "wallet" ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-white text-gray-400 border-transparent shadow-sm")}>
               <Wallet className="h-6 w-6" />
-              <div className="text-center"><p className="text-[11px] font-black leading-none">رصيد المحفظة</p><p className="text-[8px] font-bold opacity-70 mt-1">المتاح: {wallet?.balance || 0} ر.س</p></div>
+              <div className="text-center"><p className="text-[11px] font-black leading-none">رصيد المحفظة</p><p className="text-[8px] font-bold opacity-70 mt-1">المتاح: {wallet?.balance || 0} ريال</p></div>
             </button>
             <button onClick={() => setPaymentMethod("bank")} className={cn("p-5 rounded-[20px] border-2 flex flex-col items-center gap-3 transition-all", paymentMethod === "bank" ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-white text-gray-400 border-transparent shadow-sm")}>
               <Landmark className="h-6 w-6" />

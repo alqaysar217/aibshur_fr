@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -151,7 +150,7 @@ export default function OrdersPage() {
                         </div>
                         <div className="text-left space-y-1">
                           <p className="text-[9px] font-black text-gray-400 uppercase">إجمالي الحساب</p>
-                          <p className="text-sm font-black text-primary">{order.totalAmount} <small className="text-[9px]">ر.س</small></p>
+                          <p className="text-sm font-black text-primary">{order.totalAmount} <small className="text-[9px]">ريال</small></p>
                         </div>
                       </div>
 

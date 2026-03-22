@@ -224,10 +224,10 @@ export default function CartPage() {
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-xs truncate text-right">{item.name}</p>
                     </div>
-                    <div className="w-16 text-center font-bold text-[11px] text-muted-foreground shrink-0">{item.price} ر.س</div>
+                    <div className="w-16 text-center font-bold text-[11px] text-muted-foreground shrink-0">{item.price} ريال</div>
                     <div className="w-12 text-center font-black text-[11px] shrink-0">x{item.quantity}</div>
                     <div className="w-20 text-center font-black text-primary text-[11px] shrink-0">
-                      {item.price * item.quantity} ر.س
+                      {item.price * item.quantity} ريال
                     </div>
                   </div>
                 ))}
@@ -241,7 +241,7 @@ export default function CartPage() {
                     </div>
                     <div className="flex-1 min-w-0 text-right">
                       <p className="font-bold text-xs truncate">{item.name}</p>
-                      <p className="text-[10px] text-primary font-black">{item.price} ر.س</p>
+                      <p className="text-[10px] text-primary font-black">{item.price} ريال</p>
                     </div>
                     <div className="flex items-center gap-2 bg-white p-1 rounded-md shadow-sm border">
                       <button onClick={() => updateQuantity(item.id, -1)} className="h-6 w-6 rounded flex items-center justify-center active:scale-90"><Minus className="h-3 w-3" /></button>
@@ -358,7 +358,7 @@ export default function CartPage() {
               <SelectItem value="wallet" className="font-bold text-xs py-3 text-right">
                 <div className="flex items-center gap-2 justify-start w-full">
                   <Wallet className="h-4 w-4 text-primary shrink-0" />
-                  <span>المحفظة (الرصيد: {wallet?.balance || 0} ر.س)</span>
+                  <span>المحفظة (الرصيد: {wallet?.balance || 0} ريال)</span>
                 </div>
               </SelectItem>
               <SelectItem value="cash" className="font-bold text-xs py-3 text-right">
@@ -406,15 +406,15 @@ export default function CartPage() {
           <CardContent className="p-5 space-y-4">
             <div className="flex justify-between text-xs font-bold">
               <span className="text-muted-foreground">إجمالي المنتجات</span>
-              <span>{cartTotal} ر.س</span>
+              <span>{cartTotal} ريال</span>
             </div>
             <div className="flex justify-between text-xs font-bold">
               <span className="text-muted-foreground">رسوم التوصيل</span>
-              <span className="text-primary">+ {deliveryFee} ر.س</span>
+              <span className="text-primary">+ {deliveryFee} ريال</span>
             </div>
             <div className="border-t border-dashed pt-4 flex justify-between items-center">
               <span className="font-black text-sm text-primary">الإجمالي الكلي</span>
-              <span className="font-black text-2xl text-primary">{total} <small className="text-xs">ر.س</small></span>
+              <span className="font-black text-2xl text-primary">{total} <small className="text-xs">ريال</small></span>
             </div>
           </CardContent>
         </Card>
@@ -431,7 +431,7 @@ export default function CartPage() {
               <span>جاري المعالجة...</span>
             </>
           ) : (
-            <span>تأكيد الطلب - {total} ر.س</span>
+            <span>تأكيد الطلب - {total} ريال</span>
           )}
         </Button>
       </div>

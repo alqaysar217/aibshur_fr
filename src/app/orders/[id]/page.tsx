@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -250,7 +249,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                     <span className="flex-1 font-bold text-xs text-gray-800 text-right">{item.name}</span>
                     <span className="w-16 text-center font-bold text-[10px] text-gray-500">{item.price}</span>
                     <span className="w-12 text-center font-black text-[10px]">x{item.quantity}</span>
-                    <span className="w-20 text-left font-black text-primary text-[11px]">{item.price * item.quantity} ر.س</span>
+                    <span className="w-20 text-left font-black text-primary text-[11px]">{item.price * item.quantity} ريال</span>
                   </div>
                 ))}
               </div>
@@ -277,9 +276,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
         <Card className="border-none shadow-sm rounded-[25px] bg-white overflow-hidden">
           <CardContent className="p-6 space-y-4">
-            <div className="flex justify-between text-xs font-bold text-gray-500"><span>المجموع الفرعي</span><span>{order.subtotal} ر.س</span></div>
-            <div className="flex justify-between text-xs font-bold text-gray-500"><span>رسوم التوصيل</span><span className="text-primary">+ {order.deliveryFee} ر.س</span></div>
-            <div className="border-t border-dashed border-secondary/50 pt-4 flex justify-between items-center"><span className="font-black text-sm text-gray-900">الإجمالي الكلي</span><span className="font-black text-2xl text-primary">{order.totalAmount} <small className="text-[10px]">ر.س</small></span></div>
+            <div className="flex justify-between text-xs font-bold text-gray-500"><span>المجموع الفرعي</span><span>{order.subtotal} ريال</span></div>
+            <div className="flex justify-between text-xs font-bold text-gray-500"><span>رسوم التوصيل</span><span className="text-primary">+ {order.deliveryFee} ريال</span></div>
+            <div className="border-t border-dashed border-secondary/50 pt-4 flex justify-between items-center"><span className="font-black text-sm text-gray-900">الإجمالي الكلي</span><span className="font-black text-2xl text-primary">{order.totalAmount} <small className="text-[10px]">ريال</small></span></div>
           </CardContent>
         </Card>
 
@@ -334,7 +333,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </div>
           <div className="p-6 space-y-6 bg-white">
             <div className="grid grid-cols-3 gap-3">
-              {[500, 1000, 2000].map(v => <Button key={v} variant="outline" onClick={() => setTipAmount(v.toString())} className={cn("h-12 rounded-xl font-black text-xs", tipAmount === v.toString() ? "bg-primary text-white border-primary" : "bg-gray-50 border-transparent")}>{v} ر.س</Button>)}
+              {[500, 1000, 2000].map(v => <Button key={v} variant="outline" onClick={() => setTipAmount(v.toString())} className={cn("h-12 rounded-xl font-black text-xs", tipAmount === v.toString() ? "bg-primary text-white border-primary" : "bg-gray-50 border-transparent")}>{v} ريال</Button>)}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <button onClick={() => setTipMethod('wallet')} className={cn("p-4 rounded-2xl border-2 flex flex-col items-center gap-2", tipMethod === 'wallet' ? "bg-primary/5 border-primary text-primary" : "border-transparent bg-gray-50 text-gray-400")}>

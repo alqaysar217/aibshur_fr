@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -76,7 +75,7 @@ export default function WalletPage() {
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">الرصيد المتاح</p>
                 <div className="flex items-baseline gap-2">
                   <h2 className="text-5xl font-black tabular-nums">{wallet?.balance || 0}</h2>
-                  <span className="text-sm font-bold opacity-60">ر.س</span>
+                  <span className="text-sm font-bold opacity-60">ريال</span>
                 </div>
               </div>
               <Wallet className="h-8 w-8 text-primary" />
@@ -157,7 +156,7 @@ export default function WalletPage() {
                   )}>
                     {tx.type === 'deposit' ? '+' : '-'}{tx.amount}
                   </span>
-                  <p className="text-[8px] font-black text-gray-300">ر.س</p>
+                  <p className="text-[8px] font-black text-gray-300">ريال</p>
                 </div>
               </div>
             ))}

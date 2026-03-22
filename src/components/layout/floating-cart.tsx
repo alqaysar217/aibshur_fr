@@ -57,7 +57,7 @@ export function FloatingCart() {
         </div>
         <div className="flex items-center gap-1 border-r border-white/20 pr-4">
           <span className="text-xl">{cartTotal}</span>
-          <span className="text-[10px] opacity-80 font-bold">ر.س</span>
+          <span className="text-[10px] opacity-80 font-bold">ريال</span>
         </div>
       </Button>
     </div>

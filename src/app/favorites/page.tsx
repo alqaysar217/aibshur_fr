@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -177,7 +176,7 @@ export default function FavoritesPage() {
                       <div className="flex items-center justify-between mt-auto">
                         <div className="flex items-center gap-2">
                           {renderStars(product.rating || 4.8)}
-                          <div className="text-primary font-black text-[11px] shrink-0">{product.price} ر.س</div>
+                          <div className="text-primary font-black text-[11px] shrink-0">{product.price} ريال</div>
                         </div>
                         <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                           {inCart ? (
