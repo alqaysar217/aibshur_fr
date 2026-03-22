@@ -65,7 +65,7 @@ export default function ProfilePage() {
         { icon: HandHeart, label: "بوابة التبرعات", description: "شارك في أعمال الخير", href: "/donations" },
         { icon: Shield, label: "الخصوصية والأمان", description: "سياسة حماية بياناتك", href: "/privacy" },
         { icon: FileText, label: "الشروط والأحكام", description: "حقوقك والتزاماتك القانونية", href: "/terms" },
-        { icon: HelpCircle, label: "مركز المساعدة", description: "الأسئلة الشائعة والدعم الفني", href: "#" },
+        { icon: HelpCircle, label: "مركز المساعدة", description: "الأسئلة الشائعة والدعم الفني", href: "/help" },
       ]
     }
   ]
@@ -96,6 +96,7 @@ export default function ProfilePage() {
           <h1 className="text-2xl font-black text-primary">سجل دخولك الآن</h1>
           <p className="text-muted-foreground text-sm max-w-[250px] mx-auto leading-relaxed">انضم لعالم أبشر لإدارة طلباتك، محفظتك، والحصول على عروض حصرية!</p>
         </div>
+        <Button onClick={() => router.push('/login')} className="w-full max-w-xs h-14 rounded-[10px] font-black text-lg">تسجيل الدخول</Button>
         <BottomNav />
       </div>
     )
