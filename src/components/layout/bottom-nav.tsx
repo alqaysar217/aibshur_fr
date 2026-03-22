@@ -30,6 +30,12 @@ export function BottomNav() {
 
   if (!mounted) return null;
 
+  // إخفاء شريط التنقل في صفحات البداية والمصادقة
+  const authRoutes = ["/login", "/governorates", "/register/user", "/register/driver"]
+  const isAuthPage = authRoutes.includes(pathname)
+  
+  if (isAuthPage) return null;
+
   const handleNavClick = (e: React.MouseEvent, item: any) => {
     if (item.protected && !user) {
       e.preventDefault()

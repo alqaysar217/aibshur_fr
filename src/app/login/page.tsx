@@ -2,12 +2,11 @@
 "use client"
 
 import { useState } from "react"
-import { Smartphone, MessageSquare, X, LogIn, Sparkles, ShieldCheck } from "lucide-react"
+import { Smartphone, MessageSquare, X, LogIn, Sparkles, ShieldCheck, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/firebase"
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth"
+import { useAuth, initiateAnonymousSignIn } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -20,6 +19,7 @@ export default function LoginPage() {
   
   const router = useRouter()
   const { toast } = useToast()
+  const auth = useAuth()
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,10 +38,19 @@ export default function LoginPage() {
     e.preventDefault()
     if (otp === "123456") {
       setLoading(true)
-      setTimeout(() => {
+      try {
+        // تفعيل حالة المصادقة لإنهاء وضع الضيف
+        initiateAnonymousSignIn(auth)
+        
+        setTimeout(() => {
+          setLoading(false)
+          toast({ title: "تم الدخول بنجاح", description: "أهلاً بك في أبشر" })
+          router.push("/")
+        }, 800)
+      } catch (error) {
         setLoading(false)
-        router.push("/")
-      }, 1000)
+        toast({ variant: "destructive", title: "خطأ في تسجيل الدخول" })
+      }
     } else {
       toast({ variant: "destructive", title: "رمز غير صحيح", description: "استخدم الكود التجريبي 123456" })
     }
@@ -154,7 +163,7 @@ export default function LoginPage() {
                 />
               </div>
               <Button type="submit" disabled={loading || otp.length < 6} className="w-full h-16 rounded-[15px] text-lg font-black bg-primary shadow-xl shadow-primary/20">
-                {loading ? "جاري التحقق..." : "تأكيد الحساب"}
+                {loading ? <Loader2 className="animate-spin h-6 w-6 mx-auto" /> : "تأكيد الحساب"}
               </Button>
               <button type="button" onClick={() => setStep(1)} className="w-full text-center text-xs font-black text-primary hover:underline">تعديل رقم الهاتف؟</button>
             </form>
