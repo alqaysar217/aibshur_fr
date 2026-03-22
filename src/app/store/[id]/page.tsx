@@ -350,7 +350,7 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
                 <Image src={viewingProduct.imageUrl || `https://picsum.photos/seed/${viewingProduct.id}/600/400`} alt={viewingProduct.name} fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 <div className="absolute bottom-4 right-4 text-white">
-                  <h2 className="text-lg font-black">{viewingProduct.name}</h2>
+                  <DialogTitle className="text-lg font-black">{viewingProduct.name}</DialogTitle>
                 </div>
               </div>
               <div className="bg-white p-5 space-y-4">
@@ -359,7 +359,9 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
                   {renderStars(viewingProduct.rating || 4.8)}
                 </div>
                 <p className="text-2xl font-black text-primary">{viewingProduct.price} <small className="text-xs">ريال</small></p>
-                <p className="text-[11px] text-gray-500 leading-relaxed font-medium">{viewingProduct.description || 'وصف المنتج متاح هنا'}</p>
+                <DialogDescription className="text-[11px] text-gray-500 leading-relaxed font-medium">
+                  {viewingProduct.description || 'وصف المنتج متاح هنا'}
+                </DialogDescription>
                 
                 {!user ? (
                   <Button onClick={() => router.push('/login')} className="w-full h-14 rounded-[10px] bg-amber-600 text-white font-black text-lg shadow-lg gap-2">
