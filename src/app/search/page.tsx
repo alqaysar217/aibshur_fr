@@ -141,17 +141,14 @@ export default function SearchPage() {
     saveCart(newCart)
   }
 
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex items-center gap-0.5" dir="rtl">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star key={star} className={cn("h-2 w-2", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
-        ))}
-      </div>
-    )
-  }
+  const renderStars = (rating: number) => (
+    <div className="flex items-center gap-1" dir="rtl">
+      <Star className="h-3 w-3 fill-primary text-primary" />
+      <span className="text-[10px] font-bold text-gray-500">{rating}</span>
+    </div>
+  )
 
-  if (!mounted) return null
+  if (!mounted) null
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0)
 
   return (
@@ -206,7 +203,6 @@ export default function SearchPage() {
                       <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">
                         <Image src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200`} alt={item.name} fill className="object-cover" />
                       </div>
-                      {renderStars(item.rating || 4.8)}
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
                       <div className="flex justify-between items-start">

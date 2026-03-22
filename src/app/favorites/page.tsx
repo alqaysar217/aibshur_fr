@@ -111,15 +111,12 @@ export default function FavoritesPage() {
     saveCart(newCart)
   }
 
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex items-center gap-0.5" dir="rtl">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star key={star} className={cn("h-2 w-2", rating >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
-        ))}
-      </div>
-    )
-  }
+  const renderStars = (rating: number) => (
+    <div className="flex items-center gap-1" dir="rtl">
+      <Star className="h-3 w-3 fill-primary text-primary" />
+      <span className="text-[10px] font-bold text-gray-500">{rating}</span>
+    </div>
+  )
 
   if (!mounted || isUserLoading || isUserDataLoading) return null
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0)
