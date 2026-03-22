@@ -1,13 +1,13 @@
 
 "use client"
 
-import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, Coffee, Laptop, Flame, Flower2, ShoppingBag, Gift, Sparkles, Leaf, Beef, Navigation, LogIn } from "lucide-react"
+import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, Coffee, Laptop, Flame, Flower2, ShoppingBag, Gift, Sparkles, Leaf, Beef, Navigation, LogIn, LayoutGrid } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from "@/firebase"
 import { collection, query, limit, doc, setDoc, arrayUnion, arrayRemove, where, serverTimestamp } from "firebase/firestore"
 import { cn } from "@/lib/utils"
@@ -25,6 +25,7 @@ export default function Home() {
   const { user, isUserLoading } = useUser()
   const { toast } = useToast()
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [activeFilter, setActiveFilter] = useState<string>('all')
   const [mounted, setMounted] = useState(false)
   const [isSeeding, setIsSeeding] = useState(false)
 
@@ -64,6 +65,23 @@ export default function Home() {
   }, [db, activeCategory]);
 
   const { data: stores, isLoading: isStoresLoading } = useCollection(storesQuery);
+
+  const displayStores = useMemo(() => {
+    if (!stores) return [];
+    let list = [...stores];
+
+    if (activeFilter === 'favorites') {
+      return list.filter(s => userData?.favoritesStoreIds?.includes(s.id));
+    }
+
+    if (activeFilter === 'top_rated') {
+      return list.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+    }
+
+    // 'nearest' logic can be added here if coordinates are available, currently mocked
+    
+    return list;
+  }, [stores, activeFilter, userData?.favoritesStoreIds]);
 
   const toggleFavorite = (e: React.MouseEvent, storeId: string) => {
     e.preventDefault()
@@ -237,11 +255,39 @@ export default function Home() {
           <h3 className="font-bold text-primary">المتاجر المتاحة</h3>
         </div>
 
+        {/* Filter Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1 mb-2">
+          {[
+            { id: 'all', label: 'الكل', icon: LayoutGrid },
+            { id: 'nearest', label: 'الأقرب', icon: Navigation },
+            { id: 'favorites', label: 'المفضلة', icon: Heart },
+            { id: 'top_rated', label: 'الأعلى تقييماً', icon: Star },
+          ].map((f) => {
+            const Icon = f.icon;
+            const isActive = activeFilter === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => setActiveFilter(f.id)}
+                className={cn(
+                  "flex items-center gap-1.5 px-4 py-2 rounded-full whitespace-nowrap transition-all text-[10px] font-black border",
+                  isActive 
+                    ? "bg-primary text-white border-primary shadow-sm" 
+                    : "bg-white text-gray-500 border-gray-100"
+                )}
+              >
+                <Icon className={cn("h-3 w-3", isActive ? "fill-current" : "")} />
+                {f.label}
+              </button>
+            )
+          })}
+        </div>
+
         <div className="flex flex-col gap-4">
           {isStoresLoading ? (
             [1, 2, 3].map(i => <div key={i} className="h-32 w-full bg-white rounded-[10px] animate-pulse" />)
-          ) : stores && stores.length > 0 ? (
-            stores.map((store: any) => {
+          ) : displayStores && displayStores.length > 0 ? (
+            displayStores.map((store: any) => {
               const isOpen = store.status === 'مفتوح' || store.status === 'open'
               const isFav = userData?.favoritesStoreIds?.includes(store.id)
               const categoryObj = categories?.find(c => (store.categoryIds || []).includes(c.id));
