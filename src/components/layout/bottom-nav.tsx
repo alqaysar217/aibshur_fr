@@ -3,20 +3,25 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Home, Search, ClipboardList, Heart, User } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useUser } from "@/firebase"
+import { useToast } from "@/hooks/use-toast"
 
 const navItems = [
   { icon: Home, label: "الرئيسية", href: "/" },
   { icon: Search, label: "البحث", href: "/search" },
-  { icon: ClipboardList, label: "طلباتي", href: "/orders" },
-  { icon: Heart, label: "المفضلة", href: "/favorites" },
+  { icon: ClipboardList, label: "طلباتي", href: "/orders", protected: true },
+  { icon: Heart, label: "المفضلة", href: "/favorites", protected: true },
   { icon: User, label: "حسابي", href: "/profile" },
 ]
 
 export function BottomNav() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user } = useUser()
+  const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -24,6 +29,14 @@ export function BottomNav() {
   }, [])
 
   if (!mounted) return null;
+
+  const handleNavClick = (e: React.MouseEvent, item: any) => {
+    if (item.protected && !user) {
+      e.preventDefault()
+      toast({ title: "تنبيه", description: "هذا القسم يتطلب تسجيل الدخول" })
+      router.push("/login")
+    }
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-xl border-t border-gray-100 flex items-center justify-around h-18 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-[60] rounded-t-[1.5rem]" dir="rtl">
@@ -33,6 +46,7 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
+            onClick={(e) => handleNavClick(e, item)}
             className={cn(
               "flex flex-col items-center justify-center w-full h-full py-3 transition-all duration-300 relative group",
               isActive ? "text-primary" : "text-[#6B7280] hover:text-primary/60"

@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, Coffee, Laptop, Flame, Flower2, ShoppingBag, Gift, Sparkles, Leaf, Beef, Navigation } from "lucide-react"
+import { Search, MapPin, Star, Heart, Database, Utensils, ShoppingBasket, Pill, Coffee, Laptop, Flame, Flower2, ShoppingBag, Gift, Sparkles, Leaf, Beef, Navigation, LogIn } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -69,6 +69,7 @@ export default function Home() {
     e.preventDefault()
     e.stopPropagation()
     if (!user || !db) {
+      toast({ title: "تنبيه", description: "يرجى تسجيل الدخول لاستخدام المفضلة" })
       router.push('/login')
       return
     }
@@ -141,41 +142,30 @@ export default function Home() {
 
   const getCategoryIcon = (cat: any) => {
     if (cat.icon) return <span className="text-2xl">{cat.icon}</span>;
-    switch (cat.id) {
-      case 'restaurants': return <span className="text-2xl">🍔</span>
-      case 'cafe': return <span className="text-2xl">☕</span>
-      case 'gifts': return <span className="text-2xl">🎁</span>
-      case 'beauty': return <span className="text-2xl">✨</span>
-      case 'grocery': return <span className="text-2xl">🛒</span>
-      case 'pharmacy': return <span className="text-2xl">💊</span>
-      case 'electronics': return <span className="text-2xl">💻</span>
-      case 'meat': return <span className="text-2xl">🥩</span>
-      case 'honey': return <span className="text-2xl">🍯</span>
-      case 'spices': return <span className="text-2xl">🌶️</span>
-      case 'vegetables': return <span className="text-2xl">🥦</span>
-      default: return <span className="text-2xl">📦</span>
-    }
+    return <span className="text-2xl">📦</span>
   }
 
   if (!mounted) return null;
 
-  const sortedCategories = categories ? [...categories].sort((a, b) => (a.order || 99) - (b.order || 99)) : [
-    { id: "restaurants", name: "مطاعم", icon: "🍔", color: "bg-rose-50", textColor: "text-rose-600" },
-    { id: "gifts", name: "هدايا", icon: "🎁", color: "bg-purple-50", textColor: "text-purple-600" },
-    { id: "cafe", name: "كافيهات", icon: "☕", color: "bg-amber-50", textColor: "text-amber-800" },
-    { id: "pharmacy", name: "صيدليات", icon: "💊", color: "bg-blue-50", textColor: "text-blue-600" },
-    { id: "grocery", name: "ماركت", icon: "🛒", color: "bg-green-50", textColor: "text-green-600" },
-    { id: "electronics", name: "إلكترونيات", icon: "💻", color: "bg-slate-100", textColor: "text-slate-700" },
-    { id: "beauty", name: "تجميل", icon: "✨", color: "bg-pink-50", textColor: "text-pink-600" },
-    { id: "vegetables", name: "خضروات", icon: "🥦", color: "bg-emerald-50", textColor: "text-emerald-700" },
-    { id: "meat", name: "لحوم", icon: "🥩", color: "bg-red-50", textColor: "text-red-700" },
-    { id: "spices", name: "بهارات", icon: "🌶️", color: "bg-orange-50", textColor: "text-orange-700" },
-    { id: "honey", name: "عسل", icon: "🍯", color: "bg-yellow-50", textColor: "text-yellow-800" }
-  ];
-
   return (
     <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300" dir="rtl">
       <Header />
+
+      {/* تنبيه الزائر */}
+      {!user && (
+        <div className="px-5 pt-4">
+          <div className="bg-amber-50 border border-amber-100 p-4 rounded-[10px] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <LogIn className="h-5 w-5 text-amber-600" />
+              <div className="text-right">
+                <p className="text-[11px] font-black text-amber-900 leading-none">تتصفح كزائر</p>
+                <p className="text-[9px] font-bold text-amber-700 mt-1">سجل دخولك لتتمكن من الطلب</p>
+              </div>
+            </div>
+            <Button onClick={() => router.push('/login')} size="sm" className="h-8 rounded-md bg-amber-600 text-[10px] font-black">دخول</Button>
+          </div>
+        </div>
+      )}
 
       <section className="py-4 bg-white border-b border-gray-100 shadow-sm overflow-hidden">
         <div className="flex gap-5 overflow-x-auto px-6 pb-2 scrollbar-hide" dir="rtl">
@@ -197,7 +187,7 @@ export default function Home() {
             </span>
           </button>
 
-          {sortedCategories.map((cat: any) => (
+          {categories?.sort((a, b) => (a.order || 99) - (b.order || 99)).map((cat: any) => (
             <button 
               key={cat.id} 
               onClick={() => setActiveCategory(cat.id === activeCategory ? null : cat.id)}
@@ -223,11 +213,7 @@ export default function Home() {
       </section>
 
       <section className="px-4 py-4">
-        <Carousel 
-          opts={{ loop: true, direction: 'rtl' }} 
-          plugins={[Autoplay({ delay: 5000 })]}
-          className="w-full"
-        >
+        <Carousel opts={{ loop: true, direction: 'rtl' }} plugins={[Autoplay({ delay: 5000 })]} className="w-full">
           <CarouselContent>
             {ads && ads.length > 0 ? ads.map((ad: any) => (
               <CarouselItem key={ad.id}>

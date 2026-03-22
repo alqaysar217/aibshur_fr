@@ -4,7 +4,7 @@
 import * as React from "react"
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase"
 import { useParams, useRouter } from "next/navigation"
-import { Star, Plus, ShoppingBag, ArrowRight, Minus, Heart, MapPin, Map, Timer, Navigation } from "lucide-react"
+import { Star, Plus, ShoppingBag, ArrowRight, Minus, Heart, MapPin, Map, Timer, Navigation, LogIn } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -44,6 +44,13 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
 
   const addToCart = (product: any, e?: React.MouseEvent) => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
+    
+    if (!user) {
+      toast({ title: "تنبيه", description: "يرجى تسجيل الدخول للتمكن من إضافة المنتجات للسلة" })
+      router.push('/login')
+      return
+    }
+
     const existing = cart.find(item => item.id === product.id)
     let newCart;
     if (existing) {
@@ -72,30 +79,6 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
   const { data: products, isLoading: isProductsLoading } = useCollection(productsQuery)
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
-
-  const getCategoryDisplayName = (categoryId: string) => {
-    const translations: Record<string, string> = {
-      'grocery': 'بقالة',
-      'restaurants': 'مطاعم',
-      'pharmacy': 'صيدليات',
-      'cafe': 'كافيهات',
-      'electronics': 'إلكترونيات',
-      'beauty': 'تجميل',
-      'meat': 'لحوم',
-      'honey': 'عسل',
-      'gifts': 'هدايا',
-      'spices': 'بهارات',
-      'vegetables': 'خضروات'
-    };
-    return translations[categoryId] || categoryId || 'متجر';
-  };
-
-  const categories = useMemo(() => {
-    const base = ["الكل", "مطاعم", "هدايا", "كافيهات", "صيدليات", "ماركت", "إلكترونيات", "تجميل", "خضروات", "لحوم", "بهارات", "عسل"]
-    const dynamicFilters = new Set<string>()
-    if (products) products.forEach((p: any) => { if (p.category) dynamicFilters.add(p.category) })
-    return ["الكل", ...base.slice(1), ...Array.from(dynamicFilters).filter(c => !base.includes(c))]
-  }, [products])
 
   const filteredProducts = useMemo(() => {
     if (!products) return []
@@ -137,8 +120,6 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
       <span className="text-[10px] font-bold text-gray-500">{rating}</span>
     </div>
   )
-
-  const hasOptions = (name: string) => ['بيتزا', 'نفر', 'برجر', 'عصير', 'حجم', 'نوع'].some(k => name.includes(k))
 
   if (isStoreLoading) return <div className="flex items-center justify-center min-h-screen font-bold text-primary">جاري تحميل المتجر...</div>
   if (!store) return <div className="p-10 text-center font-bold">المتجر غير موجود</div>
@@ -185,10 +166,9 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md">
                   <Star className="h-3 w-3 fill-primary text-primary" />
                   <span className="text-[10px] font-black text-primary">{store.averageRating || '4.5'}</span>
-                  <span className="text-[8px] text-gray-400 font-bold">(100+)</span>
                 </div>
                 <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-black text-[9px] h-4.5 px-2 rounded-md">
-                  {getCategoryDisplayName(store.categoryIds?.[0] || 'متجر')}
+                  {store.categoryIds?.[0] || 'متجر'}
                 </Badge>
                 <Badge className={cn("text-[9px] font-black h-4.5 px-2 rounded-md border-none shadow-none", isOpen ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600")}>
                   {isOpen ? 'مفتوح' : 'مغلق'}
@@ -216,16 +196,6 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
         </div>
       </div>
 
-      <div className="sticky top-0 z-40 bg-[#F8FAFB]/95 backdrop-blur-md py-3 border-b border-gray-100/50">
-        <div className="flex gap-2 overflow-x-auto px-5 scrollbar-hide" dir="rtl">
-          {categories.map((cat) => (
-            <button key={cat} onClick={() => setSelectedCategory(cat)} className={cn("px-4 py-2 rounded-full text-[10px] font-black whitespace-nowrap transition-all border", selectedCategory === cat ? "bg-primary text-white border-primary shadow-md scale-105" : "bg-white text-gray-500 border-gray-100 shadow-sm")}>
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <div className="px-5 py-4 flex flex-col gap-4">
         {isProductsLoading ? (
           [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-[10px] animate-pulse" />)
@@ -233,7 +203,6 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
           filteredProducts.map((product: any) => {
             const inCart = cart.find(item => item.id === product.id)
             const isFavProd = userData?.favoritesProductIds?.includes(product.id)
-            const needsOptions = hasOptions(product.name)
             return (
               <Card key={`product-${product.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer" onClick={() => setViewingProduct(product)}>
                 <CardContent className="p-3 flex items-start gap-4" dir="rtl">
@@ -254,15 +223,15 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
                         <span className="text-primary font-black text-[11px] shrink-0">{product.price} ر.س</span>
                       </div>
                       <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                        {inCart && !needsOptions ? (
+                        {inCart ? (
                           <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
                             <button onClick={(e) => removeFromCart(product.id, e)} className="h-7 w-7 rounded-[8px] bg-white shadow-sm flex items-center justify-center active:scale-90 transition-all"><Minus className="h-3 w-3 text-primary" /></button>
                             <span className="font-black text-[10px] min-w-[12px] text-center">{inCart.quantity}</span>
                             <button onClick={(e) => addToCart(product, e)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center active:scale-90 transition-all shadow-sm"><Plus className="h-3 w-3" /></button>
                           </div>
                         ) : (
-                          <Button onClick={(e) => { e.stopPropagation(); if (needsOptions) setViewingProduct(product); else addToCart(product, e); }} className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[10px] font-black px-3 active:scale-95 transition-all flex items-center gap-1">
-                            {needsOptions ? "التفاصيل" : <><ShoppingBag className="h-3 w-3" /> إضافة</>}
+                          <Button onClick={(e) => { e.stopPropagation(); addToCart(product, e); }} className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[10px] font-black px-3 active:scale-95 transition-all flex items-center gap-1">
+                            <ShoppingBag className="h-3 w-3" /> إضافة
                           </Button>
                         )}
                       </div>
@@ -284,10 +253,6 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
         <DialogContent className="rounded-[10px] w-[92%] max-w-md mx-auto p-0 overflow-hidden border-none shadow-2xl z-[100]" dir="rtl">
           {viewingProduct && (
             <div className="flex flex-col max-h-[85vh] overflow-y-auto pb-6">
-              <DialogHeader className="sr-only">
-                <DialogTitle>{viewingProduct.name}</DialogTitle>
-                <DialogDescription>تفاصيل المنتج</DialogDescription>
-              </DialogHeader>
               <div className="relative h-56 w-full">
                 <Image src={viewingProduct.imageUrl || `https://picsum.photos/seed/${viewingProduct.id}/600/400`} alt={viewingProduct.name} fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
@@ -302,7 +267,14 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
                 </div>
                 <p className="text-2xl font-black text-primary">{viewingProduct.price} <small className="text-xs">ر.س</small></p>
                 <p className="text-[11px] text-gray-500 leading-relaxed font-medium">{viewingProduct.description || 'وصف المنتج متاح هنا'}</p>
-                <Button onClick={(e) => { addToCart(viewingProduct, e); setViewingProduct(null); }} className="w-full h-14 rounded-[10px] bg-primary text-white font-black text-lg shadow-lg active:scale-95 transition-all">تأكيد الإضافة للسلة</Button>
+                
+                {!user ? (
+                  <Button onClick={() => router.push('/login')} className="w-full h-14 rounded-[10px] bg-amber-600 text-white font-black text-lg shadow-lg gap-2">
+                    <LogIn className="h-5 w-5" /> سجل دخولك لتتمكن من الطلب
+                  </Button>
+                ) : (
+                  <Button onClick={(e) => { addToCart(viewingProduct, e); setViewingProduct(null); }} className="w-full h-14 rounded-[10px] bg-primary text-white font-black text-lg shadow-lg active:scale-95 transition-all">تأكيد الإضافة للسلة</Button>
+                )}
               </div>
             </div>
           )}
