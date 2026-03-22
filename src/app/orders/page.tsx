@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Clock, ChevronLeft, Utensils, ShoppingBag, ArrowRight, Package, CheckCircle2, Truck, XCircle, Search, Activity, Check } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -51,7 +51,16 @@ export default function OrdersPage() {
   }, [db, user])
 
   const { data: realOrders, isLoading: isCollectionLoading } = useCollection(ordersQuery)
-  const displayOrders = (realOrders && realOrders.length > 0) ? realOrders : MOCK_ORDERS
+  
+  // دمج الطلبات الحقيقية مع الوهمية لضمان ظهور النماذج دائماً أثناء التطوير
+  const displayOrders = useMemo(() => {
+    const real = realOrders || []
+    return [...real, ...MOCK_ORDERS].sort((a: any, b: any) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime()
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime()
+      return dateB - dateA
+    })
+  }, [realOrders])
 
   const getStatusConfig = (status: string) => {
     switch (status) {
