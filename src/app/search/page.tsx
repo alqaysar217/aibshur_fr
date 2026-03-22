@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Search, ArrowRight, ShoppingBag, Heart, MapPin, Plus, Minus, Store, Package, Star, Navigation } from "lucide-react"
+import { Search, ArrowRight, ShoppingBag, Heart, MapPin, Plus, Minus, Store, Package, Star, Navigation, LayoutGrid, Zap } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -19,9 +19,26 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { BottomNav } from "@/components/layout/bottom-nav"
 
+const STORE_FILTERS = [
+  { id: "الكل", label: "الكل", icon: LayoutGrid },
+  { id: "الأقرب", label: "الأقرب", icon: MapPin },
+  { id: "المفضلة", label: "المفضلة", icon: Heart },
+  { id: "الأكثر تقييماً", label: "الأكثر تقييماً", icon: Star },
+]
+
+const PRODUCT_FILTERS = [
+  { id: "الكل", label: "الكل", icon: LayoutGrid },
+  { id: "الأكثر طلباً", label: "الأكثر طلباً", icon: Zap },
+  { id: "المفضلة", label: "المفضلة", icon: Heart },
+]
+
 export default function SearchPage() {
   const [queryText, setQueryText] = useState("")
   const [mounted, setMounted] = useState(false)
+  const [activeTab, setActiveTab] = useState("products")
+  const [activeStoreFilter, setActiveStoreFilter] = useState("الكل")
+  const [activeProductFilter, setActiveProductFilter] = useState("الكل")
+  
   const db = useFirestore()
   const { user } = useUser()
   const { toast } = useToast()
@@ -86,8 +103,26 @@ export default function SearchPage() {
         })
   }, [queryText, stores, products, mounted])
 
-  const filteredProducts = useMemo(() => filteredResults.filter(i => i.type === 'product'), [filteredResults])
-  const filteredStores = useMemo(() => filteredResults.filter(i => i.type === 'store'), [filteredResults])
+  const filteredProducts = useMemo(() => {
+    let list = filteredResults.filter(i => i.type === 'product')
+    if (activeProductFilter === "الأكثر طلباً") {
+      list = list.filter(p => (p.rating || 0) >= 4.8)
+    } else if (activeProductFilter === "المفضلة") {
+      list = list.filter(p => userData?.favoritesProductIds?.includes(p.id))
+    }
+    return list
+  }, [filteredResults, activeProductFilter, userData?.favoritesProductIds])
+
+  const filteredStores = useMemo(() => {
+    let list = filteredResults.filter(i => i.type === 'store')
+    if (activeStoreFilter === "المفضلة") {
+      list = list.filter(s => userData?.favoritesStoreIds?.includes(s.id))
+    } else if (activeStoreFilter === "الأكثر تقييماً") {
+      list = [...list].sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
+    }
+    // Note: Nearest logic would require coordinates comparison
+    return list
+  }, [filteredResults, activeStoreFilter, userData?.favoritesStoreIds])
 
   const toggleFavorite = (e: React.MouseEvent, type: 'store' | 'product', id: string) => {
     e.preventDefault()
@@ -180,7 +215,7 @@ export default function SearchPage() {
           className="h-14 rounded-[10px] border-none shadow-sm bg-white text-right focus-visible:ring-primary/20"
         />
 
-        <Tabs defaultValue="products" className="w-full" dir="rtl">
+        <Tabs defaultValue="products" onValueChange={setActiveTab} className="w-full" dir="rtl">
           <TabsList className="grid w-full grid-cols-2 mb-6 bg-white rounded-[10px] p-1 shadow-sm h-14" dir="rtl">
             <TabsTrigger value="products" className="rounded-md font-bold text-sm h-full gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-white shadow-none data-[state=active]:shadow-md">
               <Package className="h-4 w-4" /> المنتجات
@@ -189,6 +224,29 @@ export default function SearchPage() {
               <Store className="h-4 w-4" /> المتاجر
             </TabsTrigger>
           </TabsList>
+
+          {/* Dynamic Filter Bar Injection */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1 mb-2" dir="rtl">
+            {(activeTab === "products" ? PRODUCT_FILTERS : STORE_FILTERS).map((f) => {
+              const Icon = f.icon;
+              const isActive = (activeTab === "products" ? activeProductFilter : activeStoreFilter) === f.id;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => activeTab === "products" ? setActiveProductFilter(f.id) : setActiveStoreFilter(f.id)}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all text-[10px] font-black border",
+                    isActive 
+                      ? "bg-[#10B981] text-white border-[#10B981] shadow-md shadow-[#10B981]/20" 
+                      : "bg-[#F9FAFB] text-gray-400 border-transparent"
+                  )}
+                >
+                  <Icon className={cn("h-4 w-4", isActive ? "fill-current" : "")} />
+                  <span>{f.label}</span>
+                </button>
+              )
+            })}
+          </div>
 
           <TabsContent value="products" className="flex flex-col gap-4">
             {loadingProducts ? (
