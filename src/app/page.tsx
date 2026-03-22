@@ -22,7 +22,7 @@ import Autoplay from "embla-carousel-autoplay"
 export default function Home() {
   const router = useRouter()
   const db = useFirestore()
-  const { user } = useUser()
+  const { user, isUserLoading } = useUser()
   const { toast } = useToast()
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -151,9 +151,9 @@ export default function Home() {
     <div className="bg-[#F5F7F6] min-h-screen font-body transition-all duration-300" dir="rtl">
       <Header />
 
-      {/* تنبيه الزائر */}
-      {!user && (
-        <div className="px-5 pt-4">
+      {/* تنبيه الزائر - يظهر فقط بعد التأكد من عدم وجود مستخدم مسجل */}
+      {!isUserLoading && !user && (
+        <div className="px-5 pt-4 animate-in fade-in slide-in-from-top-2 duration-500">
           <div className="bg-amber-50 border border-amber-100 p-4 rounded-[10px] flex items-center justify-between">
             <div className="flex items-center gap-3">
               <LogIn className="h-5 w-5 text-amber-600" />
@@ -294,7 +294,7 @@ export default function Home() {
           ) : (
             <div className="text-center py-10 bg-white rounded-[10px] border border-dashed border-gray-200">
               <p className="text-xs text-gray-400">لا توجد بيانات متاحة</p>
-              {user && (
+              {!isUserLoading && user && (
                 <Button onClick={seedData} disabled={isSeeding} variant="outline" className="mt-4 rounded-[10px] h-10 text-xs border-primary text-primary font-bold">
                   {isSeeding ? "جاري البناء..." : "تجهيز تطبيق أبشر"}
                 </Button>
@@ -304,7 +304,7 @@ export default function Home() {
         </div>
       </section>
 
-      {user && stores && stores.length > 0 && (
+      {!isUserLoading && user && stores && stores.length > 0 && (
         <div className="fixed bottom-24 right-4 z-50 opacity-10 hover:opacity-100 transition-opacity">
           <Button size="icon" variant="ghost" onClick={seedData} disabled={isSeeding} className="bg-white shadow-md rounded-full h-10 w-10 border">
             <Database className="h-5 w-5" />

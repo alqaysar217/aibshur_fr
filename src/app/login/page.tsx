@@ -39,14 +39,15 @@ export default function LoginPage() {
     if (otp === "123456") {
       setLoading(true)
       try {
-        // تفعيل حالة المصادقة لإنهاء وضع الضيف
+        // تفعيل حالة المصادقة لإنهاء وضع الضيف فعلياً في Firebase
         initiateAnonymousSignIn(auth)
         
+        // الانتظار قليلاً لضمان تحديث حالة المصادقة في التطبيق قبل التوجيه
         setTimeout(() => {
           setLoading(false)
           toast({ title: "تم الدخول بنجاح", description: "أهلاً بك في أبشر" })
-          router.push("/")
-        }, 800)
+          router.replace("/")
+        }, 1200)
       } catch (error) {
         setLoading(false)
         toast({ variant: "destructive", title: "خطأ في تسجيل الدخول" })

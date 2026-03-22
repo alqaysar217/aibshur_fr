@@ -20,21 +20,27 @@ const navItems = [
 export function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
-  const { user } = useUser()
+  const { user, isUserLoading } = useUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
+  const [isSplashVisible, setIsSplashVisible] = useState(true)
 
   useEffect(() => {
     setMounted(true)
+    // مزامنة إخفاء الشريط مع مدة الـ Splash Screen (2.5 ثانية)
+    const timer = setTimeout(() => {
+      setIsSplashVisible(false)
+    }, 2500)
+    return () => clearTimeout(timer)
   }, [])
 
-  if (!mounted) return null;
+  if (!mounted || isSplashVisible) return null;
 
   // إخفاء شريط التنقل في صفحات البداية والمصادقة
   const authRoutes = ["/login", "/governorates", "/register/user", "/register/driver"]
   const isAuthPage = authRoutes.includes(pathname)
   
-  if (isAuthPage) return null;
+  if (isAuthPage || isUserLoading) return null;
 
   const handleNavClick = (e: React.MouseEvent, item: any) => {
     if (item.protected && !user) {
