@@ -1,11 +1,11 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
 import { 
   Trash2, Plus, Minus, ArrowRight, ShoppingBag, 
   MapPin, Loader2, Wallet, Banknote, 
-  MessageSquare, CheckCircle2, ChevronDown, Check, Edit2, LogIn, Tag, PlusCircle, Copy
+  MessageSquare, CheckCircle2, ChevronDown, Check, Edit2, LogIn, Tag, PlusCircle, Copy,
+  Home, Briefcase, Landmark
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -277,11 +277,17 @@ export default function CartPage() {
                 <SelectValue placeholder="اختر عنوان التوصيل" />
               </SelectTrigger>
               <SelectContent className="rounded-[15px]" dir="rtl">
-                {addresses?.map((addr) => (
-                  <SelectItem key={addr.id} value={addr.id} className="font-bold text-xs py-3 text-right">
-                    {addr.label} ({addr.city} - {addr.details})
-                  </SelectItem>
-                ))}
+                {addresses?.map((addr) => {
+                  const AddrIcon = addr.label === "المنزل" ? Home : addr.label === "العمل" ? Briefcase : MapPin;
+                  return (
+                    <SelectItem key={addr.id} value={addr.id} className="font-bold text-xs py-3 text-right">
+                      <div className="flex items-center gap-2 justify-end w-full">
+                        <span>{addr.label} ({addr.city} - {addr.details})</span>
+                        <AddrIcon className="h-4 w-4 text-primary" />
+                      </div>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           ) : (
@@ -350,13 +356,22 @@ export default function CartPage() {
             </SelectTrigger>
             <SelectContent className="rounded-[15px]" dir="rtl">
               <SelectItem value="wallet" className="font-bold text-xs py-3 text-right">
-                المحفظة (الرصيد: {wallet?.balance || 0} ر.س)
+                <div className="flex items-center gap-2 justify-end w-full">
+                  <span>المحفظة (الرصيد: {wallet?.balance || 0} ر.س)</span>
+                  <Wallet className="h-4 w-4 text-primary" />
+                </div>
               </SelectItem>
               <SelectItem value="cash" className="font-bold text-xs py-3 text-right">
-                الدفع عند الاستلام
+                <div className="flex items-center gap-2 justify-end w-full">
+                  <span>الدفع عند الاستلام</span>
+                  <Banknote className="h-4 w-4 text-primary" />
+                </div>
               </SelectItem>
               <SelectItem value="bank" className="font-bold text-xs py-3 text-right">
-                تحويل بنكي
+                <div className="flex items-center gap-2 justify-end w-full">
+                  <span>تحويل بنكي</span>
+                  <Landmark className="h-4 w-4 text-primary" />
+                </div>
               </SelectItem>
             </SelectContent>
           </Select>
