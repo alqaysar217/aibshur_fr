@@ -3,9 +3,9 @@
 
 import { useState, useEffect } from "react"
 import { 
-  Trash2, Plus, Minus, ArrowRight, CreditCard, ShoppingBag, 
-  Tag, MapPin, ChevronLeft, Loader2, Wallet, Banknote, 
-  MessageSquare, AlertCircle, CheckCircle2, Copy, ChevronDown, Check, Edit2, LogIn
+  Trash2, Plus, Minus, ArrowRight, ShoppingBag, 
+  MapPin, Loader2, Wallet, Banknote, 
+  MessageSquare, CheckCircle2, ChevronDown, Check, Edit2, LogIn, Tag, PlusCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from "@/firebase"
-import { collection, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, increment } from "firebase/firestore"
+import { collection, addDoc, serverTimestamp, query, orderBy, doc } from "firebase/firestore"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
@@ -26,6 +26,7 @@ export default function CartPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string>("")
   const [paymentMethod, setPaymentMethod] = useState<string>("cash")
   const [orderNotes, setOrderNotes] = useState("")
+  const [couponCode, setCouponCode] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const router = useRouter()
@@ -116,6 +117,7 @@ export default function CartPage() {
       paymentMethod: paymentMethod,
       deliveryAddress: `${selectedAddress?.city} - ${selectedAddress?.details}`,
       notes: orderNotes,
+      couponCode: couponCode,
       createdAt: serverTimestamp()
     }
 
@@ -160,7 +162,7 @@ export default function CartPage() {
         </Button>
       </header>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-6">
         {!user && (
           <div className="bg-amber-50 border border-amber-100 p-4 rounded-[15px] flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
@@ -174,6 +176,7 @@ export default function CartPage() {
           </div>
         )}
 
+        {/* قائمة الطلبات */}
         <Card className="border-none shadow-sm rounded-[15px] overflow-hidden bg-white">
           <div className="p-4 border-b flex justify-between items-center bg-secondary/10">
             <h2 className="font-bold text-sm text-primary flex items-center gap-2">
@@ -188,6 +191,17 @@ export default function CartPage() {
               {isEditing ? <><Check className="h-3.5 w-3.5" /> تم</> : <><Edit2 className="h-3.5 w-3.5" /> تعديل</>}
             </Button>
           </div>
+          
+          {/* Table Headers */}
+          {!isEditing && (
+            <div className="px-4 py-3 bg-gray-50/50 flex items-center text-[10px] font-black text-gray-400 uppercase tracking-widest border-b">
+              <span className="flex-1 text-right">المنتج</span>
+              <span className="w-16 text-center">السعر</span>
+              <span className="w-12 text-center">الكمية</span>
+              <span className="w-20 text-center">الإجمالي</span>
+            </div>
+          )}
+
           <CardContent className="p-0">
             {!isEditing ? (
               <div className="divide-y divide-secondary/50">
@@ -228,9 +242,22 @@ export default function CartPage() {
           </CardContent>
         </Card>
 
-        {user && (
-          <section className="space-y-3">
-            <h2 className="font-bold text-sm text-primary px-1 flex items-center gap-2"><MapPin className="h-4 w-4" /> عنوان التوصيل</h2>
+        {/* عنوان التوصيل */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="font-bold text-sm text-primary flex items-center gap-2">
+              <MapPin className="h-4 w-4" /> عنوان التوصيل
+            </h2>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => router.push('/addresses')}
+              className="text-[10px] font-black text-primary gap-1 h-7 bg-primary/5 rounded-full px-3"
+            >
+              <PlusCircle className="h-3 w-3" /> إضافة عنوان
+            </Button>
+          </div>
+          {user ? (
             <Select value={selectedAddressId} onValueChange={setSelectedAddressId}>
               <SelectTrigger className="h-14 rounded-[15px] bg-white border-none shadow-sm font-bold text-xs text-right" dir="rtl">
                 <SelectValue placeholder="اختر عنوان التوصيل" />
@@ -243,13 +270,75 @@ export default function CartPage() {
                 ))}
               </SelectContent>
             </Select>
-          </section>
-        )}
+          ) : (
+            <Card className="border-none shadow-sm rounded-[15px] bg-white p-4 text-center">
+              <p className="text-xs text-muted-foreground font-bold italic">سجل دخولك لاختيار عنوان التوصيل</p>
+            </Card>
+          )}
+        </section>
 
+        {/* كوبون الخصم */}
+        <section className="space-y-3">
+          <h2 className="font-bold text-sm text-primary px-1 flex items-center gap-2">
+            <Tag className="h-4 w-4" /> هل لديك كوبون خصم؟
+          </h2>
+          <div className="flex gap-2">
+            <Input 
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              placeholder="أدخل كود الخصم هنا"
+              className="h-12 rounded-[12px] bg-white border-none shadow-sm text-right font-bold text-xs"
+            />
+            <Button className="h-12 px-6 rounded-[12px] font-black text-xs shadow-sm">تطبيق</Button>
+          </div>
+        </section>
+
+        {/* الملاحظات */}
+        <section className="space-y-3">
+          <h2 className="font-bold text-sm text-primary px-1 flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" /> هل لديك ملاحظة؟
+          </h2>
+          <Textarea 
+            value={orderNotes}
+            onChange={(e) => setOrderNotes(e.target.value)}
+            placeholder="مثال: يرجى الاتصال عند الوصول، بدون شطة، إلخ..."
+            className="rounded-[15px] bg-white border-none shadow-sm text-right font-bold text-xs min-h-[100px] p-4 resize-none"
+          />
+        </section>
+
+        {/* طرق الدفع */}
+        <section className="space-y-3">
+          <h2 className="font-bold text-sm text-primary px-1 flex items-center gap-2">
+            <Wallet className="h-4 w-4" /> طريقة الدفع
+          </h2>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { id: 'cash', label: 'الدفع عند الاستلام', icon: Banknote },
+              { id: 'wallet', label: 'محفظة', icon: Wallet },
+              { id: 'bank', label: 'تحويل بنكي', icon: CheckCircle2 },
+            ].map((method) => (
+              <button
+                key={method.id}
+                onClick={() => setPaymentMethod(method.id)}
+                className={cn(
+                  "flex flex-col items-center justify-center p-3 rounded-[15px] border-2 transition-all gap-2 h-24",
+                  paymentMethod === method.id 
+                    ? "bg-primary/5 border-primary text-primary" 
+                    : "bg-white border-transparent text-gray-400 shadow-sm"
+                )}
+              >
+                <method.icon className="h-6 w-6" />
+                <span className="text-[9px] font-black text-center leading-tight">{method.label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* ملخص الفاتورة */}
         <Card className="border-none shadow-sm rounded-[15px] bg-white overflow-hidden">
           <CardContent className="p-5 space-y-4">
             <div className="flex justify-between text-xs font-bold">
-              <span className="text-muted-foreground">قيمة المنتجات</span>
+              <span className="text-muted-foreground">إجمالي المنتجات</span>
               <span>{cartTotal} ر.س</span>
             </div>
             <div className="flex justify-between text-xs font-bold">
@@ -257,30 +346,25 @@ export default function CartPage() {
               <span className="text-primary">+ {deliveryFee} ر.س</span>
             </div>
             <div className="border-t border-dashed pt-4 flex justify-between items-center">
-              <span className="font-black text-lg text-primary">المبلغ الإجمالي</span>
+              <span className="font-black text-sm text-primary">الإجمالي الكلي</span>
               <span className="font-black text-2xl text-primary">{total} <small className="text-xs">ر.س</small></span>
             </div>
           </CardContent>
         </Card>
 
+        {/* زر التأكيد */}
         <Button 
           onClick={handleCheckout} 
           disabled={isSubmitting || (user && !selectedAddressId)}
-          className="w-full h-16 rounded-[15px] shadow-xl text-lg font-black bg-primary flex items-center justify-between px-8 mt-6"
+          className="w-full h-16 rounded-[15px] shadow-xl text-base font-black bg-primary flex items-center justify-center gap-3 mt-6"
         >
           {isSubmitting ? (
-            <div className="flex items-center gap-2 mx-auto">
-              <Loader2 className="animate-spin h-6 w-6" />
-              <span>جاري المعالجة...</span>
-            </div>
-          ) : (
             <>
-              <div className="flex items-center gap-2">
-                <span>{user ? "تأكيد وتنفيذ الطلب" : "تسجيل الدخول للطلب"}</span>
-                <ChevronLeft className="h-5 w-5" />
-              </div>
-              <span className="border-r pr-4 border-white/20">{total} ر.س</span>
+              <Loader2 className="animate-spin h-5 w-5" />
+              <span>جاري المعالجة...</span>
             </>
+          ) : (
+            <span>تأكيد الطلب - {total} ر.س</span>
           )}
         </Button>
       </div>
