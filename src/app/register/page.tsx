@@ -13,6 +13,15 @@ import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+// مكون علم اليمن الصغير
+const YemenFlag = () => (
+  <svg viewBox="0 0 6 4" className="h-3 w-4 rounded-[2px] shadow-sm shrink-0">
+    <rect width="6" height="4" fill="#fff"/>
+    <rect width="6" height="1.33" fill="#CE1126"/>
+    <rect y="2.67" width="6" height="1.33" fill="#000"/>
+  </svg>
+)
+
 export default function RegisterPage() {
   const router = useRouter()
   const { toast } = useToast()
@@ -88,10 +97,10 @@ export default function RegisterPage() {
         <Tabs defaultValue="customer" className="w-full" onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2 h-14 bg-gray-50 rounded-[15px] p-1.5 mb-8">
             <TabsTrigger value="customer" className="rounded-[10px] font-black text-sm data-[state=active]:bg-white data-[state=active]:text-primary shadow-none data-[state=active]:shadow-sm transition-all gap-2">
-              <User className="h-4 w-4" /> عميل
+              <User className="h-4 w-4" /> حساب عميل
             </TabsTrigger>
             <TabsTrigger value="driver" className="rounded-[10px] font-black text-sm data-[state=active]:bg-white data-[state=active]:text-primary shadow-none data-[state=active]:shadow-sm transition-all gap-2">
-              <Truck className="h-4 w-4" /> مندوب
+              <Truck className="h-4 w-4" /> شريك مندوب
             </TabsTrigger>
           </TabsList>
 
@@ -99,7 +108,7 @@ export default function RegisterPage() {
             <div className="relative w-full max-w-[180px] aspect-square rounded-[30px] overflow-hidden shadow-2xl shadow-primary/10 border-4 border-white rotate-3">
               <Image 
                 src={activeTab === 'customer' ? "https://picsum.photos/seed/absher-user/600/600" : "https://picsum.photos/seed/absher-driver/600/600"} 
-                alt="Welcome Illustration" 
+                alt="Illustration" 
                 fill 
                 className="object-cover"
                 unoptimized
@@ -122,27 +131,37 @@ export default function RegisterPage() {
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">الاسم</label>
                   <Input placeholder="أدخل اسمك الكريم" className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-bold text-gray-800 focus-visible:ring-primary/20 text-right transition-all" required />
                 </div>
+                
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">رقم الهاتف</label>
-                  <div className="relative" dir="ltr">
-                    <div className="absolute left-5 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 border-r pr-4 h-6">
-                      <span className="text-sm font-black">+967</span>
+                  <div className="relative" dir="rtl">
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 border-l pl-4 h-6">
+                      <div className="flex items-center gap-1.5">
+                        <YemenFlag />
+                        <span className="text-sm font-black" dir="ltr">+967</span>
+                      </div>
                     </div>
-                    <Input placeholder="7xxxxxxxx" className="h-16 pl-24 rounded-[15px] bg-gray-50 border-none font-black text-lg tracking-widest focus-visible:ring-primary/20 text-left" maxLength={9} required />
+                    <Input 
+                      placeholder="7xxxxxxxx" 
+                      className="h-16 pr-28 rounded-[15px] bg-gray-50 border-none font-black text-lg tracking-widest focus-visible:ring-primary/20 text-right" 
+                      maxLength={9} 
+                      required 
+                    />
                   </div>
                 </div>
+
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">كلمة المرور</label>
                   <Input type="password" placeholder="••••••••" className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-black focus-visible:ring-primary/20 text-right" required />
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-[15px] transition-all active:scale-[0.99] group">
+              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-[15px] transition-all active:scale-[0.99] group" dir="rtl">
                 <Checkbox 
                   id="customer-terms" 
                   checked={customerAgreed} 
                   onCheckedChange={(val) => setCustomerAgreed(val as boolean)} 
-                  className="mt-1 border-primary h-5 w-5 rounded-md data-[state=checked]:bg-primary" 
+                  className="mt-1 border-primary h-5 w-5 rounded-md data-[state=checked]:bg-primary shrink-0" 
                 />
                 <label htmlFor="customer-terms" className="text-[11px] font-bold text-gray-500 leading-relaxed cursor-pointer text-right flex-1">
                   أوافق على <Link href="/terms" className="text-primary underline font-black">شروط الخدمة</Link> و <Link href="/privacy" className="text-primary underline font-black">سياسة الخصوصية</Link>
@@ -170,17 +189,31 @@ export default function RegisterPage() {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">رقم الهاتف</label>
-                  <div className="relative" dir="ltr">
-                    <div className="absolute left-5 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 border-r pr-4 h-6">
-                      <span className="text-sm font-black">+967</span>
+                  <div className="relative" dir="rtl">
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 border-l pl-4 h-6">
+                      <div className="flex items-center gap-1.5">
+                        <YemenFlag />
+                        <span className="text-sm font-black" dir="ltr">+967</span>
+                      </div>
                     </div>
-                    <Input placeholder="7xxxxxxxx" className="h-16 pl-24 rounded-[15px] bg-gray-50 border-none font-black text-lg tracking-widest focus-visible:ring-primary/20 text-left" maxLength={9} required />
+                    <Input 
+                      placeholder="7xxxxxxxx" 
+                      className="h-16 pr-28 rounded-[15px] bg-gray-50 border-none font-black text-lg tracking-widest focus-visible:ring-primary/20 text-right" 
+                      maxLength={9} 
+                      required 
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">البريد الإلكتروني</label>
-                  <Input type="email" placeholder="example@email.com" className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-bold text-left focus-visible:ring-primary/20" dir="ltr" required />
+                  <Input 
+                    type="email" 
+                    placeholder="example@email.com" 
+                    className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-bold text-right focus-visible:ring-primary/20" 
+                    dir="rtl"
+                    required 
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -228,12 +261,12 @@ export default function RegisterPage() {
                 </button>
               </div>
 
-              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-[15px] transition-all active:scale-[0.99] group">
+              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-[15px] transition-all active:scale-[0.99] group" dir="rtl">
                 <Checkbox 
                   id="driver-terms" 
                   checked={driverAgreed} 
                   onCheckedChange={(val) => setDriverAgreed(val as boolean)} 
-                  className="mt-1 border-primary h-5 w-5 rounded-md data-[state=checked]:bg-primary" 
+                  className="mt-1 border-primary h-5 w-5 rounded-md data-[state=checked]:bg-primary shrink-0" 
                 />
                 <label htmlFor="driver-terms" className="text-[11px] font-bold text-gray-500 leading-relaxed cursor-pointer text-right flex-1">
                   أوافق على <Link href="/terms" className="text-primary underline font-black">شروط الانضمام</Link> والعمل كشريك في منصة أبشر.
