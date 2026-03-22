@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Clock, ChevronLeft, Utensils, ShoppingBag, ArrowRight, Package, CheckCircle2, Truck, XCircle, Search } from "lucide-react"
+import { Clock, ChevronLeft, Utensils, ShoppingBag, ArrowRight, Package, CheckCircle2, Truck, XCircle, Search, Activity, Check } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { BottomNav } from "@/components/layout/bottom-nav"
@@ -100,11 +100,17 @@ export default function OrdersPage() {
       </header>
 
       <div className="p-5">
-        <Tabs defaultValue="active" className="w-full">
+        <Tabs defaultValue="active" className="w-full" dir="rtl">
           <TabsList className="grid w-full grid-cols-3 h-14 bg-white rounded-[15px] p-1.5 mb-6 shadow-sm">
-            <TabsTrigger value="active" className="rounded-[10px] font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white transition-all">الحالية</TabsTrigger>
-            <TabsTrigger value="completed" className="rounded-[10px] font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white transition-all">السابقة</TabsTrigger>
-            <TabsTrigger value="cancelled" className="rounded-[10px] font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white transition-all">الملغية</TabsTrigger>
+            <TabsTrigger value="active" className="rounded-[10px] font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white transition-all gap-2">
+              <Clock className="h-3.5 w-3.5" /> الحالية
+            </TabsTrigger>
+            <TabsTrigger value="completed" className="rounded-[10px] font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white transition-all gap-2">
+              <Check className="h-3.5 w-3.5" /> السابقة
+            </TabsTrigger>
+            <TabsTrigger value="cancelled" className="rounded-[10px] font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white transition-all gap-2">
+              <XCircle className="h-3.5 w-3.5" /> الملغية
+            </TabsTrigger>
           </TabsList>
 
           {['active', 'completed', 'cancelled'].map((tab) => (
@@ -119,7 +125,7 @@ export default function OrdersPage() {
                           <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-secondary bg-gray-50 shrink-0">
                             <img src={order.storeImage || `https://picsum.photos/seed/${order.id}/100`} alt={order.storeName} className="object-cover w-full h-full" />
                           </div>
-                          <div>
+                          <div className="text-right">
                             <h3 className="font-black text-sm text-gray-900 truncate max-w-[150px]">{order.storeName}</h3>
                             <p className="text-[10px] font-bold text-gray-400">#{order.id.substring(0, 8).toUpperCase()}</p>
                           </div>
@@ -130,7 +136,7 @@ export default function OrdersPage() {
                       </div>
 
                       <div className="flex items-center justify-between pt-2 border-t border-secondary/30">
-                        <div className="space-y-1">
+                        <div className="text-right space-y-1">
                           <p className="text-[9px] font-black text-gray-400 uppercase">وقت الطلب</p>
                           <p className="text-[11px] font-bold text-gray-600">{formatOrderDate(order.createdAt)}</p>
                         </div>

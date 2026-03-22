@@ -28,9 +28,11 @@ const BANK_ACCOUNTS = [
 ]
 
 const MOCK_ORDERS_DETAILS: Record<string, any> = {
-  "mock-1": { id: "mock-1", storeName: "مطعم مذاقي", storeId: "mathaqi_rest", totalAmount: 4500, subtotal: 3500, deliveryFee: 1000, status: "delivered", createdAt: { toDate: () => new Date(Date.now() - 1000 * 60 * 60 * 24) }, deliveryAddress: "المكلا - حي الشرج - عمارة البركة", paymentMethod: "الدفع عند الاستلام", orderItems: [{ name: "مندي دجاج نصف حبة", quantity: 1, price: 2500 }, { name: "سلطة حارة", quantity: 2, price: 500 }] },
-  "mock-2": { id: "mock-2", storeName: "سوبر ماركت الخليج", storeId: "al_khaleej_market", totalAmount: 1200, subtotal: 200, deliveryFee: 1000, status: "on_the_way", createdAt: { toDate: () => new Date() }, deliveryAddress: "المكلا - فوه - مساكن الإنشاءات", paymentMethod: "المحفظة", driverName: "سالم محمد", orderItems: [{ name: "زبادي نادك كبير", quantity: 2, price: 100 }] },
-  "mock-5": { id: "mock-5", storeName: "عسل حضرمي", storeId: "sweet_home", totalAmount: 15000, subtotal: 14000, deliveryFee: 1000, status: "pending", createdAt: { toDate: () => new Date() }, deliveryAddress: "سيئون - السحيل", paymentMethod: "تحويل بنكي", orderItems: [{ name: "عسل سدر ملكي 1كجم", quantity: 1, price: 14000 }] }
+  "mock-1": { id: "mock-1", storeName: "مطعم مذاقي", storeId: "mathaqi_rest", totalAmount: 4500, subtotal: 3500, deliveryFee: 1000, status: "delivered", createdAt: { toDate: () => new Date(Date.now() - 1000 * 60 * 60 * 24) }, deliveryAddress: "المكلا - حي الشرج - عمارة البركة", paymentMethod: "الدفع عند الاستلام", orderItems: [{ id: "p1", name: "مندي دجاج نصف حبة", quantity: 1, price: 2500 }, { id: "p2", name: "سلطة حارة", quantity: 2, price: 500 }] },
+  "mock-2": { id: "mock-2", storeName: "سوبر ماركت الخليج", storeId: "al_khaleej_market", totalAmount: 1200, subtotal: 200, deliveryFee: 1000, status: "on_the_way", createdAt: { toDate: () => new Date() }, deliveryAddress: "المكلا - فوه - مساكن الإنشاءات", paymentMethod: "المحفظة", driverName: "سالم محمد", orderItems: [{ id: "p3", name: "زبادي نادك كبير", quantity: 2, price: 100 }] },
+  "mock-3": { id: "mock-3", storeName: "كافيه بن علي", storeId: "ali_cafe", totalAmount: 2800, subtotal: 1800, deliveryFee: 1000, status: "preparing", createdAt: { toDate: () => new Date() }, deliveryAddress: "المكلا - الديس", paymentMethod: "الدفع عند الاستلام", orderItems: [{ id: "p4", name: "كابتشينو", quantity: 2, price: 900 }] },
+  "mock-4": { id: "mock-4", storeName: "صيدلية السلام", storeId: "salam_pharmacy", totalAmount: 3500, subtotal: 2500, deliveryFee: 1000, status: "cancelled", createdAt: { toDate: () => new Date() }, deliveryAddress: "المكلا - الشرج", paymentMethod: "الدفع عند الاستلام", orderItems: [{ id: "p5", name: "بنادول اكسترا", quantity: 5, price: 500 }] },
+  "mock-5": { id: "mock-5", storeName: "عسل حضرمي", storeId: "sweet_home", totalAmount: 15000, subtotal: 14000, deliveryFee: 1000, status: "pending", createdAt: { toDate: () => new Date() }, deliveryAddress: "سيئون - السحيل", paymentMethod: "تحويل بنكي", orderItems: [{ id: "p6", name: "عسل سدر ملكي 1كجم", quantity: 1, price: 14000 }] }
 }
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -98,6 +100,30 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     setIsTipOpen(false)
   }
 
+  const handleReorder = () => {
+    if (!order) return
+    const savedCart = localStorage.getItem('absher_cart')
+    let cart = savedCart ? JSON.parse(savedCart) : []
+    
+    order.orderItems.forEach((item: any) => {
+      const existing = cart.find((i: any) => i.id === item.id)
+      if (existing) {
+        existing.quantity += item.quantity
+      } else {
+        cart.push({
+          ...item,
+          storeId: order.storeId,
+          storeName: order.storeName
+        })
+      }
+    })
+    
+    localStorage.setItem('absher_cart', JSON.stringify(cart))
+    window.dispatchEvent(new Event('cart-updated'))
+    toast({ title: "تمت إعادة الطلب", description: "تمت إضافة المنتجات إلى السلة" })
+    router.push('/cart')
+  }
+
   if (isRealOrderLoading) return <div className="flex flex-col items-center justify-center min-h-screen gap-4 font-black text-primary"><RefreshCw className="animate-spin h-10 w-10" /> جاري التحميل...</div>
   if (!order) return <div className="min-h-screen flex flex-col items-center justify-center p-10 text-center gap-6" dir="rtl"><ShoppingBag className="h-16 w-16 text-muted-foreground opacity-30" /><h2 className="text-xl font-black text-primary">الطلب غير موجود</h2><Button onClick={() => router.push('/orders')}>العودة لطلباتي</Button></div>
 
@@ -114,37 +140,42 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       <div className="p-5 space-y-6">
         {/* معلومات أساسية */}
         <div className="flex justify-between items-start">
-          <div className="space-y-1">
+          <div className="text-right space-y-1">
             <h2 className="text-xl font-black text-gray-900">{order.storeName}</h2>
             <p className="text-xs text-gray-400 font-bold">{format(order.createdAt?.toDate?.() || new Date(), "PPP p", { locale: ar })}</p>
           </div>
-          <Badge className="bg-primary text-white border-none font-black px-4 py-1.5 rounded-full text-xs">
-            {steps.find(s => s.id === order.status)?.label || order.status}
+          <Badge className={cn(
+            "border-none font-black px-4 py-1.5 rounded-full text-xs",
+            order.status === 'cancelled' ? 'bg-red-100 text-red-600' : 'bg-primary text-white'
+          )}>
+            {steps.find(s => s.id === order.status)?.label || (order.status === 'cancelled' ? 'ملغي' : order.status)}
           </Badge>
         </div>
 
         {/* شريط التقدم بالأيقونات */}
-        <Card className="border-none shadow-sm rounded-[25px] bg-white overflow-hidden">
-          <CardContent className="p-6">
-            <div className="relative flex justify-between items-center w-full px-2">
-              <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-secondary -translate-y-1/2 z-0" />
-              <div className="absolute top-1/2 right-0 h-0.5 bg-primary -translate-y-1/2 z-0 transition-all duration-1000" style={{ width: `${(getCurrentStepIndex() / (steps.length - 1)) * 100}%`, right: 0 }} />
-              {steps.map((step, idx) => {
-                const isActive = idx <= getCurrentStepIndex()
-                const isCurrent = idx === getCurrentStepIndex()
-                const StepIcon = step.icon
-                return (
-                  <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
-                    <div className={cn("h-8 w-8 rounded-full flex items-center justify-center border-4 border-white transition-all duration-500 shadow-sm", isActive ? "bg-primary text-white scale-110" : "bg-gray-200 text-gray-400")}>
-                      <StepIcon className="h-3.5 w-3.5" />
+        {order.status !== 'cancelled' && (
+          <Card className="border-none shadow-sm rounded-[25px] bg-white overflow-hidden">
+            <CardContent className="p-6">
+              <div className="relative flex justify-between items-center w-full px-2">
+                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-secondary -translate-y-1/2 z-0" />
+                <div className="absolute top-1/2 right-0 h-0.5 bg-primary -translate-y-1/2 z-0 transition-all duration-1000" style={{ width: `${(getCurrentStepIndex() / (steps.length - 1)) * 100}%`, right: 0 }} />
+                {steps.map((step, idx) => {
+                  const isActive = idx <= getCurrentStepIndex()
+                  const isCurrent = idx === getCurrentStepIndex()
+                  const StepIcon = step.icon
+                  return (
+                    <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
+                      <div className={cn("h-8 w-8 rounded-full flex items-center justify-center border-4 border-white transition-all duration-500 shadow-sm", isActive ? "bg-primary text-white scale-110" : "bg-gray-200 text-gray-400")}>
+                        <StepIcon className="h-3.5 w-3.5" />
+                      </div>
+                      <span className={cn("text-[8px] font-black whitespace-nowrap", isActive ? "text-primary" : "text-gray-400")}>{step.label}</span>
                     </div>
-                    <span className={cn("text-[8px] font-black whitespace-nowrap", isActive ? "text-primary" : "text-gray-400")}>{step.label}</span>
-                  </div>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* تتبع المندوب - يظهر فقط في الطريق */}
         {order.status === 'on_the_way' && (
@@ -166,10 +197,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
         {/* جدول الوجبات */}
         <div className="space-y-3">
-          <h3 className="font-black text-sm px-2">الوجبات المطلوبة</h3>
+          <h3 className="font-black text-sm px-2 text-right">الوجبات المطلوبة</h3>
           <Card className="border-none shadow-sm rounded-[25px] bg-white overflow-hidden">
             <div className="px-4 py-3 bg-gray-50 flex items-center text-[10px] font-black text-gray-400 border-b">
-              <span className="flex-1">المنتج</span>
+              <span className="flex-1 text-right">المنتج</span>
               <span className="w-16 text-center">السعر</span>
               <span className="w-12 text-center">الكمية</span>
               <span className="w-20 text-left">الإجمالي</span>
@@ -178,7 +209,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               <div className="divide-y divide-secondary/30">
                 {order.orderItems.map((item: any, i: number) => (
                   <div key={i} className="p-4 flex items-center gap-3">
-                    <span className="flex-1 font-bold text-xs text-gray-800">{item.name}</span>
+                    <span className="flex-1 font-bold text-xs text-gray-800 text-right">{item.name}</span>
                     <span className="w-16 text-center font-bold text-[10px] text-gray-500">{item.price}</span>
                     <span className="w-12 text-center font-black text-[10px]">x{item.quantity}</span>
                     <span className="w-20 text-left font-black text-primary text-[11px]">{item.price * item.quantity} ر.س</span>
@@ -193,14 +224,14 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         <div className="grid grid-cols-1 gap-4">
           <div className="flex gap-4 p-5 bg-white rounded-[25px] shadow-sm">
             <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0"><MapPin className="h-5 w-5 text-orange-600" /></div>
-            <div className="space-y-1">
+            <div className="text-right space-y-1">
               <p className="text-[9px] font-black text-gray-400 uppercase">عنوان التوصيل</p>
               <p className="text-xs font-bold text-gray-800 leading-relaxed">{order.deliveryAddress}</p>
             </div>
           </div>
           <div className="flex gap-4 p-5 bg-white rounded-[25px] shadow-sm">
             <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0"><CreditCard className="h-5 w-5 text-blue-600" /></div>
-            <div className="space-y-1">
+            <div className="text-right space-y-1">
               <p className="text-[9px] font-black text-gray-400 uppercase">طريقة الدفع</p>
               <p className="text-xs font-bold text-gray-800">{order.paymentMethod}</p>
             </div>
@@ -221,12 +252,12 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           <Button onClick={handleCancelOrder} className="w-full h-14 rounded-2xl bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 font-black text-sm gap-3">
             <XCircle className="h-5 w-5" /> إلغاء الطلب (متاح خلال {timeLeft} ث)
           </Button>
-        ) : (
+        ) : order.status !== 'delivered' && order.status !== 'cancelled' ? (
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1 h-14 rounded-2xl border-primary/20 bg-white text-primary font-black text-xs gap-2"><Phone className="h-4 w-4" /> اتصال {order.driverName ? 'بالمندوب' : 'بالدعم'}</Button>
             <Button variant="outline" className="flex-1 h-14 rounded-2xl border-green-500/20 bg-white text-green-600 font-black text-xs gap-2"><MessageCircle className="h-4 w-4" /> واتساب {order.driverName ? 'بالمندوب' : 'بالدعم'}</Button>
           </div>
-        )}
+        ) : null}
 
         {/* بعد التوصيل: تقييم وإعادة طلب وبخشيش */}
         {order.status === 'delivered' && (
@@ -247,10 +278,17 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             )}
 
             <div className="grid grid-cols-2 gap-3">
-              <Button onClick={() => { router.push('/cart'); toast({ title: "تمت الإضافة للسلة" }) }} className="h-14 rounded-2xl bg-primary text-white font-black text-xs gap-2"><RefreshCw className="h-4 w-4" /> إعادة الطلب</Button>
+              <Button onClick={handleReorder} className="h-14 rounded-2xl bg-primary text-white font-black text-xs gap-2"><RefreshCw className="h-4 w-4" /> إعادة الطلب</Button>
               <Button onClick={() => setIsTipOpen(true)} variant="outline" className="h-14 rounded-2xl border-amber-200 text-amber-600 bg-amber-50 font-black text-xs gap-2"><Heart className="h-4 w-4 fill-amber-600" /> بخشيش للمندوب</Button>
             </div>
           </div>
+        )}
+
+        {/* في حال الإلغاء: زر إعادة الطلب فقط */}
+        {order.status === 'cancelled' && (
+          <Button onClick={handleReorder} className="w-full h-14 rounded-2xl bg-primary text-white font-black text-sm gap-2">
+            <RefreshCw className="h-5 w-5" /> إعادة المحاولة (إضافة للسلة)
+          </Button>
         )}
       </div>
 
