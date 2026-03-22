@@ -2,62 +2,26 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Clock, ChevronLeft, Utensils, ShoppingBag, ArrowRight } from "lucide-react"
+import { Clock, ChevronLeft, Utensils, ShoppingBag, ArrowRight, Package, CheckCircle2, Truck, XCircle, Search } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { BottomNav } from "@/components/layout/bottom-nav"
-import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, orderBy } from "firebase/firestore"
+import { collection, query, orderBy, where } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { formatDistanceToNow } from "date-fns"
+import { formatDistanceToNow, isToday, format } from "date-fns"
 import { ar } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 
-// بيانات تجريبية لتوضيح حالات الطلب المختلفة
 const MOCK_ORDERS = [
-  {
-    id: "mock-1",
-    storeName: "مطعم مذاقي",
-    totalAmount: 4500,
-    status: "delivered",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // أمس
-    itemsCount: 3
-  },
-  {
-    id: "mock-2",
-    storeName: "سوبر ماركت الخليج",
-    totalAmount: 1200,
-    status: "on_the_way",
-    createdAt: new Date(Date.now() - 1000 * 60 * 30), // قبل 30 دقيقة
-    itemsCount: 5
-  },
-  {
-    id: "mock-3",
-    storeName: "كافيه بن علي",
-    totalAmount: 2800,
-    status: "preparing",
-    createdAt: new Date(Date.now() - 1000 * 60 * 45), // قبل 45 دقيقة
-    itemsCount: 2
-  },
-  {
-    id: "mock-4",
-    storeName: "صيدلية السلام",
-    totalAmount: 3500,
-    status: "accepted",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60), // قبل ساعة
-    itemsCount: 2
-  },
-  {
-    id: "mock-5",
-    storeName: "عسل حضرمي",
-    totalAmount: 15000,
-    status: "pending",
-    createdAt: new Date(Date.now() - 1000 * 60 * 10), // قبل 10 دقائق
-    itemsCount: 1
-  }
+  { id: "mock-1", storeName: "مطعم مذاقي", storeImage: "https://picsum.photos/seed/m1/100", totalAmount: 4500, status: "delivered", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), itemsCount: 3 },
+  { id: "mock-2", storeName: "سوبر ماركت الخليج", storeImage: "https://picsum.photos/seed/m2/100", totalAmount: 1200, status: "on_the_way", createdAt: new Date(Date.now() - 1000 * 60 * 30), itemsCount: 5 },
+  { id: "mock-3", storeName: "كافيه بن علي", storeImage: "https://picsum.photos/seed/m3/100", totalAmount: 2800, status: "preparing", createdAt: new Date(Date.now() - 1000 * 60 * 45), itemsCount: 2 },
+  { id: "mock-4", storeName: "صيدلية السلام", storeImage: "https://picsum.photos/seed/m4/100", totalAmount: 3500, status: "cancelled", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5), itemsCount: 2 },
+  { id: "mock-5", storeName: "عسل حضرمي", storeImage: "https://picsum.photos/seed/m5/100", totalAmount: 15000, status: "pending", createdAt: new Date(Date.now() - 1000 * 60 * 10), itemsCount: 1 }
 ]
 
 export default function OrdersPage() {
@@ -74,8 +38,6 @@ export default function OrdersPage() {
       if (savedCart) {
         const cart = JSON.parse(savedCart)
         setCartCount(cart.reduce((s: number, i: any) => s + i.quantity, 0))
-      } else {
-        setCartCount(0)
       }
     }
     updateCart()
@@ -85,61 +47,46 @@ export default function OrdersPage() {
 
   const ordersQuery = useMemoFirebase(() => {
     if (!db || !user) return null
-    return query(
-      collection(db, "users", user.uid, "orders"),
-      orderBy("createdAt", "desc")
-    )
+    return query(collection(db, "users", user.uid, "orders"), orderBy("createdAt", "desc"))
   }, [db, user])
 
   const { data: realOrders, isLoading: isCollectionLoading } = useCollection(ordersQuery)
-
-  // دمج الطلبات الحقيقية مع الطلبات التجريبية للعرض فقط في مرحلة التطوير
-  // سنعرض الطلبات التجريبية إذا لم يكن هناك طلبات حقيقية، حتى للزوار
   const displayOrders = (realOrders && realOrders.length > 0) ? realOrders : MOCK_ORDERS
 
-  const getStatusLabel = (status: string) => {
+  const getStatusConfig = (status: string) => {
     switch (status) {
-      case 'pending': return 'قيد الانتظار'
-      case 'accepted': return 'تم القبول'
-      case 'preparing': return 'جاري التحضير'
-      case 'on_the_way': return 'في الطريق'
-      case 'delivered': return 'تم التوصيل'
-      default: return status
+      case 'pending': return { label: 'قيد الانتظار', color: 'bg-yellow-100 text-yellow-700', icon: <Clock className="h-3 w-3" /> }
+      case 'accepted': return { label: 'تم القبول', color: 'bg-blue-100 text-blue-700', icon: <CheckCircle2 className="h-3 w-3" /> }
+      case 'preparing': return { label: 'جاري التحضير', color: 'bg-orange-100 text-orange-700', icon: <Utensils className="h-3 w-3" /> }
+      case 'on_the_way': return { label: 'في الطريق', color: 'bg-primary/10 text-primary', icon: <Truck className="h-3 w-3" /> }
+      case 'delivered': return { label: 'تم التسليم', color: 'bg-green-100 text-green-700', icon: <CheckCircle2 className="h-3 w-3" /> }
+      case 'cancelled': return { label: 'ملغي', color: 'bg-red-100 text-red-700', icon: <XCircle className="h-3 w-3" /> }
+      default: return { label: status, color: 'bg-gray-100 text-gray-700', icon: <Package className="h-3 w-3" /> }
     }
   }
 
-  const getStatusProgress = (status: string) => {
-    switch (status) {
-      case 'pending': return 20
-      case 'accepted': return 40
-      case 'preparing': return 60
-      case 'on_the_way': return 80
-      case 'delivered': return 100
-      default: return 0
-    }
+  const formatOrderDate = (dateInput: any) => {
+    if (!dateInput) return "الآن"
+    const date = dateInput.toDate ? dateInput.toDate() : new Date(dateInput)
+    return isToday(date) ? formatDistanceToNow(date, { addSuffix: true, locale: ar }) : format(date, "yyyy/MM/dd", { locale: ar })
   }
 
-  const formatOrderDate = (createdAt: any) => {
-    if (!createdAt) return "الآن"
-    const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt)
-    return formatDistanceToNow(date, { addSuffix: true, locale: ar })
+  const filterOrders = (type: 'active' | 'completed' | 'cancelled') => {
+    return displayOrders.filter((o: any) => {
+      if (type === 'active') return ['pending', 'accepted', 'preparing', 'on_the_way'].includes(o.status)
+      if (type === 'completed') return o.status === 'delivered'
+      if (type === 'cancelled') return o.status === 'cancelled'
+      return false
+    })
   }
 
   if (!mounted) return null
-
-  if (isUserLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-        <div className="animate-pulse font-black text-primary">جاري التحميل...</div>
-      </div>
-    )
-  }
 
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen font-body" dir="rtl">
       <header className="p-4 glass sticky top-0 z-40 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full h-10 w-10">
             <ArrowRight className="h-6 w-6 text-primary" />
           </Button>
           <h1 className="text-xl font-black text-primary">طلباتي</h1>
@@ -147,103 +94,67 @@ export default function OrdersPage() {
         <Link href="/cart">
           <Button variant="ghost" size="icon" className="relative h-10 w-10">
             <ShoppingBag className="h-5 w-5 text-primary" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white animate-bounce">
-                {cartCount}
-              </span>
-            )}
+            {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">{cartCount}</span>}
           </Button>
         </Link>
       </header>
 
-      <div className="p-5 space-y-5">
-        {/* تنبيه في حال كان المستخدم يتصفح كزائر */}
-        {!user && (
-          <div className="bg-blue-50 border border-blue-100 p-4 rounded-[15px] flex items-center justify-between mb-2">
-            <div className="text-right">
-              <p className="text-[11px] font-black text-blue-900 leading-none">أنت تظهر طلبات تجريبية</p>
-              <p className="text-[9px] font-bold text-blue-700 mt-1">سجل دخولك لمتابعة طلباتك الحقيقية</p>
-            </div>
-            <Button onClick={() => router.push('/login')} size="sm" className="h-8 rounded-md bg-blue-600 text-[10px] font-black">دخول</Button>
-          </div>
-        )}
+      <div className="p-5">
+        <Tabs defaultValue="active" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 h-14 bg-white rounded-[15px] p-1.5 mb-6 shadow-sm">
+            <TabsTrigger value="active" className="rounded-[10px] font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white transition-all">الحالية</TabsTrigger>
+            <TabsTrigger value="completed" className="rounded-[10px] font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white transition-all">السابقة</TabsTrigger>
+            <TabsTrigger value="cancelled" className="rounded-[10px] font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white transition-all">الملغية</TabsTrigger>
+          </TabsList>
 
-        {isCollectionLoading && !realOrders ? (
-          [1, 2, 3].map(i => <div key={i} className="h-48 bg-white rounded-[20px] animate-pulse" />)
-        ) : displayOrders.map((order: any) => (
-          <Card key={order.id} className="border-none shadow-sm overflow-hidden rounded-[20px] bg-white transition-all active:scale-[0.98]">
-            <CardContent className="p-0">
-              {/* ترويسة الطلب */}
-              <div className="p-4 flex items-center justify-between border-b border-secondary/30 bg-secondary/5">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-secondary">
-                    <Utensils className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-sm text-gray-900">{order.storeName || "طلب من أبشر"}</h3>
-                    <p className="text-[10px] text-gray-400 font-bold">{formatOrderDate(order.createdAt)}</p>
-                  </div>
+          {['active', 'completed', 'cancelled'].map((tab) => (
+            <TabsContent key={tab} value={tab} className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              {filterOrders(tab as any).length > 0 ? filterOrders(tab as any).map((order: any) => {
+                const config = getStatusConfig(order.status)
+                return (
+                  <Card key={order.id} className="border-none shadow-sm rounded-[20px] overflow-hidden bg-white hover:shadow-md transition-all active:scale-[0.98]">
+                    <CardContent className="p-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-secondary bg-gray-50 shrink-0">
+                            <img src={order.storeImage || `https://picsum.photos/seed/${order.id}/100`} alt={order.storeName} className="object-cover w-full h-full" />
+                          </div>
+                          <div>
+                            <h3 className="font-black text-sm text-gray-900 truncate max-w-[150px]">{order.storeName}</h3>
+                            <p className="text-[10px] font-bold text-gray-400">#{order.id.substring(0, 8).toUpperCase()}</p>
+                          </div>
+                        </div>
+                        <Badge className={cn("px-2.5 py-1 rounded-full text-[9px] font-black border-none gap-1.5", config.color)}>
+                          {config.icon} {config.label}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-secondary/30">
+                        <div className="space-y-1">
+                          <p className="text-[9px] font-black text-gray-400 uppercase">وقت الطلب</p>
+                          <p className="text-[11px] font-bold text-gray-600">{formatOrderDate(order.createdAt)}</p>
+                        </div>
+                        <div className="text-left space-y-1">
+                          <p className="text-[9px] font-black text-gray-400 uppercase">إجمالي الحساب</p>
+                          <p className="text-sm font-black text-primary">{order.totalAmount} <small className="text-[9px]">ر.س</small></p>
+                        </div>
+                      </div>
+
+                      <Button asChild className="w-full h-11 rounded-xl bg-secondary/30 hover:bg-secondary/50 text-primary font-black text-xs shadow-none">
+                        <Link href={`/orders/${order.id}`}>عرض التفاصيل <ChevronLeft className="mr-1 h-4 w-4" /></Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
+              }) : (
+                <div className="text-center py-20 opacity-30">
+                  <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-primary" />
+                  <p className="font-black text-primary">لا توجد طلبات في هذا القسم</p>
                 </div>
-                <Badge 
-                  className={cn(
-                    "px-3 py-1 rounded-full text-[10px] font-black border-none",
-                    order.status === 'delivered' ? 'bg-green-50 text-green-600' : 'bg-primary text-white'
-                  )}
-                >
-                  {getStatusLabel(order.status)}
-                </Badge>
-              </div>
-
-              {/* حالة التقدم */}
-              <div className="p-5 space-y-5">
-                {order.status !== 'delivered' ? (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-black uppercase tracking-wider">
-                      <span className="flex items-center gap-1.5 text-primary">
-                        <Clock className="h-3.5 w-3.5 animate-pulse" /> حالة التجهيز
-                      </span>
-                      <span className="text-gray-400">{getStatusProgress(order.status)}%</span>
-                    </div>
-                    <Progress value={getStatusProgress(order.status)} className="h-2 rounded-full bg-secondary" />
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-xl border border-green-100">
-                    <div className="h-6 w-6 bg-green-500 rounded-full flex items-center justify-center shrink-0">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </div>
-                    <p className="text-[11px] font-black">وصل طلبك، بالهناء والشفاء!</p>
-                  </div>
-                )}
-
-                {/* تفاصيل السعر والتحويل */}
-                <div className="pt-4 flex justify-between items-center border-t border-secondary/30">
-                  <div>
-                    <p className="text-[10px] text-gray-400 font-black uppercase">إجمالي الحساب</p>
-                    <div className="flex items-baseline gap-1">
-                      <span className="font-black text-primary text-xl">{order.totalAmount}</span>
-                      <span className="text-[10px] font-bold text-gray-400">ر.س</span>
-                    </div>
-                  </div>
-                  <Link href={`/orders/${order.id}`}>
-                    <button className="text-xs font-black text-primary flex items-center gap-1 bg-primary/5 px-4 py-2.5 rounded-xl border border-primary/10 hover:bg-primary/10 transition-colors">
-                      تفاصيل الطلب <ChevronLeft className="h-4 w-4" />
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-
-        {!isCollectionLoading && displayOrders.length === 0 && (
-          <div className="text-center py-20 space-y-4">
-            <div className="h-20 w-20 bg-secondary/20 rounded-full flex items-center justify-center mx-auto">
-              <ShoppingBag className="h-10 w-10 text-muted-foreground opacity-30" />
-            </div>
-            <p className="text-muted-foreground font-black text-lg">لا توجد طلبات سابقة</p>
-            <Button onClick={() => router.push('/')} variant="outline" className="rounded-[15px] h-12 px-8 border-primary text-primary font-black">ابدأ التسوق الآن</Button>
-          </div>
-        )}
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
       <BottomNav />
     </div>
