@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -68,14 +67,13 @@ export default function LoginPage() {
         {step === 1 ? (
           <div className="space-y-8 animate-in fade-in duration-700">
             <div className="flex flex-col items-center text-center space-y-6">
-              <div className="relative w-full max-w-[240px] aspect-square">
+              <div className="relative w-full max-w-[240px] aspect-square rounded-[20px] overflow-hidden shadow-sm">
                 <Image 
-                  src="https://illustrations.popsy.co/teal/log-in.svg" 
+                  src="https://picsum.photos/seed/absher-login/600/600" 
                   alt="Login Illustration" 
                   fill 
-                  className="object-contain"
+                  className="object-cover"
                   priority
-                  unoptimized
                   data-ai-hint="login illustration"
                 />
               </div>
@@ -138,13 +136,12 @@ export default function LoginPage() {
         ) : (
           <div className="space-y-12 animate-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-6">
-              <div className="relative w-full max-w-[200px] aspect-square mx-auto">
+              <div className="relative w-full max-w-[200px] aspect-square mx-auto rounded-[20px] overflow-hidden">
                 <Image 
-                  src="https://illustrations.popsy.co/teal/message-sent.svg" 
+                  src="https://picsum.photos/seed/absher-otp/600/600" 
                   alt="OTP Illustration" 
                   fill 
-                  className="object-contain"
-                  unoptimized
+                  className="object-cover"
                   data-ai-hint="message illustration"
                 />
               </div>

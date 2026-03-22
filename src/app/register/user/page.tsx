@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -43,13 +42,12 @@ export default function UserRegisterPage() {
 
       <div className="flex-1 max-w-sm mx-auto w-full space-y-8">
         <div className="text-center space-y-4">
-          <div className="relative w-full max-w-[200px] aspect-square mx-auto">
+          <div className="relative w-full max-w-[200px] aspect-square mx-auto rounded-[20px] overflow-hidden shadow-sm">
             <Image 
-              src="https://illustrations.popsy.co/teal/celebration.svg" 
+              src="https://picsum.photos/seed/absher-welcome/600/600" 
               alt="Welcome Illustration" 
               fill 
-              className="object-contain"
-              unoptimized
+              className="object-cover"
               data-ai-hint="welcome illustration"
             />
           </div>

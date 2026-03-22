@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -45,14 +44,13 @@ export default function DriverRegisterPage() {
 
       <div className="flex-1 max-w-sm mx-auto w-full space-y-10">
         <div className="flex flex-col items-center text-center space-y-6">
-          <div className="relative w-full max-w-[240px] aspect-square">
+          <div className="relative w-full max-w-[240px] aspect-square rounded-[20px] overflow-hidden shadow-sm">
             <Image 
-              src="https://illustrations.popsy.co/teal/delivery.svg" 
+              src="https://picsum.photos/seed/absher-driver/600/600" 
               alt="Driver Illustration" 
               fill 
-              className="object-contain"
+              className="object-cover"
               priority
-              unoptimized
               data-ai-hint="driver illustration"
             />
           </div>
