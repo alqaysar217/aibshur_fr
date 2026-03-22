@@ -17,17 +17,15 @@ export default function LoginPage() {
   const [phone, setPhone] = useState("")
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
   
   const router = useRouter()
-  const auth = useAuth()
   const { toast } = useToast()
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     if (phone.length >= 7) {
       setLoading(true)
-      // Simulate sending OTP for demo (actual implementation requires Firebase setup)
+      // محاكاة إرسال الرمز للعرض (الكود التجريبي 123456)
       setTimeout(() => {
         setStep(2)
         setLoading(false)
@@ -74,7 +72,7 @@ export default function LoginPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <h1 className="text-3xl font-black text-gray-900 tracking-tight">أهلاً بك في <span className="text-primary">أبشر</span></h1>
+                <h1 className="text-3xl font-black text-gray-900 tracking-tight">تسجيل الدخول</h1>
                 <p className="text-gray-400 text-sm font-medium leading-relaxed max-w-[240px] mx-auto">سجل دخولك لتجربة تسوق ذكية وآمنة في متناول يدك</p>
               </div>
             </div>
@@ -144,15 +142,17 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleVerifyOtp} className="space-y-8">
-              <Input 
-                placeholder="000000"
-                className="h-20 rounded-[20px] bg-gray-50 border-none text-4xl text-center tracking-[0.5em] font-black w-full focus-visible:ring-primary/20"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                maxLength={6}
-                required
-                autoFocus
-              />
+              <div className="flex justify-center gap-2">
+                <Input 
+                  placeholder="000000"
+                  className="h-20 rounded-[20px] bg-gray-50 border-none text-4xl text-center tracking-[0.5em] font-black w-full max-w-[280px] focus-visible:ring-primary/20"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  maxLength={6}
+                  required
+                  autoFocus
+                />
+              </div>
               <Button type="submit" disabled={loading || otp.length < 6} className="w-full h-16 rounded-[15px] text-lg font-black bg-primary shadow-xl shadow-primary/20">
                 {loading ? "جاري التحقق..." : "تأكيد الحساب"}
               </Button>

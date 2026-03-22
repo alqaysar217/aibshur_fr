@@ -22,14 +22,13 @@ export default function DriverRegisterPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!agreed || !idUploaded) {
-      toast({ variant: "destructive", title: "بيانات ناقصة", description: "يرجى رفع الوثائق المطلوبة" })
+      toast({ variant: "destructive", title: "بيانات ناقصة", description: "يرجى رفع كافة الوثائق المطلوبة" })
       return
     }
     setLoading(true)
-    // Simulate application submission
     setTimeout(() => {
       setLoading(false)
-      toast({ title: "تم استلام طلبك", description: "سنقوم بمراجعة بياناتك والتواصل معك قريباً." })
+      toast({ title: "تم إرسال طلبك", description: "سنقوم بمراجعة بياناتك والتواصل معك قريباً." })
       router.push("/login")
     }, 2000)
   }
@@ -58,13 +57,18 @@ export default function DriverRegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-8 pb-20">
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2">الاسم الكامل (مطابق للهوية)</label>
-              <Input placeholder="مثال: عمر احمد مبارك" className="h-16 px-6 rounded-[15px] bg-white border-none shadow-sm font-bold text-gray-800" required />
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2">الاسم الكامل (حسب الهوية)</label>
+              <Input placeholder="أدخل اسمك الرباعي" className="h-16 px-6 rounded-[15px] bg-white border-none shadow-sm font-bold text-gray-800" required />
             </div>
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2">تاريخ الميلاد</label>
               <Input type="date" className="h-16 px-6 rounded-[15px] bg-white border-none shadow-sm font-bold text-right" required />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2">البريد الإلكتروني</label>
+              <Input type="email" placeholder="example@email.com" className="h-16 px-6 rounded-[15px] bg-white border-none shadow-sm font-bold text-left" dir="ltr" required />
             </div>
 
             <div className="space-y-2">
@@ -77,11 +81,11 @@ export default function DriverRegisterPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <button type="button" onClick={() => { setPhotoUploaded(true); toast({ title: "تم الرفع" }); }} className={cn("flex flex-col items-center justify-center gap-3 p-6 rounded-[20px] border-2 border-dashed transition-all active:scale-95", photoUploaded ? "bg-green-50 border-green-200 text-green-600" : "bg-white border-gray-200 text-gray-300")}>
+            <button type="button" onClick={() => { setPhotoUploaded(true); toast({ title: "تم رفع الصورة" }); }} className={cn("flex flex-col items-center justify-center gap-3 p-6 rounded-[20px] border-2 border-dashed transition-all active:scale-95", photoUploaded ? "bg-green-50 border-green-200 text-green-600" : "bg-white border-gray-200 text-gray-300")}>
               {photoUploaded ? <BadgeCheck className="h-8 w-8 animate-in zoom-in" /> : <Camera className="h-8 w-8" />}
               <span className="text-[10px] font-black">الصورة الشخصية</span>
             </button>
-            <button type="button" onClick={() => { setIdUploaded(true); toast({ title: "تم الرفع" }); }} className={cn("flex flex-col items-center justify-center gap-3 p-6 rounded-[20px] border-2 border-dashed transition-all active:scale-95", idUploaded ? "bg-green-50 border-green-200 text-green-600" : "bg-white border-gray-200 text-gray-300")}>
+            <button type="button" onClick={() => { setIdUploaded(true); toast({ title: "تم رفع الهوية" }); }} className={cn("flex flex-col items-center justify-center gap-3 p-6 rounded-[20px] border-2 border-dashed transition-all active:scale-95", idUploaded ? "bg-green-50 border-green-200 text-green-600" : "bg-white border-gray-200 text-gray-300")}>
               {idUploaded ? <BadgeCheck className="h-8 w-8 animate-in zoom-in" /> : <FileText className="h-8 w-8" />}
               <span className="text-[10px] font-black">صورة الهوية</span>
             </button>
@@ -89,13 +93,13 @@ export default function DriverRegisterPage() {
 
           <div className="p-5 bg-blue-50 rounded-[20px] border border-blue-100 flex items-start gap-4">
             <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-            <p className="text-[10px] font-bold text-blue-800 leading-relaxed">تتم مراجعة الطلبات يدوياً لضمان جودة الخدمة. سنقوم بالتواصل معك بمجرد القبول.</p>
+            <p className="text-[10px] font-bold text-blue-800 leading-relaxed">تتم مراجعة طلبات الانضمام يدوياً لضمان جودة الخدمة. سنقوم بالتواصل معك بمجرد القبول.</p>
           </div>
 
           <div className="flex items-start gap-4 px-2">
             <Checkbox id="terms" checked={agreed} onCheckedChange={(val) => setAgreed(val as boolean)} className="mt-1 border-primary h-5 w-5 rounded-md" />
             <label htmlFor="terms" className="text-[11px] font-bold text-gray-500 leading-relaxed cursor-pointer">
-              أوافق على <Link href="/terms" className="text-primary underline font-black">شروط الانضمام</Link> والعمل في المنصة.
+              أوافق على <Link href="/terms" className="text-primary underline font-black">شروط الانضمام</Link> والعمل كشريك في المنصة.
             </label>
           </div>
 

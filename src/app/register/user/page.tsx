@@ -20,11 +20,10 @@ export default function UserRegisterPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!agreed) {
-      toast({ variant: "destructive", title: "خطأ", description: "يجب الموافقة على الشروط أولاً" })
+      toast({ variant: "destructive", title: "تنبيه", description: "يجب الموافقة على الشروط أولاً" })
       return
     }
     setLoading(true)
-    // Simulate API call
     setTimeout(() => {
       setLoading(false)
       toast({ title: "تم الإرسال", description: "سيصلك رمز التفعيل عبر SMS" })
@@ -38,7 +37,7 @@ export default function UserRegisterPage() {
         <button onClick={() => router.back()} className="h-12 w-12 flex items-center justify-center rounded-2xl bg-gray-50 text-gray-900 active:scale-90 transition-all">
           <ArrowRight className="h-6 w-6" />
         </button>
-        <h1 className="text-xl font-black text-gray-900 tracking-tight">إنشاء حساب جديد</h1>
+        <h1 className="text-xl font-black text-gray-900 tracking-tight">إنشاء حساب عميل</h1>
       </header>
 
       <div className="flex-1 max-w-sm mx-auto w-full space-y-12">
@@ -47,16 +46,16 @@ export default function UserRegisterPage() {
             <User className="h-10 w-10 text-primary" />
             <Sparkles className="h-5 w-5 text-amber-500 absolute -top-1 -right-1 animate-bounce" />
           </div>
-          <h2 className="text-2xl font-black text-gray-900 leading-tight">ابدأ رحلتك معنا</h2>
-          <p className="text-gray-400 text-xs font-medium leading-relaxed px-8">انضم لآلاف المستخدمين واستمتع بأفضل خدمات التوصيل</p>
+          <h2 className="text-2xl font-black text-gray-900 leading-tight">انضم لعائلة أبشر</h2>
+          <p className="text-gray-400 text-xs font-medium leading-relaxed px-8">استمتع بأسرع خدمة توصيل وأفضل العروض في منطقتك</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2">الاسم بالكامل</label>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2">الاسم</label>
               <Input 
-                placeholder="أدخل اسمك" 
+                placeholder="أدخل اسمك الكريم" 
                 className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-bold text-gray-800 focus-visible:ring-primary/20 transition-all" 
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -80,7 +79,7 @@ export default function UserRegisterPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2">كلمة السر</label>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2">كلمة المرور</label>
               <Input 
                 type="password" 
                 placeholder="••••••••" 
@@ -104,13 +103,13 @@ export default function UserRegisterPage() {
             disabled={loading || !agreed} 
             className="w-full h-16 rounded-[15px] bg-primary text-lg font-black shadow-xl shadow-primary/20 transition-all active:scale-[0.98]"
           >
-            {loading ? <Loader2 className="animate-spin h-6 w-6" /> : "إنشاء حسابي"}
+            {loading ? <Loader2 className="animate-spin h-6 w-6" /> : "متابعة التسجيل"}
           </Button>
         </form>
       </div>
 
       <p className="text-center text-xs font-bold text-gray-400 mt-10">
-        لديك حساب بالفعل؟ <Link href="/login" className="text-primary font-black hover:underline">سجل دخولك</Link>
+        لديك حساب؟ <Link href="/login" className="text-primary font-black hover:underline">سجل دخولك</Link>
       </p>
     </div>
   )
