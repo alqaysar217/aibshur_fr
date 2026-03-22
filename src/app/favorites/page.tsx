@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, arrayRemove, query, collection, collectionGroup, limit, serverTimestamp, arrayUnion } from "firebase/firestore"
 import { Heart, ShoppingBag, MapPin, Package, Store, ArrowRight, Plus, Minus, Star, Navigation } from "lucide-react"
-import Image from "image"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
@@ -167,7 +167,6 @@ export default function FavoritesPage() {
                       <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10">
                         <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                       </div>
-                      {renderStars(product.rating || 4.8)}
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
                       <div className="flex justify-between items-start">
@@ -191,7 +190,7 @@ export default function FavoritesPage() {
                               <button onClick={(e) => addToCart(e, product)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center shadow-sm"><Plus className="h-3.5 w-3.5" /></button>
                             </div>
                           ) : (
-                            <Button onClick={(e) => addToCart(e, product)} className="h-8 rounded-[8px] bg-primary text-white text-[10px] font-black px-4 shadow-sm flex items-center gap-1">
+                            <Button onClick={(e) => addToCart(e, product)} className="h-8 rounded-[8px] bg-primary text-white text-[10px] font-black px-3 shadow-sm flex items-center gap-1">
                               <span>إضافة</span>
                               <ShoppingBag className="h-3 w-3" />
                             </Button>
