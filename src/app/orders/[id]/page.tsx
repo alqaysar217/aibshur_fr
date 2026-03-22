@@ -53,7 +53,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [tipAmount, setTipAmount] = useState("")
   const [tipMethod, setTipMethod] = useState<"wallet" | "bank">("wallet")
   const [driverHeading, setDriverHeading] = useState(45)
-  const [simulatedStatus, setSimulatedStatus] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -62,8 +61,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const orderRef = useMemoFirebase(() => (!db || !user || !id || id.startsWith('mock-')) ? null : doc(db, "users", user.uid, "orders", id as string), [db, user, id])
   const { data: realOrder, isLoading: isRealOrderLoading } = useDoc(orderRef)
   
-  const baseOrder = useMemo(() => id.startsWith('mock-') ? MOCK_ORDERS_DETAILS[id] : realOrder, [id, realOrder])
-  const order = useMemo(() => baseOrder ? { ...baseOrder, status: simulatedStatus || baseOrder.status } : null, [baseOrder, simulatedStatus])
+  const order = useMemo(() => id.startsWith('mock-') ? MOCK_ORDERS_DETAILS[id] : realOrder, [id, realOrder])
 
   const walletRef = useMemoFirebase(() => (!db || !user) ? null : doc(db, "users", user.uid, "wallet", "wallet"), [db, user])
   const { data: wallet } = useDoc(walletRef)
@@ -110,7 +108,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const handleCancelOrder = async () => {
     if (!canCancel || !order) return
     toast({ title: "تم إلغاء الطلب", description: "تم إلغاء طلبك بنجاح" })
-    setSimulatedStatus('cancelled')
+    // في التطبيق الحقيقي سيتم تحديث قاعدة البيانات هنا
   }
 
   const handleTipSubmit = async () => {
@@ -162,7 +160,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         <div className="flex justify-between items-start">
           <div className="text-right space-y-1">
             <h2 className="text-xl font-black text-gray-900">{order.storeName}</h2>
-            <p className="text-xs text-gray-400 font-bold">{format(order.createdAt?.toDate?.() || new Date(), "PPP p", { locale: ar })}</p>
+            <p className="text-xs text-gray-400 font-bold">
+              {mounted ? format(order.createdAt?.toDate?.() || new Date(), "PPP p", { locale: ar }) : "..."}
+            </p>
           </div>
           <Badge className={cn(
             "border-none font-black px-4 py-1.5 rounded-full text-xs",
@@ -322,30 +322,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           <Button onClick={handleReorder} className="w-full h-14 rounded-2xl bg-primary text-white font-black text-sm gap-2">
             <RefreshCw className="h-5 w-5" /> إعادة المحاولة (إضافة للسلة)
           </Button>
-        )}
-
-        {/* Simulator Controls for Testing */}
-        {id.startsWith('mock-') && (
-          <div className="mt-10 p-6 bg-slate-900 rounded-[25px] border-2 border-dashed border-primary/30 text-white space-y-4">
-            <div className="flex items-center gap-2 text-primary">
-              <Bug className="h-5 w-5" />
-              <h3 className="font-black text-sm">أدوات المطور: محاكاة حالة الطلب</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {['pending', 'accepted', 'preparing', 'on_the_way', 'delivered', 'cancelled'].map(s => (
-                <Button 
-                  key={s} 
-                  variant={order.status === s ? "default" : "outline"} 
-                  size="sm" 
-                  onClick={() => setSimulatedStatus(s)}
-                  className={cn("h-10 text-[10px] font-bold rounded-xl", order.status === s ? "bg-primary border-none" : "text-white border-white/20")}
-                >
-                  {s.replace('_', ' ')}
-                </Button>
-              ))}
-            </div>
-            <p className="text-[9px] text-slate-400 font-medium italic text-center">هذه اللوحة تظهر فقط للطلبات التجريبية لتسهيل معاينة التصميم</p>
-          </div>
         )}
       </div>
 
