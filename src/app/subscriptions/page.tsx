@@ -15,7 +15,8 @@ const PLANS = [
   {
     id: "silver",
     name: "الباقة الفضية",
-    price: 49,
+    monthlyPrice: 49,
+    yearlyPrice: 450,
     features: ["توصيل مجاني لـ 5 طلبات", "خصم 5% على المتاجر", "دعم فني سريع"],
     color: "from-slate-400 to-slate-600",
     icon: <ShieldCheck className="h-8 w-8 text-white" />
@@ -23,7 +24,8 @@ const PLANS = [
   {
     id: "gold",
     name: "الباقة الذهبية",
-    price: 99,
+    monthlyPrice: 99,
+    yearlyPrice: 890,
     features: ["توصيل مجاني غير محدود", "خصم 10% على كافة المتاجر", "دعم VIP مباشر", "نقاط مضاعفة x2"],
     color: "from-amber-400 to-orange-600",
     icon: <Crown className="h-8 w-8 text-white" />,
@@ -41,6 +43,7 @@ export default function SubscriptionsPage() {
   const { user } = useUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly")
   const [selectedPlan, setSelectedPlan] = useState<any>(null)
   const [isPaymentOpen, setIsPaymentOpen] = useState(false)
 
@@ -49,8 +52,15 @@ export default function SubscriptionsPage() {
   }, [])
 
   const handlePlanSelection = (plan: any) => {
-    if (!user) { router.push('/login'); return; }
-    setSelectedPlan(plan)
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    setSelectedPlan({
+      ...plan,
+      activePrice: billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice,
+      period: billingCycle === "monthly" ? "شهر" : "سنة"
+    })
     setIsPaymentOpen(true)
   }
 
@@ -74,15 +84,46 @@ export default function SubscriptionsPage() {
           <p className="text-gray-400 text-sm font-medium leading-relaxed max-w-[240px] mx-auto">وفر الكثير واستمتع بتجربة تسوق لا محدودة مع عضوية VIP</p>
         </div>
 
+        {/* Billing Toggle */}
+        <div className="flex justify-center">
+          <div className="bg-secondary/30 p-1.5 rounded-full flex items-center gap-1 w-full max-w-[280px]">
+            <button
+              onClick={() => setBillingCycle("monthly")}
+              className={cn(
+                "flex-1 h-11 rounded-full text-xs font-black transition-all duration-300",
+                billingCycle === "monthly" ? "bg-white text-primary shadow-sm" : "text-gray-500"
+              )}
+            >
+              شهري
+            </button>
+            <button
+              onClick={() => setBillingCycle("yearly")}
+              className={cn(
+                "flex-1 h-11 rounded-full text-xs font-black transition-all duration-300 relative",
+                billingCycle === "yearly" ? "bg-white text-primary shadow-sm" : "text-gray-500"
+              )}
+            >
+              سنوي
+              {billingCycle === "monthly" && (
+                <span className="absolute -top-3 -left-2 bg-amber-400 text-white text-[8px] px-2 py-0.5 rounded-full shadow-sm animate-bounce">وفر أكثر</span>
+              )}
+            </button>
+          </div>
+        </div>
+
         <div className="space-y-6">
           {PLANS.map((plan) => (
             <div key={plan.id} className="relative rounded-[25px] overflow-hidden bg-white shadow-xl border border-gray-100 active:scale-[0.98] transition-all">
-              <div className={cn("h-28 bg-gradient-to-br p-6 flex items-center justify-between", plan.color)}>
+              <div className={cn("h-32 bg-gradient-to-br p-6 flex items-center justify-between", plan.color)}>
                 <div className="text-white space-y-1">
                   <h3 className="font-black text-xl">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-black">{plan.price}</span>
-                    <span className="text-[10px] font-bold opacity-80">ريال / شهر</span>
+                  <div className="flex items-baseline gap-1 animate-in fade-in duration-500" key={billingCycle}>
+                    <span className="text-3xl font-black">
+                      {billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice}
+                    </span>
+                    <span className="text-[10px] font-bold opacity-80">
+                      ريال / {billingCycle === "monthly" ? "شهر" : "سنة"}
+                    </span>
                   </div>
                 </div>
                 <div className="h-12 w-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
@@ -100,7 +141,13 @@ export default function SubscriptionsPage() {
                     </div>
                   ))}
                 </div>
-                <Button onClick={() => handlePlanSelection(plan)} className={cn("w-full h-14 rounded-[12px] font-black text-base text-white shadow-lg", plan.id === 'gold' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-slate-700 hover:bg-slate-800')}>
+                <Button 
+                  onClick={() => handlePlanSelection(plan)} 
+                  className={cn(
+                    "w-full h-14 rounded-[12px] font-black text-base text-white shadow-lg", 
+                    plan.id === 'gold' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-slate-700 hover:bg-slate-800'
+                  )}
+                >
                   تفعيل العضوية
                 </Button>
               </CardContent>
@@ -114,7 +161,9 @@ export default function SubscriptionsPage() {
           <div className="bg-gray-900 p-8 text-white text-center space-y-2">
             <Landmark className="h-10 w-10 text-primary mx-auto mb-2" />
             <DialogTitle className="text-xl font-black">إكمال الدفع</DialogTitle>
-            <DialogDescription className="text-gray-400 text-xs font-medium">حول {selectedPlan?.price} ريال لأحد حساباتنا</DialogDescription>
+            <DialogDescription className="text-gray-400 text-xs font-medium">
+              حول {selectedPlan?.activePrice} ريال لأحد حساباتنا لتفعيل {selectedPlan?.name} لـ {selectedPlan?.period}
+            </DialogDescription>
           </div>
           <div className="p-6 max-h-[60vh] overflow-y-auto space-y-4 bg-white">
             {BANK_ACCOUNTS.map((bank) => (
@@ -130,7 +179,9 @@ export default function SubscriptionsPage() {
                 </div>
                 <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-dashed border-gray-200">
                   <span className="font-black text-sm tracking-widest text-primary">{bank.account}</span>
-                  <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(bank.account); toast({ title: "تم النسخ" }); }} className="text-primary"><Copy className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(bank.account); toast({ title: "تم النسخ" }); }} className="text-primary">
+                    <Copy className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             ))}
