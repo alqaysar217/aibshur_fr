@@ -8,40 +8,34 @@
       "imageHint": "app logo"
     },
     {
+      "id": "login-illustration",
+      "description": "رسم توضيحي لتسجيل الدخول",
+      "imageUrl": "https://illustrations.popsy.co/teal/log-in.svg",
+      "imageHint": "login illustration"
+    },
+    {
+      "id": "welcome-illustration",
+      "description": "رسم توضيحي للترحيب بالعملاء",
+      "imageUrl": "https://illustrations.popsy.co/teal/celebration.svg",
+      "imageHint": "welcome illustration"
+    },
+    {
+      "id": "delivery-illustration",
+      "description": "رسم توضيحي لمندوب توصيل",
+      "imageUrl": "https://illustrations.popsy.co/teal/delivery.svg",
+      "imageHint": "driver illustration"
+    },
+    {
+      "id": "otp-illustration",
+      "description": "رسم توضيحي لرسائل التحقق",
+      "imageUrl": "https://illustrations.popsy.co/teal/message-sent.svg",
+      "imageHint": "message illustration"
+    },
+    {
       "id": "mandi-restaurant",
       "description": "مطعم مندي يمني",
       "imageUrl": "https://picsum.photos/seed/mandi1/600/400",
       "imageHint": "mandi rice meat"
-    },
-    {
-      "id": "yemeni-grocery",
-      "description": "بقالة يمنية تقليدية",
-      "imageUrl": "https://picsum.photos/seed/grocery_yem/600/400",
-      "imageHint": "supermarket fruits vegetables"
-    },
-    {
-      "id": "yemeni-pharmacy",
-      "description": "صيدلية طبية",
-      "imageUrl": "https://picsum.photos/seed/pharmacy_yem/600/400",
-      "imageHint": "pharmacy medical shelf"
-    },
-    {
-      "id": "mandi-dish",
-      "description": "وجبة مندي لحم",
-      "imageUrl": "https://picsum.photos/seed/dish1/400/300",
-      "imageHint": "cooked meat rice"
-    },
-    {
-      "id": "milk-product",
-      "description": "منتجات ألبان",
-      "imageUrl": "https://picsum.photos/seed/milk/400/300",
-      "imageHint": "milk bottle"
-    },
-    {
-      "id": "medicine-box",
-      "description": "علب أدوية",
-      "imageUrl": "https://picsum.photos/seed/meds/400/300",
-      "imageHint": "medicine pills box"
     }
   ]
 }

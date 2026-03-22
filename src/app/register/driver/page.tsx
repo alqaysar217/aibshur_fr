@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -50,6 +51,7 @@ export default function DriverRegisterPage() {
               alt="Driver Illustration" 
               fill 
               className="object-contain"
+              priority
               data-ai-hint="driver illustration"
             />
           </div>
