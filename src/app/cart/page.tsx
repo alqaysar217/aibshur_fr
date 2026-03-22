@@ -281,9 +281,9 @@ export default function CartPage() {
                   const AddrIcon = addr.label === "المنزل" ? Home : addr.label === "العمل" ? Briefcase : MapPin;
                   return (
                     <SelectItem key={addr.id} value={addr.id} className="font-bold text-xs py-3 text-right">
-                      <div className="flex items-center gap-2 justify-end w-full">
+                      <div className="flex items-center gap-2 justify-start w-full">
+                        <AddrIcon className="h-4 w-4 text-primary shrink-0" />
                         <span>{addr.label} ({addr.city} - {addr.details})</span>
-                        <AddrIcon className="h-4 w-4 text-primary" />
                       </div>
                     </SelectItem>
                   );
@@ -356,21 +356,21 @@ export default function CartPage() {
             </SelectTrigger>
             <SelectContent className="rounded-[15px]" dir="rtl">
               <SelectItem value="wallet" className="font-bold text-xs py-3 text-right">
-                <div className="flex items-center gap-2 justify-end w-full">
+                <div className="flex items-center gap-2 justify-start w-full">
+                  <Wallet className="h-4 w-4 text-primary shrink-0" />
                   <span>المحفظة (الرصيد: {wallet?.balance || 0} ر.س)</span>
-                  <Wallet className="h-4 w-4 text-primary" />
                 </div>
               </SelectItem>
               <SelectItem value="cash" className="font-bold text-xs py-3 text-right">
-                <div className="flex items-center gap-2 justify-end w-full">
+                <div className="flex items-center gap-2 justify-start w-full">
+                  <Banknote className="h-4 w-4 text-primary shrink-0" />
                   <span>الدفع عند الاستلام</span>
-                  <Banknote className="h-4 w-4 text-primary" />
                 </div>
               </SelectItem>
               <SelectItem value="bank" className="font-bold text-xs py-3 text-right">
-                <div className="flex items-center gap-2 justify-end w-full">
+                <div className="flex items-center gap-2 justify-start w-full">
+                  <Landmark className="h-4 w-4 text-primary shrink-0" />
                   <span>تحويل بنكي</span>
-                  <Landmark className="h-4 w-4 text-primary" />
                 </div>
               </SelectItem>
             </SelectContent>
