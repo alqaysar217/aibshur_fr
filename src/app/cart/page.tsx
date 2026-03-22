@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { 
   Trash2, Plus, Minus, ArrowRight, ShoppingBag, 
   MapPin, Loader2, Wallet, Banknote, 
-  MessageSquare, CheckCircle2, ChevronDown, Check, Edit2, LogIn, Tag, PlusCircle
+  MessageSquare, CheckCircle2, ChevronDown, Check, Edit2, LogIn, Tag, PlusCircle, Copy
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -20,15 +20,24 @@ import { collection, addDoc, serverTimestamp, query, orderBy, doc } from "fireba
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
+const BANK_ACCOUNTS = [
+  { id: "kuraimi", name: "بنك الكريمي", holder: "عمر احمد مبارك دعكيك", account: "123456789", logo: "https://picsum.photos/seed/kuraimi/100" },
+  { id: "omqi", name: "شركة العمقي", holder: "عمر احمد مبارك دعكيك", account: "998877665", logo: "https://picsum.photos/seed/omqi/100" },
+  { id: "busairi", name: "شركة البسيري", holder: "عمر احمد مبارك دعكيك", account: "554433221", logo: "https://picsum.photos/seed/busairi/100" }
+]
+
 export default function CartPage() {
   const [cart, setCart] = useState<any[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [selectedAddressId, setSelectedAddressId] = useState<string>("")
-  const [paymentMethod, setPaymentMethod] = useState<string>("cash")
+  const [paymentMethod, setPaymentMethod] = useState<string>("")
   const [orderNotes, setOrderNotes] = useState("")
   const [couponCode, setCouponCode] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   
+  const [isCouponExpanded, setIsCouponExpanded] = useState(false)
+  const [isNotesExpanded, setIsNotesExpanded] = useState(false)
+
   const router = useRouter()
   const { toast } = useToast()
   const { user } = useUser()
@@ -100,6 +109,11 @@ export default function CartPage() {
 
     if (!selectedAddressId) {
       toast({ title: "تنبيه", description: "يرجى اختيار عنوان التوصيل", variant: "destructive" })
+      return
+    }
+
+    if (!paymentMethod) {
+      toast({ title: "تنبيه", description: "يرجى اختيار طريقة الدفع", variant: "destructive" })
       return
     }
 
@@ -279,31 +293,49 @@ export default function CartPage() {
 
         {/* كوبون الخصم */}
         <section className="space-y-3">
-          <h2 className="font-bold text-sm text-primary px-1 flex items-center gap-2">
-            <Tag className="h-4 w-4" /> هل لديك كوبون خصم؟
-          </h2>
-          <div className="flex gap-2">
-            <Input 
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
-              placeholder="أدخل كود الخصم هنا"
-              className="h-12 rounded-[12px] bg-white border-none shadow-sm text-right font-bold text-xs"
-            />
-            <Button className="h-12 px-6 rounded-[12px] font-black text-xs shadow-sm">تطبيق</Button>
-          </div>
+          <button 
+            onClick={() => setIsCouponExpanded(!isCouponExpanded)}
+            className="flex items-center justify-between w-full px-1 py-1"
+          >
+            <h2 className="font-bold text-sm text-primary flex items-center gap-2">
+              <Tag className="h-4 w-4" /> هل لديك كوبون خصم؟
+            </h2>
+            <ChevronDown className={cn("h-4 w-4 text-primary transition-transform", isCouponExpanded && "rotate-180")} />
+          </button>
+          {isCouponExpanded && (
+            <div className="flex gap-2 animate-in slide-in-from-top-2 duration-200">
+              <Input 
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                placeholder="أدخل كود الخصم هنا"
+                className="h-12 rounded-[12px] bg-white border-none shadow-sm text-right font-bold text-xs"
+              />
+              <Button className="h-12 px-6 rounded-[12px] font-black text-xs shadow-sm">تطبيق</Button>
+            </div>
+          )}
         </section>
 
         {/* الملاحظات */}
         <section className="space-y-3">
-          <h2 className="font-bold text-sm text-primary px-1 flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" /> هل لديك ملاحظة؟
-          </h2>
-          <Textarea 
-            value={orderNotes}
-            onChange={(e) => setOrderNotes(e.target.value)}
-            placeholder="مثال: يرجى الاتصال عند الوصول، بدون شطة، إلخ..."
-            className="rounded-[15px] bg-white border-none shadow-sm text-right font-bold text-xs min-h-[100px] p-4 resize-none"
-          />
+          <button 
+            onClick={() => setIsNotesExpanded(!isNotesExpanded)}
+            className="flex items-center justify-between w-full px-1 py-1"
+          >
+            <h2 className="font-bold text-sm text-primary flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" /> هل لديك ملاحظة؟
+            </h2>
+            <ChevronDown className={cn("h-4 w-4 text-primary transition-transform", isNotesExpanded && "rotate-180")} />
+          </button>
+          {isNotesExpanded && (
+            <div className="animate-in slide-in-from-top-2 duration-200">
+              <Textarea 
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                placeholder="مثال: يرجى الاتصال عند الوصول، بدون شطة، إلخ..."
+                className="rounded-[15px] bg-white border-none shadow-sm text-right font-bold text-xs min-h-[100px] p-4 resize-none"
+              />
+            </div>
+          )}
         </section>
 
         {/* طرق الدفع */}
@@ -311,27 +343,47 @@ export default function CartPage() {
           <h2 className="font-bold text-sm text-primary px-1 flex items-center gap-2">
             <Wallet className="h-4 w-4" /> طريقة الدفع
           </h2>
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { id: 'cash', label: 'الدفع عند الاستلام', icon: Banknote },
-              { id: 'wallet', label: 'محفظة', icon: Wallet },
-              { id: 'bank', label: 'تحويل بنكي', icon: CheckCircle2 },
-            ].map((method) => (
-              <button
-                key={method.id}
-                onClick={() => setPaymentMethod(method.id)}
-                className={cn(
-                  "flex flex-col items-center justify-center p-3 rounded-[15px] border-2 transition-all gap-2 h-24",
-                  paymentMethod === method.id 
-                    ? "bg-primary/5 border-primary text-primary" 
-                    : "bg-white border-transparent text-gray-400 shadow-sm"
-                )}
-              >
-                <method.icon className="h-6 w-6" />
-                <span className="text-[9px] font-black text-center leading-tight">{method.label}</span>
-              </button>
-            ))}
-          </div>
+          
+          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+            <SelectTrigger className="h-14 rounded-[15px] bg-white border-none shadow-sm font-bold text-xs text-right" dir="rtl">
+              <SelectValue placeholder="اختر طريقة الدفع" />
+            </SelectTrigger>
+            <SelectContent className="rounded-[15px]" dir="rtl">
+              <SelectItem value="wallet" className="font-bold text-xs py-3 text-right">
+                المحفظة (الرصيد: {wallet?.balance || 0} ر.س)
+              </SelectItem>
+              <SelectItem value="cash" className="font-bold text-xs py-3 text-right">
+                الدفع عند الاستلام
+              </SelectItem>
+              <SelectItem value="bank" className="font-bold text-xs py-3 text-right">
+                تحويل بنكي
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          {paymentMethod === 'bank' && (
+            <div className="space-y-3 animate-in fade-in duration-300 mt-4">
+              {BANK_ACCOUNTS.map((bank) => (
+                <div key={bank.id} className="p-4 bg-white rounded-[15px] border border-gray-100 space-y-3 shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
+                      <Image src={bank.logo} alt={bank.name} fill className="object-cover" />
+                    </div>
+                    <div className="flex-1 text-right">
+                      <p className="text-sm font-black text-gray-900">{bank.name}</p>
+                      <p className="text-[10px] text-gray-400 font-bold">{bank.holder}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200">
+                    <span className="font-black text-sm tracking-widest text-primary">{bank.account}</span>
+                    <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(bank.account); toast({ title: "تم النسخ" }); }} className="h-8 w-8 p-0 text-primary">
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* ملخص الفاتورة */}
@@ -355,7 +407,7 @@ export default function CartPage() {
         {/* زر التأكيد */}
         <Button 
           onClick={handleCheckout} 
-          disabled={isSubmitting || (user && !selectedAddressId)}
+          disabled={isSubmitting || (user && (!selectedAddressId || !paymentMethod))}
           className="w-full h-16 rounded-[15px] shadow-xl text-base font-black bg-primary flex items-center justify-center gap-3 mt-6"
         >
           {isSubmitting ? (
