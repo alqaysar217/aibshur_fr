@@ -107,7 +107,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const handleCancelOrder = async () => {
     if (!canCancel || !order) return
     toast({ title: "تم إلغاء الطلب", description: "تم إلغاء طلبك بنجاح" })
-    // في التطبيق الحقيقي سيتم تحديث قاعدة البيانات هنا
   }
 
   const handleTipSubmit = async () => {
@@ -325,7 +324,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       </div>
 
       <Dialog open={isTipOpen} onOpenChange={setIsTipOpen}>
-        <DialogContent className="rounded-[25px] w-[92%] max-w-md mx-auto p-0 border-none overflow-hidden" dir="rtl">
+        <DialogContent className="rounded-[25px] w-[92%] max-w-md mx-auto p-0 border-none overflow-hidden [&>button]:text-white [&>button]:opacity-100 [&>button]:bg-black/20 [&>button]:hover:bg-black/40 [&>button]:rounded-full [&>button]:transition-all" dir="rtl">
           <div className="bg-gray-900 p-8 text-white text-center space-y-2">
             <Heart className="h-10 w-10 text-rose-500 mx-auto mb-2 fill-rose-500" />
             <DialogTitle className="text-xl font-black">دعم المندوب</DialogTitle>

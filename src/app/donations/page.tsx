@@ -137,7 +137,7 @@ export default function DonationsPage() {
       </div>
 
       <Dialog open={isBankDialogOpen} onOpenChange={setIsBankDialogOpen}>
-        <DialogContent className="rounded-[20px] w-[92%] max-w-md mx-auto p-0 border-none overflow-hidden" dir="rtl">
+        <DialogContent className="rounded-[20px] w-[92%] max-w-md mx-auto p-0 border-none overflow-hidden [&>button]:text-white [&>button]:opacity-100 [&>button]:bg-black/20 [&>button]:hover:bg-black/40 [&>button]:rounded-full [&>button]:transition-all" dir="rtl">
           <div className="bg-gray-900 p-8 text-center text-white space-y-2">
             <Landmark className="h-10 w-10 text-primary mx-auto mb-2" />
             <DialogTitle className="text-xl font-black">إيداع التبرع</DialogTitle>
