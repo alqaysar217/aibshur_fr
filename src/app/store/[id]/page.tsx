@@ -18,6 +18,21 @@ import { cn } from "@/lib/utils"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
+const CATEGORY_FILTERS: Record<string, string[]> = {
+  restaurants: ["لحوم", "أرز", "بقوليات", "بيتزا", "فتة", "معجنات", "سندويتشات", "مشروبات باردة", "مشروبات ساخنة", "مشويات", "مشكلات", "بروست", "برجر", "فطائر", "خبز", "آيسكريم", "حلويات"],
+  cafe: ["قهوة", "اسبريسو", "لاتيه", "كابتشينو", "مشروبات باردة", "عصائر", "سموذي", "شاي", "حلويات", "كيك", "كوكيز", "آيسكريم", "إفطار خفيف"],
+  gifts: ["هدايا رجالية", "هدايا نسائية", "هدايا أطفال", "بوكسات هدايا", "ورد", "شوكولاتة", "عطور", "إكسسوارات", "تغليف هدايا", "مناسبات", "تذكارات"],
+  grocery: ["مواد غذائية", "مشروبات", "منظفات", "معلبات", "ألبان", "خبز", "خضروات", "فواكه", "مجمدات", "وجبات سريعة", "بهارات"],
+  electronics: ["جوالات", "لابتوبات", "إكسسوارات", "سماعات", "شواحن", "كابلات", "شاشات", "أجهزة منزلية", "ألعاب إلكترونية"],
+  beauty: ["مكياج", "عناية بالبشرة", "عناية بالشعر", "عطور", "أدوات تجميل", "منتجات طبيعية"],
+  meat: ["لحوم طازجة", "لحوم مجمدة", "دجاج", "أسماك", "مشويات جاهزة"],
+  vegetables: ["خضروات", "فواكه", "عضوي", "مقطع وجاهز"],
+  honey: ["عسل سدر", "عسل جبلي", "عسل طبيعي", "منتجات نحل"],
+  dates: ["تمور فاخرة", "تمور عادية", "تمر محشي", "منتجات التمر"],
+  perfume: ["عطور رجالية", "عطور نسائية", "بخور", "عود", "زيوت عطرية"],
+  sweets: ["كيك", "تشيز كيك", "شوكولاتة", "بقلاوة", "حلويات شرقية", "حلويات غربية", "آيسكريم"]
+}
+
 export default function StoreDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = React.use(params)
   const id = resolvedParams.id
@@ -91,6 +106,13 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
       return matchesSearch && matchesCategory
     })
   }, [products, searchQuery, selectedCategory, userData?.favoritesProductIds])
+
+  const storeCategory = store?.categoryIds?.[0] || ""
+  const dynamicFilters = useMemo(() => {
+    const base = ["الكل", "الأكثر طلباً", "المفضلة"]
+    const specific = CATEGORY_FILTERS[storeCategory] || []
+    return [...base, ...specific]
+  }, [storeCategory])
 
   const toggleFavoriteStore = (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -196,57 +218,77 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
         </div>
       </div>
 
-      <div className="px-5 py-4 flex flex-col gap-4">
-        {isProductsLoading ? (
-          [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-[10px] animate-pulse" />)
-        ) : filteredProducts.length > 0 ? (
-          filteredProducts.map((product: any) => {
-            const inCart = cart.find(item => item.id === product.id)
-            const isFavProd = userData?.favoritesProductIds?.includes(product.id)
-            return (
-              <Card key={`product-${product.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer" onClick={() => setViewingProduct(product)}>
-                <CardContent className="p-3 flex items-start gap-4" dir="rtl">
-                  <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shadow-sm shrink-0">
-                    <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-sm text-primary truncate leading-tight">{product.name}</h3>
-                      <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="p-1.5 active:scale-75 transition-transform">
-                        <Heart className={cn("h-4 w-4", isFavProd ? "fill-destructive text-destructive" : "text-gray-300")} />
-                      </button>
+      <div className="px-5 py-4 space-y-4">
+        {/* Dynamic Product Filter Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
+          {dynamicFilters.map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setSelectedCategory(filter)}
+              className={cn(
+                "px-4 py-2 rounded-full whitespace-nowrap text-[10px] font-black transition-all",
+                selectedCategory === filter 
+                  ? "bg-[#10B981] text-white shadow-md shadow-[#10B981]/20" 
+                  : "bg-white text-gray-400 border border-gray-100"
+              )}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {isProductsLoading ? (
+            [1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-[10px] animate-pulse" />)
+          ) : filteredProducts.length > 0 ? (
+            filteredProducts.map((product: any) => {
+              const inCart = cart.find(item => item.id === product.id)
+              const isFavProd = userData?.favoritesProductIds?.includes(product.id)
+              return (
+                <Card key={`product-${product.id}`} className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white active:scale-[0.98] transition-all cursor-pointer" onClick={() => setViewingProduct(product)}>
+                  <CardContent className="p-3 flex items-start gap-4" dir="rtl">
+                    <div className="relative h-20 w-20 rounded-[10px] overflow-hidden bg-secondary/10 shadow-sm shrink-0">
+                      <Image src={product.imageUrl || `https://picsum.photos/seed/${product.id}/200`} alt={product.name} fill className="object-cover" />
                     </div>
-                    <p className="text-[10px] text-gray-400 line-clamp-1 leading-relaxed">{product.description || 'وصف المنتج متاح هنا'}</p>
-                    <div className="flex items-center justify-between mt-auto">
-                      <div className="flex items-center gap-2">
-                        {renderStars(product.rating || 4.8)}
-                        <span className="text-primary font-black text-[11px] shrink-0">{product.price} ر.س</span>
+                    <div className="flex-1 min-w-0 flex flex-col justify-between h-20">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-bold text-sm text-primary truncate leading-tight">{product.name}</h3>
+                        <button onClick={(e) => toggleFavoriteProduct(e, product.id)} className="p-1.5 active:scale-75 transition-transform">
+                          <Heart className={cn("h-4 w-4", isFavProd ? "fill-destructive text-destructive" : "text-gray-300")} />
+                        </button>
                       </div>
-                      <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                        {inCart ? (
-                          <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
-                            <button onClick={(e) => removeFromCart(product.id, e)} className="h-7 w-7 rounded-[8px] bg-white shadow-sm flex items-center justify-center active:scale-90 transition-all"><Minus className="h-3 w-3 text-primary" /></button>
-                            <span className="font-black text-[10px] min-w-[12px] text-center">{inCart.quantity}</span>
-                            <button onClick={(e) => addToCart(product, e)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center active:scale-90 transition-all shadow-sm"><Plus className="h-3 w-3" /></button>
-                          </div>
-                        ) : (
-                          <Button onClick={(e) => { e.stopPropagation(); addToCart(product, e); }} className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[10px] font-black px-3 active:scale-95 transition-all flex items-center gap-1">
-                            <ShoppingBag className="h-3 w-3" /> إضافة
-                          </Button>
-                        )}
+                      <p className="text-[10px] text-gray-400 line-clamp-1 leading-relaxed">{product.description || 'وصف المنتج متاح هنا'}</p>
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex items-center gap-2">
+                          {renderStars(product.rating || 4.8)}
+                          <span className="text-primary font-black text-[11px] shrink-0">{product.price} ر.س</span>
+                        </div>
+                        <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                          {inCart ? (
+                            <div className="flex items-center gap-2 bg-secondary/30 p-0.5 rounded-[10px]">
+                              <button onClick={(e) => removeFromCart(product.id, e)} className="h-7 w-7 rounded-[8px] bg-white shadow-sm flex items-center justify-center active:scale-90 transition-all"><Minus className="h-3 w-3 text-primary" /></button>
+                              <span className="font-black text-[10px] min-w-[12px] text-center">{inCart.quantity}</span>
+                              <button onClick={(e) => addToCart(product, e)} className="h-7 w-7 rounded-[8px] bg-primary text-white flex items-center justify-center active:scale-90 transition-all shadow-sm"><Plus className="h-3 w-3" /></button>
+                            </div>
+                          ) : (
+                            <Button onClick={(e) => { e.stopPropagation(); addToCart(product, e); }} className="h-8 rounded-[8px] shadow-sm bg-primary text-white text-[10px] font-black px-3 active:scale-95 transition-all flex items-center gap-1">
+                              <ShoppingBag className="h-3 w-3" /> إضافة
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })
-        ) : (
-          <div className="text-center py-20 opacity-30">
-            <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-primary" />
-            <p className="font-bold text-primary">لا توجد منتجات حالياً</p>
-          </div>
-        )}
+                  </CardContent>
+                </Card>
+              )
+            })
+          ) : (
+            <div className="text-center py-20 opacity-30">
+              <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-primary" />
+              <p className="font-bold text-primary">لا توجد منتجات حالياً</p>
+            </div>
+          )}
+        </div>
       </div>
 
       <Dialog open={!!viewingProduct} onOpenChange={(val) => !val && setViewingProduct(null)}>
