@@ -1,7 +1,7 @@
 
 "use client"
 
-import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Crown, Trash2, ChevronDown, BadgeCheck, Phone, Wallet, FileText } from "lucide-react"
+import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Crown, Trash2, ChevronDown, BadgeCheck, Phone, Wallet, FileText, LogIn, ArrowRight } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
@@ -85,18 +85,46 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8 space-y-8 bg-white" dir="rtl">
-        <div className="bg-primary/5 p-10 rounded-[10px] relative">
-          <User className="h-20 w-20 text-primary/20" />
-          <div className="absolute -bottom-2 -right-2 bg-primary p-3 rounded-md shadow-xl">
-            <Shield className="h-6 w-6 text-white" />
+      <div className="min-h-screen bg-[#F8FAFB] font-body" dir="rtl">
+        <div className="relative pt-20 pb-10 px-8 text-center space-y-8">
+          <div className="relative inline-block">
+            <div className="bg-primary/5 w-28 h-28 rounded-[35px] flex items-center justify-center mx-auto shadow-inner border border-white">
+              <User className="h-14 w-14 text-primary/20" />
+            </div>
+            <div className="absolute -bottom-2 -right-2 bg-primary p-2.5 rounded-xl shadow-lg border-2 border-white">
+              <LogIn className="h-5 w-5 text-white" />
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <h1 className="text-3xl font-black text-gray-900 leading-tight">أهلاً بك في أبشر</h1>
+            <p className="text-gray-400 text-sm font-medium leading-relaxed max-w-[260px] mx-auto">
+              سجل دخولك الآن لتدير طلباتك، محفظتك، وتحصل على خصومات حصرية للأعضاء!
+            </p>
+          </div>
+
+          <div className="space-y-4 pt-4">
+            <Button onClick={() => router.push('/login')} className="w-full h-16 rounded-[15px] bg-primary text-white text-lg font-black shadow-xl shadow-primary/20 active:scale-[0.98] transition-all">
+              تسجيل الدخول / إنشاء حساب
+            </Button>
+            <Button onClick={() => router.push('/')} variant="ghost" className="text-primary font-bold gap-2">
+              تصفح التطبيق كضيف <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-black text-primary">سجل دخولك الآن</h1>
-          <p className="text-muted-foreground text-sm max-w-[250px] mx-auto leading-relaxed">انضم لعالم أبشر لإدارة طلباتك، محفظتك، والحصول على عروض حصرية!</p>
+
+        <div className="px-8 space-y-6 opacity-40 grayscale pointer-events-none select-none">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white p-5 rounded-[15px] border border-gray-100 flex flex-col items-center gap-2">
+              <Wallet className="h-5 w-5 text-gray-400" />
+              <span className="text-[10px] font-black uppercase">المحفظة</span>
+            </div>
+            <div className="bg-white p-5 rounded-[15px] border border-gray-100 flex flex-col items-center gap-2">
+              <Star className="h-5 w-5 text-gray-400" />
+              <span className="text-[10px] font-black uppercase">النقاط</span>
+            </div>
+          </div>
         </div>
-        <Button onClick={() => router.push('/login')} className="w-full max-w-xs h-14 rounded-[10px] font-black text-lg">تسجيل الدخول</Button>
         <BottomNav />
       </div>
     )

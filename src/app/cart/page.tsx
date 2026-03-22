@@ -1,10 +1,11 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { 
   Trash2, Plus, Minus, ArrowRight, CreditCard, ShoppingBag, 
   Tag, MapPin, ChevronLeft, Loader2, Wallet, Banknote, 
-  MessageSquare, AlertCircle, CheckCircle2, Copy, ChevronDown, Check, Edit2
+  MessageSquare, AlertCircle, CheckCircle2, Copy, ChevronDown, Check, Edit2, LogIn
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -19,21 +20,11 @@ import { collection, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, in
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
-const BANK_ACCOUNTS = [
-  { id: "kuraimi", name: "بنك الكريمي", holder: "عمر احمد مبارك دعكيك", account: "123456789", logo: "https://picsum.photos/seed/kuraimi/100" },
-  { id: "bindool", name: "بنك بن دول", holder: "عمر احمد مبارك دعكيك", account: "223344556", logo: "https://picsum.photos/seed/bindool/100" },
-  { id: "omqi", name: "شركة العمقي", holder: "عمر احمد مبارك دعكيك", account: "998877665", logo: "https://picsum.photos/seed/omqi/100" },
-  { id: "busairi", name: "شركة البسيري", holder: "عمر احمد مبارك دعكيك", account: "554433221", logo: "https://picsum.photos/seed/busairi/100" },
-  { id: "tadhamon", name: "بنك التضامن", holder: "عمر احمد مبارك دعكيك", account: "112233445", logo: "https://picsum.photos/seed/tadhamon/100" }
-]
-
 export default function CartPage() {
   const [cart, setCart] = useState<any[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [coupon, setCoupon] = useState("")
-  const [showCouponInput, setShowCouponInput] = useState(false)
   const [isCouponApplied, setIsCouponApplied] = useState(false)
-  const [showNoteInput, setShowNoteInput] = useState(false)
   const [selectedAddressId, setSelectedAddressId] = useState<string>("")
   const [paymentMethod, setPaymentMethod] = useState<string>("cash")
   const [selectedBankId, setSelectedBankId] = useState<string | null>(null)
@@ -63,12 +54,6 @@ export default function CartPage() {
     return query(collection(db, "users", user.uid, "addresses"), orderBy("createdAt", "desc"))
   }, [db, user])
   const { data: addresses } = useCollection(addressesQuery)
-
-  const storesQuery = useMemoFirebase(() => {
-    if (!db) return null
-    return query(collection(db, "stores"))
-  }, [db])
-  const { data: allStores } = useCollection(storesQuery)
 
   useEffect(() => {
     if (addresses && addresses.length > 0 && !selectedAddressId) {
@@ -110,7 +95,8 @@ export default function CartPage() {
   const total = Math.max(0, cartTotal + deliveryFee - discount)
 
   const handleCheckout = async () => {
-    if (!user || !db) {
+    if (!user) {
+      toast({ title: "تنبيه", description: "يرجى تسجيل الدخول لإتمام الطلب" })
       router.push('/login')
       return
     }
@@ -122,7 +108,6 @@ export default function CartPage() {
 
     setIsSubmitting(true)
     const selectedAddress = addresses?.find(a => a.id === selectedAddressId)
-    const selectedBank = BANK_ACCOUNTS.find(b => b.id === selectedBankId)
     
     const orderData = {
       userId: user.uid,
@@ -134,7 +119,6 @@ export default function CartPage() {
       totalAmount: total,
       status: "pending",
       paymentMethod: paymentMethod,
-      bankDetails: paymentMethod === "bank" ? selectedBank : null,
       deliveryAddress: `${selectedAddress?.city} - ${selectedAddress?.details}`,
       notes: orderNotes,
       createdAt: serverTimestamp()
@@ -192,6 +176,20 @@ export default function CartPage() {
       </header>
 
       <div className="p-4 space-y-4">
+        {/* تنبيه الزائر في السلة */}
+        {!user && (
+          <div className="bg-amber-50 border border-amber-100 p-4 rounded-[10px] flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <LogIn className="h-5 w-5 text-amber-600" />
+              <div className="text-right">
+                <p className="text-[11px] font-black text-amber-900 leading-none">أنت في وضع الضيف</p>
+                <p className="text-[9px] font-bold text-amber-700 mt-1">سجل دخولك لتتمكن من إتمام الطلب</p>
+              </div>
+            </div>
+            <Button onClick={() => router.push('/login')} size="sm" className="h-8 rounded-md bg-amber-600 text-[10px] font-black">دخول</Button>
+          </div>
+        )}
+
         <Card className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
           <div className="p-4 border-b flex justify-between items-center bg-secondary/10">
             <h2 className="font-bold text-sm text-primary flex items-center gap-2">
@@ -246,21 +244,23 @@ export default function CartPage() {
           </CardContent>
         </Card>
 
-        <section className="space-y-3">
-          <h2 className="font-bold text-sm text-primary px-1 flex items-center gap-2"><MapPin className="h-4 w-4" /> عنوان التوصيل</h2>
-          <Select value={selectedAddressId} onValueChange={setSelectedAddressId}>
-            <SelectTrigger className="h-14 rounded-[10px] bg-white border-none shadow-sm font-bold text-xs text-right" dir="rtl">
-              <SelectValue placeholder="اختر عنوان التوصيل" />
-            </SelectTrigger>
-            <SelectContent className="rounded-[10px]" dir="rtl">
-              {addresses?.map((addr) => (
-                <SelectItem key={addr.id} value={addr.id} className="font-bold text-xs py-3 text-right">
-                  {addr.label} ({addr.city} - {addr.details})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </section>
+        {user && (
+          <section className="space-y-3">
+            <h2 className="font-bold text-sm text-primary px-1 flex items-center gap-2"><MapPin className="h-4 w-4" /> عنوان التوصيل</h2>
+            <Select value={selectedAddressId} onValueChange={setSelectedAddressId}>
+              <SelectTrigger className="h-14 rounded-[10px] bg-white border-none shadow-sm font-bold text-xs text-right" dir="rtl">
+                <SelectValue placeholder="اختر عنوان التوصيل" />
+              </SelectTrigger>
+              <SelectContent className="rounded-[10px]" dir="rtl">
+                {addresses?.map((addr) => (
+                  <SelectItem key={addr.id} value={addr.id} className="font-bold text-xs py-3 text-right">
+                    {addr.label} ({addr.city} - {addr.details})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </section>
+        )}
 
         <Card className="border-none shadow-sm rounded-[10px] bg-white overflow-hidden">
           <CardContent className="p-5 space-y-4">
@@ -281,18 +281,18 @@ export default function CartPage() {
 
         <Button 
           onClick={handleCheckout} 
-          disabled={isSubmitting || !selectedAddressId}
+          disabled={isSubmitting || (user && !selectedAddressId)}
           className="w-full h-16 rounded-[10px] shadow-xl text-lg font-black bg-primary flex items-center justify-between px-8 mt-6"
         >
           {isSubmitting ? (
             <div className="flex items-center gap-2 mx-auto">
               <Loader2 className="animate-spin h-6 w-6" />
-              <span>جاري إرسال الطلب...</span>
+              <span>جاري المعالجة...</span>
             </div>
           ) : (
             <>
               <div className="flex items-center gap-2">
-                <span>تأكيد وتنفيذ الطلب</span>
+                <span>{user ? "تأكيد وتنفيذ الطلب" : "تسجيل الدخول للطلب"}</span>
                 <ChevronLeft className="h-5 w-5" />
               </div>
               <span className="border-r pr-4 border-white/20">{total} ر.س</span>
