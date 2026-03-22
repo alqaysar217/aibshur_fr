@@ -238,10 +238,9 @@ export default function FavoritesPage() {
                         <div className="flex items-center gap-2 pt-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <Badge variant="secondary" className="bg-primary/5 text-primary text-[8px] h-4 px-1.5 border-none font-black rounded-[10px]">متجر</Badge>
-                            <div className="flex items-center gap-0.5" dir="rtl">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star key={star} className={cn("h-2.5 w-2.5", (store.averageRating || 4.5) >= star ? "fill-primary text-primary" : "fill-muted text-muted")} />
-                              ))}
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-primary text-primary" />
+                              <span className="text-[10px] font-bold text-gray-500">{store.averageRating || 4.5}</span>
                             </div>
                           </div>
                           <div className="flex-1" />
