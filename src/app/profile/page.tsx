@@ -108,7 +108,7 @@ export default function ProfilePage() {
         <div className="flex flex-col items-center">
           <div className="relative mb-6">
             <Avatar className="h-28 w-28 border-[4px] border-white shadow-xl rounded-full relative z-10">
-              <AvatarImage src={`https://picsum.photos/seed/${user.uid}/300`} />
+              <AvatarImage src="/Super-App.jpeg" />
               <AvatarFallback className="bg-primary text-white text-3xl font-black">
                 {user.phoneNumber?.substring(user.phoneNumber.length - 2)}
               </AvatarFallback>
