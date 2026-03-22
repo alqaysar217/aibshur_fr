@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -114,7 +115,7 @@ export default function LoginPage() {
 
             <div className="text-center pt-4">
               <p className="text-xs font-bold text-gray-500">
-                ليس لديك حساب؟ <Link href="/register/user" className="text-primary font-black hover:underline underline-offset-4">إنشاء حساب جديد</Link>
+                ليس لديك حساب؟ <Link href="/register" className="text-primary font-black hover:underline underline-offset-4">إنشاء حساب جديد</Link>
               </p>
             </div>
           </div>
