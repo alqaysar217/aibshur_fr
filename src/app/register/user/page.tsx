@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function UserRegisterPage() {
   const router = useRouter()
@@ -33,28 +34,23 @@ export default function UserRegisterPage() {
 
   return (
     <div className="min-h-screen bg-white font-body p-8 flex flex-col" dir="rtl">
-      <header className="mb-12 flex items-center gap-4 pt-4">
+      <header className="mb-8 flex items-center gap-4 pt-4">
         <button onClick={() => router.back()} className="h-12 w-12 flex items-center justify-center rounded-2xl bg-gray-50 text-gray-900 active:scale-90 transition-all">
           <ArrowRight className="h-6 w-6" />
         </button>
         <h1 className="text-xl font-black text-gray-900 tracking-tight">إنشاء حساب عميل</h1>
       </header>
 
-      <div className="flex-1 max-w-sm mx-auto w-full space-y-12">
-        <div className="text-center space-y-6">
-          <div className="relative inline-block mx-auto">
-            {/* Decorative animated backgrounds */}
-            <div className="absolute inset-0 bg-primary/10 rounded-[35px] rotate-6 animate-pulse" />
-            <div className="absolute inset-0 bg-primary/5 rounded-[35px] -rotate-3 animate-bounce duration-[2000ms]" />
-            
-            <div className="relative h-28 w-28 bg-white rounded-[30px] flex items-center justify-center shadow-xl border border-primary/5 overflow-hidden group">
-              <div className="absolute -top-2 -right-2 w-10 h-10 bg-primary/5 rounded-full animate-pulse" />
-              <User className="h-12 w-12 text-primary relative z-10 animate-in zoom-in duration-700" />
-            </div>
-            
-            <div className="absolute -top-2 -right-2 h-8 w-8 bg-amber-400 rounded-lg flex items-center justify-center border-2 border-white shadow-lg animate-bounce">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
+      <div className="flex-1 max-w-sm mx-auto w-full space-y-8">
+        <div className="text-center space-y-4">
+          <div className="relative w-full max-w-[200px] aspect-square mx-auto">
+            <Image 
+              src="https://illustrations.popsy.co/teal/celebration.svg" 
+              alt="Welcome Illustration" 
+              fill 
+              className="object-contain"
+              data-ai-hint="welcome illustration"
+            />
           </div>
           
           <div className="space-y-2">

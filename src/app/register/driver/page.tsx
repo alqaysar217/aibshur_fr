@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 export default function DriverRegisterPage() {
@@ -35,40 +36,23 @@ export default function DriverRegisterPage() {
 
   return (
     <div className="min-h-screen bg-white font-body p-8 flex flex-col" dir="rtl">
-      <header className="mb-10 flex items-center gap-4 pt-4">
+      <header className="mb-8 flex items-center gap-4 pt-4">
         <button onClick={() => router.back()} className="h-12 w-12 flex items-center justify-center rounded-2xl bg-gray-50 text-gray-900 active:scale-90 transition-all">
           <ArrowRight className="h-6 w-6" />
         </button>
         <h1 className="text-xl font-black text-gray-900 tracking-tight">الانضمام للمناديب</h1>
       </header>
 
-      <div className="flex-1 max-w-sm mx-auto w-full space-y-12">
-        {/* Animated Infographic for Delivery Representative */}
-        <div className="flex flex-col items-center text-center space-y-8">
-          <div className="relative inline-block">
-            {/* Decorative animated backgrounds */}
-            <div className="absolute inset-0 bg-primary/10 rounded-[40px] rotate-6 animate-pulse" />
-            <div className="absolute inset-0 bg-primary/5 rounded-[40px] -rotate-3 animate-bounce duration-[3000ms]" />
-            
-            <div className="relative h-32 w-32 bg-white rounded-[35px] shadow-2xl shadow-primary/10 border border-primary/5 flex items-center justify-center overflow-hidden group">
-              <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary/5 rounded-full animate-pulse" />
-              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-primary/5 rounded-full animate-bounce delay-700" />
-              
-              <div className="relative transform transition-transform group-hover:scale-110 duration-500">
-                <Bike className="h-14 w-14 text-primary relative z-10 drop-shadow-2xl" />
-                <div className="absolute inset-0 h-14 w-14 text-primary/20 blur-sm translate-y-1 translate-x-1">
-                  <Bike className="h-14 w-14" />
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute -top-3 -right-3 h-10 w-10 bg-amber-400 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg animate-bounce duration-[1500ms]">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
-            
-            <div className="absolute -bottom-2 -right-4 h-9 w-9 bg-primary rounded-xl flex items-center justify-center border-4 border-white shadow-md animate-pulse delay-500">
-              <PackageCheck className="h-4 w-4 text-white" />
-            </div>
+      <div className="flex-1 max-w-sm mx-auto w-full space-y-10">
+        <div className="flex flex-col items-center text-center space-y-6">
+          <div className="relative w-full max-w-[240px] aspect-square">
+            <Image 
+              src="https://illustrations.popsy.co/teal/delivery.svg" 
+              alt="Driver Illustration" 
+              fill 
+              className="object-contain"
+              data-ai-hint="driver illustration"
+            />
           </div>
 
           <div className="space-y-2">

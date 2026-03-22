@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import { useAuth, initiateAnonymousSignIn } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 export default function LoginPage() {
@@ -25,7 +26,6 @@ export default function LoginPage() {
     e.preventDefault()
     if (phone.length >= 7) {
       setLoading(true)
-      // محاكاة إرسال الرمز للعرض (الكود التجريبي 123456)
       setTimeout(() => {
         setStep(2)
         setLoading(false)
@@ -39,10 +39,7 @@ export default function LoginPage() {
     if (otp === "123456") {
       setLoading(true)
       try {
-        // تفعيل حالة المصادقة لإنهاء وضع الضيف فعلياً في Firebase
         initiateAnonymousSignIn(auth)
-        
-        // الانتظار قليلاً لضمان تحديث حالة المصادقة في التطبيق قبل التوجيه
         setTimeout(() => {
           setLoading(false)
           toast({ title: "تم الدخول بنجاح", description: "أهلاً بك في أبشر" })
@@ -59,7 +56,6 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-body" dir="rtl">
-      {/* Skip Button */}
       <button 
         onClick={() => router.push("/")}
         className="absolute top-6 left-6 z-50 flex items-center gap-2 text-gray-400 text-[11px] font-bold hover:text-primary transition-all bg-gray-50 px-4 py-2 rounded-full"
@@ -68,38 +64,19 @@ export default function LoginPage() {
         <X className="h-3 w-3" />
       </button>
 
-      <div className="flex-1 flex flex-col px-8 pt-20 pb-10">
+      <div className="flex-1 flex flex-col px-8 pt-12 pb-10">
         {step === 1 ? (
-          <div className="space-y-12 animate-in fade-in duration-700">
-            {/* Infographic Area Enhanced */}
-            <div className="flex flex-col items-center text-center space-y-8">
-              <div className="relative inline-block">
-                {/* Decorative 3D-style animated backgrounds */}
-                <div className="absolute inset-0 bg-primary/10 rounded-[40px] rotate-6 animate-pulse" />
-                <div className="absolute inset-0 bg-primary/5 rounded-[40px] -rotate-3 animate-bounce duration-[3000ms]" />
-                
-                {/* Main Container */}
-                <div className="relative h-32 w-32 bg-white rounded-[35px] shadow-2xl shadow-primary/10 border border-primary/5 flex items-center justify-center overflow-hidden group">
-                  <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary/5 rounded-full animate-pulse" />
-                  <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-primary/5 rounded-full animate-bounce delay-700" />
-                  
-                  {/* Central Icon with 3D shadow effect */}
-                  <div className="relative transform transition-transform group-hover:scale-110 duration-500">
-                    <Smartphone className="h-14 w-14 text-primary relative z-10 drop-shadow-2xl" />
-                    <div className="absolute inset-0 h-14 w-14 text-primary/20 blur-sm translate-y-1 translate-x-1">
-                      <Smartphone className="h-14 w-14" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Accent floating elements */}
-                <div className="absolute -top-3 -right-3 h-10 w-10 bg-amber-400 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg animate-bounce duration-[1500ms]">
-                  <Sparkles className="h-5 w-5 text-white" />
-                </div>
-                
-                <div className="absolute -bottom-2 -right-4 h-9 w-9 bg-primary rounded-xl flex items-center justify-center border-4 border-white shadow-md animate-pulse delay-500">
-                  <ShieldCheck className="h-4 w-4 text-white" />
-                </div>
+          <div className="space-y-8 animate-in fade-in duration-700">
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="relative w-full max-w-[240px] aspect-square">
+                <Image 
+                  src="https://illustrations.popsy.co/teal/log-in.svg" 
+                  alt="Login Illustration" 
+                  fill 
+                  className="object-contain"
+                  priority
+                  data-ai-hint="login illustration"
+                />
               </div>
 
               <div className="space-y-2">
@@ -160,12 +137,14 @@ export default function LoginPage() {
         ) : (
           <div className="space-y-12 animate-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-6">
-              <div className="relative inline-block mx-auto">
-                <div className="h-28 w-28 bg-primary/5 rounded-[35px] flex items-center justify-center relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-primary/10 animate-pulse" />
-                  <MessageSquare className="h-12 w-12 text-primary relative z-10 animate-bounce duration-[2000ms]" />
-                  <div className="absolute -bottom-2 -right-2 h-10 w-10 bg-green-500 rounded-full border-4 border-white shadow-md animate-pulse" />
-                </div>
+              <div className="relative w-full max-w-[200px] aspect-square mx-auto">
+                <Image 
+                  src="https://illustrations.popsy.co/teal/message-sent.svg" 
+                  alt="OTP Illustration" 
+                  fill 
+                  className="object-contain"
+                  data-ai-hint="message illustration"
+                />
               </div>
               <div className="space-y-2">
                 <h1 className="text-2xl font-black text-gray-900">التحقق من الرمز</h1>
