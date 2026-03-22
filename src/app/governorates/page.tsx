@@ -38,7 +38,6 @@ export default function GovernoratesPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-body" dir="rtl">
-      {/* Decorative Header */}
       <header className="relative pt-16 pb-10 px-8 text-center space-y-6 overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-primary/5 to-transparent -z-10" />
         
@@ -59,20 +58,18 @@ export default function GovernoratesPage() {
         </div>
       </header>
 
-      {/* Search Bar */}
       <div className="px-6 pb-6">
         <div className="relative group">
           <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300 group-focus-within:text-primary transition-colors" />
           <Input 
             placeholder="ابحث عن مدينتك..." 
-            className="h-16 pr-14 rounded-[20px] bg-gray-50 border-none text-lg font-bold shadow-inner focus-visible:ring-primary/20 text-right"
+            className="h-16 pr-14 rounded-[15px] bg-gray-50 border-none text-lg font-bold shadow-inner focus-visible:ring-primary/20 text-right"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </div>
 
-      {/* Governorates List */}
       <div className="flex-1 overflow-y-auto px-6 space-y-4 pb-12">
         <div className="flex items-center justify-between mb-4 px-2">
           <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
@@ -86,7 +83,7 @@ export default function GovernoratesPage() {
             <button 
               key={gov.id}
               onClick={() => handleSelect(gov.name)}
-              className="w-full p-5 flex items-center justify-between bg-white rounded-[20px] border border-gray-100 shadow-sm hover:border-primary/40 hover:bg-primary/5 transition-all group active:scale-[0.98]"
+              className="w-full p-5 flex items-center justify-between bg-white rounded-[15px] border border-gray-100 shadow-sm hover:border-primary/40 hover:bg-primary/5 transition-all group active:scale-[0.98]"
             >
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
@@ -103,18 +100,8 @@ export default function GovernoratesPage() {
             </button>
           ))}
         </div>
-
-        {filtered.length === 0 && (
-          <div className="text-center py-20 animate-in fade-in">
-            <div className="bg-gray-50 h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="h-8 w-8 text-gray-200" />
-            </div>
-            <p className="text-gray-400 font-bold text-sm italic">عذراً، المدينة غير موجودة في القائمة</p>
-          </div>
-        )}
       </div>
 
-      {/* Footer Branding */}
       <div className="p-8 text-center">
         <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.3em]">Absher Delivery System v2.0</p>
       </div>

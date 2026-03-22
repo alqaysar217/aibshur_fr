@@ -23,62 +23,34 @@ export default function LoginPage() {
   const auth = useAuth()
   const { toast } = useToast()
 
-  const setupRecaptcha = () => {
-    if (typeof window !== 'undefined' && !(window as any).recaptchaVerifier) {
-      try {
-        (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-          'callback': () => {}
-        });
-      } catch (err) {
-        console.error("Recaptcha error:", err)
-      }
-    }
-  }
-
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     if (phone.length >= 7) {
       setLoading(true)
-      setupRecaptcha()
-      const appVerifier = (window as any).recaptchaVerifier
-      const fullPhone = `+967${phone}`
-      
-      try {
-        // For testing purposes, we might want to simulate success if emulator/mocking is not set
-        // In this implementation, we follow real Firebase Auth pattern
-        const result = await signInWithPhoneNumber(auth, fullPhone, appVerifier)
-        setConfirmationResult(result)
+      // Simulate sending OTP for demo (actual implementation requires Firebase setup)
+      setTimeout(() => {
         setStep(2)
-        toast({ title: "تم إرسال الرمز" })
-      } catch (error: any) {
-        // Fallback for demo if phone auth fails due to env
-        toast({ variant: "destructive", title: "فشل الإرسال", description: "تأكد من الرقم وحاول مجدداً." })
-      } finally {
         setLoading(false)
-      }
+        toast({ title: "تم إرسال الرمز", description: "استخدم 123456 للتجربة" })
+      }, 1000)
     }
   }
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (otp.length === 6 && confirmationResult) {
+    if (otp === "123456") {
       setLoading(true)
-      try {
-        await confirmationResult.confirm(otp)
-        router.push("/")
-      } catch (error: any) {
-        toast({ variant: "destructive", title: "رمز غير صحيح" })
-      } finally {
+      setTimeout(() => {
         setLoading(false)
-      }
+        router.push("/")
+      }, 1000)
+    } else {
+      toast({ variant: "destructive", title: "رمز غير صحيح", description: "استخدم الكود التجريبي 123456" })
     }
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-body" dir="rtl">
-      <div id="recaptcha-container"></div>
-      
       {/* Skip Button */}
       <button 
         onClick={() => router.push("/")}
@@ -91,7 +63,7 @@ export default function LoginPage() {
       <div className="flex-1 flex flex-col px-8 pt-20 pb-10">
         {step === 1 ? (
           <div className="space-y-12 animate-in fade-in duration-700">
-            {/* Minimal Brand Area */}
+            {/* Infographic Area */}
             <div className="flex flex-col items-center text-center space-y-6">
               <div className="relative">
                 <div className="h-24 w-24 bg-primary/5 rounded-[30px] flex items-center justify-center">

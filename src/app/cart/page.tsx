@@ -23,11 +23,8 @@ import { cn } from "@/lib/utils"
 export default function CartPage() {
   const [cart, setCart] = useState<any[]>([])
   const [isEditing, setIsEditing] = useState(false)
-  const [coupon, setCoupon] = useState("")
-  const [isCouponApplied, setIsCouponApplied] = useState(false)
   const [selectedAddressId, setSelectedAddressId] = useState<string>("")
   const [paymentMethod, setPaymentMethod] = useState<string>("cash")
-  const [selectedBankId, setSelectedBankId] = useState<string | null>(null)
   const [orderNotes, setOrderNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -91,8 +88,7 @@ export default function CartPage() {
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   const deliveryFee = 1000 
-  const discount = isCouponApplied ? 500 : 0
-  const total = Math.max(0, cartTotal + deliveryFee - discount)
+  const total = cartTotal + deliveryFee
 
   const handleCheckout = async () => {
     if (!user) {
@@ -115,7 +111,6 @@ export default function CartPage() {
       orderItems: cart,
       subtotal: cartTotal,
       deliveryFee: deliveryFee,
-      discount: discount,
       totalAmount: total,
       status: "pending",
       paymentMethod: paymentMethod,
@@ -126,17 +121,7 @@ export default function CartPage() {
 
     try {
       const ordersRef = collection(db, "users", user.uid, "orders")
-      const docRef = await addDoc(ordersRef, orderData)
-
-      if (paymentMethod === "wallet") {
-        await updateDoc(walletRef!, { balance: increment(-total) })
-        await addDoc(collection(db, "users", user.uid, "transactions"), {
-          amount: total,
-          type: "debit",
-          description: `دفع طلب #${docRef.id.substring(0,6)}`,
-          createdAt: serverTimestamp()
-        })
-      }
+      await addDoc(ordersRef, orderData)
 
       localStorage.removeItem('absher_cart')
       window.dispatchEvent(new Event('cart-updated'))
@@ -153,11 +138,11 @@ export default function CartPage() {
   if (!mounted) return null
   if (cart.length === 0) return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-white" dir="rtl">
-      <div className="bg-secondary/20 p-8 rounded-[10px] mb-6">
+      <div className="bg-secondary/20 p-8 rounded-[15px] mb-6">
         <ShoppingBag className="h-16 w-16 text-muted-foreground opacity-30" />
       </div>
       <h1 className="text-xl font-black text-primary mb-2">سلة التسوق فارغة</h1>
-      <Button onClick={() => router.push('/')} className="rounded-[10px] h-14 px-10 font-bold text-lg">تصفح المتاجر</Button>
+      <Button onClick={() => router.push('/')} className="rounded-[15px] h-14 px-10 font-bold text-lg">تصفح المتاجر</Button>
     </div>
   )
 
@@ -176,9 +161,8 @@ export default function CartPage() {
       </header>
 
       <div className="p-4 space-y-4">
-        {/* تنبيه الزائر في السلة */}
         {!user && (
-          <div className="bg-amber-50 border border-amber-100 p-4 rounded-[10px] flex items-center justify-between mb-2">
+          <div className="bg-amber-50 border border-amber-100 p-4 rounded-[15px] flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
               <LogIn className="h-5 w-5 text-amber-600" />
               <div className="text-right">
@@ -190,7 +174,7 @@ export default function CartPage() {
           </div>
         )}
 
-        <Card className="border-none shadow-sm rounded-[10px] overflow-hidden bg-white">
+        <Card className="border-none shadow-sm rounded-[15px] overflow-hidden bg-white">
           <div className="p-4 border-b flex justify-between items-center bg-secondary/10">
             <h2 className="font-bold text-sm text-primary flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" /> قائمة الطلبات
@@ -248,10 +232,10 @@ export default function CartPage() {
           <section className="space-y-3">
             <h2 className="font-bold text-sm text-primary px-1 flex items-center gap-2"><MapPin className="h-4 w-4" /> عنوان التوصيل</h2>
             <Select value={selectedAddressId} onValueChange={setSelectedAddressId}>
-              <SelectTrigger className="h-14 rounded-[10px] bg-white border-none shadow-sm font-bold text-xs text-right" dir="rtl">
+              <SelectTrigger className="h-14 rounded-[15px] bg-white border-none shadow-sm font-bold text-xs text-right" dir="rtl">
                 <SelectValue placeholder="اختر عنوان التوصيل" />
               </SelectTrigger>
-              <SelectContent className="rounded-[10px]" dir="rtl">
+              <SelectContent className="rounded-[15px]" dir="rtl">
                 {addresses?.map((addr) => (
                   <SelectItem key={addr.id} value={addr.id} className="font-bold text-xs py-3 text-right">
                     {addr.label} ({addr.city} - {addr.details})
@@ -262,7 +246,7 @@ export default function CartPage() {
           </section>
         )}
 
-        <Card className="border-none shadow-sm rounded-[10px] bg-white overflow-hidden">
+        <Card className="border-none shadow-sm rounded-[15px] bg-white overflow-hidden">
           <CardContent className="p-5 space-y-4">
             <div className="flex justify-between text-xs font-bold">
               <span className="text-muted-foreground">قيمة المنتجات</span>
@@ -282,7 +266,7 @@ export default function CartPage() {
         <Button 
           onClick={handleCheckout} 
           disabled={isSubmitting || (user && !selectedAddressId)}
-          className="w-full h-16 rounded-[10px] shadow-xl text-lg font-black bg-primary flex items-center justify-between px-8 mt-6"
+          className="w-full h-16 rounded-[15px] shadow-xl text-lg font-black bg-primary flex items-center justify-between px-8 mt-6"
         >
           {isSubmitting ? (
             <div className="flex items-center gap-2 mx-auto">

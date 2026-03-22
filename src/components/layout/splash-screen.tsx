@@ -29,9 +29,8 @@ export function SplashScreen() {
           className="object-contain"
           priority
           onError={(e) => {
-            // fallback في حال عدم وجود logo.png
             const target = e.target as HTMLImageElement;
-            target.src = "/Super-App.jpeg";
+            target.src = "https://picsum.photos/seed/absher_logo/200/200";
           }}
         />
       </div>
