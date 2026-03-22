@@ -1,3 +1,4 @@
+
 "use client"
 
 import { User, MapPin, Gift, Shield, HelpCircle, LogOut, ChevronLeft, Star, HandHeart, Crown, Trash2, ChevronDown, BadgeCheck, Phone, Wallet } from "lucide-react"
@@ -62,7 +63,7 @@ export default function ProfilePage() {
       title: "الدعم والمساهمة",
       items: [
         { icon: HandHeart, label: "بوابة التبرعات", description: "شارك في أعمال الخير", href: "/donations" },
-        { icon: Shield, label: "الخصوصية والأمان", description: "شروط الخدمة والسياسات", href: "#" },
+        { icon: Shield, label: "الخصوصية والأمان", description: "شروط الخدمة والسياسات", href: "/privacy" },
         { icon: HelpCircle, label: "مركز المساعدة", description: "الأسئلة الشائعة والدعم الفني", href: "#" },
       ]
     }
