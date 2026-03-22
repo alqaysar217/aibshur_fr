@@ -9,7 +9,7 @@ import {
   ArrowRight, Clock, MapPin, CreditCard, ShoppingBag, Star, 
   Phone, MessageCircle, ChevronRight, Truck, CheckCircle2, 
   Utensils, XCircle, RefreshCw, Wallet, Landmark, Copy, Heart,
-  Navigation, Home
+  Navigation, Home, Bug
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -53,6 +53,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [tipAmount, setTipAmount] = useState("")
   const [tipMethod, setTipMethod] = useState<"wallet" | "bank">("wallet")
   const [driverHeading, setDriverHeading] = useState(45)
+  const [simulatedStatus, setSimulatedStatus] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -60,7 +61,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
   const orderRef = useMemoFirebase(() => (!db || !user || !id || id.startsWith('mock-')) ? null : doc(db, "users", user.uid, "orders", id as string), [db, user, id])
   const { data: realOrder, isLoading: isRealOrderLoading } = useDoc(orderRef)
-  const order = useMemo(() => id.startsWith('mock-') ? MOCK_ORDERS_DETAILS[id] : realOrder, [id, realOrder])
+  
+  const baseOrder = useMemo(() => id.startsWith('mock-') ? MOCK_ORDERS_DETAILS[id] : realOrder, [id, realOrder])
+  const order = useMemo(() => baseOrder ? { ...baseOrder, status: simulatedStatus || baseOrder.status } : null, [baseOrder, simulatedStatus])
 
   const walletRef = useMemoFirebase(() => (!db || !user) ? null : doc(db, "users", user.uid, "wallet", "wallet"), [db, user])
   const { data: wallet } = useDoc(walletRef)
@@ -80,8 +83,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         }, 1000)
         return () => clearInterval(timer)
       }
+    } else {
+      setCanCancel(false)
     }
-  }, [order])
+  }, [order?.status, order?.id])
 
   useEffect(() => {
     if (order?.status === 'on_the_way') {
@@ -105,7 +110,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const handleCancelOrder = async () => {
     if (!canCancel || !order) return
     toast({ title: "تم إلغاء الطلب", description: "تم إلغاء طلبك بنجاح" })
-    router.push('/orders')
+    setSimulatedStatus('cancelled')
   }
 
   const handleTipSubmit = async () => {
@@ -167,7 +172,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </Badge>
         </div>
 
-        {order.status !== 'cancelled' && (
+        {order.status !== 'cancelled' && order.status !== 'delivered' && (
           <Card className="border-none shadow-sm rounded-[25px] bg-white overflow-hidden">
             <CardContent className="p-6">
               <div className="relative flex justify-between items-center w-full px-2">
@@ -175,7 +180,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="absolute top-1/2 right-0 h-0.5 bg-primary -translate-y-1/2 z-0 transition-all duration-1000" style={{ width: `${(getCurrentStepIndex() / (steps.length - 1)) * 100}%`, right: 0 }} />
                 {steps.map((step, idx) => {
                   const isActive = idx <= getCurrentStepIndex()
-                  const isCurrent = idx === getCurrentStepIndex()
                   const StepIcon = step.icon
                   return (
                     <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
@@ -318,6 +322,30 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           <Button onClick={handleReorder} className="w-full h-14 rounded-2xl bg-primary text-white font-black text-sm gap-2">
             <RefreshCw className="h-5 w-5" /> إعادة المحاولة (إضافة للسلة)
           </Button>
+        )}
+
+        {/* Simulator Controls for Testing */}
+        {id.startsWith('mock-') && (
+          <div className="mt-10 p-6 bg-slate-900 rounded-[25px] border-2 border-dashed border-primary/30 text-white space-y-4">
+            <div className="flex items-center gap-2 text-primary">
+              <Bug className="h-5 w-5" />
+              <h3 className="font-black text-sm">أدوات المطور: محاكاة حالة الطلب</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {['pending', 'accepted', 'preparing', 'on_the_way', 'delivered', 'cancelled'].map(s => (
+                <Button 
+                  key={s} 
+                  variant={order.status === s ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => setSimulatedStatus(s)}
+                  className={cn("h-10 text-[10px] font-bold rounded-xl", order.status === s ? "bg-primary border-none" : "text-white border-white/20")}
+                >
+                  {s.replace('_', ' ')}
+                </Button>
+              ))}
+            </div>
+            <p className="text-[9px] text-slate-400 font-medium italic text-center">هذه اللوحة تظهر فقط للطلبات التجريبية لتسهيل معاينة التصميم</p>
+          </div>
         )}
       </div>
 
