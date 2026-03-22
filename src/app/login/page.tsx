@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useAuth, initiateAnonymousSignIn } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
-import Link from "link"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 export default function LoginPage() {
