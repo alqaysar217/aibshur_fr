@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowRight, User, Smartphone, Lock, Sparkles, Loader2 } from "lucide-react"
+import { ArrowRight, User, Smartphone, Lock, Sparkles, Loader2, ShieldCheck } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -41,13 +41,26 @@ export default function UserRegisterPage() {
       </header>
 
       <div className="flex-1 max-w-sm mx-auto w-full space-y-12">
-        <div className="text-center space-y-3">
-          <div className="h-20 w-20 bg-primary/5 rounded-[25px] flex items-center justify-center mx-auto mb-4 relative">
-            <User className="h-10 w-10 text-primary" />
-            <Sparkles className="h-5 w-5 text-amber-500 absolute -top-1 -right-1 animate-bounce" />
+        <div className="text-center space-y-6">
+          <div className="relative inline-block mx-auto">
+            {/* Decorative animated backgrounds */}
+            <div className="absolute inset-0 bg-primary/10 rounded-[35px] rotate-6 animate-pulse" />
+            <div className="absolute inset-0 bg-primary/5 rounded-[35px] -rotate-3 animate-bounce duration-[2000ms]" />
+            
+            <div className="relative h-28 w-28 bg-white rounded-[30px] flex items-center justify-center shadow-xl border border-primary/5 overflow-hidden group">
+              <div className="absolute -top-2 -right-2 w-10 h-10 bg-primary/5 rounded-full animate-pulse" />
+              <User className="h-12 w-12 text-primary relative z-10 animate-in zoom-in duration-700" />
+            </div>
+            
+            <div className="absolute -top-2 -right-2 h-8 w-8 bg-amber-400 rounded-lg flex items-center justify-center border-2 border-white shadow-lg animate-bounce">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
           </div>
-          <h2 className="text-2xl font-black text-gray-900 leading-tight">انضم لعائلة أبشر</h2>
-          <p className="text-gray-400 text-xs font-medium leading-relaxed px-8">استمتع بأسرع خدمة توصيل وأفضل العروض في منطقتك</p>
+          
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black text-gray-900 leading-tight">انضم لعائلة أبشر</h2>
+            <p className="text-gray-400 text-xs font-medium leading-relaxed px-8">استمتع بأسرع خدمة توصيل وأفضل العروض في منطقتك</p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

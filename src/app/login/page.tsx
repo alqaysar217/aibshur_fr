@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useAuth, initiateAnonymousSignIn } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
-import Link from "next/link"
+import Link from "link"
 import { cn } from "@/lib/utils"
 
 export default function LoginPage() {
@@ -71,16 +71,37 @@ export default function LoginPage() {
       <div className="flex-1 flex flex-col px-8 pt-20 pb-10">
         {step === 1 ? (
           <div className="space-y-12 animate-in fade-in duration-700">
-            {/* Infographic Area */}
-            <div className="flex flex-col items-center text-center space-y-6">
-              <div className="relative">
-                <div className="h-24 w-24 bg-primary/5 rounded-[30px] flex items-center justify-center">
-                  <Smartphone className="h-10 w-10 text-primary" />
+            {/* Infographic Area Enhanced */}
+            <div className="flex flex-col items-center text-center space-y-8">
+              <div className="relative inline-block">
+                {/* Decorative 3D-style animated backgrounds */}
+                <div className="absolute inset-0 bg-primary/10 rounded-[40px] rotate-6 animate-pulse" />
+                <div className="absolute inset-0 bg-primary/5 rounded-[40px] -rotate-3 animate-bounce duration-[3000ms]" />
+                
+                {/* Main Container */}
+                <div className="relative h-32 w-32 bg-white rounded-[35px] shadow-2xl shadow-primary/10 border border-primary/5 flex items-center justify-center overflow-hidden group">
+                  <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary/5 rounded-full animate-pulse" />
+                  <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-primary/5 rounded-full animate-bounce delay-700" />
+                  
+                  {/* Central Icon with 3D shadow effect */}
+                  <div className="relative transform transition-transform group-hover:scale-110 duration-500">
+                    <Smartphone className="h-14 w-14 text-primary relative z-10 drop-shadow-2xl" />
+                    <div className="absolute inset-0 h-14 w-14 text-primary/20 blur-sm translate-y-1 translate-x-1">
+                      <Smartphone className="h-14 w-14" />
+                    </div>
+                  </div>
                 </div>
-                <div className="absolute -top-2 -right-2 h-8 w-8 bg-amber-400 rounded-full flex items-center justify-center border-4 border-white">
-                  <Sparkles className="h-4 w-4 text-white" />
+
+                {/* Accent floating elements */}
+                <div className="absolute -top-3 -right-3 h-10 w-10 bg-amber-400 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg animate-bounce duration-[1500ms]">
+                  <Sparkles className="h-5 w-5 text-white" />
+                </div>
+                
+                <div className="absolute -bottom-2 -right-4 h-9 w-9 bg-primary rounded-xl flex items-center justify-center border-4 border-white shadow-md animate-pulse delay-500">
+                  <ShieldCheck className="h-4 w-4 text-white" />
                 </div>
               </div>
+
               <div className="space-y-2">
                 <h1 className="text-3xl font-black text-gray-900 tracking-tight">تسجيل الدخول</h1>
                 <p className="text-gray-400 text-sm font-medium leading-relaxed max-w-[240px] mx-auto">سجل دخولك لتجربة تسوق ذكية وآمنة في متناول يدك</p>
@@ -138,9 +159,13 @@ export default function LoginPage() {
           </div>
         ) : (
           <div className="space-y-12 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="text-center space-y-4">
-              <div className="h-20 w-20 bg-primary/5 rounded-[25px] flex items-center justify-center mx-auto">
-                <MessageSquare className="h-8 w-8 text-primary" />
+            <div className="text-center space-y-6">
+              <div className="relative inline-block mx-auto">
+                <div className="h-28 w-28 bg-primary/5 rounded-[35px] flex items-center justify-center relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-primary/10 animate-pulse" />
+                  <MessageSquare className="h-12 w-12 text-primary relative z-10 animate-bounce duration-[2000ms]" />
+                  <div className="absolute -bottom-2 -right-2 h-10 w-10 bg-green-500 rounded-full border-4 border-white shadow-md animate-pulse" />
+                </div>
               </div>
               <div className="space-y-2">
                 <h1 className="text-2xl font-black text-gray-900">التحقق من الرمز</h1>
