@@ -74,6 +74,7 @@ export default function LoginPage() {
                   fill 
                   className="object-cover"
                   priority
+                  unoptimized
                   data-ai-hint="login illustration"
                 />
               </div>
@@ -111,26 +112,10 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="space-y-6">
-              <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100" /></div>
-                <span className="relative bg-white px-4 text-[10px] font-black text-gray-300 uppercase tracking-widest">أو أنشئ حساباً جديداً</span>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <Link href="/register/user" className="p-5 bg-gray-50 rounded-[20px] flex flex-col items-center gap-3 active:scale-95 transition-all group">
-                  <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm group-hover:bg-primary group-hover:text-white transition-colors">
-                    <LogIn className="h-5 w-5" />
-                  </div>
-                  <span className="text-[11px] font-black text-gray-600">حساب عميل</span>
-                </Link>
-                <Link href="/register/driver" className="p-5 bg-gray-50 rounded-[20px] flex flex-col items-center gap-3 active:scale-95 transition-all group">
-                  <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <span className="text-[11px] font-black text-gray-600">مندوب توصيل</span>
-                </Link>
-              </div>
+            <div className="text-center pt-4">
+              <p className="text-xs font-bold text-gray-500">
+                ليس لديك حساب؟ <Link href="/register/user" className="text-primary font-black hover:underline underline-offset-4">إنشاء حساب جديد</Link>
+              </p>
             </div>
           </div>
         ) : (
@@ -142,6 +127,7 @@ export default function LoginPage() {
                   alt="OTP Illustration" 
                   fill 
                   className="object-cover"
+                  unoptimized
                   data-ai-hint="message illustration"
                 />
               </div>
