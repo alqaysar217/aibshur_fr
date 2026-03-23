@@ -46,29 +46,28 @@ service cloud.firestore {
     }
 
     // --- ملفات المستخدمين ---
-    // تم التصحيح لضمان السماح بعمليات القراءة والكتابة للمستخدمين المسجلين
     match /users/{userId} {
+      // السماح بالقراءة والكتابة للمستخدمين المسجلين
       allow read, write: if isSignedIn();
+      // السماح بعمليات القائمة (Queries) على مجموعة المستخدمين
+      allow list: if isSignedIn();
       
-      // الوصول لكافة المجموعات الفرعية (المحفظة، العناوين، التنبيهات، الطلبات الفرعية)
+      // الوصول لكافة المجموعات الفرعية (المحفظة، العناوين، التنبيهات، إلخ)
       match /{allSubcollections=**} {
         allow read, write: if isSignedIn();
       }
     }
 
-    // السماح صراحة بعمليات القائمة (list) على مجموعة المستخدمين للمسؤولين
-    match /users {
-      allow list: if isAdmin();
-    }
-
     // --- الطلبات ---
-    // السماح بالوصول للطلبات سواء كانت في الجذر أو كمجموعة فرعية للمستخدم
     match /orders/{orderId} {
       allow read, write: if isSignedIn();
+      allow list: if isSignedIn();
     }
     
+    // دعم الاستعلامات المجمعة للطلبات (Collection Group)
     match /{path=**}/orders/{orderId} {
       allow read, write: if isSignedIn();
+      allow list: if isSignedIn();
     }
 
     // --- إعدادات النظام ---
