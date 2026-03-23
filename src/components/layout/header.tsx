@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, ShoppingBag, MapPin } from "lucide-react"
+import { Search, ShoppingBag, Bell } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -13,8 +13,6 @@ export function Header() {
   const [cartCount, setCartCount] = useState(0)
   const router = useRouter()
 
-  // استخدام الصورة الموجودة في مجلد public مباشرة
-  // نفترض أن اسم الملف هو logo.png أو يمكنك تغييره للمسار الصحيح
   const logoImage = "/logo.png"
 
   useEffect(() => {
@@ -40,7 +38,6 @@ export function Header() {
               className="object-cover"
               priority
               onError={(e) => {
-                // في حال عدم وجود الصورة، يمكن الرجوع لصورة احتياطية أو نص
                 const target = e.target as HTMLImageElement;
                 target.src = "https://picsum.photos/seed/absher_logo/200/200";
               }}
@@ -50,21 +47,30 @@ export function Header() {
         </Link>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => router.push('/search')}
-          className="rounded-full hover:bg-gray-50 h-10 w-10 text-gray-500"
+          className="rounded-full hover:bg-gray-50 h-10 w-10 text-gray-500 shrink-0"
         >
           <Search className="h-5 w-5" />
+        </Button>
+
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => router.push('/notifications')}
+          className="rounded-full hover:bg-gray-50 h-10 w-10 text-gray-500 shrink-0"
+        >
+          <Bell className="h-5 w-5" />
         </Button>
         
         <Link href="/cart" className="relative">
           <Button 
             variant="ghost" 
             size="icon" 
-            className="rounded-full hover:bg-gray-50 h-10 w-10 text-gray-500"
+            className="rounded-full hover:bg-gray-50 h-10 w-10 text-gray-500 shrink-0"
           >
             <ShoppingBag className="h-5 w-5" />
           </Button>
