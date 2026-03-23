@@ -19,19 +19,21 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!mounted || isUserLoading) return;
 
+    // التحقق البسيط من وجود مستخدم مسجل
     if (!user) {
       router.replace("/login")
       return
     }
   }, [user, isUserLoading, router, mounted])
 
+  // حل مشكلة الـ Hydration: لا نعرض أي شيء حتى يكتمل تحميل الصفحة في المتصفح
   if (!mounted) return null;
 
   if (isUserLoading) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-50 gap-4" dir="rtl">
         <Loader2 className="h-12 w-12 text-primary animate-spin" />
-        <p className="font-black text-primary animate-pulse text-sm">جاري تحميل لوحة التحكم...</p>
+        <p className="font-black text-primary animate-pulse text-sm">جاري جلب البيانات...</p>
       </div>
     )
   }
