@@ -4,16 +4,16 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     // Function to check if the user is a verified Admin
-    // Supports both Auth Token phone number and Firestore document fallback
     function isAdmin() {
+      // Primary check: Official Admin Phone in Auth Token
       let isAdminPhone = request.auth != null && 
              (request.auth.token.phone_number == '+967775258830' || 
               request.auth.token.phone_number == '+967770636008');
       
-      // Fallback: Check the users collection if sign-in is anonymous but phone is in the document
-      // This ensures prototypes work without real Phone Auth while remaining secure
+      // Fallback: Check the users collection by UID (Crucial for Anonymous Prototype Sync)
+      // This allows the Admin Dashboard to work during the 'sync' phase
       let isDocAdmin = request.auth != null && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.phone in ['775258830', '770636008', '+967775258830', '+967770636008'];
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.type == 'admin';
              
       return isAdminPhone || isDocAdmin;
     }

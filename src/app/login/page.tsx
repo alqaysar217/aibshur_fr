@@ -41,8 +41,12 @@ export default function LoginPage() {
         const userRef = doc(db, "users", user.uid);
         const isAdmin = pendingPhone === "775258830" || pendingPhone === "770636008";
         
-        // Non-blocking setDoc
-        setDoc(userRef, {
+        if (isAdmin) {
+          localStorage.setItem('absher_admin_session', pendingPhone);
+        }
+
+        // Blocking write during critical sync if possible, or merged non-blocking
+        await setDoc(userRef, {
           phone: pendingPhone,
           name: isAdmin ? "المسؤول العام" : "مستخدم أبشر",
           type: isAdmin ? "admin" : "customer",
@@ -88,6 +92,7 @@ export default function LoginPage() {
         
         initiateAnonymousSignIn(auth)
         
+        // Wait for auth and sync
         setTimeout(() => {
           setLoading(false)
           if (isAdmin) {
@@ -97,7 +102,7 @@ export default function LoginPage() {
             toast({ title: "تم الدخول بنجاح", description: "أهلاً بك في أبشر" })
             router.replace("/")
           }
-        }, 1200)
+        }, 1500)
       } catch (error) {
         setLoading(false)
         toast({ variant: "destructive", title: "خطأ في تسجيل الدخول" })

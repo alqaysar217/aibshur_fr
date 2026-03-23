@@ -7,15 +7,16 @@ import { AdminTopBar } from "@/components/admin/top-bar"
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { doc } from "firebase/firestore"
 import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
+import { Loader2, ShieldAlert } from "lucide-react"
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser()
   const db = useFirestore()
   const router = useRouter()
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
 
-  // Fetch current user data from Firestore as a fallback for anonymous sessions
+  // Fetch current user data from Firestore
   const userRef = useMemoFirebase(() => {
     if (!db || !user) return null
     return doc(db, "users", user.uid)
@@ -23,52 +24,67 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userRef)
 
   useEffect(() => {
-    // Only check authorization when BOTH Auth and Firestore user data are loaded
-    if (!isUserLoading && !isUserDataLoading) {
-      console.log("Admin Layout - Auth State:", user);
-      console.log("Admin Layout - Firestore Data:", userData);
-      
-      if (!user) {
-        console.warn("Admin Layout: No user authenticated, redirecting to login...");
-        router.replace("/login")
-        return
-      }
+    // Wait until Auth is determined
+    if (isUserLoading) return;
 
-      // Allowed Admin Phone Numbers (Master List)
-      const allowedPhones = ['+967775258830', '+967770636008', '775258830', '770636008'];
-      
-      // Check phone from Auth object OR from Firestore document (fallback for anonymous login)
-      const authPhone = user.phoneNumber || "";
-      const firestorePhone = userData?.phone || "";
-      
-      const isAllowedByPhone = allowedPhones.some(phone => 
-        (authPhone && authPhone.includes(phone)) || 
-        (firestorePhone && firestorePhone.includes(phone))
-      );
-
-      // Also check explicitly by account type if phone matches
-      const isAdminType = userData?.type === "admin";
-
-      if (isAllowedByPhone || isAdminType) {
-        console.log("Admin Layout: Authorization successful.");
-        setIsAuthorized(true)
-      } else {
-        console.error("Admin Layout: Unauthorized access attempt. Phone:", authPhone || firestorePhone);
-        router.replace("/")
-      }
+    if (!user) {
+      console.warn("Admin Layout: No session found, redirecting...");
+      router.replace("/login")
+      return
     }
-  }, [user, isUserLoading, userData, isUserDataLoading, router])
 
-  if (isUserLoading || isUserDataLoading || isAuthorized === null) {
+    // Master List of Admin Phones
+    const adminPhones = ['+967775258830', '+967770636008', '775258830', '770636008'];
+    
+    // Check points of truth
+    const authPhone = user.phoneNumber || "";
+    const firestorePhone = userData?.phone || "";
+    const userType = userData?.type || "";
+    
+    // Session hint from local storage (helps with sync lag)
+    const sessionHint = typeof window !== 'undefined' ? localStorage.getItem('absher_admin_session') : null;
+
+    const isAuthorizedByPhone = adminPhones.some(p => 
+      (authPhone && authPhone.includes(p)) || 
+      (firestorePhone && firestorePhone.includes(p)) ||
+      (sessionHint && sessionHint.includes(p))
+    );
+
+    const isAuthorizedByType = userType === "admin";
+
+    if (isAuthorizedByPhone || isAuthorizedByType) {
+      setIsAuthorized(true)
+    } else {
+      // If we are still loading or the document is missing (newly created), wait a bit
+      if (isUserDataLoading || (!userData && retryCount < 5)) {
+        const timer = setTimeout(() => setRetryCount(prev => prev + 1), 1000);
+        return () => clearTimeout(timer);
+      }
+      
+      console.error("Admin Layout: Unauthorized access attempt. Context:", { authPhone, firestorePhone, userType, sessionHint });
+      setIsAuthorized(false)
+      // Small delay before redirect to show error state if any
+      setTimeout(() => router.replace("/"), 2000);
+    }
+  }, [user, isUserLoading, userData, isUserDataLoading, router, retryCount])
+
+  if (isUserLoading || isAuthorized === null) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-50 gap-4" dir="rtl">
-        <div className="relative">
-          <Loader2 className="h-16 w-16 text-primary animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-2 w-2 bg-primary rounded-full animate-ping" />
-          </div>
+        <Loader2 className="h-12 w-12 text-primary animate-spin" />
+        <p className="font-black text-primary animate-pulse">جاري التحقق من صلاحيات المسؤول...</p>
+      </div>
+    )
+  }
+
+  if (isAuthorized === false) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-white p-10 text-center gap-4" dir="rtl">
+        <div className="h-20 w-20 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-2">
+          <ShieldAlert className="h-10 w-10" />
         </div>
-        <p className="font-black text-primary animate-pulse">جاري التحقق من الصلاحيات الإدارية...</p>
+        <h1 className="text-2xl font-black text-gray-900">وصول غير مصرح به</h1>
+        <p className="text-gray-500 font-bold max-w-xs">عذراً، هذا الحساب لا يملك صلاحيات إدارية. سيتم توجيهك للرئيسية...</p>
       </div>
     )
   }
