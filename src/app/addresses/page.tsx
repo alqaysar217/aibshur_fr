@@ -228,13 +228,13 @@ export default function AddressesPage() {
                   <div className="space-y-2 text-right">
                     <label className="text-xs font-bold text-muted-foreground mr-1">تسمية العنوان</label>
                     <Select onValueChange={(v) => setLabelType(v)} value={labelType}>
-                      <SelectTrigger className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold text-right flex-row-reverse" dir="rtl">
+                      <SelectTrigger className="h-12 rounded-[10px] border-secondary bg-secondary/5 font-bold text-right" dir="rtl">
                         <SelectValue placeholder="اختر نوع العنوان" />
                       </SelectTrigger>
                       <SelectContent className="rounded-[10px] z-[110]" dir="rtl">
-                        <SelectItem value="المنزل" className="text-right flex-row-reverse">المنزل</SelectItem>
-                        <SelectItem value="العمل" className="text-right flex-row-reverse">العمل</SelectItem>
-                        <SelectItem value="آخر" className="text-right flex-row-reverse">أخرى</SelectItem>
+                        <SelectItem value="المنزل" className="text-right">المنزل</SelectItem>
+                        <SelectItem value="العمل" className="text-right">العمل</SelectItem>
+                        <SelectItem value="آخر" className="text-right">أخرى</SelectItem>
                       </SelectContent>
                     </Select>
                     
