@@ -45,16 +45,14 @@ service cloud.firestore {
     }
 
     // --- ملفات المستخدمين ---
-    // السماح بالقائمة (List) لمجموعة المستخدمين - أساسي للوحة الإدارة
+    // السماح بالقراءة والقائمة لكافة المستخدمين المسجلين في مرحلة النموذج الأولي
     match /users {
-      allow list: if isAdmin();
+      allow read, list: if isSignedIn();
     }
 
     match /users/{userId} {
       // السماح بالقراءة والكتابة للمستخدمين المسجلين
       allow read, write: if isSignedIn();
-      // السماح بعمليات القائمة (Queries) للمسؤول
-      allow list: if isAdmin();
       
       // الوصول لكافة المجموعات الفرعية (المحفظة، العناوين، التنبيهات، إلخ)
       match /{allSubcollections=**} {
@@ -65,18 +63,16 @@ service cloud.firestore {
     // --- الطلبات ---
     // السماح بالقائمة (List) لمجموعة الطلبات - أساسي للوحة الإدارة
     match /orders {
-      allow list: if isAdmin();
+      allow read, list: if isSignedIn();
     }
 
     match /orders/{orderId} {
       allow read, write: if isSignedIn();
-      allow list: if isSignedIn();
     }
     
     // دعم الاستعلامات المجمعة للطلبات (Collection Group)
     match /{path=**}/orders/{orderId} {
-      allow read, write: if isSignedIn();
-      allow list: if isSignedIn();
+      allow read, write, list: if isSignedIn();
     }
 
     // --- إعدادات النظام ---
