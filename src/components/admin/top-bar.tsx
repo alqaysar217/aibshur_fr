@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Search, User, Menu, ChevronRight } from "lucide-react"
+import { Bell, Search, User, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { query, collection, where } from "firebase/firestore"
@@ -26,7 +26,7 @@ export function AdminTopBar({ toggleMobile, toggleDesktop }: TopBarProps) {
   return (
     <header className="h-20 bg-white border-b border-gray-100 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center gap-4">
-        {/* Toggle Button for Mobile */}
+        {/* Toggle Button for Mobile & Desktop */}
         <Button 
           variant="ghost" 
           size="icon" 
@@ -36,7 +36,6 @@ export function AdminTopBar({ toggleMobile, toggleDesktop }: TopBarProps) {
           <Menu className="h-5 w-5" />
         </Button>
 
-        {/* Toggle Button for Desktop (Optional addition to existing sidebar button) */}
         <Button 
           variant="ghost" 
           size="icon" 

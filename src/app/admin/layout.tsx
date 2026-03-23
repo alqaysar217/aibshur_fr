@@ -14,11 +14,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setMounted(true)
-    // Logging for debugging as requested
-    if (auth.currentUser) {
-      console.log("Current Admin Auth:", auth.currentUser)
-    }
-  }, [auth])
+  }, [])
 
   if (!mounted) return null
 
