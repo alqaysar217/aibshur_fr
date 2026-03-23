@@ -38,28 +38,47 @@ export default function LoginPage() {
       setTimeout(() => {
         setStep(2)
         setLoading(false)
-        toast({ title: "تم إرسال الرمز", description: "استخدم 123456 للتجربة" })
+        const isAdminPhone = phone === "775258830" || phone === "770636008"
+        toast({ 
+          title: "تم إرسال الرمز", 
+          description: isAdminPhone ? "استخدم 654321 لدخول الإدارة" : "استخدم 123456 للتجربة" 
+        })
       }, 1000)
     }
   }
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (otp === "123456") {
+    
+    // Master Logic: Admin vs User
+    const isAdmin = (phone === "775258830" || phone === "770636008") && otp === "654321"
+    const isUser = otp === "123456"
+
+    if (isAdmin || isUser) {
       setLoading(true)
       try {
         initiateAnonymousSignIn(auth)
         setTimeout(() => {
           setLoading(false)
-          toast({ title: "تم الدخول بنجاح", description: "أهلاً بك في أبشر" })
-          router.replace("/")
+          if (isAdmin) {
+            console.log("Redirecting to Admin...");
+            toast({ title: "تم دخول المسؤول", description: "مرحباً بك في لوحة الإدارة العليا" })
+            router.replace("/admin")
+          } else {
+            toast({ title: "تم الدخول بنجاح", description: "أهلاً بك في أبشر" })
+            router.replace("/")
+          }
         }, 1200)
       } catch (error) {
         setLoading(false)
         toast({ variant: "destructive", title: "خطأ في تسجيل الدخول" })
       }
     } else {
-      toast({ variant: "destructive", title: "رمز غير صحيح", description: "استخدم الكود التجريبي 123456" })
+      toast({ 
+        variant: "destructive", 
+        title: "رمز غير صحيح", 
+        description: "يرجى التأكد من الرمز المدخل والمحاولة مرة أخرى" 
+      })
     }
   }
 
