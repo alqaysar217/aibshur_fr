@@ -31,7 +31,7 @@ export function AdminTopBar({ toggleMobile, toggleDesktop }: TopBarProps) {
           variant="ghost" 
           size="icon" 
           onClick={toggleMobile}
-          className="lg:hidden rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600"
+          className="lg:hidden rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 h-10 w-10"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -40,12 +40,12 @@ export function AdminTopBar({ toggleMobile, toggleDesktop }: TopBarProps) {
           variant="ghost" 
           size="icon" 
           onClick={toggleDesktop}
-          className="hidden lg:flex rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 h-10 w-10"
+          className="hidden lg:flex rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 h-10 w-10 transition-all active:scale-90"
         >
           <Menu className="h-5 w-5" />
         </Button>
 
-        <h1 className="font-black text-lg text-[#10B981] hidden sm:block">أبشر لوحة الإدارة</h1>
+        <h1 className="font-black text-lg text-gray-900 hidden sm:block">لوحة التحكم</h1>
       </div>
 
       {/* Global Search */}

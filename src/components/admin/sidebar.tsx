@@ -50,30 +50,42 @@ export function AdminSidebar({ isCollapsed, isMobileOpen, setIsMobileOpen }: Sid
 
   return (
     <aside className={sidebarClasses}>
-      {/* Brand Identity / Logo */}
+      {/* Premium Brand Section */}
       <div className={cn(
-        "h-20 flex items-center border-b border-gray-50 shrink-0 transition-all",
+        "h-24 flex items-center border-b border-gray-50 shrink-0 transition-all duration-300",
         isCollapsed ? "justify-center px-0" : "px-6 justify-start"
       )}>
-        {!isCollapsed ? (
-          <div className="relative w-32 h-10 animate-in fade-in duration-500">
-            {!imgError ? (
-              <Image 
-                src="/logo.png" 
-                alt="Abshar Admin" 
-                fill 
-                className="object-contain"
-                onError={() => setImgError(true)}
-              />
-            ) : (
-              <span className="font-black text-xl text-[#10B981] whitespace-nowrap">أبشر للإدارة</span>
-            )}
+        <div className={cn(
+          "flex items-center gap-3 transition-all duration-300",
+          isCollapsed ? "w-full justify-center" : "w-auto"
+        )}>
+          {/* Logo Image */}
+          <div className={cn(
+            "relative shrink-0 rounded-xl overflow-hidden border border-gray-100 shadow-sm transition-all duration-300",
+            isCollapsed ? "w-14 h-14" : "w-12 h-12"
+          )}>
+            <Image 
+              src="/logo.png" 
+              alt="Abshar Admin" 
+              fill 
+              className="object-cover"
+              priority
+              onError={() => setImgError(true)}
+            />
           </div>
-        ) : (
-          <div className="h-10 w-10 bg-[#10B981] rounded-xl flex items-center justify-center shadow-lg shadow-[#10B981]/20">
-            <PackageSearch className="h-6 w-6 text-white" />
-          </div>
-        )}
+
+          {/* Brand Text - Only in Expanded Mode */}
+          {!isCollapsed && (
+            <div className="flex flex-col animate-in fade-in slide-in-from-right-4 duration-500">
+              <span className="font-black text-xl text-[#10B981] whitespace-nowrap leading-none mb-1">
+                أبشر للإدارة
+              </span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                Admin Console
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Navigation Links */}
@@ -86,17 +98,17 @@ export function AdminSidebar({ isCollapsed, isMobileOpen, setIsMobileOpen }: Sid
               href={item.href}
               onClick={() => setIsMobileOpen(false)}
               className={cn(
-                "flex items-center gap-3 p-3 rounded-xl transition-all group relative",
+                "flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group relative",
                 isActive 
-                  ? "bg-[#10B981] text-white shadow-lg shadow-[#10B981]/20 scale-[1.02]" 
+                  ? "bg-gradient-to-r from-[#059669] to-[#10B981] text-white shadow-lg shadow-[#10B981]/30 scale-[1.02]" 
                   : "text-gray-500 hover:bg-gray-50 hover:text-[#10B981]",
                 isCollapsed && "justify-center px-0"
               )}
             >
               <item.icon className={cn(
-                "shrink-0 transition-transform group-hover:scale-110",
-                isActive ? "text-white" : "text-gray-400 group-hover:text-[#10B981]",
-                "h-5 w-5"
+                "shrink-0 transition-all duration-300 group-hover:scale-110",
+                isActive ? "text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" : "text-gray-400 group-hover:text-[#10B981]",
+                "h-5 w-5" // Approx 20px
               )} />
               
               {!isCollapsed && (
@@ -115,11 +127,11 @@ export function AdminSidebar({ isCollapsed, isMobileOpen, setIsMobileOpen }: Sid
       </nav>
 
       {/* Footer / Logout */}
-      <div className="p-4 border-t border-gray-50">
+      <div className="p-4 border-t border-gray-50 bg-gray-50/30">
         <button 
           onClick={handleLogout}
           className={cn(
-            "w-full flex items-center gap-3 p-3 rounded-xl transition-all text-red-500 hover:bg-red-50 group relative",
+            "w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 text-red-500 hover:bg-red-50 group relative",
             isCollapsed && "justify-center px-0"
           )}
         >
