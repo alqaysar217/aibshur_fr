@@ -46,7 +46,7 @@ service cloud.firestore {
     }
 
     // --- ملفات المستخدمين ---
-    // تم التصحيح لضمان السماح بعمليات القائمة (list) لمسؤولي النظام
+    // تم التصحيح لضمان السماح بعمليات القراءة والكتابة للمستخدمين المسجلين
     match /users/{userId} {
       allow read, write: if isSignedIn();
       
@@ -54,6 +54,11 @@ service cloud.firestore {
       match /{allSubcollections=**} {
         allow read, write: if isSignedIn();
       }
+    }
+
+    // السماح صراحة بعمليات القائمة (list) على مجموعة المستخدمين للمسؤولين
+    match /users {
+      allow list: if isAdmin();
     }
 
     // --- الطلبات ---
