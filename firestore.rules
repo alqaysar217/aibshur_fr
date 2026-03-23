@@ -8,13 +8,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // التحقق من صلاحية المسؤول
     // للنموذج الأولي، نعتبر كل مستخدم مسجل كمسؤول مؤقتاً لضمان عمل لوحة التحكم
     function isAdmin() {
       return isSignedIn();
     }
 
-    // --- مجموعات البيانات العامة ---
+    // --- المجموعات العامة ---
     match /cities/{cityId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -46,11 +45,16 @@ service cloud.firestore {
     }
 
     // --- ملفات المستخدمين ---
+    // السماح بالقائمة (List) لمجموعة المستخدمين - أساسي للوحة الإدارة
+    match /users {
+      allow list: if isAdmin();
+    }
+
     match /users/{userId} {
       // السماح بالقراءة والكتابة للمستخدمين المسجلين
       allow read, write: if isSignedIn();
-      // السماح بعمليات القائمة (Queries) على مجموعة المستخدمين
-      allow list: if isSignedIn();
+      // السماح بعمليات القائمة (Queries) للمسؤول
+      allow list: if isAdmin();
       
       // الوصول لكافة المجموعات الفرعية (المحفظة، العناوين، التنبيهات، إلخ)
       match /{allSubcollections=**} {
@@ -59,6 +63,11 @@ service cloud.firestore {
     }
 
     // --- الطلبات ---
+    // السماح بالقائمة (List) لمجموعة الطلبات - أساسي للوحة الإدارة
+    match /orders {
+      allow list: if isAdmin();
+    }
+
     match /orders/{orderId} {
       allow read, write: if isSignedIn();
       allow list: if isSignedIn();
