@@ -2,9 +2,8 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { ArrowRight, Bell, ShoppingBag, Tag, Info, CheckCircle2, Clock } from "lucide-react"
+import { ArrowRight, Bell, ShoppingBag, Tag, Info, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy, doc, updateDoc } from "firebase/firestore"
@@ -41,7 +40,7 @@ export default function NotificationsPage() {
   const { data: realNotifications, isLoading } = useCollection(notificationsQuery)
 
   const mockNotifications = [
-    { id: "mock-1", title: "تم قبول طلبك", body: "مطعم مذاقي بدأ في تحضير طلبك الآن", type: "order_status", isRead: false, createdAt: { toDate: () => new Date() } },
+    { id: "mock-1", title: "تم قبول طلبك", body: "مطعم مذاقي بدأ في تحضير طلبك الآن", type: "order_status", orderId: "mock-3", isRead: false, createdAt: { toDate: () => new Date() } },
     { id: "mock-2", title: "عرض خاص!", body: "خصم 20% على كافة الحلويات اليوم فقط", type: "promotion", isRead: true, createdAt: { toDate: () => new Date(Date.now() - 3600000) } },
     { id: "mock-3", title: "تحديث النظام", body: "تم تحسين واجهة التتبع لتجربة أفضل", type: "system", isRead: true, createdAt: { toDate: () => new Date(Date.now() - 86400000) } },
   ]
@@ -52,10 +51,31 @@ export default function NotificationsPage() {
     return combined.filter(n => n.type === activeFilter)
   }, [realNotifications, activeFilter])
 
-  const markAsRead = async (notificationId: string) => {
-    if (!user || !db || notificationId.startsWith('mock-')) return
-    const notifRef = doc(db, "users", user.uid, "notifications", notificationId)
-    await updateDoc(notifRef, { isRead: true })
+  const handleNotificationClick = async (notif: any) => {
+    // 1. Mark as read in Firestore if it's a real notification
+    if (user && db && !notif.id.startsWith('mock-')) {
+      const notifRef = doc(db, "users", user.uid, "notifications", notif.id)
+      updateDoc(notifRef, { isRead: true })
+    }
+
+    // 2. Navigate based on type
+    switch (notif.type) {
+      case 'order_status':
+        if (notif.orderId) {
+          router.push(`/orders/${notif.orderId}`)
+        } else {
+          router.push('/orders')
+        }
+        break
+      case 'promotion':
+        router.push('/')
+        break
+      case 'system':
+        // Stay on page or provide feedback
+        break
+      default:
+        break
+    }
   }
 
   const getIcon = (type: string) => {
@@ -110,10 +130,10 @@ export default function NotificationsPage() {
             <div 
               key={notif.id} 
               className={cn(
-                "p-3 rounded-[15px] transition-all active:scale-[0.98] flex gap-3 items-start",
+                "p-3 rounded-[15px] transition-all active:scale-[0.98] flex gap-3 items-start cursor-pointer",
                 notif.isRead ? "bg-white/50 border border-transparent" : "bg-white shadow-sm border border-primary/5 ring-1 ring-primary/5"
               )}
-              onClick={() => markAsRead(notif.id)}
+              onClick={() => handleNotificationClick(notif)}
             >
               <div className={cn(
                 "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
