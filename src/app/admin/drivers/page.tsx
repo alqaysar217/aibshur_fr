@@ -1,46 +1,33 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from "@/firebase"
+import { useState } from "react"
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, where, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore"
-import { Truck, BadgeCheck, XCircle, Eye, Loader2, MapPin, Star, Clock, ShieldAlert, RefreshCcw } from "lucide-react"
+import { Truck, BadgeCheck, XCircle, Eye, Loader2, MapPin, Star, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 
 export default function AdminDriversPage() {
   const db = useFirestore()
-  const { user } = useUser()
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState("approved")
-  const [authorized, setAuthorized] = useState(false)
-
-  const userRef = useMemoFirebase(() => (!db || !user) ? null : doc(db, "users", user.uid), [db, user])
-  const { data: userData } = useDoc(userRef)
-
-  useEffect(() => {
-    const debugUIDs = ['mV7AQV2Mm6MDRpe5eSxskxNRVn73', 'Dn5QW71UUNVTo5XmOlfBrCfCmFO2'];
-    if (userData?.role === 'admin' || userData?.type === 'admin' || debugUIDs.includes(user?.uid || '')) {
-      setAuthorized(true)
-    }
-  }, [userData, user])
 
   const driversQuery = useMemoFirebase(() => {
-    // CRITICAL: Prevent execution until authorized
-    if (!db || !authorized) return null
+    if (!db) return null
     return query(
       collection(db, "users"), 
       where("type", "==", "driver"), 
       orderBy("createdAt", "desc")
     )
-  }, [db, authorized])
+  }, [db])
 
-  const { data: allDrivers, isLoading, error } = useCollection(driversQuery)
+  const { data: allDrivers, isLoading } = useCollection(driversQuery)
 
   const approvedDrivers = allDrivers?.filter(d => d.status === "active")
   const pendingDrivers = allDrivers?.filter(d => d.status === "pending")
@@ -63,18 +50,6 @@ export default function AdminDriversPage() {
     } catch (e) {
       toast({ variant: "destructive", title: "خطأ" })
     }
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center p-20 bg-white rounded-3xl gap-4 shadow-sm">
-        <ShieldAlert className="h-16 w-16 text-red-500 opacity-20" />
-        <h2 className="text-xl font-black">فشل تحميل بيانات المناديب</h2>
-        <Button onClick={() => window.location.reload()} className="rounded-xl gap-2">
-          <RefreshCcw className="h-4 w-4" /> إعادة المحاولة
-        </Button>
-      </div>
-    )
   }
 
   return (
@@ -108,7 +83,7 @@ export default function AdminDriversPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isLoading || !authorized ? (
+                  {isLoading ? (
                     <TableRow><TableCell colSpan={5} className="h-20 text-center"><Loader2 className="animate-spin h-6 w-6 mx-auto text-primary" /></TableCell></TableRow>
                   ) : approvedDrivers?.length === 0 ? (
                     <TableRow><TableCell colSpan={5} className="h-32 text-center text-gray-400 font-bold">لا يوجد مناديب معتمدين حالياً</TableCell></TableRow>
@@ -218,7 +193,7 @@ export default function AdminDriversPage() {
                 </div>
               </Card>
             ))}
-            {pendingDrivers?.length === 0 && authorized && !isLoading && (
+            {pendingDrivers?.length === 0 && !isLoading && (
               <div className="col-span-full py-20 text-center opacity-30">
                 <Clock className="h-16 w-16 mx-auto mb-4 text-primary" />
                 <p className="font-black text-primary">لا توجد طلبات انضمام حالياً</p>

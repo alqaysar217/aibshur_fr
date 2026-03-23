@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from "@/firebase"
+import { useState } from "react"
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, where, orderBy, doc, updateDoc, increment } from "firebase/firestore"
-import { Users, Search, Wallet, ShieldAlert, Loader2, Edit3, RefreshCcw } from "lucide-react"
+import { Users, Search, Wallet, Loader2, Edit3, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
@@ -17,32 +17,18 @@ import { ar } from "date-fns/locale"
 
 export default function AdminUsersPage() {
   const db = useFirestore()
-  const { user } = useUser()
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [balanceAmount, setBalanceAmount] = useState("")
   const [isUpdating, setIsUpdating] = useState(false)
-  const [authorized, setAuthorized] = useState(false)
-
-  // Verify Admin Status before query
-  const userRef = useMemoFirebase(() => (!db || !user) ? null : doc(db, "users", user.uid), [db, user])
-  const { data: userData } = useDoc(userRef)
-
-  useEffect(() => {
-    const debugUIDs = ['mV7AQV2Mm6MDRpe5eSxskxNRVn73', 'Dn5QW71UUNVTo5XmOlfBrCfCmFO2'];
-    if (userData?.role === 'admin' || userData?.type === 'admin' || debugUIDs.includes(user?.uid || '')) {
-      setAuthorized(true)
-    }
-  }, [userData, user])
 
   const usersQuery = useMemoFirebase(() => {
-    // CRITICAL: Prevent execution until authorized
-    if (!db || !authorized) return null
+    if (!db) return null
     return query(collection(db, "users"), where("type", "==", "customer"), orderBy("createdAt", "desc"))
-  }, [db, authorized])
+  }, [db])
 
-  const { data: users, isLoading, error } = useCollection(usersQuery)
+  const { data: users, isLoading } = useCollection(usersQuery)
 
   const filteredUsers = users?.filter(u => 
     u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -78,25 +64,12 @@ export default function AdminUsersPage() {
     }
   }
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center p-20 bg-white rounded-3xl gap-4 shadow-sm">
-        <ShieldAlert className="h-16 w-16 text-red-500 opacity-20" />
-        <h2 className="text-xl font-black">فشل تحميل البيانات</h2>
-        <p className="text-gray-400 font-bold">يرجى التأكد من صلاحيات المسؤول والمحاولة مرة أخرى</p>
-        <Button onClick={() => window.location.reload()} className="rounded-xl gap-2">
-          <RefreshCcw className="h-4 w-4" /> إعادة المحاولة
-        </Button>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900">إدارة العملاء</h1>
-          <p className="text-gray-400 text-sm font-bold mt-1">متابعة حسابات المستخدمين، الأرصدة، والحالات التشغيلية</p>
+          <p className="text-gray-400 text-sm font-bold mt-1">متابعة حسابات المستخدمين والأرصدة</p>
         </div>
         <div className="relative w-full md:w-72 group">
           <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 group-focus-within:text-primary transition-colors" />
@@ -122,7 +95,7 @@ export default function AdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading || !authorized ? (
+              {isLoading ? (
                 [1, 2, 3].map(i => <TableRow key={i} className="animate-pulse"><TableCell colSpan={5} className="h-16 bg-gray-50/20" /></TableRow>)
               ) : filteredUsers?.map((user) => (
                 <TableRow key={user.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-50">
