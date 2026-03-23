@@ -2,11 +2,15 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Function to check if the user is a verified Admin (Database-First)
+    // Function to check if the user is a verified Admin
     function isAdmin() {
-      let userDoc = /databases/$(database)/documents/users/$(request.auth.uid);
-      return request.auth != null && 
-             (exists(userDoc) && (get(userDoc).data.role == 'admin' || get(userDoc).data.type == 'admin'));
+      let uid = request.auth.uid;
+      let userDocPath = /databases/$(database)/documents/users/$(uid);
+      return request.auth != null && (
+        uid in ['mV7AQV2Mm6MDRpe5eSxskxNRVn73', 'Dn5QW71UUNVTo5XmOlfBrCfCmFO2'] ||
+        (exists(userDocPath) && (get(userDocPath).data.role == 'admin' || get(userDocPath).data.type == 'admin')) ||
+        request.auth.token.phone_number in ['+967775258830', '+967770636008']
+      );
     }
 
     // Cities, Stores, Categories, Ads: Public read, Admin write

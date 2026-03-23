@@ -16,7 +16,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false)
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
 
-  // Ensure client-side only rendering to prevent Hydration errors
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -36,25 +35,35 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       return
     }
 
+    // MASTER LOGGING FOR DEBUGGING
+    console.log("Admin Check - Current Auth User:", {
+      uid: user.uid,
+      phoneNumber: user.phoneNumber,
+      isAnonymous: user.isAnonymous
+    });
+    console.log("Admin Check - Firestore User Data:", userData);
+
     // Master List of Debug UIDs (Bypass for testing)
     const debugUIDs = ['mV7AQV2Mm6MDRpe5eSxskxNRVn73', 'Dn5QW71UUNVTo5XmOlfBrCfCmFO2'];
     
     if (debugUIDs.includes(user.uid)) {
+      console.log("Admin Check - Access Granted via Debug UID Bypass");
       setIsAuthorized(true)
       return;
     }
 
-    // Check Role or Type in Firestore document
+    // Wait for Firestore data if not a debug UID
+    if (isUserDataLoading) return;
+
     const hasAdminRole = userData?.role === "admin" || userData?.type === "admin";
 
     if (hasAdminRole) {
+      console.log("Admin Check - Access Granted via Firestore Role/Type");
       setIsAuthorized(true)
-    } else {
-      // If data is still loading, wait. If data loaded and not admin, deny.
-      if (!isUserDataLoading && userData !== undefined) {
-        setIsAuthorized(false)
-        setTimeout(() => router.replace("/"), 3000)
-      }
+    } else if (userData !== undefined) {
+      console.error("Admin Check - Access Denied. Role/Type mismatch or missing.");
+      setIsAuthorized(false)
+      setTimeout(() => router.replace("/"), 3000)
     }
   }, [user, isUserLoading, userData, isUserDataLoading, router, mounted])
 
@@ -64,7 +73,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-50 gap-4" dir="rtl">
         <Loader2 className="h-12 w-12 text-primary animate-spin" />
-        <p className="font-black text-primary animate-pulse text-sm">جاري التحقق من الصلاحيات...</p>
+        <p className="font-black text-primary animate-pulse text-sm">جاري التحقق من صلاحيات المسؤول...</p>
       </div>
     )
   }
@@ -76,7 +85,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <ShieldAlert className="h-10 w-10" />
         </div>
         <h1 className="text-2xl font-black text-gray-900">دخول غير مصرح به</h1>
-        <p className="text-gray-500 font-bold max-w-xs">عذراً، لم يتم العثور على صلاحيات مسؤول لهذا الحساب.</p>
+        <p className="text-gray-500 font-bold max-w-xs">عذراً، هذا الحساب لا يمتلك صلاحيات الإدارة العليا.</p>
         <Button onClick={() => router.push("/")} variant="outline" className="rounded-xl">العودة للرئيسية</Button>
       </div>
     )
