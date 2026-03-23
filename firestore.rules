@@ -5,54 +5,46 @@ service cloud.firestore {
     
     // Function to check if the user is a verified Admin
     function isAdmin() {
-      // Primary check: Official Admin Phone in Auth Token
-      let isAdminPhone = request.auth != null && 
-             (request.auth.token.phone_number == '+967775258830' || 
-              request.auth.token.phone_number == '+967770636008');
+      // 1. Check Phone in Auth Token (Official Method)
+      let isAdminPhone = request.auth != null && (
+        request.auth.token.phone_number == '+967775258830' || 
+        request.auth.token.phone_number == '+967770636008'
+      );
       
-      // Fallback: Check the users collection by UID (Crucial for Anonymous Prototype Sync)
-      // This allows the Admin Dashboard to work during the 'sync' phase
-      let isDocAdmin = request.auth != null && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.type == 'admin';
+      // 2. Check Firestore Document (Prototype/Fallback Method)
+      // We use a helper variable to safely access the document
+      let userPath = /databases/$(database)/documents/users/$(request.auth.uid);
+      let isDocAdmin = request.auth != null && exists(userPath) && get(userPath).data.type == 'admin';
              
       return isAdminPhone || isDocAdmin;
     }
 
-    // Cities: Everyone can read, only Admin can write
+    // Users: Admin can list/manage all. Users can manage their own.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      match /{allSubcollections=**} {
+        allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      }
+    }
+
+    // Orders: Admin has full access. Customers see their own.
+    match /orders/{orderId} {
+      allow read, write: if isAdmin() || (request.auth != null && (resource == null || resource.data.customerId == request.auth.uid || request.resource.data.customerId == request.auth.uid));
+      match /{allSubcollections=**} {
+        allow read, write: if request.auth != null;
+      }
+    }
+
+    // Cities, Stores, etc: Public read, Admin write
     match /cities/{cityId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Users & Drivers: Admin has FULL access. Users see their own data.
-    match /users/{userId} {
-      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
-      match /{allSubcollections=**} {
-        allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
-      }
-    }
-
-    match /drivers/{driverId=**} {
-      allow read, write: if isAdmin();
-    }
-    
-    // Orders: Admin has FULL access. Customers see their own orders.
-    match /orders/{orderId} {
-      allow read, write: if isAdmin() || (request.auth != null && (resource == null || resource.data.customerId == request.auth.uid || resource.data.userId == request.auth.uid));
-      match /{allSubcollections=**} {
-        allow read, write: if isAdmin() || (request.auth != null);
-      }
-    }
-
-    // Support Collection Groups for Admin Queries
-    match /{path=**}/orders/{orderId} {
-      allow read, write: if isAdmin() || (request.auth != null);
-    }
-
     match /stores/{storeId} {
       allow read: if true;
       allow write: if isAdmin();
-      match /{allSub=**} {
+      match /{allSubcollections=**} {
         allow read: if true;
         allow write: if isAdmin();
       }
@@ -72,7 +64,8 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
-
+    
+    // Shared access for subcollections in collectionGroup queries if needed
     match /{path=**}/products/{productId} {
       allow read: if true;
       allow write: if isAdmin();

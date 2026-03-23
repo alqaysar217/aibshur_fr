@@ -56,8 +56,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       setIsAuthorized(true)
     } else {
       // If we are still loading or the document is missing (newly created), wait a bit
-      if (isUserDataLoading || (!userData && retryCount < 5)) {
-        const timer = setTimeout(() => setRetryCount(prev => prev + 1), 1000);
+      if (isUserDataLoading || (!userData && retryCount < 10)) {
+        const timer = setTimeout(() => setRetryCount(prev => prev + 1), 500);
         return () => clearTimeout(timer);
       }
       
@@ -71,7 +71,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   if (isUserLoading || isAuthorized === null) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-50 gap-4" dir="rtl">
-        <Loader2 className="h-12 w-12 text-primary animate-spin" />
+        <div className="relative">
+          <Loader2 className="h-12 w-12 text-primary animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[10px] font-bold">{retryCount}</span>
+          </div>
+        </div>
         <p className="font-black text-primary animate-pulse">جاري التحقق من صلاحيات المسؤول...</p>
       </div>
     )
