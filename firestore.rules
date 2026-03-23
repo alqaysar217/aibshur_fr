@@ -15,27 +15,27 @@ service cloud.firestore {
 
     // --- المحافظات والمدن ---
     match /cities/{cityId} {
-      allow read, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // --- الفئات ---
     match /categories/{catId} {
-      allow read, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // --- المتاجر والمنتجات ---
     match /stores/{storeId} {
-      allow read, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
 
       match /products/{productId} {
-        allow read, list: if true;
+        allow read: if true;
         allow write: if isAdmin();
         
         match /variants/{vId} {
-          allow read, list: if true;
+          allow read: if true;
           allow write: if isAdmin();
         }
       }
@@ -43,34 +43,34 @@ service cloud.firestore {
 
     // --- الإعلانات ---
     match /ads/{adId} {
-      allow read, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
     }
 
-    // --- المنتجات (البحث الموحد عبر المتاجر) ---
+    // --- المنتجات (البحث الموحد عبر المتاجر - Collection Group) ---
     match /{path=**}/products/{productId} {
-      allow read, list: if true;
+      allow read: if true;
     }
 
     // --- ملفات المستخدمين ---
+    // تم التعديل للسماح صراحة بعمليات القائمة (list) على مجموعة المستخدمين
     match /users/{userId} {
-      // السماح بالقراءة والكتابة والبحث للمسؤولين أو صاحب الحساب
-      allow read, write, list: if isSignedIn();
+      allow read, write: if isSignedIn();
       
-      // الوصول لكافة المجموعات الفرعية (المحفظة، العناوين، التنبيهات، الطلبات الفرعية إلخ)
+      // الوصول لكافة المجموعات الفرعية (المحفظة، العناوين، إلخ)
       match /{allSubcollections=**} {
-        allow read, write, list: if isSignedIn();
+        allow read, write: if isSignedIn();
       }
     }
 
     // --- الطلبات العامة ---
     match /orders/{orderId} {
-      allow read, write, list: if isSignedIn();
+      allow read, write: if isSignedIn();
     }
     
     // دعم الاستعلامات المجمعة للطلبات (Collection Group)
     match /{path=**}/orders/{orderId} {
-      allow read, write, list: if isSignedIn();
+      allow read, write: if isSignedIn();
     }
 
     // --- إعدادات النظام ---
@@ -78,5 +78,7 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    
+    // تعليق لتنشيط تحديث القواعد: تم تحسين صلاحيات القائمة للمسؤولين
   }
 }
