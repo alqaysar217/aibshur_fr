@@ -2,83 +2,92 @@
 {
   "entities": {
     "User": {
-      "description": "بيانات العميل",
+      "description": "بيانات العميل والمندوب",
       "properties": {
         "id": { "type": "string" },
         "name": { "type": "string" },
         "phone": { "type": "string" },
+        "type": { "type": "string", "enum": ["customer", "driver", "admin"] },
         "favoritesStoreIds": { "type": "array" },
         "favoritesProductIds": { "type": "array" },
         "loyaltyPoints": { "type": "number" },
-        "subscriptionId": { "type": "string" }
-      }
-    },
-    "Address": {
-      "description": "عنوان التوصيل",
-      "properties": {
-        "id": { "type": "string" },
-        "label": { "type": "string", "description": "مثال: المنزل، العمل" },
-        "city": { "type": "string" },
-        "details": { "type": "string" },
-        "latitude": { "type": "number" },
-        "longitude": { "type": "number" },
-        "isDefault": { "type": "boolean" },
+        "subscriptionId": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
-    "Notification": {
-      "description": "التنبيهات والرسائل",
+    "City": {
+      "description": "المحافظات والمدن المتاحة",
       "properties": {
         "id": { "type": "string" },
-        "title": { "type": "string" },
-        "body": { "type": "string" },
-        "type": { "type": "string", "enum": ["order_status", "promotion", "system"] },
-        "isRead": { "type": "boolean" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "cityName": { "type": "string" },
+        "supportNumber": { "type": "string" },
+        "isActive": { "type": "boolean" }
       }
     },
     "Store": {
       "description": "المتاجر والمطاعم",
       "properties": {
         "id": { "type": "string" },
+        "cityId": { "type": "string", "description": "Reference to City" },
+        "categoryId": { "type": "string" },
         "name": { "type": "string" },
-        "logoUrl": { "type": "string" },
-        "categoryIds": { "type": "array" },
-        "address": { "type": "string" },
-        "status": { "type": "string" },
-        "averageRating": { "type": "number" }
+        "logo": { "type": "string" },
+        "coverImage": { "type": "string" },
+        "location": { "type": "object", "description": "Geopoint" },
+        "rating": { "type": "number" },
+        "deliveryTime": { "type": "number", "description": "In minutes" },
+        "isOpen": { "type": "boolean" },
+        "isTopRated": { "type": "boolean" }
       }
     },
     "Product": {
-      "description": "الوجبات والمنتجات",
+      "description": "المنتجات والوجبات",
       "properties": {
         "id": { "type": "string" },
+        "storeId": { "type": "string" },
+        "filterId": { "type": "string" },
         "name": { "type": "string" },
-        "price": { "type": "number" },
-        "imageUrl": { "type": "string" },
         "description": { "type": "string" },
-        "storeId": { "type": "string" }
+        "image": { "type": "string" },
+        "price": { "type": "number" },
+        "hasVariants": { "type": "boolean" }
       }
     },
     "Order": {
-      "description": "الطلبات",
+      "description": "نظام الطلبات المتكامل",
       "properties": {
         "id": { "type": "string" },
-        "userId": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "customerId": { "type": "string" },
+        "driverId": { "type": "string" },
         "storeId": { "type": "string" },
-        "totalAmount": { "type": "number" },
-        "status": { "type": "string", "enum": ["pending", "accepted", "preparing", "on_the_way", "delivered"] }
+        "items": { "type": "array" },
+        "totalPrice": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "preparing", "onWay", "delivered", "canceled"] },
+        "paymentMethod": { "type": "string" },
+        "location": { "type": "object", "description": "Geopoint" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "AdminSettings": {
+      "description": "إعدادات النظام العليا",
+      "properties": {
+        "allowedAdmins": { "type": "array", "description": "Phone numbers list" },
+        "vipSilverPrice": { "type": "number" },
+        "vipGoldPrice": { "type": "number" },
+        "pointsToCashRate": { "type": "number" }
       }
     }
   },
   "firestore": {
-    "/users/{userId}": { "schema": "User" },
-    "/users/{userId}/addresses/{addressId}": { "schema": "Address" },
-    "/users/{userId}/notifications/{notifId}": { "schema": "Notification" },
+    "/cities/{cityId}": { "schema": "City" },
     "/stores/{storeId}": { "schema": "Store" },
     "/stores/{storeId}/products/{productId}": { "schema": "Product" },
+    "/stores/{storeId}/products/{productId}/variants/{vId}": { "description": "خيارات المنتج" },
     "/orders/{orderId}": { "schema": "Order" },
-    "/categories/{id}": { "description": "الأقسام" },
-    "/governorates/{id}": { "description": "المحافظات" }
+    "/users/{userId}": { "schema": "User" },
+    "/users/{userId}/wallet/{id}": { "description": "محفظة المستخدم" },
+    "/admin_settings/settings": { "schema": "AdminSettings" }
   }
 }

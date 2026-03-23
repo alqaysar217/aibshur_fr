@@ -1,15 +1,9 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- 1. قاعدة المجموعات المشتركة (مهمة جداً للبحث والمفضلة) ---
-    // هذه القاعدة يجب أن تكون في القمة وخارج أي تداخل لتسمح باستعلامات collectionGroup
-    match /{path=**}/products/{productId} {
-      // الوجبات بيانات عامة يجب أن تظهر للجميع لنجاح تجربة الاكتشاف
-      allow read, list: if true;
-    }
-
-    // --- 2. دالات مساعدة ---
+    // --- دالات مساعدة ---
     function isSignedIn() {
       return request.auth != null;
     }
@@ -18,41 +12,89 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // --- 3. المتاجر (البيانات العامة) ---
-    match /stores/{storeId} {
-      allow read, list: if true; 
-      // منع الكتابة العشوائية إلا للمسؤولين (أو عبر كود التهيئة حالياً)
-      allow write: if isSignedIn();
+    // التحقق من صلاحية المسؤول عبر رقم الهاتف
+    function isAdmin() {
+      let adminData = get(/databases/$(database)/documents/admin_settings/settings).data;
+      return isSignedIn() && (
+        request.auth.token.phone_number in adminData.allowedAdmins ||
+        request.auth.token.phone_number.replace('\\+967', '') in adminData.allowedAdmins
+      );
+    }
 
-      // المنتجات هنا مغطاة أيضاً بالقاعدة رقم 1 أعلاه
+    // --- مجموعات البيانات العامة ---
+    match /cities/{cityId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /categories/{catId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /stores/{storeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
       match /products/{productId} {
-        allow read, list: if true;
-        allow write: if isSignedIn();
+        allow read: if true;
+        allow write: if isAdmin();
+        
+        match /variants/{vId} {
+          allow read: if true;
+          allow write: if isAdmin();
+        }
       }
     }
 
-    // --- 4. ملفات المستخدمين (خصوصية تامة) ---
+    // --- المنتجات (البحث الموحد) ---
+    match /{path=**}/products/{productId} {
+      allow read: if true;
+    }
+
+    // --- ملفات المستخدمين والمحفظة ---
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
       
-      // التنبيهات، الطلبات، المحفظة داخل ملف المستخدم
-      match /{allSubcollections=**} {
+      match /wallet/{id} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if isAdmin(); // الإدارة فقط تشحن الرصيد برمجياً
+      }
+
+      match /addresses/{addressId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /notifications/{notifId} {
         allow read, write: if isOwner(userId);
       }
     }
 
-    // --- 5. البيانات المفتوحة الأخرى ---
-    match /ads/{id} { allow read: if true; allow write: if isSignedIn(); }
-    match /categories/{id} { allow read: if true; allow write: if isSignedIn(); }
-    match /governorates/{id} { allow read: if true; allow write: if isSignedIn(); }
-
-    // --- 6. الطلبات (صلاحيات مشتركة بين العميل والمندوب) ---
+    // --- الطلبات ---
     match /orders/{orderId} {
       allow create: if isSignedIn();
-      allow read, update: if isSignedIn() && (
-        resource.data.userId == request.auth.uid || 
-        resource.data.driverId == request.auth.uid
+      allow read: if isSignedIn() && (
+        resource.data.customerId == request.auth.uid || 
+        resource.data.driverId == request.auth.uid ||
+        isAdmin()
       );
+      allow update: if isSignedIn() && (
+        resource.data.customerId == request.auth.uid || 
+        resource.data.driverId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // --- إعدادات النظام ---
+    match /admin_settings/settings {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /ads/{adId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }
