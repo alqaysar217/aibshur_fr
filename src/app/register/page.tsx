@@ -13,7 +13,7 @@ import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-// مكون علم اليمن الصغير
+// Yemen Flag Component
 const YemenFlag = () => (
   <svg viewBox="0 0 6 4" className="h-3 w-4 rounded-[2px] shadow-sm shrink-0">
     <rect width="6" height="4" fill="#fff"/>
@@ -85,27 +85,27 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-white font-body flex flex-col" dir="rtl">
-      <header className="p-6 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-50">
-        <button onClick={() => router.back()} className="h-12 w-12 flex items-center justify-center rounded-2xl bg-gray-50 text-gray-900 active:scale-90 transition-all">
-          <ArrowRight className="h-6 w-6" />
+      <header className="p-5 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-50">
+        <button onClick={() => router.back()} className="h-10 w-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-900 active:scale-90 transition-all">
+          <ArrowRight className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-black text-gray-900 tracking-tight">إنشاء حساب جديد</h1>
-        <div className="w-12" />
+        <h1 className="text-lg font-black text-gray-900 tracking-tight">إنشاء حساب جديد</h1>
+        <div className="w-10" />
       </header>
 
       <div className="flex-1 px-8 pb-10 pt-4">
         <Tabs defaultValue="customer" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 h-14 bg-gray-50 rounded-[15px] p-1.5 mb-8">
-            <TabsTrigger value="customer" className="rounded-[10px] font-black text-sm data-[state=active]:bg-white data-[state=active]:text-primary shadow-none data-[state=active]:shadow-sm transition-all gap-2">
-              <User className="h-4 w-4" /> حساب عميل
+          <TabsList className="grid w-full grid-cols-2 h-12 bg-gray-50 rounded-[12px] p-1 mb-6">
+            <TabsTrigger value="customer" className="rounded-[8px] font-black text-xs data-[state=active]:bg-white data-[state=active]:text-primary shadow-none data-[state=active]:shadow-sm transition-all gap-2">
+              <User className="h-3.5 w-3.5" /> مستخدم
             </TabsTrigger>
-            <TabsTrigger value="driver" className="rounded-[10px] font-black text-sm data-[state=active]:bg-white data-[state=active]:text-primary shadow-none data-[state=active]:shadow-sm transition-all gap-2">
-              <Truck className="h-4 w-4" /> شريك مندوب
+            <TabsTrigger value="driver" className="rounded-[8px] font-black text-xs data-[state=active]:bg-white data-[state=active]:text-primary shadow-none data-[state=active]:shadow-sm transition-all gap-2">
+              <Truck className="h-3.5 w-3.5" /> مندوب
             </TabsTrigger>
           </TabsList>
 
-          <div className="flex flex-col items-center text-center space-y-6 mb-8">
-            <div className="relative w-full max-w-[180px] aspect-square rounded-[30px] overflow-hidden shadow-2xl shadow-primary/10 border-4 border-white rotate-3">
+          <div className="flex flex-col items-center text-center space-y-5 mb-8">
+            <div className="relative w-full max-w-[150px] aspect-square rounded-[25px] overflow-hidden shadow-2xl shadow-primary/10 border-4 border-white rotate-2">
               <Image 
                 src={activeTab === 'customer' ? "https://picsum.photos/seed/absher-user/600/600" : "https://picsum.photos/seed/absher-driver/600/600"} 
                 alt="Illustration" 
@@ -114,132 +114,128 @@ export default function RegisterPage() {
                 unoptimized
               />
             </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black text-gray-900 leading-tight">
+            <div className="space-y-1.5">
+              <h2 className="text-xl font-black text-gray-900 leading-tight">
                 {activeTab === 'customer' ? "أهلاً بك في عائلة أبشر" : "كن شريك نجاح في أبشر"}
               </h2>
-              <p className="text-gray-400 text-[11px] font-medium leading-relaxed px-4">
+              <p className="text-gray-400 text-[10px] font-bold leading-relaxed px-4">
                 {activeTab === 'customer' ? "استمتع بأسرع خدمة توصيل وأفضل العروض في منطقتك" : "اربح أكثر مع نظام توصيل ذكي ومرن يوفر لك أفضل الفرص"}
               </p>
             </div>
           </div>
 
           <TabsContent value="customer" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <form onSubmit={handleCustomerSubmit} className="space-y-6">
+            <form onSubmit={handleCustomerSubmit} className="space-y-5">
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">الاسم</label>
-                  <Input placeholder="أدخل اسمك الكريم" className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-bold text-gray-800 focus-visible:ring-primary/20 text-right transition-all" required />
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">الاسم</label>
+                  <Input placeholder="أدخل اسمك الكريم" className="h-14 px-5 rounded-[12px] bg-gray-50 border-none font-bold text-gray-800 focus-visible:ring-primary/20 text-right transition-all" required />
                 </div>
                 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">رقم الهاتف</label>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">رقم الهاتف</label>
                   <div className="relative" dir="rtl">
-                    <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 border-l pl-4 h-6">
-                      <div className="flex items-center gap-1.5">
-                        <YemenFlag />
-                        <span className="text-sm font-black" dir="ltr">+967</span>
-                      </div>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 border-l pl-3 h-5">
+                      <YemenFlag />
+                      <span className="text-xs font-black" dir="ltr">+967</span>
                     </div>
                     <Input 
                       placeholder="7xxxxxxxx" 
-                      className="h-16 pr-28 rounded-[15px] bg-gray-50 border-none font-black text-lg tracking-widest focus-visible:ring-primary/20 text-right" 
+                      className="h-14 pr-28 rounded-[12px] bg-gray-50 border-none font-black text-base tracking-widest focus-visible:ring-primary/20 text-right" 
                       maxLength={9} 
                       required 
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">كلمة المرور</label>
-                  <Input type="password" placeholder="••••••••" className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-black focus-visible:ring-primary/20 text-right" required />
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">كلمة المرور</label>
+                  <Input type="password" placeholder="••••••••" className="h-14 px-5 rounded-[12px] bg-gray-50 border-none font-black focus-visible:ring-primary/20 text-right" required />
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-[15px] transition-all active:scale-[0.99] group" dir="rtl">
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-[12px] transition-all active:scale-[0.99]" dir="rtl">
                 <Checkbox 
                   id="customer-terms" 
                   checked={customerAgreed} 
                   onCheckedChange={(val) => setCustomerAgreed(val as boolean)} 
-                  className="mt-1 border-primary h-5 w-5 rounded-md data-[state=checked]:bg-primary shrink-0" 
+                  className="mt-0.5 border-primary h-4 w-4 rounded-md data-[state=checked]:bg-primary shrink-0" 
                 />
-                <label htmlFor="customer-terms" className="text-[11px] font-bold text-gray-500 leading-relaxed cursor-pointer text-right flex-1">
+                <label htmlFor="customer-terms" className="text-[10px] font-bold text-gray-500 leading-relaxed cursor-pointer text-right flex-1">
                   أوافق على <Link href="/terms" className="text-primary underline font-black">شروط الخدمة</Link> و <Link href="/privacy" className="text-primary underline font-black">سياسة الخصوصية</Link>
                 </label>
               </div>
 
-              <Button type="submit" disabled={loading || !customerAgreed} className="w-full h-16 rounded-[15px] bg-primary text-white text-lg font-black shadow-xl shadow-primary/20 transition-all active:scale-[0.98]">
-                {loading ? <Loader2 className="animate-spin h-6 w-6" /> : "متابعة التسجيل"}
+              <Button type="submit" disabled={loading || !customerAgreed} className="w-full h-14 rounded-[12px] bg-primary text-white text-base font-black shadow-xl shadow-primary/20 transition-all active:scale-[0.98]">
+                {loading ? <Loader2 className="animate-spin h-5 w-5" /> : "متابعة التسجيل"}
               </Button>
             </form>
           </TabsContent>
 
           <TabsContent value="driver" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <form onSubmit={handleDriverSubmit} className="space-y-6">
+            <form onSubmit={handleDriverSubmit} className="space-y-5">
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">الاسم الكامل (حسب الهوية)</label>
-                  <Input placeholder="أدخل اسمك الرباعي" className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-bold text-gray-800 focus-visible:ring-primary/20 text-right" required />
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">الاسم الكامل (حسب الهوية)</label>
+                  <Input placeholder="أدخل اسمك الرباعي" className="h-14 px-5 rounded-[12px] bg-gray-50 border-none font-bold text-gray-800 focus-visible:ring-primary/20 text-right" required />
                 </div>
                 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">تاريخ الميلاد</label>
-                  <Input type="date" className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-bold text-right focus-visible:ring-primary/20" required />
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">تاريخ الميلاد</label>
+                  <Input type="date" className="h-14 px-5 rounded-[12px] bg-gray-50 border-none font-bold text-right focus-visible:ring-primary/20" required />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">رقم الهاتف</label>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">رقم الهاتف</label>
                   <div className="relative" dir="rtl">
-                    <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 border-l pl-4 h-6">
-                      <div className="flex items-center gap-1.5">
-                        <YemenFlag />
-                        <span className="text-sm font-black" dir="ltr">+967</span>
-                      </div>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 border-l pl-3 h-5">
+                      <YemenFlag />
+                      <span className="text-xs font-black" dir="ltr">+967</span>
                     </div>
                     <Input 
                       placeholder="7xxxxxxxx" 
-                      className="h-16 pr-28 rounded-[15px] bg-gray-50 border-none font-black text-lg tracking-widest focus-visible:ring-primary/20 text-right" 
+                      className="h-14 pr-28 rounded-[12px] bg-gray-50 border-none font-black text-base tracking-widest focus-visible:ring-primary/20 text-right" 
                       maxLength={9} 
                       required 
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">البريد الإلكتروني</label>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">البريد الإلكتروني</label>
                   <Input 
                     type="email" 
                     placeholder="example@email.com" 
-                    className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-bold text-right focus-visible:ring-primary/20" 
+                    className="h-14 px-5 rounded-[12px] bg-gray-50 border-none font-bold text-right focus-visible:ring-primary/20" 
                     dir="rtl"
                     required 
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">كلمة المرور</label>
-                  <Input type="password" placeholder="••••••••" className="h-16 px-6 rounded-[15px] bg-gray-50 border-none font-black focus-visible:ring-primary/20 text-right" required />
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pr-2 text-right block">كلمة المرور</label>
+                  <Input type="password" placeholder="••••••••" className="h-14 px-5 rounded-[12px] bg-gray-50 border-none font-black focus-visible:ring-primary/20 text-right" required />
                 </div>
               </div>
 
               {/* Upload Section */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <input type="file" accept="image/*" className="hidden" ref={personalPhotoInputRef} onChange={(e) => handleFileChange(e, 'personal')} />
                 <button 
                   type="button" 
                   onClick={() => personalPhotoInputRef.current?.click()} 
                   className={cn(
-                    "flex flex-col items-center justify-center gap-2 p-4 rounded-[20px] border-2 border-dashed transition-all active:scale-95 relative overflow-hidden", 
+                    "flex flex-col items-center justify-center gap-2 p-3 rounded-[15px] border-2 border-dashed transition-all active:scale-95 relative overflow-hidden", 
                     personalPhoto ? "bg-green-50 border-green-200 text-green-600" : "bg-gray-50 border-gray-200 text-gray-400"
                   )}
                 >
                   {personalPhotoPreview ? (
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
                       <Image src={personalPhotoPreview} alt="Personal" fill className="object-cover" />
                     </div>
-                  ) : <Camera className="h-6 w-6" />}
+                  ) : <Camera className="h-5 w-5" />}
                   <span className="text-[9px] font-black uppercase text-center">{personalPhoto ? "تغيير الصورة" : "الصورة الشخصية"}</span>
-                  {personalPhoto && <BadgeCheck className="absolute top-2 right-2 h-4 w-4 text-green-500 fill-white" />}
+                  {personalPhoto && <BadgeCheck className="absolute top-1.5 right-1.5 h-3.5 w-3.5 text-green-500 fill-white" />}
                 </button>
 
                 <input type="file" accept="image/*" className="hidden" ref={idPhotoInputRef} onChange={(e) => handleFileChange(e, 'id')} />
@@ -247,41 +243,41 @@ export default function RegisterPage() {
                   type="button" 
                   onClick={() => idPhotoInputRef.current?.click()} 
                   className={cn(
-                    "flex flex-col items-center justify-center gap-2 p-4 rounded-[20px] border-2 border-dashed transition-all active:scale-95 relative overflow-hidden", 
+                    "flex flex-col items-center justify-center gap-2 p-3 rounded-[15px] border-2 border-dashed transition-all active:scale-95 relative overflow-hidden", 
                     idPhoto ? "bg-green-50 border-green-200 text-green-600" : "bg-gray-50 border-gray-200 text-gray-400"
                   )}
                 >
                   {idPhotoPreview ? (
-                    <div className="relative w-full h-12 rounded-lg overflow-hidden border-2 border-white shadow-sm">
+                    <div className="relative w-full h-10 rounded-lg overflow-hidden border-2 border-white shadow-sm">
                       <Image src={idPhotoPreview} alt="ID" fill className="object-cover" />
                     </div>
-                  ) : <FileText className="h-6 w-6" />}
+                  ) : <FileText className="h-5 w-5" />}
                   <span className="text-[9px] font-black uppercase text-center">{idPhoto ? "تغيير الهوية" : "صورة الهوية"}</span>
-                  {idPhoto && <BadgeCheck className="absolute top-2 right-2 h-4 w-4 text-green-500 fill-white" />}
+                  {idPhoto && <BadgeCheck className="absolute top-1.5 right-1.5 h-3.5 w-3.5 text-green-500 fill-white" />}
                 </button>
               </div>
 
-              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-[15px] transition-all active:scale-[0.99] group" dir="rtl">
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-[12px] transition-all active:scale-[0.99]" dir="rtl">
                 <Checkbox 
                   id="driver-terms" 
                   checked={driverAgreed} 
                   onCheckedChange={(val) => setDriverAgreed(val as boolean)} 
-                  className="mt-1 border-primary h-5 w-5 rounded-md data-[state=checked]:bg-primary shrink-0" 
+                  className="mt-0.5 border-primary h-4 w-4 rounded-md data-[state=checked]:bg-primary shrink-0" 
                 />
-                <label htmlFor="driver-terms" className="text-[11px] font-bold text-gray-500 leading-relaxed cursor-pointer text-right flex-1">
+                <label htmlFor="driver-terms" className="text-[10px] font-bold text-gray-500 leading-relaxed cursor-pointer text-right flex-1">
                   أوافق على <Link href="/terms" className="text-primary underline font-black">شروط الانضمام</Link> والعمل كشريك في منصة أبشر.
                 </label>
               </div>
 
-              <Button type="submit" disabled={loading || !driverAgreed || !idPhoto || !personalPhoto} className="w-full h-18 rounded-[15px] bg-primary text-white text-lg font-black shadow-xl shadow-primary/20 transition-all active:scale-[0.98]">
-                {loading ? <Loader2 className="animate-spin h-6 w-6" /> : "إرسال طلب الانضمام"}
+              <Button type="submit" disabled={loading || !driverAgreed || !idPhoto || !personalPhoto} className="w-full h-14 rounded-[12px] bg-primary text-white text-base font-black shadow-xl shadow-primary/20 transition-all active:scale-[0.98]">
+                {loading ? <Loader2 className="animate-spin h-5 w-5" /> : "إرسال طلب الانضمام"}
               </Button>
             </form>
           </TabsContent>
         </Tabs>
       </div>
 
-      <p className="text-center text-xs font-bold text-gray-400 mt-auto pb-10">
+      <p className="text-center text-xs font-bold text-gray-400 mt-auto pb-8">
         لديك حساب بالفعل؟ <Link href="/login" className="text-primary font-black hover:underline">سجل دخولك</Link>
       </p>
     </div>
