@@ -8,10 +8,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
     // التحقق من صلاحية المسؤول
     // للنموذج الأولي، نعتبر كل مستخدم مسجل كمسؤول مؤقتاً لضمان عمل لوحة التحكم
     function isAdmin() {
@@ -44,33 +40,39 @@ service cloud.firestore {
       }
     }
 
-    // --- المنتجات (البحث الموحد) ---
+    // --- المنتجات (البحث الموحد عبر المتاجر) ---
     match /{path=**}/products/{productId} {
       allow read: if true;
     }
 
-    // --- ملفات المستخدمين والبيانات التابعة ---
-    // تم التوسيع للسماح للوحة الإدارة بجلب القوائم
+    // --- ملفات المستخدمين ---
+    // تم التصحيح لضمان السماح بعمليات القائمة (list) لمسؤولي النظام
     match /users/{userId} {
       allow read, write: if isSignedIn();
       
-      // السماح بالوصول لكافة المجموعات الفرعية (المحفظة، العناوين، التنبيهات)
+      // الوصول لكافة المجموعات الفرعية (المحفظة، العناوين، التنبيهات، الطلبات الفرعية)
       match /{allSubcollections=**} {
         allow read, write: if isSignedIn();
       }
     }
 
-    // --- الطلبات العامة ---
+    // --- الطلبات ---
+    // السماح بالوصول للطلبات سواء كانت في الجذر أو كمجموعة فرعية للمستخدم
     match /orders/{orderId} {
+      allow read, write: if isSignedIn();
+    }
+    
+    match /{path=**}/orders/{orderId} {
       allow read, write: if isSignedIn();
     }
 
     // --- إعدادات النظام ---
-    match /admin_settings/settings {
+    match /admin_settings/{settingId} {
       allow read: if true;
       allow write: if isAdmin();
     }
     
+    // --- الإعلانات ---
     match /ads/{adId} {
       allow read: if true;
       allow write: if isAdmin();
