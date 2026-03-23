@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { 
   TrendingUp, ShoppingBag, Truck, Users, 
   ArrowUpRight, ArrowDownRight, MoreHorizontal,
-  LayoutDashboard, Store, Filter, MapPin, Wallet, Settings
+  LayoutDashboard, Store, Filter, MapPin, Wallet, Settings,
+  ChevronLeft
 } from "lucide-react"
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, 
