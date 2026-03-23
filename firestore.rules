@@ -53,18 +53,13 @@ service cloud.firestore {
     }
 
     // --- ملفات المستخدمين ---
-    // تم التعديل للسماح صراحة بعمليات القائمة (list) على مجموعة المستخدمين
-    match /users/{userId} {
+    // استخدام المطابقة المتسلسلة لضمان شمول عمليات القائمة (list) والقراءة والكتابة
+    match /users/{document=**} {
       allow read, write: if isSignedIn();
-      
-      // الوصول لكافة المجموعات الفرعية (المحفظة، العناوين، إلخ)
-      match /{allSubcollections=**} {
-        allow read, write: if isSignedIn();
-      }
     }
 
     // --- الطلبات العامة ---
-    match /orders/{orderId} {
+    match /orders/{document=**} {
       allow read, write: if isSignedIn();
     }
     
@@ -79,6 +74,6 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
-    // تعليق لتنشيط تحديث القواعد: تم تحسين صلاحيات القائمة للمسؤولين
+    // تعليق لتنشيط تحديث القواعد: تم تبسيط هيكلية الوصول لضمان عمل لوحة الإدارة
   }
 }
