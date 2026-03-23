@@ -1,79 +1,75 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // --- دالات مساعدة ---
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // للنموذج الأولي، نعتبر كل مستخدم مسجل كمسؤول مؤقتاً لضمان عمل لوحة التحكم
+    
+    // دالة للتحقق مما إذا كان المستخدم مسؤولاً معتمداً بناءً على رقم الهاتف
     function isAdmin() {
-      return isSignedIn();
+      return request.auth != null && 
+             (request.auth.token.phone_number == '+967775258830' || 
+              request.auth.token.phone_number == '+967770636008');
     }
 
-    // --- المحافظات والمدن ---
+    // المحافظات والمدن: الجميع يمكنه القراءة، المسؤول فقط يمكنه الكتابة
     match /cities/{cityId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // --- الفئات ---
+    // المستخدمين والمناديب: المسؤول له صلاحية كاملة، المستخدم العادي يرى بياناته فقط
+    match /users/{userId} {
+      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      match /{allSubcollections=**} {
+        allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      }
+    }
+
+    // قاعدة إضافية للمناديب (إذا كانت في مجموعة منفصلة مستقبلاً)
+    match /drivers/{driverId=**} {
+      allow read, write: if isAdmin();
+    }
+    
+    // الطلبات: المسؤول له صلاحية كاملة، العميل يرى طلباته الخاصة
+    match /orders/{orderId} {
+      allow read, write: if isAdmin() || (request.auth != null && (resource == null || resource.data.customerId == request.auth.uid || resource.data.userId == request.auth.uid));
+      match /{allSubcollections=**} {
+        allow read, write: if isAdmin() || (request.auth != null);
+      }
+    }
+
+    // قواعد الوصول للمتاجر والأقسام والإعلانات
+    match /stores/{storeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+      match /{allSub=**} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
     match /categories/{catId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // --- المتاجر والمنتجات ---
-    match /stores/{storeId} {
-      allow read: if true;
-      allow write: if isAdmin();
-
-      match /products/{productId} {
-        allow read: if true;
-        allow write: if isAdmin();
-        
-        match /variants/{vId} {
-          allow read: if true;
-          allow write: if isAdmin();
-        }
-      }
-    }
-
-    // --- الإعلانات ---
     match /ads/{adId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // --- المنتجات (البحث الموحد عبر المتاجر - Collection Group) ---
-    match /{path=**}/products/{productId} {
-      allow read: if true;
-    }
-
-    // --- ملفات المستخدمين ---
-    // استخدام المطابقة المتسلسلة لضمان شمول عمليات القائمة (list) والقراءة والكتابة
-    match /users/{document=**} {
-      allow read, write: if isSignedIn();
-    }
-
-    // --- الطلبات العامة ---
-    match /orders/{document=**} {
-      allow read, write: if isSignedIn();
-    }
-    
-    // دعم الاستعلامات المجمعة للطلبات (Collection Group)
-    match /{path=**}/orders/{orderId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // --- إعدادات النظام ---
     match /admin_settings/{settingId} {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // دعم الاستعلامات المجمعة للمنتجات (Collection Group)
+    match /{path=**}/products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
     
-    // تعليق لتنشيط تحديث القواعد: تم تبسيط هيكلية الوصول لضمان عمل لوحة الإدارة
+    // دعم الاستعلامات المجمعة للطلبات
+    match /{path=**}/orders/{orderId} {
+      allow read, write: if isAdmin() || (request.auth != null);
+    }
   }
 }
