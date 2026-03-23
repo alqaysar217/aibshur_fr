@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from "@/firebase"
 import { collection, query, where, orderBy, doc, updateDoc, increment } from "firebase/firestore"
-import { Users, Search, Wallet, ShieldCheck, ShieldAlert, Loader2, Edit3, RefreshCcw } from "lucide-react"
+import { Users, Search, Wallet, ShieldAlert, Loader2, Edit3, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
@@ -30,12 +30,14 @@ export default function AdminUsersPage() {
   const { data: userData } = useDoc(userRef)
 
   useEffect(() => {
-    if (userData?.type === 'admin' || userData?.role === 'admin' || ['mV7AQV2Mm6MDRpe5eSxskxNRVn73', 'Dn5QW71UUNVTo5XmOlfBrCfCmFO2'].includes(user?.uid || '')) {
+    const debugUIDs = ['mV7AQV2Mm6MDRpe5eSxskxNRVn73', 'Dn5QW71UUNVTo5XmOlfBrCfCmFO2'];
+    if (userData?.role === 'admin' || userData?.type === 'admin' || debugUIDs.includes(user?.uid || '')) {
       setAuthorized(true)
     }
   }, [userData, user])
 
   const usersQuery = useMemoFirebase(() => {
+    // CRITICAL: Prevent execution until authorized
     if (!db || !authorized) return null
     return query(collection(db, "users"), where("type", "==", "customer"), orderBy("createdAt", "desc"))
   }, [db, authorized])
@@ -175,7 +177,6 @@ export default function AdminUsersPage() {
         </CardContent>
       </Card>
 
-      {/* Edit Balance Dialog */}
       <Dialog open={!!selectedUser} onOpenChange={(val) => !val && setSelectedUser(null)}>
         <DialogContent className="rounded-[25px] border-none max-w-sm" dir="rtl">
           <DialogHeader>

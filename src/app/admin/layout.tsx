@@ -6,7 +6,7 @@ import { AdminTopBar } from "@/components/admin/top-bar"
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { doc } from "firebase/firestore"
 import { useRouter } from "next/navigation"
-import { Loader2, ShieldAlert, RefreshCcw } from "lucide-react"
+import { Loader2, ShieldAlert } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -15,74 +15,56 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
-  const [retryCount, setRetryCount] = useState(0)
 
-  // Wait for hydration
+  // Ensure client-side only rendering to prevent Hydration errors
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Fetch current user data from Firestore
   const userRef = useMemoFirebase(() => {
     if (!db || !user) return null
     return doc(db, "users", user.uid)
   }, [db, user])
+  
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userRef)
 
   useEffect(() => {
     if (!mounted || isUserLoading) return;
 
     if (!user) {
-      console.warn("Admin Layout: No user found, redirecting...");
       router.replace("/login")
       return
     }
 
-    // Detailed Report for Debugging
-    console.log("--- Admin Auth Report ---");
-    console.log("Current Auth User:", user);
-    console.log("Firestore User Data:", userData);
-    console.log("UID:", user.uid);
-    console.log("-------------------------");
-
-    // Master List of Debug UIDs (Bypass)
+    // Master List of Debug UIDs (Bypass for testing)
     const debugUIDs = ['mV7AQV2Mm6MDRpe5eSxskxNRVn73', 'Dn5QW71UUNVTo5XmOlfBrCfCmFO2'];
     
     if (debugUIDs.includes(user.uid)) {
-      console.log("Admin Layout: Auth Bypass triggered for debug UID");
       setIsAuthorized(true)
       return;
     }
 
-    const isAuthorizedByType = userData?.type === "admin" || userData?.role === "admin";
-    const isAdminPhone = ['+967775258830', '+967770636008'].some(p => user.phoneNumber?.includes(p));
+    // Check Role or Type in Firestore document
+    const hasAdminRole = userData?.role === "admin" || userData?.type === "admin";
 
-    if (isAuthorizedByType || isAdminPhone) {
+    if (hasAdminRole) {
       setIsAuthorized(true)
     } else {
-      if (isUserDataLoading || (!userData && retryCount < 10)) {
-        const timer = setTimeout(() => setRetryCount(prev => prev + 1), 800);
-        return () => clearTimeout(timer);
+      // If data is still loading, wait. If data loaded and not admin, deny.
+      if (!isUserDataLoading && userData !== undefined) {
+        setIsAuthorized(false)
+        setTimeout(() => router.replace("/"), 3000)
       }
-      
-      console.error("Admin Layout: Unauthorized access attempt.");
-      setIsAuthorized(false)
-      setTimeout(() => router.replace("/"), 3000);
     }
-  }, [user, isUserLoading, userData, isUserDataLoading, router, retryCount, mounted])
+  }, [user, isUserLoading, userData, isUserDataLoading, router, mounted])
 
   if (!mounted) return null;
 
   if (isUserLoading || isAuthorized === null) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-50 gap-4" dir="rtl">
-        <div className="relative">
-          <Loader2 className="h-12 w-12 text-primary animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[10px] font-bold">{retryCount}</span>
-          </div>
-        </div>
-        <p className="font-black text-primary animate-pulse">التحقق من الصلاحيات (محاولة {retryCount}/10)...</p>
+        <Loader2 className="h-12 w-12 text-primary animate-spin" />
+        <p className="font-black text-primary animate-pulse text-sm">جاري التحقق من الصلاحيات...</p>
       </div>
     )
   }

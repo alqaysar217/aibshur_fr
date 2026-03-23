@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 
@@ -24,12 +24,14 @@ export default function AdminDriversPage() {
   const { data: userData } = useDoc(userRef)
 
   useEffect(() => {
-    if (userData?.type === 'admin' || userData?.role === 'admin' || ['mV7AQV2Mm6MDRpe5eSxskxNRVn73', 'Dn5QW71UUNVTo5XmOlfBrCfCmFO2'].includes(user?.uid || '')) {
+    const debugUIDs = ['mV7AQV2Mm6MDRpe5eSxskxNRVn73', 'Dn5QW71UUNVTo5XmOlfBrCfCmFO2'];
+    if (userData?.role === 'admin' || userData?.type === 'admin' || debugUIDs.includes(user?.uid || '')) {
       setAuthorized(true)
     }
   }, [userData, user])
 
   const driversQuery = useMemoFirebase(() => {
+    // CRITICAL: Prevent execution until authorized
     if (!db || !authorized) return null
     return query(
       collection(db, "users"), 

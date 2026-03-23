@@ -6,7 +6,7 @@ service cloud.firestore {
     function isAdmin() {
       let userDoc = /databases/$(database)/documents/users/$(request.auth.uid);
       return request.auth != null && 
-             (exists(userDoc) && (get(userDoc).data.type == 'admin' || get(userDoc).data.role == 'admin'));
+             (exists(userDoc) && (get(userDoc).data.role == 'admin' || get(userDoc).data.type == 'admin'));
     }
 
     // Cities, Stores, Categories, Ads: Public read, Admin write
