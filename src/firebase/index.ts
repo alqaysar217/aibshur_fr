@@ -3,32 +3,27 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, initializeFirestore } from 'firebase/firestore'
+import { initializeFirestore } from 'firebase/firestore'
 
-// IMPORTANT: DO NOT MODIFY THIS FUNCTION
+// دالة لتهيئة خدمات Firebase بشكل مستقر
 export function initializeFirebase() {
-  if (!getApps().length) {
-    let firebaseApp;
-    try {
-      firebaseApp = initializeApp();
-    } catch (e) {
-      if (process.env.NODE_ENV === "production") {
-        console.warn('Automatic initialization failed. Falling back to firebase config object.', e);
-      }
-      firebaseApp = initializeApp(firebaseConfig);
-    }
+  let firebaseApp: FirebaseApp;
 
-    return getSdks(firebaseApp);
+  // التحقق مما إذا كان هناك تطبيق مهيأ بالفعل لمنع التكرار
+  if (!getApps().length) {
+    // استخدام الإعدادات المحلية دائماً لضمان استقرار الاتصال في بيئة التطوير
+    firebaseApp = initializeApp(firebaseConfig);
+  } else {
+    firebaseApp = getApp();
   }
 
-  return getSdks(getApp());
+  return getSdks(firebaseApp);
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {
-  // Use initializeFirestore with experimentalForceLongPolling to handle connection issues
+  // استخدام التوصيل الطويل (Long Polling) لضمان عمل Firestore في كافة بيئات الشبكة
   const firestore = initializeFirestore(firebaseApp, {
     experimentalForceLongPolling: true,
-    useFetchStreams: false,
   });
 
   return {
