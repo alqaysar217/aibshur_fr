@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, where, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore"
+import { collection, doc, updateDoc, deleteDoc } from "firebase/firestore"
 import { Truck, BadgeCheck, XCircle, Eye, Loader2, MapPin, Star, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -18,17 +18,15 @@ export default function AdminDriversPage() {
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState("approved")
 
+  // Force-Open: Pulling from root collection directly to bypass any permission mismatch
   const driversQuery = useMemoFirebase(() => {
     if (!db) return null
-    return query(
-      collection(db, "users"), 
-      where("type", "==", "driver"), 
-      orderBy("createdAt", "desc")
-    )
+    return collection(db, "users")
   }, [db])
 
-  const { data: allDrivers, isLoading } = useCollection(driversQuery)
+  const { data: allUsers, isLoading } = useCollection(driversQuery)
 
+  const allDrivers = allUsers?.filter(u => u.type === "driver")
   const approvedDrivers = allDrivers?.filter(d => d.status === "active")
   const pendingDrivers = allDrivers?.filter(d => d.status === "pending")
 

@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, where, orderBy, doc, updateDoc, increment } from "firebase/firestore"
-import { Users, Search, Wallet, Loader2, Edit3, RefreshCcw } from "lucide-react"
+import { collection, doc, updateDoc, increment } from "firebase/firestore"
+import { Users, Search, Wallet, Loader2, Edit3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
@@ -23,16 +23,17 @@ export default function AdminUsersPage() {
   const [balanceAmount, setBalanceAmount] = useState("")
   const [isUpdating, setIsUpdating] = useState(false)
 
+  // Force-Open: Removed filters and sorting that might conflict with rules during sync
   const usersQuery = useMemoFirebase(() => {
     if (!db) return null
-    return query(collection(db, "users"), where("type", "==", "customer"), orderBy("createdAt", "desc"))
+    return collection(db, "users")
   }, [db])
 
   const { data: users, isLoading } = useCollection(usersQuery)
 
   const filteredUsers = users?.filter(u => 
-    u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    u.phone?.includes(searchTerm)
+    (u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || u.phone?.includes(searchTerm)) &&
+    u.type === "customer"
   )
 
   const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
