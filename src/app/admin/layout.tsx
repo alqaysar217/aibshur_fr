@@ -3,27 +3,52 @@
 import { ReactNode, useState, useEffect } from "react"
 import { AdminSidebar } from "@/components/admin/sidebar"
 import { AdminTopBar } from "@/components/admin/top-bar"
+import { useAuth } from "@/firebase"
+import { cn } from "@/lib/utils"
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  // Temporary Bypass for Development
-  const [isAuthorized, setIsAuthorized] = useState(true); 
-  const [mounted, setMounted] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const auth = useAuth()
 
   useEffect(() => {
-    setMounted(true);
-    setIsAuthorized(true); // Always authorized in dev
-  }, []);
+    setMounted(true)
+    // Logging for debugging as requested
+    if (auth.currentUser) {
+      console.log("Current Admin Auth:", auth.currentUser)
+    }
+  }, [auth])
 
-  // حل مشكلة الـ Hydration: لا نعرض أي شيء حتى يكتمل تحميل الصفحة في المتصفح
-  if (!mounted) return null;
+  if (!mounted) return null
 
   return (
-    <div className="flex h-screen w-full bg-[#F8FAFB] font-body" dir="rtl">
-      <AdminSidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <AdminTopBar />
-        <main className="flex-1 overflow-y-auto p-6 md:p-10">
-          <div className="max-w-full mx-auto">
+    <div className="flex h-screen w-full bg-[#F8FAFB] font-body overflow-hidden" dir="rtl">
+      {/* Sidebar Overlay for Mobile */}
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[100] lg:hidden backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <AdminSidebar 
+        isCollapsed={isCollapsed} 
+        setIsCollapsed={setIsCollapsed}
+        isMobileOpen={isMobileOpen}
+        setIsMobileOpen={setIsMobileOpen}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        <AdminTopBar 
+          toggleMobile={() => setIsMobileOpen(!isMobileOpen)} 
+          toggleDesktop={() => setIsCollapsed(!isCollapsed)}
+        />
+        
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10">
+          <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-500">
             {children}
           </div>
         </main>
