@@ -1,13 +1,14 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Smartphone, MessageSquare, X, LogIn, Sparkles, ShieldCheck, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { useAuth, initiateAnonymousSignIn } from "@/firebase"
+import { useAuth, useFirestore, initiateAnonymousSignIn } from "@/firebase"
 import { useToast } from "@/hooks/use-toast"
+import { doc, setDoc, serverTimestamp } from "firebase/firestore"
 import Link from "next/link"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
@@ -30,6 +31,31 @@ export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
   const auth = useAuth()
+  const db = useFirestore()
+
+  // Sync user data to Firestore after login
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      const pendingPhone = localStorage.getItem('absher_pending_phone');
+      if (user && pendingPhone) {
+        const userRef = doc(db, "users", user.uid);
+        const isAdmin = pendingPhone === "775258830" || pendingPhone === "770636008";
+        
+        // Non-blocking setDoc
+        setDoc(userRef, {
+          phone: pendingPhone,
+          name: isAdmin ? "المسؤول العام" : "مستخدم أبشر",
+          type: isAdmin ? "admin" : "customer",
+          isActive: true,
+          updatedAt: serverTimestamp(),
+          createdAt: serverTimestamp()
+        }, { merge: true });
+        
+        localStorage.removeItem('absher_pending_phone');
+      }
+    });
+    return () => unsubscribe();
+  }, [auth, db]);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,11 +83,14 @@ export default function LoginPage() {
     if (isAdmin || isUser) {
       setLoading(true)
       try {
+        // Store phone in localStorage so the useEffect syncs it to Firestore
+        localStorage.setItem('absher_pending_phone', phone);
+        
         initiateAnonymousSignIn(auth)
+        
         setTimeout(() => {
           setLoading(false)
           if (isAdmin) {
-            console.log("Redirecting to Admin...");
             toast({ title: "تم دخول المسؤول", description: "مرحباً بك في لوحة الإدارة العليا" })
             router.replace("/admin")
           } else {
@@ -193,7 +222,7 @@ export default function LoginPage() {
 
       <div className="mt-auto p-10 text-center">
         <p className="text-[10px] text-gray-400 font-medium leading-relaxed max-w-[220px] mx-auto">
-          باستخدامك لتطبيق أبشر، أنت توافق على <Link href="/terms" className="text-primary font-black underline">شروط الخدمة</Link> و <Link href="/privacy" className="text-primary font-black underline">سياسة الخصوصية</Link>
+          باستخدامك لتطبيق أبشر، أنت توافق على <Link href="/terms" className="text-primary font-black underline">شروط الخدمة</Link> و <Link href="/privacy" className="text-primary underline font-black">سياسة الخصوصية</Link>
         </p>
       </div>
     </div>
